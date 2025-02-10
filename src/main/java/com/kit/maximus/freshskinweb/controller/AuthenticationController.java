@@ -1,0 +1,38 @@
+package com.kit.maximus.freshskinweb.controller;
+
+
+import com.kit.maximus.freshskinweb.dto.request.AuthenticationRequestDTO;
+import com.kit.maximus.freshskinweb.dto.response.AuthenticationResponseDTO;
+import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
+import com.kit.maximus.freshskinweb.service.AuthenticationService;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@Data
+
+
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("auth")
+public class AuthenticationController {
+
+    final AuthenticationService authenticationService;
+
+    @PostMapping("/login")
+  public ResponseAPI<AuthenticationResponseDTO> checkLogin(@RequestBody AuthenticationRequestDTO request) {
+      AuthenticationResponseDTO result = authenticationService.authenticate(request);
+        return ResponseAPI.<AuthenticationResponseDTO>builder().code(1000).data(result).build();
+
+}
+
+
+
+
+}
