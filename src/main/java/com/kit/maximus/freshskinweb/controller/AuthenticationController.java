@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*")
@@ -24,9 +25,10 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseAPI<AuthenticationResponseDTO> checkLogin(@RequestBody AuthenticationRequestDTO request) {
+        String message = "Login success";
         AuthenticationResponseDTO result = authenticationService.authenticate(request);
 
-        return ResponseAPI.<AuthenticationResponseDTO>builder().code(1000).data(result).build();
+        return ResponseAPI.<AuthenticationResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
 
     }
 
