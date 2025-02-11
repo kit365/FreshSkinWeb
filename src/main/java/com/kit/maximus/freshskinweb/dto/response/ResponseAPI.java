@@ -3,6 +3,7 @@ package com.kit.maximus.freshskinweb.dto.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
@@ -10,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ResponseAPI <T>{
-    long code = 1000;
+    long code = HttpStatus.OK.value();
     String message;
     T data;
 
