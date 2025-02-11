@@ -11,7 +11,7 @@ public enum ErrorCode {
     UNAUTHENTICATED(401, "Unauthenticated"),
     KEY_INVALID(400, "Key Invalid"),
     USER_ALREADY_EXISTS(400, "User Already Exists"),
-
+    SORT_DIRECTION_INVALID(400, "Sort Direction Invalid(asc | desc)"),
     ;
 
 

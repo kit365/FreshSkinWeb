@@ -1,5 +1,7 @@
 package com.kit.maximus.freshskinweb.service;
 
+import org.hibernate.query.SortDirection;
+
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +15,7 @@ public interface BaseService<request,response> {
 
     response update(Long id,request request);
     List<response> update(List<request> listRequest);
-    Map<String, Object> getAll(int page, int size);
+    Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection);
 
     //bo sung 1 ham khoi phuc: 1 san pham va nhieu
 

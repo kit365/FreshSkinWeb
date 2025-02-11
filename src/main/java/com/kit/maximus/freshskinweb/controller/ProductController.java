@@ -31,10 +31,11 @@ public class ProductController {
 
     @GetMapping()
     public ResponseAPI<Map<String, Object>> getAllProduct(@RequestParam(defaultValue = "1") int page,
-                                                          @RequestParam(defaultValue = "4") int size
-                                                          ) {
+                                                          @RequestParam(defaultValue = "4") int size,
+                                                          @RequestParam(defaultValue = "sortKey") String sortKey,
+                                                          @RequestParam(defaultValue = "desc") String sortValue) {
         log.info("GET ALL PRODUCTS");
-        Map<String, Object> result = productService.getAll(page, size);
+        Map<String, Object> result = productService.getAll(page, size,sortKey, sortValue);
 
         if (result == null) {
             return new ResponseAPI<>(HttpStatus.NOT_FOUND.value(), "Not Found");
