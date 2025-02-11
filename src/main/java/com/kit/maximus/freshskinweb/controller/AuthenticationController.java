@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "https://project-swp391-n9j6.onrender.com")
+@CrossOrigin(origins = "*")
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RestController
