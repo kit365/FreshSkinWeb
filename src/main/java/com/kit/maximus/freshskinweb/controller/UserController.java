@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,26 +27,29 @@ public class UserController {
     @PostMapping("create")
     public ResponseAPI<UserResponseDTO> addUser(@Valid @RequestBody CreateUserRequest requestDTO) {
         String message = "Create user successfully";
-        return ResponseAPI.<UserResponseDTO>builder().code(1000).message(message).data(userServiceImpl.add(requestDTO)).build();
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(userServiceImpl.add(requestDTO)).build();
     }
 
     @GetMapping("show")
-    public List<UserResponseDTO> getUsers() {
-        return userServiceImpl.getAllUsers();
+    public ResponseAPI<List<UserResponseDTO>> getUsers() {
+        String message = "Get all users successfully";
+        var result = userServiceImpl.getAllUsers();
+        return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
     @GetMapping("search")
     public ResponseAPI<List<UserResponseDTO>> searchUser(@RequestParam("keyword") String name) {
+        String message = "Search user successfully";
         var user = userServiceImpl.getUserByUsername(name);
 //        return Collections.singletonList(userService.getUserByUsername(name));
-        return ResponseAPI.<List<UserResponseDTO>>builder().code(1000).data(user).build();
+        return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(user).build();
     }
 
     @PatchMapping("update/{id}")
     public ResponseAPI<UserResponseDTO> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest userRequestDTO){
         String message = "Update user successfully";
         var result = userServiceImpl.update(id, userRequestDTO);
-        return ResponseAPI.<UserResponseDTO>builder().code(1000).message(message).data(result).build();
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
     @DeleteMapping("delete/{id}")
@@ -53,7 +57,7 @@ public class UserController {
         String message = "Delete user successfully";
         userServiceImpl.delete(id);
         log.info(message);
-        return ResponseAPI.<UserResponseDTO>builder().code(1000).message(message).build();
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
     }
 
@@ -63,6 +67,6 @@ public class UserController {
         String message = "Delete user successfully";
         userServiceImpl.deleteTemporarily(id);
         log.info(message);
-        return ResponseAPI.<UserResponseDTO>builder().code(1000).message(message).build();
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 }

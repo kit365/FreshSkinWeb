@@ -42,6 +42,9 @@ public class UserServiceImpl implements UserService {
         if(userRepository.existsByUsername(request.getUsername())){
             throw new AppException(ErrorCode.USER_EXISTED);
         }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        }
         UserEntity userEntity = userMapper.toUserEntity(request);
         encodePassword(userEntity);
         return userMapper.toUserResponseDTO(userRepository.save(userEntity));
@@ -114,6 +117,10 @@ public class UserServiceImpl implements UserService {
         // Cập nhật thông tin từ request (trừ password)
         userMapper.updateUser(userEntity, userRequestDTO);
         userEntity.setUsername(userEntity.getUsername());
+        if (userRepository.existsByEmail(userRequestDTO.getEmail())) {
+            log.info("Email exist");
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        }
 
         // Chỉ mã hóa mật khẩu nếu có thay đổi
         if (StringUtils.hasLength(userRequestDTO.getPassword())) {

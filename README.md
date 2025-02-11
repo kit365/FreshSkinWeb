@@ -59,8 +59,6 @@ git branch -D feature/abc  # Xóa nhánh chưa merge (nếu chắc chắn không
 git push origin --delete feature/abc
 
 
-
-
 ### Một số lệnh hữu ích khác:
 
 **Kiểm tra trạng thái của Git:**

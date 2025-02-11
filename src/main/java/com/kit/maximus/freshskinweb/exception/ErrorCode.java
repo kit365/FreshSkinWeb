@@ -18,6 +18,7 @@ public enum ErrorCode {
     PASSWORD_INVALID(400, "Password must be more than 5 and less than 20 characters"),
     USER_EXISTED(400, "User already existed"),
     SORT_DIRECTION_INVALID(400, "Sort Direction Invalid"),
+    EMAIL_EXISTED(400, "Email already existed"),
     ;
 
 
