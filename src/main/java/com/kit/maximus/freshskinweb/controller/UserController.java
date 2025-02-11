@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin("https://project-swp391-n9j6.onrender.com")
 @Slf4j
 @RequestMapping("admin/users")
 @RestController

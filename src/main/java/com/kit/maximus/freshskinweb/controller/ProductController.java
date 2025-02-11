@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+@CrossOrigin("https://project-swp391-n9j6.onrender.com")
 @Slf4j
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE)
