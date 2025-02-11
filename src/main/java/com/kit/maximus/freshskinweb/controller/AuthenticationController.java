@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.controller;
 
 
+
 import com.kit.maximus.freshskinweb.dto.request.AuthenticationRequestDTO;
 import com.kit.maximus.freshskinweb.dto.response.AuthenticationResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
@@ -15,22 +16,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Data
-
-
-@FieldDefaults(level = AccessLevel.PRIVATE)
-@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RestController
 @RequestMapping("auth")
+@RequiredArgsConstructor
 public class AuthenticationController {
 
-    final AuthenticationService authenticationService;
+    AuthenticationService authenticationService;
 
     @PostMapping("/login")
-  public ResponseAPI<AuthenticationResponseDTO> checkLogin(@RequestBody AuthenticationRequestDTO request) {
-      AuthenticationResponseDTO result = authenticationService.authenticate(request);
+    public ResponseAPI<AuthenticationResponseDTO> checkLogin(@RequestBody AuthenticationRequestDTO request) {
+        AuthenticationResponseDTO result = authenticationService.authenticate(request);
+
         return ResponseAPI.<AuthenticationResponseDTO>builder().code(1000).data(result).build();
 
-}
+    }
 
 
 
