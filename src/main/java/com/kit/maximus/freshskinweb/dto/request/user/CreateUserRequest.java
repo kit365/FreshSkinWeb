@@ -1,6 +1,8 @@
-package com.kit.maximus.freshskinweb.dto.request;
+package com.kit.maximus.freshskinweb.dto.request.user;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,17 +15,17 @@ import java.io.Serializable;
 @Getter
 @ToString
 @Builder
-public class UserRequestDTO implements Serializable {
-
-    Long id;
-    @NotNull(message = "username not null")
+public class CreateUserRequest implements Serializable {
+    @NotNull(message = "USER_NOT_NULL")
+    @NotBlank(message = "USER_NOT_BLANK")
+    @Size(min = 5, max = 20, message = "USERNAME_INVALID")
     String username;
-    @NotNull(message = "password not null")
+    @NotNull(message = "PASSWORD_NOT_NULL")
+    @NotBlank(message = "PASSWORD_NOT_BLANK")
+    @Size(min = 5, max = 20, message = "PASSWORD_INVALID")
     String password;
-
     String firstName;
     String lastName;
-
     String email;
     String phone;
     String avatar;
@@ -31,5 +33,5 @@ public class UserRequestDTO implements Serializable {
     String address;
     String status;   // ACTIVE / INACTIVE
     String typeUser; // NORMAL / VIP
-
 }
+

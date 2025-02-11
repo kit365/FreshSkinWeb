@@ -1,75 +1,68 @@
 package com.kit.maximus.freshskinweb.controller;
 
-import com.kit.maximus.freshskinweb.dto.request.UserRequestDTO;
-import com.kit.maximus.freshskinweb.dto.request.ValidationGroups;
+import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
+import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
+import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
-import com.kit.maximus.freshskinweb.service.UserService;
+import com.kit.maximus.freshskinweb.service.user.UserServiceImpl;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j
-@RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @RequestMapping("admin/users")
 @RestController
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
 
-    final UserService userService;
+    UserServiceImpl userServiceImpl;
 
     @PostMapping("create")
-    public ResponseEntity<UserResponseDTO> addUser(@Valid @RequestBody UserRequestDTO requestDTO) {
-        return ResponseEntity.ok(userService.add(requestDTO));
+    public ResponseAPI<UserResponseDTO> addUser(@Valid @RequestBody CreateUserRequest requestDTO) {
+        String message = "Create user successfully";
+        return ResponseAPI.<UserResponseDTO>builder().code(1000).message(message).data(userServiceImpl.add(requestDTO)).build();
     }
 
     @GetMapping("show")
-    public ResponseEntity<List<UserResponseDTO>> getUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public List<UserResponseDTO> getUsers() {
+        return userServiceImpl.getAllUsers();
     }
 
     @GetMapping("search")
-    public ResponseEntity<List<UserResponseDTO>> searchUser(@RequestParam("keyword") String name) {
-        return ResponseEntity.ok(Collections.singletonList(userService.getUserByUsername(name)));
+    public ResponseAPI<List<UserResponseDTO>> searchUser(@RequestParam("keyword") String name) {
+        var user = userServiceImpl.getUserByUsername(name);
+//        return Collections.singletonList(userService.getUserByUsername(name));
+        return ResponseAPI.<List<UserResponseDTO>>builder().code(1000).data(user).build();
     }
 
     @PatchMapping("update/{id}")
-    public ResponseEntity<Object> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UserRequestDTO userRequestDTO){
-        UserResponseDTO result = userService.update(id, userRequestDTO);
-        if (result != null) {
-            log.info("User updated successfully");
-            return ResponseEntity.ok(result);
-        }
-        log.info("User update failed");
-        return ResponseEntity.badRequest().body("User update failed");
+    public ResponseAPI<UserResponseDTO> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest userRequestDTO){
+        String message = "Update user successfully";
+        var result = userServiceImpl.update(id, userRequestDTO);
+        return ResponseAPI.<UserResponseDTO>builder().code(1000).message(message).data(result).build();
     }
 
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<Object> deleteUser(@PathVariable("id") Long id){
-        boolean result = userService.delete(id);
-        if (result) {
-            log.info("User deleted successfully");
-            return ResponseEntity.ok("User deleted successfully");
-        }
-        log.info("User delete failed");
-        return ResponseEntity.badRequest().body("User delete failed");
+    public ResponseAPI<UserResponseDTO> deleteUser(@PathVariable("id") Long id){{
+        String message = "Delete user successfully";
+        userServiceImpl.delete(id);
+        log.info(message);
+        return ResponseAPI.<UserResponseDTO>builder().code(1000).message(message).build();
+    }
     }
 
+
     @PatchMapping("deleteT/{id}")
-    public ResponseEntity<String> deleteUserT(@PathVariable("id") Long id){
-        boolean result = userService.deleteTemporarily(id);
-        if (result) {
-            log.info("User deleted successfully");
-            return ResponseEntity.ok("User deleted successfully");
-        }
-        log.info("User delete failed");
-        return ResponseEntity.badRequest().body("User delete failed");
+    public ResponseAPI<UserResponseDTO> deleteUserT(@PathVariable("id") Long id){
+        String message = "Delete user successfully";
+        userServiceImpl.deleteTemporarily(id);
+        log.info(message);
+        return ResponseAPI.<UserResponseDTO>builder().code(1000).message(message).build();
     }
 }

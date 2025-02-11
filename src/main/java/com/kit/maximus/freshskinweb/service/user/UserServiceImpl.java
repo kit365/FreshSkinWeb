@@ -1,6 +1,8 @@
-package com.kit.maximus.freshskinweb.service;
+package com.kit.maximus.freshskinweb.service.user;
 
-import com.kit.maximus.freshskinweb.dto.request.UserRequestDTO;
+import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
+import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
+import com.kit.maximus.freshskinweb.dto.request.user.UserRequestDTO;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -8,13 +10,11 @@ import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.UserMapper;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.utils.Status;
-import jakarta.validation.Valid;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.query.SortDirection;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,26 +31,28 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UserService implements BaseService<UserRequestDTO,UserResponseDTO>{
+public class UserServiceImpl implements UserService {
 
-    final UserRepository userRepository;
+   UserRepository userRepository;
 
-    final UserMapper userMapper;
+    UserMapper userMapper;
 
 
-    @Override
-    public UserResponseDTO add(@Valid UserRequestDTO user) {
-        checkUsernameExist(user.getUsername());
-
-        UserEntity userEntity = userMapper.toUserEntity(user);
+    public UserResponseDTO add(CreateUserRequest request) {
+        if(userRepository.existsByUsername(request.getUsername())){
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+        UserEntity userEntity = userMapper.toUserEntity(request);
         encodePassword(userEntity);
         return userMapper.toUserResponseDTO(userRepository.save(userEntity));
     }
 
 
-    @Override
     public boolean delete(Long userId) {
         UserEntity userEntity = getUserEntityById(userId);
+        if(userEntity == null){
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
         if(userEntity != null){
             log.info("Delete user id:{}",userId);
             userRepository.delete(userEntity);
@@ -59,15 +61,18 @@ public class UserService implements BaseService<UserRequestDTO,UserResponseDTO>{
         return false;
     }
 
-    @Override
     public boolean delete(List<Long> id) {
         return false;
     }
 
     //Method: Xóa tạm thời => Status thành false, deleted thành true
-    @Override
     public boolean deleteTemporarily(Long id) {
         UserEntity userEntity = getUserEntityById(id);
+
+        if (userEntity == null) {
+            log.info("User id not exist");
+            return false;
+        }
 
         log.info("Delete user id:{}", id);
         userEntity.setDeleted(true);
@@ -77,7 +82,6 @@ public class UserService implements BaseService<UserRequestDTO,UserResponseDTO>{
     }
 
     //Method: Xóa tạm thời nhiều users => Status thành false, deleted thành true
-    @Override
     public boolean deleteTemporarily(List<Long> request) {
         List<UserEntity> users = request.stream() //chuyển List<> thành Stream<>
                 .map(this::getUserEntityById)     //lay user tu ID
@@ -93,7 +97,16 @@ public class UserService implements BaseService<UserRequestDTO,UserResponseDTO>{
     }
 
     @Override
-    public UserResponseDTO update(Long id, @Valid UserRequestDTO userRequestDTO) {
+    public boolean restore(Long id) {
+        return false;
+    }
+
+    @Override
+    public boolean restore(List<Long> id) {
+        return false;
+    }
+
+    public UserResponseDTO update(Long id, UpdateUserRequest userRequestDTO) {
         UserEntity userEntity = getUserEntityById(id);
 
         log.info("Tìm thấy user: {}", id);
@@ -109,14 +122,11 @@ public class UserService implements BaseService<UserRequestDTO,UserResponseDTO>{
         }
 
         log.info("Cập nhật user id: {}", id);
-
-
         return userMapper.toUserResponseDTO(userRepository.save(userEntity));
     }
 
 
     //Method: Update nhiều tài khoản cùng 1 lúc
-    @Override
     public List<UserResponseDTO> update(List<UserRequestDTO> listRequest) {
         List<UserResponseDTO> resultList = new ArrayList<>();
         for (UserRequestDTO userRequestDTO : listRequest) {
@@ -133,6 +143,11 @@ public class UserService implements BaseService<UserRequestDTO,UserResponseDTO>{
     }
 
 
+    public Map<String, Object> getAll(int page, int size) {
+        return Map.of();
+    }
+
+
     private void encodePassword(UserEntity user) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -144,21 +159,12 @@ public class UserService implements BaseService<UserRequestDTO,UserResponseDTO>{
                 .collect(Collectors.toList());
     }
 
-    public UserResponseDTO getUserByUsername(String username) {
-        return userMapper.toUserResponseDTO(userRepository.findByUsername(username));
+    public List<UserResponseDTO> getUserByUsername(String username) {
+        return userMapper.toUserResponseDTO(userRepository.searchByKeyword(username));
     }
 
-   private UserEntity getUserEntityById(Long id) {
-        log.info("User Not Found id:{}", id);
-        return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-   }
-
-    private void checkUsernameExist(String username) {
-        if (userRepository.existsByUsername(username)) {
-            log.info("Username {} EXIST", username);
-            throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
-        }
-        log.info("Username {} NOT EXIST, CONTINUE....", username);
+    private UserEntity getUserEntityById(Long id) {
+        return userRepository.findById(id).orElse(null);
     }
 
 
