@@ -4,6 +4,8 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.ProductRequestDTO;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
+import com.kit.maximus.freshskinweb.exception.AppException;
+import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.ProductMapper;
 import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.utils.Status;
@@ -15,12 +17,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.zip.DataFormatException;
 
 
 @Slf4j
@@ -105,13 +109,23 @@ public class ProductService implements BaseService<ProductRequestDTO, ProductRes
         return List.of();
     }
 
+
     @Override
-    public Map<String, Object> getAll(int page, int size) {
+    public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection) {
         Map<String, Object> map = new HashMap<>();
 
+        if(!sortDirection.equalsIgnoreCase("asc") && !sortDirection.equalsIgnoreCase("desc")) {
+            log.info("SortDirection {} is invalid", sortDirection);
+            throw new AppException(ErrorCode.SORT_DIRECTION_INVALID);
+        }
+
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+
+        Sort sort = Sort.by(direction, sortKey);
         int p = (page > 0) ? page - 1 : 0;
 
-        Pageable pageable = PageRequest.of(p, size, Sort.by("position").descending());
+        Pageable pageable = PageRequest.of(p, size, sort);
 
         Page<ProductEntity> productEntitiPage = productRepository.findAll(pageable);
 

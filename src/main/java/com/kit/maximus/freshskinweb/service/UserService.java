@@ -14,6 +14,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.query.SortDirection;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -126,9 +127,8 @@ public class UserService implements BaseService<UserRequestDTO,UserResponseDTO>{
         return resultList;
     }
 
-
     @Override
-    public Map<String, Object> getAll(int page, int size) {
+    public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection) {
         return Map.of();
     }
 
