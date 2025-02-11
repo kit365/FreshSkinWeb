@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.controller;
 
-import com.kit.maximus.freshskinweb.dto.request.ProductRequestDTO;
+import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
+import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.service.ProductService;
@@ -25,7 +26,7 @@ public class ProductController {
     final ProductService productService;
 
     @PostMapping("create")
-    public ResponseAPI<ProductResponseDTO> createProduct(@RequestBody ProductRequestDTO productRequestDTO) {
+    public ResponseAPI<ProductResponseDTO> createProduct(@RequestBody CreateProductRequest productRequestDTO) {
         log.info("CREATE PRODUCT REQUEST)");
         return new ResponseAPI<>(HttpStatus.OK.value(), "Create Product successfull", productService.add(productRequestDTO));
     }
@@ -34,9 +35,11 @@ public class ProductController {
     public ResponseAPI<Map<String, Object>> getAllProduct(@RequestParam(defaultValue = "1") int page,
                                                           @RequestParam(defaultValue = "4") int size,
                                                           @RequestParam(defaultValue = "position") String sortKey,
-                                                          @RequestParam(defaultValue = "desc") String sortValue) {
+                                                          @RequestParam(defaultValue = "desc") String sortValue,
+                                                          @RequestParam(defaultValue = "ALL") String status,
+                                                          @RequestParam(name = "keyword", required = false) String keyword) {
         log.info("GET ALL PRODUCTS");
-        Map<String, Object> result = productService.getAll(page, size,sortKey, sortValue);
+        Map<String, Object> result = productService.getAll(page, size,sortKey, sortValue,status,keyword);
 
         if (result == null) {
             return new ResponseAPI<>(HttpStatus.NOT_FOUND.value(), "Not Found");
@@ -45,7 +48,7 @@ public class ProductController {
     }
 
     @PatchMapping("update/{id}")
-    public ResponseAPI<ProductResponseDTO> updateProduct(@PathVariable("id") Long id, @RequestBody ProductRequestDTO productRequestDTO) {
+    public ResponseAPI<ProductResponseDTO> updateProduct(@PathVariable("id") Long id, @RequestBody UpdateProductRequest productRequestDTO) {
         ProductResponseDTO result = productService.update(id, productRequestDTO);
         if (result != null) {
             log.info("Product updated successfully");

@@ -8,9 +8,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
-    Page<ProductEntity> findByStatus(Status status, Pageable pageable);
+    Page<ProductEntity> findAllByStatus(Status status, Pageable pageable);
 
+    List<ProductEntity> findByTitleLike(String title);
+
+
+
+    Page<ProductEntity> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
+
+    Page<ProductEntity> findByTitleContainingIgnoreCaseAndStatus(String keyword, Status statusEnum, Pageable pageable);
 }

@@ -1,23 +1,31 @@
 package com.kit.maximus.freshskinweb.service;
 
-import org.hibernate.query.SortDirection;
-
 import java.util.List;
 import java.util.Map;
 
-public interface BaseService<request,response> {
-    response add(request request);
-    boolean delete(Long id);
-    boolean delete(List<Long> id);
+/**
+ * BaseService sử dụng Generics để tái sử dụng cho các entity khác nhau.
+ *
+ * @param <T>  Loại Response DTO (ví dụ: UserResponseDTO, ProductResponseDTO)
+ * @param <R>  Loại Request DTO khi tạo mới (ví dụ: CreateUserRequest, ProductRequestDTO)
+ * @param <U>  Loại Request DTO khi cập nhật (ví dụ: UpdateUserRequest, ProductRequestDTO)
+ * @param <ID> Kiểu dữ liệu của ID (Long, String, UUID,...)
+ */
+public interface BaseService<T, R, U, ID> {
 
-    boolean  deleteTemporarily(Long id);
-    boolean  deleteTemporarily(List<Long> id);
+    /** CRUD operations with request objects **/
+    T add(R request);
+    T update(ID id, U request);
+    List<T> update(List<U> listRequest);
 
-    response update(Long id,request request);
-    List<response> update(List<request> listRequest);
-    Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection);
+    /** Operations that require only ID **/
+    boolean delete(ID id);
+    boolean delete(List<ID> ids);
+    boolean deleteTemporarily(ID id);
+    boolean deleteTemporarily(List<ID> ids);
+    boolean restore(ID id);
+    boolean restore(List<ID> ids);
 
-    //bo sung 1 ham khoi phuc: 1 san pham va nhieu
-
-    //khi xóa mềm -> status thành false, deleted thành true
+    /** Fetching data **/
+    Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection,String status, String keyword);
 }
