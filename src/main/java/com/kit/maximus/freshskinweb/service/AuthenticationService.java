@@ -6,6 +6,7 @@ import com.kit.maximus.freshskinweb.dto.request.authentication.AuthenticationReq
 import com.kit.maximus.freshskinweb.dto.request.authentication.IntrospectRequest;
 import com.kit.maximus.freshskinweb.dto.response.AuthenticationResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.IntrospectResponse;
+import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
@@ -51,7 +52,10 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponseDTO authenticate(AuthenticationRequest authenticationRequest) {
-        var user = userRepository.findByUsername(authenticationRequest.getUsername()).orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
+        UserEntity user = userRepository.findByUsername(authenticationRequest.getUsername()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+//        if(userRepository.existsByUsername(authenticationRequest.getUsername())){
+//            throw new AppException(ErrorCode.USER_EXISTED);
+//        }
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
 
