@@ -77,7 +77,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         productRepository.delete(productEntity);
         return true;
     }
-
+// xoa mem
     @Override
     public boolean delete(List<Long> longs) {
         return true;
