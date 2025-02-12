@@ -56,11 +56,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return productMapper.productToProductResponseDTO(productRepository.save(listProduct));
     }
 
-    @Override
-    public List<ProductResponseDTO> update(List<UpdateProductRequest> listRequest) {
-        return List.of();
-    }
-
 
     public List<ProductEntity> search(String keyword) {
         return productRepository.findByTitleLike("%" + keyword + "%");
