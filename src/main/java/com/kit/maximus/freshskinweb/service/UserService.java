@@ -140,25 +140,6 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         return userMapper.toUserResponseDTO(userRepository.save(userEntity));
     }
 
-    @Override
-    public List<UserResponseDTO> update(List<UpdateUserRequest> listRequest) {
-        return List.of();
-    }
-
-
-//    //Method: Update nhiều tài khoản cùng 1 lúc
-//    public List<UserResponseDTO> update(List<UpdateUserRequest> listRequest) {
-//        List<UserResponseDTO> resultList = new ArrayList<>();
-//        for (UserRequestDTO userRequestDTO : listRequest) {
-//            UserEntity userEntity = getUserEntityById(userRequestDTO.getId());
-//            userMapper.updateUser(userEntity, userRequestDTO);
-//            resultList.add(userMapper.toUserResponseDTO(userRepository.save(userEntity)));
-//        }
-//        return resultList;
-//    }
-
-
-
 
     private void encodePassword(UserEntity user) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
