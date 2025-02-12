@@ -80,7 +80,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     @Override
     public boolean delete(List<Long> longs) {
-        return false;
+        return true;
     }
 
     @Override
