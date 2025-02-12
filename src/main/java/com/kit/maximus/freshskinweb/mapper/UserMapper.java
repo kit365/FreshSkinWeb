@@ -1,6 +1,5 @@
 package com.kit.maximus.freshskinweb.mapper;
 
-import com.kit.maximus.freshskinweb.dto.request.user.UserRequestDTO;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
@@ -20,9 +19,9 @@ public interface UserMapper {
 
     List<UserResponseDTO> toUserResponseDTO(List<UserEntity> userEntities);
 
-    @Mapping(target = "username", ignore = true)
-    @Mapping(target = "password", ignore = true)
-    void updateUser(@MappingTarget UserEntity user,  UserRequestDTO userDTO);
+//    @Mapping(target = "username", ignore = true)
+//    @Mapping(target = "password", ignore = true)
+//    void updateUser(@MappingTarget UserEntity user,  UserRequestDTO userDTO);
 
     @Mapping(target = "username", ignore = true)
     @Mapping(target = "password", ignore = true)

@@ -1,8 +1,7 @@
-package com.kit.maximus.freshskinweb.service.user;
+package com.kit.maximus.freshskinweb.service;
 
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
-import com.kit.maximus.freshskinweb.dto.request.user.UserRequestDTO;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -20,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,13 +29,14 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UserServiceImpl implements UserService {
+public class UserService implements BaseService<UserResponseDTO, CreateUserRequest, UpdateUserRequest, Long> {
 
    UserRepository userRepository;
 
     UserMapper userMapper;
 
 
+    @Override
     public UserResponseDTO add(CreateUserRequest request) {
         if(userRepository.existsByUsername(request.getUsername())){
             throw new AppException(ErrorCode.USER_EXISTED);
@@ -51,6 +50,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    @Override
     public boolean delete(Long userId) {
         UserEntity userEntity = getUserEntityById(userId);
         if(userEntity == null){
@@ -64,11 +64,13 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
+    @Override
     public boolean delete(List<Long> id) {
         return false;
     }
 
     //Method: Xóa tạm thời => Status thành false, deleted thành true
+    @Override
     public boolean deleteTemporarily(Long id) {
         UserEntity userEntity = getUserEntityById(id);
 
@@ -85,6 +87,7 @@ public class UserServiceImpl implements UserService {
     }
 
     //Method: Xóa tạm thời nhiều users => Status thành false, deleted thành true
+    @Override
     public boolean deleteTemporarily(List<Long> request) {
         List<UserEntity> users = request.stream() //chuyển List<> thành Stream<>
                 .map(this::getUserEntityById)     //lay user tu ID
@@ -109,6 +112,11 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
+    @Override
+    public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
+        return Map.of();
+    }
+
     public UserResponseDTO update(Long id, UpdateUserRequest userRequestDTO) {
         UserEntity userEntity = getUserEntityById(id);
 
@@ -130,28 +138,6 @@ public class UserServiceImpl implements UserService {
 
         log.info("Cập nhật user id: {}", id);
         return userMapper.toUserResponseDTO(userRepository.save(userEntity));
-    }
-
-
-    //Method: Update nhiều tài khoản cùng 1 lúc
-    public List<UserResponseDTO> update(List<UserRequestDTO> listRequest) {
-        List<UserResponseDTO> resultList = new ArrayList<>();
-        for (UserRequestDTO userRequestDTO : listRequest) {
-            UserEntity userEntity = getUserEntityById(userRequestDTO.getId());
-            userMapper.updateUser(userEntity, userRequestDTO);
-            resultList.add(userMapper.toUserResponseDTO(userRepository.save(userEntity)));
-        }
-        return resultList;
-    }
-
-    @Override
-    public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection) {
-        return Map.of();
-    }
-
-
-    public Map<String, Object> getAll(int page, int size) {
-        return Map.of();
     }
 
 

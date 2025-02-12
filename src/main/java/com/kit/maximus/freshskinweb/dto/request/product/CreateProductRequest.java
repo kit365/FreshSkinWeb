@@ -14,7 +14,6 @@ import java.io.Serializable;
 @ToString
 @Builder
 public class CreateProductRequest implements Serializable {
-
     String productDetailID;
     String categoryID;
     String DiscountID;

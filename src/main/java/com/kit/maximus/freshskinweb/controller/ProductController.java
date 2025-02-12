@@ -18,17 +18,19 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 @Slf4j
 @RestController
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 @RequestMapping("admin/products")
 public class ProductController {
 
-    final ProductService productService;
+    ProductService productService;
 
     @PostMapping("create")
     public ResponseAPI<ProductResponseDTO> createProduct(@RequestBody CreateProductRequest productRequestDTO) {
+        String message = "Create Product successfull";
+        var result = productService.add(productRequestDTO);
         log.info("CREATE PRODUCT REQUEST)");
-        return new ResponseAPI<>(HttpStatus.OK.value(), "Create Product successfull", productService.add(productRequestDTO));
+        return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
     @GetMapping()
@@ -38,57 +40,67 @@ public class ProductController {
                                                           @RequestParam(defaultValue = "desc") String sortValue,
                                                           @RequestParam(defaultValue = "ALL") String status,
                                                           @RequestParam(name = "keyword", required = false) String keyword) {
+        String message = "Tim thay List Product";
         log.info("GET ALL PRODUCTS");
         Map<String, Object> result = productService.getAll(page, size,sortKey, sortValue,status,keyword);
 
         if (result == null) {
-            return new ResponseAPI<>(HttpStatus.NOT_FOUND.value(), "Not Found");
+            return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.NOT_FOUND.value()).message("Not Found").build();
         }
-        return new ResponseAPI<>(HttpStatus.OK.value(), "Tim thay List Product", result);
+        return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
     @PatchMapping("update/{id}")
     public ResponseAPI<ProductResponseDTO> updateProduct(@PathVariable("id") Long id, @RequestBody UpdateProductRequest productRequestDTO) {
         ProductResponseDTO result = productService.update(id, productRequestDTO);
+        String message_succed = "Update Product successfull";
+        String message_failed = "Update Product failed";
         if (result != null) {
             log.info("Product updated successfully");
-            return new ResponseAPI<>(HttpStatus.OK.value(), "Product updated successfully", result);
+            return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
         }
         log.info("Product update failed");
-        return new ResponseAPI<>(HttpStatus.NOT_FOUND.value(), "Update product failed");
+        return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).data(result).build();
     }
 
     @DeleteMapping("delete/{id}")
     public ResponseAPI<String> deleteProduct(@PathVariable("id") Long id) {
+        String message_succed = "Delete Product successfull";
+        String message_failed = "Delete Product failed";
         boolean result = productService.delete(id);
         if (result) {
             log.info("Product deleted successfully!");
-            return new ResponseAPI<>(HttpStatus.OK.value(), "Product deleted successfully");
+            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
         }
         log.info("Product delete failed");
-        return new ResponseAPI<>(HttpStatus.NOT_FOUND.value(), "Delete product failed");
+        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
     @PatchMapping("deleteT/{id}")
     public ResponseAPI<String> deleteProductT(@PathVariable("id") Long id) {
+        String message_succed = "Delete Product successfull";
+        String message_failed = "Delete Product failed";
         boolean result = productService.deleteTemporarily(id);
         if (result) {
             log.info("Product deleted successfully");
-            return new ResponseAPI<>(HttpStatus.OK.value(), "Product deleted successfully");
+            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
         }
         log.info("User delete failed");
-        return new ResponseAPI<>(HttpStatus.NOT_FOUND.value(), "Product delete failed");
+        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
     @PatchMapping("deleteT")
     public ResponseAPI<String> deleteProductT(@RequestBody List<Long> ids) {
-        boolean result = productService.deleteTemporarily(ids);
+        String message_succed = "Delete Product successfull";
+        String message_failed = "Delete Product failed";
+        var result = productService.deleteTemporarily(ids);
         if (result) {
             log.info("Products deleted successfully");
-            return new ResponseAPI<>(HttpStatus.OK.value(), "Products deleted successfully");
+            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
         }
         log.info("Products delete failed");
-        return new ResponseAPI<>(HttpStatus.NOT_FOUND.value(), "Products delete failed");
+        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+
     }
 
 
