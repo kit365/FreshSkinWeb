@@ -4,7 +4,7 @@ import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
-import com.kit.maximus.freshskinweb.service.user.UserServiceImpl;
+import com.kit.maximus.freshskinweb.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,25 +23,25 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
 
-    UserServiceImpl userServiceImpl;
+    UserService userService;
 
     @PostMapping("create")
     public ResponseAPI<UserResponseDTO> addUser(@Valid @RequestBody CreateUserRequest requestDTO) {
         String message = "Create user successfully";
-        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(userServiceImpl.add(requestDTO)).build();
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(userService.add(requestDTO)).build();
     }
 
     @GetMapping("show")
     public ResponseAPI<List<UserResponseDTO>> getUsers() {
         String message = "Get all users successfully";
-        var result = userServiceImpl.getAllUsers();
+        var result = userService.getAllUsers();
         return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
     @GetMapping("search")
     public ResponseAPI<List<UserResponseDTO>> searchUser(@RequestParam("keyword") String name) {
         String message = "Search user successfully";
-        var user = userServiceImpl.getUserByUsername(name);
+        var user = userService.getUserByUsername(name);
 //        return Collections.singletonList(userService.getUserByUsername(name));
         return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(user).build();
     }
@@ -49,14 +49,14 @@ public class UserController {
     @PatchMapping("update/{id}")
     public ResponseAPI<UserResponseDTO> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest userRequestDTO){
         String message = "Update user successfully";
-        var result = userServiceImpl.update(id, userRequestDTO);
+        var result = userService.update(id, userRequestDTO);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
     @DeleteMapping("delete/{id}")
     public ResponseAPI<UserResponseDTO> deleteUser(@PathVariable("id") Long id){{
         String message = "Delete user successfully";
-        userServiceImpl.delete(id);
+        userService.delete(id);
         log.info(message);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
@@ -66,7 +66,7 @@ public class UserController {
     @PatchMapping("deleteT/{id}")
     public ResponseAPI<UserResponseDTO> deleteUserT(@PathVariable("id") Long id){
         String message = "Delete user successfully";
-        userServiceImpl.deleteTemporarily(id);
+        userService.deleteTemporarily(id);
         log.info(message);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
