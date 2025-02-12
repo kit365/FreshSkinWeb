@@ -80,7 +80,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 // xoa mem
     @Override
     public boolean delete(List<Long> longs) {
-        return true;
+
+        return false;
     }
 
     @Override
