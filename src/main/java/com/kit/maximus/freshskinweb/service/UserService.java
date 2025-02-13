@@ -140,6 +140,11 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         return userMapper.toUserResponseDTO(userRepository.save(userEntity));
     }
 
+    @Override
+    public boolean update(List<Long> id, String status) {
+        return false;
+    }
+
 
     private void encodePassword(UserEntity user) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);

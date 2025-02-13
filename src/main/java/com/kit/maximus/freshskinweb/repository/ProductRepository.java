@@ -15,11 +15,11 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
     Page<ProductEntity> findAllByStatus(Status status, Pageable pageable);
 
-    List<ProductEntity> findByTitleLike(String title);
-
-
 
     Page<ProductEntity> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
 
     Page<ProductEntity> findByTitleContainingIgnoreCaseAndStatus(String keyword, Status statusEnum, Pageable pageable);
+
+    List<ProductEntity> findAllByIdInAndStatus(List<Long> id, Status status);
+
 }
