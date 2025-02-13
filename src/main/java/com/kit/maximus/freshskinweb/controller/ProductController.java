@@ -4,6 +4,8 @@ import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
+import com.kit.maximus.freshskinweb.exception.AppException;
+import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.service.ProductService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +62,44 @@ public class ProductController {
             return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
         }
         log.info("Product update failed");
-        return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).data(result).build();
+        return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+    }
+
+    @PatchMapping("updateStatus")
+    public ResponseAPI<String> updateProduct(@RequestBody Map<String,Object>  productRequestDTO) {
+
+        if(!productRequestDTO.containsKey("id")) {
+            log.warn("Request does not contain 'id' key");
+            throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
+        }
+
+        String message_succed = "Update Status Product successfull";
+        String message_failed = "Update Status Product failed";
+
+        List<Long> ids =  (List<Long>) productRequestDTO.get("id");
+        String status  =  productRequestDTO.get("status").toString();
+
+        boolean result = productService.update(ids, status);
+        if (result) {
+            log.info("Product update successfully");
+            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
+        }
+        log.info("Product  update failed");
+        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+    }
+
+    @PatchMapping("updatePosition/{id}")
+    public ResponseAPI<String> updateProducts(@PathVariable("id") Long id, @RequestBody UpdateProductRequest productRequestDTO) {
+        String message_succed = "Update position Product successfull";
+        String message_failed = "Update position Product failed";
+
+        boolean result = productService.update(id, productRequestDTO.getPosition());
+        if (result) {
+            log.info("Product update  successfully");
+            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
+        }
+        log.info("Product update failed ");
+        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
     @DeleteMapping("delete/{id}")
@@ -90,7 +129,15 @@ public class ProductController {
     }
 
     @PatchMapping("deleteT")
-    public ResponseAPI<String> deleteProductT(@RequestBody List<Long> ids) {
+    public ResponseAPI<String> deleteProductT(@RequestBody Map<String,Object> productRequestDTO) {
+
+        if(!productRequestDTO.containsKey("id")) {
+            log.warn("Request does not contain 'id' key");
+            throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
+        }
+
+        List<Long> ids = (List<Long>) productRequestDTO.get("id");
+
         String message_succed = "Delete Product successfull";
         String message_failed = "Delete Product failed";
         var result = productService.deleteTemporarily(ids);
@@ -100,8 +147,9 @@ public class ProductController {
         }
         log.info("Products delete failed");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
-
     }
+
+
 
 
 }
