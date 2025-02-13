@@ -3,8 +3,10 @@ package com.kit.maximus.freshskinweb.service;
 
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
+import com.kit.maximus.freshskinweb.dto.request.productvariant.CreateProductVariant;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
+import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.ProductMapper;
@@ -19,30 +21,48 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import javax.swing.*;
+import java.text.Normalizer;
 import java.util.*;
 
 
 @Slf4j
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
 public class ProductService implements BaseService<ProductResponseDTO, CreateProductRequest, UpdateProductRequest, Long> {
 
-    final ProductRepository productRepository;
+    ProductRepository productRepository;
 
-    final ProductMapper productMapper;
+    ProductMapper productMapper;
 
 
     @Override
     public ProductResponseDTO add(CreateProductRequest request) {
+
         ProductEntity productEntity = productMapper.productToProductEntity(request);
+
+        productEntity.setSlug(getSlug(request.getTitle()));
+
+        request.getVariants().forEach(productEntity::createProductVariant);
+
         return productMapper.productToProductResponseDTO(productRepository.save(productEntity));
     }
 
     @Override
     public ProductResponseDTO update(Long id, UpdateProductRequest request) {
+
+        if(StringUtils.hasLength(request.getStatus())){
+            request.setStatus(request.getStatus().toUpperCase());
+            getStatus(request.getStatus());
+        }
         ProductEntity listProduct = getProductEntityById(id);
+
+        if(StringUtils.hasLength(request.getTitle())){
+            listProduct.setSlug(getSlug(request.getTitle()));
+        }
 
         productMapper.updateProduct(listProduct, request);
         return productMapper.productToProductResponseDTO(productRepository.save(listProduct));
@@ -60,15 +80,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return true;
     }
 
-    /*
-    Hàm này dùng để cập nhập position của 1 sản phẩm
-     */
-    public boolean update(Long id , int position) {
-        ProductEntity Product = getProductEntityById(id);
-             Product.setPosition(position);
-             productRepository.save(Product);
-        return true;
-    }
 
     /*
        Xóa(cứng) 1 sản phẩm
@@ -132,7 +143,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     }
 
 
-
     /*
      Phục hồi: 1 sản phẩm
      - Khôi phục trạng thái sản phẩm(ACTIVE) và thay đô DELETE(False)
@@ -186,17 +196,17 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 // Tìm kiếm theo tên sản phẩm, không lọc theo status
                 productEntityPage = productRepository.findByTitleContainingIgnoreCase(keyword, pageable);
             } else {
-                    // Tìm kiếm theo tên sản phẩm và status
-                    Status statusEnum = getStatus(status);
-                    productEntityPage = productRepository.findByTitleContainingIgnoreCaseAndStatus(keyword, statusEnum, pageable);
+                // Tìm kiếm theo tên sản phẩm và status
+                Status statusEnum = getStatus(status);
+                productEntityPage = productRepository.findByTitleContainingIgnoreCaseAndStatus(keyword, statusEnum, pageable);
             }
         } else {
             // Nếu không có keyword, chỉ lọc theo status
             if (status == null || status.equalsIgnoreCase("ALL")) {
                 productEntityPage = productRepository.findAll(pageable);
             } else {
-                    Status statusEnum = getStatus(status);
-                    productEntityPage = productRepository.findAllByStatus(statusEnum, pageable);
+                Status statusEnum = getStatus(status);
+                productEntityPage = productRepository.findAllByStatus(statusEnum, pageable);
             }
         }
 
@@ -238,5 +248,14 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         }
 
         return sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+    }
+
+    private String getSlug(String slug) {
+        return Normalizer.normalize(slug, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .replaceAll("[^a-zA-Z0-9\\s]", "")
+                .trim()
+                .replaceAll("\\s+","-")
+                .toLowerCase();
     }
 }

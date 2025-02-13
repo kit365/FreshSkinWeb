@@ -52,7 +52,7 @@ public class ProductController {
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
-    @PatchMapping("update/{id}")
+    @PatchMapping("edit/{id}")
     public ResponseAPI<ProductResponseDTO> updateProduct(@PathVariable("id") Long id, @RequestBody UpdateProductRequest productRequestDTO) {
         ProductResponseDTO result = productService.update(id, productRequestDTO);
         String message_succed = "Update Product successfull";
@@ -88,20 +88,6 @@ public class ProductController {
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
-    @PatchMapping("updatePosition/{id}")
-    public ResponseAPI<String> updateProducts(@PathVariable("id") Long id, @RequestBody UpdateProductRequest productRequestDTO) {
-        String message_succed = "Update position Product successfull";
-        String message_failed = "Update position Product failed";
-
-        boolean result = productService.update(id, productRequestDTO.getPosition());
-        if (result) {
-            log.info("Product update  successfully");
-            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
-        }
-        log.info("Product update failed ");
-        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
-    }
-
     @DeleteMapping("delete/{id}")
     public ResponseAPI<String> deleteProduct(@PathVariable("id") Long id) {
         String message_succed = "Delete Product successfull";
@@ -124,7 +110,7 @@ public class ProductController {
             log.info("Product deleted successfully");
             return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
         }
-        log.info("User delete failed");
+        log.info("Product delete failed");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
@@ -149,6 +135,40 @@ public class ProductController {
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
+    @PatchMapping("restore/{id}")
+    public ResponseAPI<String> restore(@PathVariable("id") Long id) {
+        String message_succed = "restore Product successfull";
+        String message_failed = "restore Product failed";
+        boolean result = productService.restore(id);
+        if (result) {
+            log.info("Product restore successfully");
+            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
+        }
+        log.info("Product restore failed");
+        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+    }
+
+
+    @PatchMapping("restore")
+    public ResponseAPI<String> restore(@RequestBody Map<String,Object> productRequestDTO) {
+
+        if(!productRequestDTO.containsKey("id")) {
+            log.warn("Request does not contain 'id' key");
+            throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
+        }
+
+        List<Long> ids = (List<Long>) productRequestDTO.get("id");
+
+        String message_succed = "restore Product successfull";
+        String message_failed = "restore Product failed";
+        var result = productService.restore(ids);
+        if (result) {
+            log.info("Products restore successfully");
+            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
+        }
+        log.info("Products restore failed");
+        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+    }
 
 
 

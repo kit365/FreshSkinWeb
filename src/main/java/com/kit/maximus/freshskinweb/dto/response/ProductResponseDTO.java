@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -19,21 +21,28 @@ public class ProductResponseDTO implements Serializable {
 
     Long id;
     String productDetailID;
-    String categoryID;
-    String DiscountID;
+    //    String categoryID;
+//    String DiscountID;
     String title;
     String slug;
     String description;
     String thumbnail;
-    int stock;
-    String priceByVolume;
+    List<ProductVariantEntity> variants;
     int discountPercent;
     int position;
     String brand;
     String skinType;
+    /// ////////////////////////////////////////////
+    String origin;
+    String ingredients;
+    String usageInstructions;
+    String benefits;
+    String skinIssues;
+//    String thumbnailPayload;
+    /// ////////////////////////////////////////////
     boolean featured;
-
     String status;
+
     @JsonFormat(pattern = "yyyy-MM-dd")
     Date createdAt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
