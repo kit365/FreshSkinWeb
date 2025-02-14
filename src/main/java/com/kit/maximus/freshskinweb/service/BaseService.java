@@ -16,7 +16,7 @@ public interface BaseService<T, R, U, ID> {
     /** CRUD operations with request objects **/
     T add(R request);
     T update(ID id, U request);
-
+    boolean update(List<ID> id , String status);
 
     /** Operations that require only ID **/
     boolean delete(ID id);

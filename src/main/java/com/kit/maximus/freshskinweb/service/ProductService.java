@@ -19,22 +19,21 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import javax.swing.*;
+import java.util.*;
 
 
 @Slf4j
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
 public class ProductService implements BaseService<ProductResponseDTO, CreateProductRequest, UpdateProductRequest, Long> {
 
-    final ProductRepository productRepository;
+    ProductRepository productRepository;
 
-    final ProductMapper productMapper;
+    ProductMapper productMapper;
 
 
     @Override
@@ -45,96 +44,123 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     @Override
     public ProductResponseDTO update(Long id, UpdateProductRequest request) {
-        ProductEntity listProduct = getProductEntityById(id);
-
-        if (listProduct == null) {
-            log.info("Product {} not exist", id);
-            return null;
+        if(StringUtils.hasLength(request.getStatus())){
+            request.setStatus(request.getStatus().toUpperCase());
+            getStatus(request.getStatus());
         }
-
+        ProductEntity listProduct = getProductEntityById(id);
         productMapper.updateProduct(listProduct, request);
         return productMapper.productToProductResponseDTO(productRepository.save(listProduct));
     }
 
-
-    public List<ProductEntity> search(String keyword) {
-        return productRepository.findByTitleLike("%" + keyword + "%");
+    //thay doi status
+    @Override
+    public boolean update(List<Long> id, String status) {
+        Status statusEnum = getStatus(status);
+        productRepository.findAllById(id)
+                .forEach(productEntity -> {
+                    productEntity.setStatus(statusEnum);
+                    productRepository.save(productEntity);
+                });
+        return true;
     }
+
+
+    /*
+       Xóa(cứng) 1 sản phẩm
+       input: long id
+       output: boolean
+     */
 
     @Override
     public boolean delete(Long id) {
         ProductEntity productEntity = getProductEntityById(id);
-        if (productEntity == null) {
-            log.info("User {} not exist", id);
-            return false;
-        }
+
         log.info("Delete: {}", id);
         productRepository.delete(productEntity);
         return true;
     }
 
+    /*
+     Xóa(cứng) nhiều sản phẩm
+     input: List<long> id
+     output: boolean
+   */
     @Override
     public boolean delete(List<Long> longs) {
-        return false;
+        List<ProductEntity> productEntities = productRepository.findAllById(longs);
+
+        productRepository.deleteAll(productEntities);
+        return true;
     }
 
+
+    /*
+     Xóa(mềm) 1 sản phẩm
+     input: long id
+     output: boolean
+   */
     @Override
     public boolean deleteTemporarily(Long id) {
         ProductEntity productEntity = getProductEntityById(id);
-        if (productEntity == null) {
-            log.info("User {} not exist", id);
-            return false;
-        }
-        log.info("Delete temporarily: {}", id);
+
+        log.info("Delete temporarily : {}", id);
         productEntity.setDeleted(true);
         productEntity.setStatus(Status.INACTIVE);
         productRepository.save(productEntity);
         return true;
     }
 
+    /*
+     Xóa(mềm) nhiều sản phẩm
+     input: List<long> id
+     output: boolean
+   */
     @Override
     public boolean deleteTemporarily(List<Long> id) {
-        List<ProductEntity> productEntityList
-                = id.stream()
-                .map(this::getProductEntityById)
-                .filter(Objects::nonNull)
-                .peek(productEntity -> {
-                    log.info("Delete temporarily: {}", productEntity.getId());
+        productRepository.findAllByIdInAndStatus(id, Status.ACTIVE)
+                .forEach(productEntity -> {
                     productEntity.setDeleted(true);
                     productEntity.setStatus(Status.INACTIVE);
-                })
-                .toList();
-        productRepository.saveAll(productEntityList);
+                    productRepository.save(productEntity);
+                });
         return true;
     }
 
+
+    /*
+     Phục hồi: 1 sản phẩm
+     - Khôi phục trạng thái sản phẩm(ACTIVE) và thay đô DELETE(False)
+     input: long id
+     output: boolean
+   */
     @Override
     public boolean restore(Long id) {
         ProductEntity productEntity = getProductEntityById(id);
-        if (productEntity == null) {
-            log.info("User {} not exist", id);
-            return false;
-        }
-        log.info("Delete temporarily: {}", id);
+
         productEntity.setDeleted(false);
         productEntity.setStatus(Status.ACTIVE);
         productRepository.save(productEntity);
+
         return true;
     }
 
+
+    /*
+  Phục hồi: nhiều sản phẩm
+  - Khôi phục trạng thái sản phẩm(ACTIVE) và thay đổi DELETE(False)
+  input: List<long> id
+  output: boolean
+*/
     @Override
     public boolean restore(List<Long> id) {
-        List<ProductEntity> productEntityList
-                = id.stream()
-                .map(this::getProductEntityById)
-                .filter(Objects::nonNull)
-                .peek(productEntity -> {
-                    log.info("Delete temporarily: {}", productEntity.getId());
-                    productEntity.setDeleted(false);
-                    productEntity.setStatus(Status.ACTIVE);
-                })
-                .toList();
-        productRepository.saveAll(productEntityList);
+        List<ProductEntity> productEntities = productRepository.findAllByIdInAndStatus(id, Status.INACTIVE);
+
+        productEntities.forEach(productEntity -> {
+            productEntity.setDeleted(false);
+            productEntity.setStatus(Status.INACTIVE);
+            productRepository.save(productEntity);
+        });
         return true;
     }
 
@@ -142,13 +168,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         Map<String, Object> map = new HashMap<>();
 
-        // Kiểm tra sortDirection hợp lệ
-        if (!sortDirection.equalsIgnoreCase("asc") && !sortDirection.equalsIgnoreCase("desc")) {
-            log.info("SortDirection {} is invalid", sortDirection);
-            throw new AppException(ErrorCode.SORT_DIRECTION_INVALID);
-        }
-
-        Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort.Direction direction = getSortDirection(sortDirection);
         Sort sort = Sort.by(direction, sortKey);
         int p = (page > 0) ? page - 1 : 0;
         Pageable pageable = PageRequest.of(p, size, sort);
@@ -161,27 +181,17 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 // Tìm kiếm theo tên sản phẩm, không lọc theo status
                 productEntityPage = productRepository.findByTitleContainingIgnoreCase(keyword, pageable);
             } else {
-                try {
-                    // Tìm kiếm theo tên sản phẩm và status
-                    Status statusEnum = Status.valueOf(status.toUpperCase());
-                    productEntityPage = productRepository.findByTitleContainingIgnoreCaseAndStatus(keyword, statusEnum, pageable);
-                } catch (IllegalArgumentException e) {
-                    log.info("Status {} is invalid", status);
-                    throw new AppException(ErrorCode.STATUS_INVALID);
-                }
+                // Tìm kiếm theo tên sản phẩm và status
+                Status statusEnum = getStatus(status);
+                productEntityPage = productRepository.findByTitleContainingIgnoreCaseAndStatus(keyword, statusEnum, pageable);
             }
         } else {
             // Nếu không có keyword, chỉ lọc theo status
             if (status == null || status.equalsIgnoreCase("ALL")) {
                 productEntityPage = productRepository.findAll(pageable);
             } else {
-                try {
-                    Status statusEnum = Status.valueOf(status.toUpperCase());
-                    productEntityPage = productRepository.findAllByStatus(statusEnum, pageable);
-                } catch (IllegalArgumentException e) {
-                    log.info("Status {} is invalid", status);
-                    throw new AppException(ErrorCode.STATUS_INVALID);
-                }
+                Status statusEnum = getStatus(status);
+                productEntityPage = productRepository.findAllByStatus(statusEnum, pageable);
             }
         }
 
@@ -200,9 +210,28 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     }
 
 
+    //tra ve ProductEntity, Neu Id null -> nem loi
     private ProductEntity getProductEntityById(Long id) {
-        return productRepository.findById(id).orElse(null);
+        return productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
 
+    private Status getStatus(String status) {
+        try {
+            return Status.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid status provided: '{}'", status);
+            throw new AppException(ErrorCode.STATUS_INVALID);
+        }
+    }
+
+    private Sort.Direction getSortDirection(String sortDirection) {
+
+        if (!sortDirection.equalsIgnoreCase("asc") && !sortDirection.equalsIgnoreCase("desc")) {
+            log.info("SortDirection {} is invalid", sortDirection);
+            throw new AppException(ErrorCode.SORT_DIRECTION_INVALID);
+        }
+
+        return sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+    }
 }
