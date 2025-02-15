@@ -52,7 +52,7 @@ public class ProductController {
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
-    @PatchMapping("update/{id}")
+    @PatchMapping("edit/{id}")
     public ResponseAPI<ProductResponseDTO> updateProduct(@PathVariable("id") Long id, @RequestBody UpdateProductRequest productRequestDTO) {
         ProductResponseDTO result = productService.update(id, productRequestDTO);
         String message_succed = "Update Product successfull";
@@ -85,20 +85,6 @@ public class ProductController {
             return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
         }
         log.info("Product  update failed");
-        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
-    }
-
-    @PatchMapping("updatePosition/{id}")
-    public ResponseAPI<String> updateProducts(@PathVariable("id") Long id, @RequestBody UpdateProductRequest productRequestDTO) {
-        String message_succed = "Update position Product successfull";
-        String message_failed = "Update position Product failed";
-
-        boolean result = productService.update(id, productRequestDTO.getPosition());
-        if (result) {
-            log.info("Product update  successfully");
-            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
-        }
-        log.info("Product update failed ");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
