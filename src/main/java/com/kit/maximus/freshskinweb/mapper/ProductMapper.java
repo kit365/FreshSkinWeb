@@ -11,13 +11,15 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
+    @Mapping(target = "variants", ignore = true)
     ProductEntity productToProductEntity(CreateProductRequest productRequest);
 
     ProductResponseDTO productToProductResponseDTO(ProductEntity product);
 
 //    List<ProductResponseDTO> toUserResponseDTO(List<ProductEntity> productEntities);
 
-    @Mapping(target = "id", ignore = true) //không update id
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE) //neu request null thi ko thay doi cai cũ
+    @Mapping(target = "id", ignore = true)
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateProduct(@MappingTarget ProductEntity user,  UpdateProductRequest productRequestDTO);
 }

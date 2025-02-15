@@ -5,6 +5,7 @@ import com.kit.maximus.freshskinweb.utils.SkinType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Setter
@@ -32,8 +33,7 @@ public class ProductEntity extends AbstractEntity {
 //    @JoinColumn(name = "ProductID") không cần vì bên nhiều giữ khóa ngoại của bên 1 nên không cần
     //Xóa một đối tượng bên N không còn map với bên 1 nữa -> orphanRemoval = true
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-
-    List<ProductVariantEntity> variants;
+    List<ProductVariantEntity> variants = new ArrayList<>();
 
     @Column(name = "Title")
     String title;
@@ -85,10 +85,8 @@ public class ProductEntity extends AbstractEntity {
 
 
     public void createProductVariant(ProductVariantEntity productVariantEntity) {
-        if (!variants.contains(productVariantEntity)) {
             variants.add(productVariantEntity);
             productVariantEntity.setProduct(this);
-        }
     }
 
 

@@ -3,10 +3,8 @@ package com.kit.maximus.freshskinweb.service;
 
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
-import com.kit.maximus.freshskinweb.dto.request.productvariant.CreateProductVariant;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
-import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.ProductMapper;
@@ -23,7 +21,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.swing.*;
 import java.text.Normalizer;
 import java.util.*;
 
