@@ -2,6 +2,7 @@ package com.kit.maximus.freshskinweb.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Setter
 @Getter
@@ -10,6 +11,7 @@ import lombok.*;
 @Entity
 @ToString
 @Table(name = "ProductVariant")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductVariantEntity extends AbstractEntity {
 
     @Id

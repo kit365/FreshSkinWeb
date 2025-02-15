@@ -6,6 +6,7 @@ import com.kit.maximus.freshskinweb.dto.request.authentication.AuthenticationReq
 import com.kit.maximus.freshskinweb.dto.request.authentication.IntrospectRequest;
 import com.kit.maximus.freshskinweb.dto.response.AuthenticationResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.IntrospectResponse;
+import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;

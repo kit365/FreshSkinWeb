@@ -14,14 +14,10 @@ public interface ProductMapper {
 
     ProductEntity productToProductEntity(CreateProductRequest productRequest);
 
-//    ProductEntity productToProductEntity(ProductRequestDTO product);
 
     ProductResponseDTO productToProductResponseDTO(ProductEntity product);
 
     List<ProductResponseDTO> toUserResponseDTO(List<ProductEntity> productEntities);
-
-//    @Mapping(target = "id", ignore = true) //không update id
-//    void updateProduct(@MappingTarget ProductEntity productEntity, ProductRequestDTO productRequestDTO);
 
     @Mapping(target = "id", ignore = true) //không update id
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE) //neu request null thi ko thay doi cai cũ
