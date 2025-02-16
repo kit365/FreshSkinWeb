@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
+import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.*;
+import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -36,4 +38,8 @@ public class OrderResponse {
     PaymentMethod paymentMethod;
 
     LocalDate OrderDate;
+
+    Status Status;
+
+    Boolean deleted;
 }

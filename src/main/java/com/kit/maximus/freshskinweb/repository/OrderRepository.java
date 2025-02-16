@@ -10,12 +10,12 @@ import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
-//    @Override
-//    Optional<OrderEntity> findById(Long orderId);
+    @Override
+    Optional<OrderEntity> findById(Long orderId);
 
     boolean existsByEmail(String email);
 
     boolean existsByPhoneNumber(String phoneNumber);
 
-//    OrderResponse findById(long orderId);
+    OrderResponse findById(long orderId);
 }

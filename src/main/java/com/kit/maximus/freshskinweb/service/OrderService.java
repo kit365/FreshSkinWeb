@@ -43,11 +43,11 @@ public class OrderService {
 //        return orderMapper.toOrderResponse(orderRepository.save(order));
 //    }
 
-//    public OrderResponse getOrderById(Long orderId) {
-//        OrderEntity order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-//
-//        return orderMapper.toOrderResponse(order);
-//    }
+    public OrderResponse getOrderById(Long orderId) {
+        OrderEntity order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        return orderMapper.toOrderResponse(order);
+    }
 
     public List<OrderResponse> getAllOrder() {
         List<OrderEntity> orders = orderRepository.findAll();
@@ -59,6 +59,16 @@ public class OrderService {
             throw new AppException(ErrorCode.ORDER_NOT_FOUND);
         }
         orderRepository.deleteById(orderId);
+    }
+
+    public OrderResponse deleted(Long orderId) {
+        OrderEntity orderEntity = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        orderEntity.setDeleted(true);
+        OrderEntity result = orderRepository.save(orderEntity);
+
+        return orderMapper.toOrderResponse(result);
     }
 
 

@@ -63,5 +63,12 @@ public class OrderConntroller {
         return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
+    @DeleteMapping("/deleted/{orderId}")
+    public ResponseAPI<OrderResponse> deleteByOrderId(@PathVariable Long orderId) {
+        String message = "Xóa đơn hàng thành công";
+        var order = orderService.deleted(orderId);
+        return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
+    }
+
 
 }
