@@ -8,6 +8,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -15,7 +16,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "Orders")
+@Table(name = "[Order]")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class OrderEntity extends AbstractEntity {
 
@@ -26,8 +27,10 @@ public class OrderEntity extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UserId")
-    @JsonIgnore
     UserEntity user;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "order")
+    List<OrderItemsEntity> orderItems;
 
     @Column(name = "Username")
     String username;

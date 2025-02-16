@@ -1,0 +1,42 @@
+package com.kit.maximus.freshskinweb.entity;
+
+
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "OrderItem")
+public class OrderItemsEntity extends AbstractEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "OrderItemId")
+    Long orderItemId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "OrderId")
+    OrderEntity order;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ProductVariantId")
+    ProductVariantEntity product;
+
+
+    @Column(name = "Quantity")
+    int quantity;
+
+    @Column(name = "Subtotal")
+    double subtotal;
+
+
+
+
+
+
+}

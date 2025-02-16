@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Setter
 @Getter
 @NoArgsConstructor
@@ -29,5 +31,11 @@ public class ProductVariantEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ProductID")
     ProductEntity product;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "product")
+    List<OrderItemsEntity> orderItems;
+
+
+
 
 }
