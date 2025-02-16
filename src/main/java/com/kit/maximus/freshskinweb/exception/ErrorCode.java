@@ -37,6 +37,9 @@ public enum ErrorCode {
     //ORDER
     ORDER_NOT_FOUND(404, "Order Not Found"),
 
+    //BLOG CATEGORY
+    BLOG_CATEGORY_NAME_EXISTED(404, "Blog Category Name already existed"),
+
     ;
 
 
