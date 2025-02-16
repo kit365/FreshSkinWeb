@@ -13,13 +13,13 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
-    Page<ProductEntity> findAllByStatus(Status status, Pageable pageable);
-
-
-    Page<ProductEntity> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
-
-    Page<ProductEntity> findByTitleContainingIgnoreCaseAndStatus(String keyword, Status statusEnum, Pageable pageable);
-
     List<ProductEntity> findAllByIdInAndStatus(List<Long> id, Status status);
 
+    Page<ProductEntity> findByTitleContainingIgnoreCaseAndDeleted(String keyword, boolean b, Pageable pageable);
+
+    Page<ProductEntity> findByTitleContainingIgnoreCaseAndStatusAndDeleted(String keyword, Status statusEnum, Pageable pageable, boolean b);
+
+    Page<ProductEntity> findAllByDeleted(boolean b, Pageable pageable);
+
+    Page<ProductEntity> findAllByStatusAndDeleted(Status statusEnum, boolean b, Pageable pageable);
 }

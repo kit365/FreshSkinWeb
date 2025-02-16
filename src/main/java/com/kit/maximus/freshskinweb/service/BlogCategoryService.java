@@ -80,4 +80,9 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Bl
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         return Map.of();
     }
+
+    @Override
+    public Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
+        return Map.of();
+    }
 }

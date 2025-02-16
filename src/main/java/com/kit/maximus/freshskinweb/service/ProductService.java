@@ -4,7 +4,6 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
-import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -20,7 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -164,7 +162,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         log.info("Delete temporarily : {}", id);
         productEntity.setDeleted(true);
-        productEntity.setStatus(Status.INACTIVE);
         productRepository.save(productEntity);
         return true;
     }
@@ -179,7 +176,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         productRepository.findAllByIdInAndStatus(id, Status.ACTIVE)
                 .forEach(productEntity -> {
                     productEntity.setDeleted(true);
-                    productEntity.setStatus(Status.INACTIVE);
                     productRepository.save(productEntity);
                 });
         return true;
@@ -210,7 +206,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         ProductEntity productEntity = getProductEntityById(id);
 
         productEntity.setDeleted(false);
-        productEntity.setStatus(Status.ACTIVE);
         productRepository.save(productEntity);
 
         return true;
@@ -225,11 +220,10 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 */
     @Override
     public boolean restore(List<Long> id) {
-        List<ProductEntity> productEntities = productRepository.findAllByIdInAndStatus(id, Status.INACTIVE);
+        List<ProductEntity> productEntities = productRepository.findAllByIdInAndStatus(id, Status.ACTIVE);
 
         productEntities.forEach(productEntity -> {
             productEntity.setDeleted(false);
-            productEntity.setStatus(Status.INACTIVE);
             productRepository.save(productEntity);
         });
         return true;
@@ -250,19 +244,19 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status.equalsIgnoreCase("ALL")) {
                 // Tìm kiếm theo tên sản phẩm, không lọc theo status
-                productEntityPage = productRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+                productEntityPage = productRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, false, pageable);
             } else {
                 // Tìm kiếm theo tên sản phẩm và status
                 Status statusEnum = getStatus(status);
-                productEntityPage = productRepository.findByTitleContainingIgnoreCaseAndStatus(keyword, statusEnum, pageable);
+                productEntityPage = productRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, false);
             }
         } else {
             // Nếu không có keyword, chỉ lọc theo status
             if (status == null || status.equalsIgnoreCase("ALL")) {
-                productEntityPage = productRepository.findAll(pageable);
+                productEntityPage = productRepository.findAllByDeleted(false, pageable);
             } else {
                 Status statusEnum = getStatus(status);
-                productEntityPage = productRepository.findAllByStatus(statusEnum, pageable);
+                productEntityPage = productRepository.findAllByStatusAndDeleted(statusEnum, false, pageable);
             }
         }
 
@@ -278,6 +272,11 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         map.put("totalPages", list.getTotalPages());
         map.put("pageSize", list.getSize());
         return map;
+    }
+
+    @Override
+    public Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
+        return Map.of();
     }
 
 

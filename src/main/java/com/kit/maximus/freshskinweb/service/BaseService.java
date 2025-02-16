@@ -26,6 +26,10 @@ public interface BaseService<T, R, U, ID> {
     boolean restore(ID id);
     boolean restore(List<ID> ids);
 
+
     /** Fetching data **/
     Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection,String status, String keyword);
+
+    Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection,String status, String keyword);
+
 }
