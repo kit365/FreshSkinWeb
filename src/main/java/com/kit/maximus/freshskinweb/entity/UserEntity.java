@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kit.maximus.freshskinweb.utils.TypeUser;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,7 +40,7 @@ public class UserEntity extends AbstractEntity {
     String email;
 
     @Column(name = "PhoneNumber")
-    String phonenumber;
+    String phone;
 
     @Column(name = "Avatar")
     String avatar;
@@ -56,6 +57,7 @@ public class UserEntity extends AbstractEntity {
     TypeUser typeUser = TypeUser.NORMAL;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
     List<OrderEntity> orders;
 
 

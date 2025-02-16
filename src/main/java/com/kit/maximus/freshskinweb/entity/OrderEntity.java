@@ -1,5 +1,7 @@
 package com.kit.maximus.freshskinweb.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,6 +16,7 @@ import java.time.LocalDate;
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "Orders")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class OrderEntity extends AbstractEntity {
 
     @Id
@@ -23,6 +26,7 @@ public class OrderEntity extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UserId")
+    @JsonIgnore
     UserEntity user;
 
     @Column(name = "Username")

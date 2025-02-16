@@ -161,6 +161,11 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         return userMapper.toUserResponseDTO(userRepository.searchByKeyword(username));
     }
 
+    public UserEntity getUser(String username) {
+        var user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        return userMapper.toUserResponse(user);
+    }
+
     private UserEntity getUserEntityById(Long id) {
         return userRepository.findById(id).orElse(null);
     }

@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,6 +37,7 @@ public class ProductEntity extends AbstractEntity {
     //Xóa một đối tượng bên N không còn map với bên 1 nữa -> orphanRemoval = true
 //    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "product",fetch = FetchType.LAZY)
+    @JsonIgnore
     List<ProductVariantEntity> variants = new ArrayList<ProductVariantEntity>();
 
     @Column(name = "Title")

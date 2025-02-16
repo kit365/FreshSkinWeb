@@ -34,9 +34,18 @@ public class OrderService {
 
 
     public OrderResponse addOldUser(CreateOrderRequest createOrderRequest) {
-        var user = userService.getUserByUsername(createOrderRequest.getUsername());
+        var user = userService.getUser(createOrderRequest.getUsername());
 
-        var order = orderMapper.toOrderEntity((CreateOrderRequest) user);
+//        var order = orderMapper.toOrderEntity(createOrderRequest);
+//        order.setUser(user);
+//        order.setUsername(user.getUsername());
+//        order.setFirstName(user.getFirstName());
+//        order.setLastName(user.getLastName());
+//        order.setEmail(user.getEmail());
+//        order.setPhoneNumber(user.getPhone());
+//        order.setAddress(user.getAddress());
+        var order = orderMapper.toOrderEntity(createOrderRequest, user);
+
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }
 

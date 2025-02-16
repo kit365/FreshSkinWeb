@@ -22,4 +22,6 @@ public interface ProductMapper {
     @Mapping(target = "id", ignore = true) //không update id
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE) //neu request null thi ko thay doi cai cũ
     void updateProduct(@MappingTarget ProductEntity user,  UpdateProductRequest productRequestDTO);
+
+
 }

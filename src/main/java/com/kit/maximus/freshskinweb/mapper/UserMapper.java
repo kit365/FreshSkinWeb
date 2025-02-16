@@ -17,6 +17,8 @@ public interface UserMapper {
 
     UserResponseDTO toUserResponseDTO(UserEntity userEntity);
 
+    UserEntity toUserResponse(UserEntity userEntity);
+
     List<UserResponseDTO> toUserResponseDTO(List<UserEntity> userEntities);
 
 //    @Mapping(target = "username", ignore = true)

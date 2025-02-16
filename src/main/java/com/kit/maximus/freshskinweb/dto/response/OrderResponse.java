@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 public class OrderResponse {
     Long orderId;
 
+    @JsonIgnore
     UserEntity user;
 
     String username;
