@@ -54,6 +54,25 @@ public class ProductController {
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
+    @GetMapping("/trash")
+    public ResponseAPI<Map<String, Object>> getAllProductInTrash(@RequestParam(defaultValue = "1") int page,
+                                                          @RequestParam(defaultValue = "4") int size,
+                                                          @RequestParam(defaultValue = "position") String sortKey,
+                                                          @RequestParam(defaultValue = "desc") String sortValue,
+                                                          @RequestParam(defaultValue = "ALL") String status,
+                                                          @RequestParam(name = "keyword", required = false) String keyword) {
+        String message = "Tim thay List Product";
+        log.info("GET ALL PRODUCTS");
+        Map<String, Object> result = productService.getTrash(page, size,sortKey, sortValue,status,keyword);
+
+//        if (result == null) {
+//            return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.NOT_FOUND.value()).message("Not Found").data(result).build();
+//        }
+
+//        return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+        return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
+    }
+
     @PatchMapping("edit/{id}")
     public ResponseAPI<ProductResponseDTO> updateProduct(@PathVariable("id") Long id, @RequestBody UpdateProductRequest productRequestDTO) {
         ProductResponseDTO result = productService.update(id, productRequestDTO);

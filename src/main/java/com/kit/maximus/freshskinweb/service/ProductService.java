@@ -276,7 +276,47 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     @Override
     public Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
-        return Map.of();
+        Map<String, Object> map = new HashMap<>();
+
+        Sort.Direction direction = getSortDirection(sortDirection);
+        Sort sort = Sort.by(direction, sortKey);
+        int p = (page > 0) ? page - 1 : 0;
+        Pageable pageable = PageRequest.of(p, size, sort);
+
+        Page<ProductEntity> productEntityPage;
+
+        // Tìm kiếm theo keyword trước
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            if (status.equalsIgnoreCase("ALL")) {
+                // Tìm kiếm theo tên sản phẩm, không lọc theo status
+                productEntityPage = productRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, true, pageable);
+            } else {
+                // Tìm kiếm theo tên sản phẩm và status
+                Status statusEnum = getStatus(status);
+                productEntityPage = productRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, true);
+            }
+        } else {
+            // Nếu không có keyword, chỉ lọc theo status
+            if (status == null || status.equalsIgnoreCase("ALL")) {
+                productEntityPage = productRepository.findAllByDeleted(true, pageable);
+            } else {
+                Status statusEnum = getStatus(status);
+                productEntityPage = productRepository.findAllByStatusAndDeleted(statusEnum, true, pageable);
+            }
+        }
+
+        Page<ProductResponseDTO> list = productEntityPage.map(productMapper::productToProductResponseDTO);
+
+//        if (!list.hasContent()) {
+//            return null;
+//        }
+
+        map.put("products", list.getContent());
+        map.put("currentPage", list.getNumber() + 1);
+        map.put("totalItems", list.getTotalElements());
+        map.put("totalPages", list.getTotalPages());
+        map.put("pageSize", list.getSize());
+        return map;
     }
 
 
