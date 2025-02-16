@@ -61,6 +61,8 @@ public class UserEntity extends AbstractEntity {
     List<OrderEntity> orders;
 
 
+
+
 //    String roleId;
 //    FOREIGN KEY (RoleID) REFERENCES Role(RoleID) ON DELETE CASCADE ON UPDATE CASCADE
 

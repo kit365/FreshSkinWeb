@@ -29,10 +29,10 @@ public class OrderItemsEntity extends AbstractEntity {
 
 
     @Column(name = "Quantity")
-    int quantity;
+    Integer quantity;
 
     @Column(name = "Subtotal")
-    double subtotal;
+    Double subtotal;
 
 
 
