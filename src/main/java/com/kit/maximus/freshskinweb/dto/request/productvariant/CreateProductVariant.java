@@ -16,9 +16,8 @@ import java.io.Serializable;
 @Builder
 public class CreateProductVariant implements Serializable {
 
-    double price;
     double volume;
     ProductEntity product;
-    String status;
+
 
 }
