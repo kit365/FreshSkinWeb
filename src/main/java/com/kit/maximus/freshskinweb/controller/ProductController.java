@@ -46,10 +46,12 @@ public class ProductController {
         log.info("GET ALL PRODUCTS");
         Map<String, Object> result = productService.getAll(page, size,sortKey, sortValue,status,keyword);
 
-        if (result == null) {
-            return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.NOT_FOUND.value()).message("Not Found").build();
-        }
-        return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+//        if (result == null) {
+//            return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.NOT_FOUND.value()).message("Not Found").data(result).build();
+//        }
+
+//        return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+        return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
     @PatchMapping("edit/{id}")
@@ -84,7 +86,7 @@ public class ProductController {
             log.info("Product update successfully");
             return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
         }
-        log.info("Product  update failed");
+        log.info("Product update failed");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
@@ -113,6 +115,7 @@ public class ProductController {
         log.info("Product delete failed");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
+
 
     @PatchMapping("deleteT")
     public ResponseAPI<String> deleteProductT(@RequestBody Map<String,Object> productRequestDTO) {

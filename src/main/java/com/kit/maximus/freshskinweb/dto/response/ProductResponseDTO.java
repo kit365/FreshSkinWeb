@@ -20,8 +20,7 @@ import java.util.List;
 public class ProductResponseDTO implements Serializable {
 
     Long id;
-    String productDetailID;
-    //    String categoryID;
+    // String categoryID;
 //    String DiscountID;
     String title;
     String slug;
