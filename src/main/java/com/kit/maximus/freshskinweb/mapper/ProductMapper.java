@@ -7,23 +7,19 @@ import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import org.mapstruct.*;
 
-import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
+    @Mapping(target = "variants", ignore = true)
     ProductEntity productToProductEntity(CreateProductRequest productRequest);
-
-//    ProductEntity productToProductEntity(ProductRequestDTO product);
 
     ProductResponseDTO productToProductResponseDTO(ProductEntity product);
 
-    List<ProductResponseDTO> toUserResponseDTO(List<ProductEntity> productEntities);
+//    List<ProductResponseDTO> toUserResponseDTO(List<ProductEntity> productEntities);
 
-//    @Mapping(target = "id", ignore = true) //không update id
-//    void updateProduct(@MappingTarget ProductEntity productEntity, ProductRequestDTO productRequestDTO);
+    @Mapping(target = "id", ignore = true)
 
-    @Mapping(target = "id", ignore = true) //không update id
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE) //neu request null thi ko thay doi cai cũ
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateProduct(@MappingTarget ProductEntity user,  UpdateProductRequest productRequestDTO);
 }

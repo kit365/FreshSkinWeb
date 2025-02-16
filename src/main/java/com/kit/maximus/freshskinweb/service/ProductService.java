@@ -21,7 +21,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.swing.*;
+import java.text.Normalizer;
 import java.util.*;
 
 
@@ -38,17 +38,29 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     @Override
     public ProductResponseDTO add(CreateProductRequest request) {
+
         ProductEntity productEntity = productMapper.productToProductEntity(request);
+
+        productEntity.setSlug(getSlug(request.getTitle()));
+
+        request.getVariants().forEach(productEntity::createProductVariant);
+
         return productMapper.productToProductResponseDTO(productRepository.save(productEntity));
     }
 
     @Override
     public ProductResponseDTO update(Long id, UpdateProductRequest request) {
+
         if(StringUtils.hasLength(request.getStatus())){
             request.setStatus(request.getStatus().toUpperCase());
             getStatus(request.getStatus());
         }
         ProductEntity listProduct = getProductEntityById(id);
+
+        if(StringUtils.hasLength(request.getTitle())){
+            listProduct.setSlug(getSlug(request.getTitle()));
+        }
+
         productMapper.updateProduct(listProduct, request);
         return productMapper.productToProductResponseDTO(productRepository.save(listProduct));
     }
@@ -233,5 +245,14 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         }
 
         return sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+    }
+
+    private String getSlug(String slug) {
+        return Normalizer.normalize(slug, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .replaceAll("[^a-zA-Z0-9\\s]", "")
+                .trim()
+                .replaceAll("\\s+","-")
+                .toLowerCase();
     }
 }

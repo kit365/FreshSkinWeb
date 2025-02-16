@@ -18,7 +18,6 @@ public class UpdateProductRequest implements Serializable {
     //    String categoryID;
 //    String DiscountID;
     String title;
-    String slug;
     String description;
     String thumbnail;
     List<ProductVariantEntity> variants;

@@ -5,6 +5,7 @@ import com.kit.maximus.freshskinweb.utils.SkinType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Setter
@@ -31,9 +32,8 @@ public class ProductEntity extends AbstractEntity {
     //    Mapper: Ánh xạ với fields bên N(product)
 //    @JoinColumn(name = "ProductID") không cần vì bên nhiều giữ khóa ngoại của bên 1 nên không cần
     //Xóa một đối tượng bên N không còn map với bên 1 nữa -> orphanRemoval = true
-//    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @OneToMany(mappedBy = "product",fetch = FetchType.LAZY)
-    List<ProductVariantEntity> variants;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    List<ProductVariantEntity> variants = new ArrayList<>();
 
     @Column(name = "Title")
     String title;
@@ -85,12 +85,14 @@ public class ProductEntity extends AbstractEntity {
 
 
     public void createProductVariant(ProductVariantEntity productVariantEntity) {
-        variants.add(productVariantEntity);
-        productVariantEntity.setProduct(this);
+            variants.add(productVariantEntity);
+            productVariantEntity.setProduct(this);
     }
+
 
     public void removeProductVariant(ProductVariantEntity productVariantEntity) {
         variants.remove(productVariantEntity);
+        productVariantEntity.setProduct(null);
     }
 
 //    FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID) ON DELETE SET NULL,

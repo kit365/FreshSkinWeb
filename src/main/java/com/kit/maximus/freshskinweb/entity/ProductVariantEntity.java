@@ -1,5 +1,7 @@
 package com.kit.maximus.freshskinweb.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,10 +12,11 @@ import lombok.*;
 @Entity
 @ToString
 @Table(name = "ProductVariant")
-public class ProductVariantEntity extends AbstractEntity {
+public class ProductVariantEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     @Column(name = "ProductVariantId")
     Long id;
 
@@ -21,8 +24,10 @@ public class ProductVariantEntity extends AbstractEntity {
     double price;
 
     @Column(name = "Volume")
-    double volume;
+    int volume;
 
+
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ProductID")
     ProductEntity product;

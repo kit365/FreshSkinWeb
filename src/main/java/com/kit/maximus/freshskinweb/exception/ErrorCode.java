@@ -22,6 +22,7 @@ public enum ErrorCode {
     PASSWORD_INVALID(400, "Password must be more than 5 and less than 20 characters"),
     USER_EXISTED(400, "User already existed"),
     EMAIL_EXISTED(400, "Email already existed"),
+    PHONE_NUMBER_EXISTED(400, "Phone Number already existed"),
     //Authentication
     UNAUTHENTICATED(401, "Unauthenticated"),
 
@@ -29,7 +30,10 @@ public enum ErrorCode {
     SORT_DIRECTION_INVALID(400, "Sort Direction Invalid[ASC or DESC]"),
     PRODUCT_NOT_FOUND(404, "Product Not Found"),
     INVALID_REQUEST_PRODUCTID(400, "Invalid Request ProductId[Missing 'id' key in request body]"),
+
     ;
+
+
 
 
     long code;

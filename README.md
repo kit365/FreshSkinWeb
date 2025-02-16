@@ -3,6 +3,7 @@
 
 📌. ** Cách kiểm tra đóng góp cá nhân trên GitHub`:**
  ```sh
+  
    git shortlog -s -n
   ```
 

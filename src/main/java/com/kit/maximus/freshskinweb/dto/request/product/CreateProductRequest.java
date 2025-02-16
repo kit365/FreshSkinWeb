@@ -22,7 +22,6 @@ public class CreateProductRequest implements Serializable {
 //    String categoryID;
 //    String DiscountID;
     String title;
-    String slug;
     String description;
     String thumbnail;
     List<ProductVariantEntity> variants;
@@ -36,7 +35,7 @@ public class CreateProductRequest implements Serializable {
     String usageInstructions;
     String benefits;
     String skinIssues;
-    String thumbnailPayload;
+//    String thumbnailPayload;
 /// ////////////////////////////////////////////
     boolean featured;
     String status;

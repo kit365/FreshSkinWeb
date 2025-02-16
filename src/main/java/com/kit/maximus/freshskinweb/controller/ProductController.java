@@ -110,7 +110,7 @@ public class ProductController {
             log.info("Product deleted successfully");
             return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
         }
-        log.info("User delete failed");
+        log.info("Product delete failed");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
@@ -135,6 +135,40 @@ public class ProductController {
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
+    @PatchMapping("restore/{id}")
+    public ResponseAPI<String> restore(@PathVariable("id") Long id) {
+        String message_succed = "restore Product successfull";
+        String message_failed = "restore Product failed";
+        boolean result = productService.restore(id);
+        if (result) {
+            log.info("Product restore successfully");
+            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
+        }
+        log.info("Product restore failed");
+        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+    }
+
+
+    @PatchMapping("restore")
+    public ResponseAPI<String> restore(@RequestBody Map<String,Object> productRequestDTO) {
+
+        if(!productRequestDTO.containsKey("id")) {
+            log.warn("Request does not contain 'id' key");
+            throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
+        }
+
+        List<Long> ids = (List<Long>) productRequestDTO.get("id");
+
+        String message_succed = "restore Product successfull";
+        String message_failed = "restore Product failed";
+        var result = productService.restore(ids);
+        if (result) {
+            log.info("Products restore successfully");
+            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
+        }
+        log.info("Products restore failed");
+        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+    }
 
 
 

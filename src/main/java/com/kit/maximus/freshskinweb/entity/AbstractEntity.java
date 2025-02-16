@@ -2,8 +2,10 @@ package com.kit.maximus.freshskinweb.entity;
 
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,24 +14,25 @@ import java.util.Date;
 @Getter
 @Setter
 @MappedSuperclass
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public abstract class AbstractEntity {
 
-    @Column(name = "created_at")
+    @Column(name = "Created_at")
     @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp
-    private Date createdAt;
+    Date createdAt;
 
-    @Column(name = "update_at")
+    @Column(name = "Update_at")
     @Temporal(TemporalType.TIMESTAMP)
     @UpdateTimestamp
-    private Date updatedAt;
+    Date updatedAt;
 
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(name = "Status")
     Status status = Status.ACTIVE;
 
-    @Column(name = "deleted")
+    @Column(name = "Deleted")
     boolean deleted;
 
 
