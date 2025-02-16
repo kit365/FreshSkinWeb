@@ -28,9 +28,9 @@ public enum ErrorCode {
 
    //Product
     SORT_DIRECTION_INVALID(400, "Sort Direction Invalid[ASC or DESC]"),
-    PRODUCT_NOT_FOUND(404, "Product Not Found"),
+    PRODUCT_NOT_FOUND(404, "Product Not Found "),
     INVALID_REQUEST_PRODUCTID(400, "Invalid Request ProductId[Missing 'id' key in request body]"),
-
+    VOLUME_EXISTED(404, "Volume already existed"),
     ;
 
 
@@ -44,5 +44,6 @@ public enum ErrorCode {
         this.code = code;
         this.message = message;
     }
+
 
 }

@@ -4,7 +4,9 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
+import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
+import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.ProductMapper;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -48,17 +51,60 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return productMapper.productToProductResponseDTO(productRepository.save(productEntity));
     }
 
+
+    public boolean checkDuplicateVolume(List<ProductVariantEntity> entityList, Long productId) {
+        Map<Integer, ProductVariantEntity> volumeMap = new HashMap<>();
+
+        ProductEntity listProduct = getProductEntityById(productId);
+        List<ProductVariantEntity> productVariantEntities = listProduct.getVariants();
+
+        for(ProductVariantEntity productVariantEntity : productVariantEntities) {
+            volumeMap.put(productVariantEntity.getVolume(),productVariantEntity);
+        }
+
+        for(ProductVariantEntity productVariantEntity : entityList) {
+            if(volumeMap.containsKey(productVariantEntity.getVolume())) {
+                throw new AppException(ErrorCode.VOLUME_EXISTED);
+            }
+        }
+        return true;
+    }
+
+
     @Override
     public ProductResponseDTO update(Long id, UpdateProductRequest request) {
 
-        if(StringUtils.hasLength(request.getStatus())){
+        if (StringUtils.hasLength(request.getStatus())) {
             request.setStatus(request.getStatus().toUpperCase());
             getStatus(request.getStatus());
         }
         ProductEntity listProduct = getProductEntityById(id);
 
-        if(StringUtils.hasLength(request.getTitle())){
+        if (StringUtils.hasLength(request.getTitle())) {
             listProduct.setSlug(getSlug(request.getTitle()));
+        }
+
+
+        if (request.getVariants() != null) {
+
+            for (ProductVariantEntity requestedVariant : request.getVariants()) {
+                if (requestedVariant.getId() == null) {
+                    boolean checkDuplicateVolume = checkDuplicateVolume(request.getVariants(), listProduct.getId());
+                    ProductVariantEntity newVariant = new ProductVariantEntity();
+                    newVariant.setVolume(requestedVariant.getVolume());
+                    newVariant.setPrice(requestedVariant.getPrice());
+                    newVariant.setProduct(listProduct);
+                    listProduct.createProductVariant(newVariant);
+                } else {
+                    for (ProductVariantEntity updatedVariant : listProduct.getVariants()) {
+                        if (requestedVariant.getId().equals(updatedVariant.getId())) {
+                                updatedVariant.setVolume(requestedVariant.getVolume());
+                                updatedVariant.setPrice(requestedVariant.getPrice());
+
+                        }
+                    }
+                }
+            }
         }
 
         productMapper.updateProduct(listProduct, request);
@@ -139,6 +185,19 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return true;
     }
 
+    //xóa product_variant
+    public boolean deleteProductVariants(Long id, ProductVariantEntity productVariantEntities) {
+        ProductEntity productEntity = getProductEntityById(id);
+
+        for (ProductVariantEntity request : productEntity.getVariants()) {
+            if (request.getId().equals(productVariantEntities.getId())) {
+                productEntity.removeProductVariant(productVariantEntities);
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     /*
      Phục hồi: 1 sản phẩm
@@ -209,9 +268,9 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         Page<ProductResponseDTO> list = productEntityPage.map(productMapper::productToProductResponseDTO);
 
-        if (!list.hasContent()) {
-            return null;
-        }
+//        if (!list.hasContent()) {
+//            return null;
+//        }
 
         map.put("products", list.getContent());
         map.put("currentPage", list.getNumber() + 1);
@@ -252,7 +311,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 .replaceAll("\\p{M}", "")
                 .replaceAll("[^a-zA-Z0-9\\s]", "")
                 .trim()
-                .replaceAll("\\s+","-")
+                .replaceAll("\\s+", "-")
                 .toLowerCase();
     }
 }
