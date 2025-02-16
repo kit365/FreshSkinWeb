@@ -19,9 +19,8 @@ public interface ProductMapper {
 //    List<ProductResponseDTO> toUserResponseDTO(List<ProductEntity> productEntities);
 
     @Mapping(target = "id", ignore = true)
-
+    @Mapping(target = "variants", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateProduct(@MappingTarget ProductEntity user,  UpdateProductRequest productRequestDTO);
-
 
 }
