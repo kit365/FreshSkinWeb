@@ -1,9 +1,11 @@
 package com.kit.maximus.freshskinweb.service;
 
 import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
+import com.kit.maximus.freshskinweb.dto.request.order.UpdateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
+import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.OrderMapper;
@@ -16,6 +18,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -27,26 +30,53 @@ public class OrderService {
     OrderMapper orderMapper;
     UserService userService;
 
-    public OrderResponse addNewUser(CreateOrderRequest createOrderRequest) {
+    public OrderResponse addOrder(CreateOrderRequest createOrderRequest) {
         var order = orderMapper.toOrderEntity(createOrderRequest);
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }
 
 
-    public OrderResponse addOldUser(CreateOrderRequest createOrderRequest) {
-        var user = userService.getUser(createOrderRequest.getUsername());
+//    public OrderResponse addOldUser(CreateOrderRequest createOrderRequest) {
+//        var user = userService.getUser(createOrderRequest.getUsername());
+//        var order = orderMapper.toOrderEntity(createOrderRequest, user);
+//
+//        return orderMapper.toOrderResponse(orderRepository.save(order));
+//    }
 
-//        var order = orderMapper.toOrderEntity(createOrderRequest);
-//        order.setUser(user);
-//        order.setUsername(user.getUsername());
-//        order.setFirstName(user.getFirstName());
-//        order.setLastName(user.getLastName());
-//        order.setEmail(user.getEmail());
-//        order.setPhoneNumber(user.getPhone());
-//        order.setAddress(user.getAddress());
-        var order = orderMapper.toOrderEntity(createOrderRequest, user);
+//    public OrderResponse getOrderById(Long orderId) {
+//        OrderEntity order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+//
+//        return orderMapper.toOrderResponse(order);
+//    }
 
-        return orderMapper.toOrderResponse(orderRepository.save(order));
+    public List<OrderResponse> getAllOrder() {
+        List<OrderEntity> orders = orderRepository.findAll();
+        return orderMapper.toOrderResponseList(orders);
     }
+
+    public void deleteOrder(Long orderId) {
+        if(!orderRepository.existsById(orderId)) {
+            throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+        }
+        orderRepository.deleteById(orderId);
+    }
+
+
+
+//    public OrderResponse updateOrder(Long orderId, UpdateOrderRequest updateOrderRequest) {
+//        // Lấy OrderEntity từ database (không phải OrderResponse)
+//        OrderEntity orderEntity = orderRepository.findById(orderId)
+//                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+//
+//        // Ánh xạ thông tin update từ request vào entity
+//        orderMapper.updateOrder(orderEntity, updateOrderRequest);
+//
+//        // Lưu lại vào database
+//        OrderEntity updatedOrder = orderRepository.save(orderEntity);
+//
+//        // Trả về OrderResponse (DTO)
+//        return orderMapper.toOrderResponse(updatedOrder);
+//    }
+
 
 }
