@@ -26,8 +26,14 @@ public class ProductEntity extends AbstractEntity {
 //    @Column(name = "DiscountID")
 //    DiscoundEntity discount;
 
-//    @Column(name = "CategoryID")
-//    String categoryID;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoryID")
+    ProductCategoryEntity category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "BrandID")
+    ProductBrandEntity Brand;
 
     //    Mapper: Ánh xạ với fields bên N(product)
 //    @JoinColumn(name = "ProductID") không cần vì bên nhiều giữ khóa ngoại của bên 1 nên không cần
@@ -53,9 +59,6 @@ public class ProductEntity extends AbstractEntity {
 
     @Column(name = "Position")
     int position;
-
-    @Column(name = "Brand")
-    String brand;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "SkinType")
@@ -83,10 +86,9 @@ public class ProductEntity extends AbstractEntity {
 
     /// ///////
 
-
     public void createProductVariant(ProductVariantEntity productVariantEntity) {
-            variants.add(productVariantEntity);
-            productVariantEntity.setProduct(this);
+        variants.add(productVariantEntity);
+        productVariantEntity.setProduct(this);
     }
 
 
