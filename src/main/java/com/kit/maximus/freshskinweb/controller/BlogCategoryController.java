@@ -23,7 +23,6 @@ public class BlogCategoryController {
 
     @PostMapping("/create")
     public ResponseAPI<BlogCategoryResponse> createBlogCategory(@RequestBody BlogCategoryCreationRequest request){
-        System.out.println(request);
         String message = "Create blog category successfully";
         var result = blogCategoryService.add(request);
         log.info("CREATE BLOG CATEGORY REQUEST");
