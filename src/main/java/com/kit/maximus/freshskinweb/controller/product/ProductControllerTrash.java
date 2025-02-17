@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.controller;
+package com.kit.maximus.freshskinweb.controller.product;
 
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
@@ -22,45 +22,18 @@ import java.util.Map;
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-@RequestMapping("admin/products")
-public class ProductController {
+@RequestMapping("admin/products/trash")
+public class ProductControllerTrash {
 
     ProductService productService;
 
-    @PostMapping("create")
-    public ResponseAPI<ProductResponseDTO> createProduct(@RequestBody CreateProductRequest productRequestDTO) {
-        String message = "Create Product successfull";
-        var result = productService.add(productRequestDTO);
-        log.info("CREATE PRODUCT REQUEST)");
-        return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
-    }
-
-    @GetMapping()
-    public ResponseAPI<Map<String, Object>> getAllProduct(@RequestParam(defaultValue = "1") int page,
-                                                          @RequestParam(defaultValue = "4") int size,
-                                                          @RequestParam(defaultValue = "position") String sortKey,
-                                                          @RequestParam(defaultValue = "desc") String sortValue,
-                                                          @RequestParam(defaultValue = "ALL") String status,
-                                                          @RequestParam(name = "keyword", required = false) String keyword) {
-        String message = "Tim thay List Product";
-        log.info("GET ALL PRODUCTS");
-        Map<String, Object> result = productService.getAll(page, size,sortKey, sortValue,status,keyword);
-
-//        if (result == null) {
-//            return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.NOT_FOUND.value()).message("Not Found").data(result).build();
-//        }
-
-//        return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
-        return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
-    }
-
-    @GetMapping("/trash")
-    public ResponseAPI<Map<String, Object>> getAllProductInTrash(@RequestParam(defaultValue = "1") int page,
-                                                          @RequestParam(defaultValue = "4") int size,
-                                                          @RequestParam(defaultValue = "position") String sortKey,
-                                                          @RequestParam(defaultValue = "desc") String sortValue,
-                                                          @RequestParam(defaultValue = "ALL") String status,
-                                                          @RequestParam(name = "keyword", required = false) String keyword) {
+    @GetMapping
+    public ResponseAPI<Map<String, Object>> getAll(@RequestParam(defaultValue = "1") int page,
+                                                                 @RequestParam(defaultValue = "4") int size,
+                                                                 @RequestParam(defaultValue = "position") String sortKey,
+                                                                 @RequestParam(defaultValue = "desc") String sortValue,
+                                                                 @RequestParam(defaultValue = "ALL") String status,
+                                                                 @RequestParam(name = "keyword", required = false) String keyword) {
         String message = "Tim thay List Product";
         log.info("GET ALL PRODUCTS");
         Map<String, Object> result = productService.getTrash(page, size,sortKey, sortValue,status,keyword);
@@ -191,7 +164,5 @@ public class ProductController {
         log.info("Products restore failed");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
-
-
 
 }
