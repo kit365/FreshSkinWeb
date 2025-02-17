@@ -39,8 +39,13 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     @Override
     public ProductResponseDTO add(CreateProductRequest request) {
-
         ProductEntity productEntity = productMapper.productToProductEntity(request);
+
+
+        if(request.getPosition() <= 0){
+        int size  = productRepository.findAll().size();
+            productEntity.setPosition(size + 1);
+        }
 
         productEntity.setSlug(getSlug(request.getTitle()));
 
