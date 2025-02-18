@@ -1,7 +1,6 @@
 package com.kit.maximus.freshskinweb.controller;
 
 import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
-import com.kit.maximus.freshskinweb.dto.request.order.UpdateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.service.OrderService;

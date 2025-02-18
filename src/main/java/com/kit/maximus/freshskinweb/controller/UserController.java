@@ -4,6 +4,7 @@ import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
+import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -68,6 +69,13 @@ public class UserController {
         String message = "Delete user successfully";
         userService.deleteTemporarily(id);
         log.info(message);
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
+    }
+
+    @DeleteMapping("/deleteO/{id}")
+    public ResponseAPI<UserResponseDTO> deleteOrder(@PathVariable("id") Long id, OrderEntity order){
+        String message = "Delete order successfully";
+        userService.deleteOrder(id, order);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 }
