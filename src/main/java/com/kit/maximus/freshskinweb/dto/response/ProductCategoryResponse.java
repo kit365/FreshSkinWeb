@@ -29,13 +29,12 @@ public class ProductCategoryResponse implements Serializable {
 
     String description;
 
-    int position;
+    Integer position;
 
     String image;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<ProductEntity> product;
-
 
     boolean featured;
 

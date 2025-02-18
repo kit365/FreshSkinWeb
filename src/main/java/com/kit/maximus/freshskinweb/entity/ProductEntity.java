@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +33,7 @@ public class ProductEntity extends AbstractEntity {
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoryID")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     ProductCategoryEntity category;
 
 //    @ManyToOne(fetch = FetchType.LAZY)
@@ -60,7 +63,7 @@ public class ProductEntity extends AbstractEntity {
     int discountPercent;
 
     @Column(name = "Position")
-    int position;
+    Integer position;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "SkinType")

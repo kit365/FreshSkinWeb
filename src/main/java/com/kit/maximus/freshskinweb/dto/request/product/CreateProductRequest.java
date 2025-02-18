@@ -27,7 +27,7 @@ public class CreateProductRequest implements Serializable {
     String thumbnail;
     List<ProductVariantEntity> variants;
     int discountPercent;
-    int position;
+    Integer position;
     String brand;
     String skinType;
     /// ////////////////////////////////////////////
