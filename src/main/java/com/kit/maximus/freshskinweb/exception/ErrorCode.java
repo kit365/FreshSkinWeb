@@ -39,7 +39,11 @@ public enum ErrorCode {
 
     //BLOG CATEGORY
     BLOG_CATEGORY_NAME_EXISTED(404, "Blog Category Name already existed"),
+    BLOG_CATEGORY_NOT_FOUND(404, "Blog Category Not Found"),
 
+    //BLOG
+    BLOG_NAME_EXISTED(404, "Blog Category Name already existed"),
+    BLOG_NOT_FOUND(404, "Blog Category Not Found"),
     ;
 
 

@@ -1,8 +1,10 @@
 package com.kit.maximus.freshskinweb.dto.request.blog;
 
-import com.kit.maximus.freshskinweb.entity.BlogCategory;
+import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.io.Serializable;
 
 @Getter
 @Setter
@@ -11,9 +13,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class BlogUpdateRequest {
+public class BlogUpdateRequest implements Serializable {
     String title;
-    BlogCategory blogCategory;
+    BlogCategoryEntity blogCategoryEntity;
     String content;
     String thumbnail;
     int position;

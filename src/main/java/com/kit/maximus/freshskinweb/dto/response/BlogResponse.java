@@ -1,8 +1,7 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
 import com.kit.maximus.freshskinweb.entity.AbstractEntity;
-import com.kit.maximus.freshskinweb.entity.BlogCategory;
-import jakarta.persistence.*;
+import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,9 +12,9 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BlogResponse extends AbstractEntity {
-    Long id;
+    Long blogId;
     String title;
-    BlogCategory blogCategory;
+    BlogCategoryEntity blogCategoryEntity;
     String content;
     String thumbnail;
     int position;

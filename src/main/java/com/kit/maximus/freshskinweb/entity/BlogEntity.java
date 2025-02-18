@@ -17,16 +17,10 @@ public class BlogEntity extends AbstractEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BlogID", insertable = false, updatable = false)
-    Long id;
+    Long blogId;
 
-
-    @Column(name = "Username")
+    @Column(name = "Title")
     String title;
-
-    @JsonIgnore
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY )
-    @JoinColumn(name = "BlogCategoryId")
-    BlogCategory blogCategory;
 
     @Column(name = "content")
     String content;
@@ -39,5 +33,10 @@ public class BlogEntity extends AbstractEntity {
 
     @Column(name = "Featured")
     boolean featured;
+
+    @ManyToOne( fetch = FetchType.LAZY )
+    @JoinColumn(name = "BlogCategoryId")
+    BlogCategoryEntity blogCategory;
+
 
 }

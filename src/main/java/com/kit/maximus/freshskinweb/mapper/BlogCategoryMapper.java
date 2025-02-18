@@ -1,17 +1,19 @@
 package com.kit.maximus.freshskinweb.mapper;
 
-import com.kit.maximus.freshskinweb.dto.request.blogCategory.BlogCategoryCreationRequest;
-import com.kit.maximus.freshskinweb.dto.request.blogCategory.BlogCategoryUpdateRequest;
+import com.kit.maximus.freshskinweb.dto.request.blog_category.BlogCategoryCreationRequest;
+import com.kit.maximus.freshskinweb.dto.request.blog_category.BlogCategoryUpdateRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
-import com.kit.maximus.freshskinweb.entity.BlogCategory;
+import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface BlogCategoryMapper {
-    BlogCategory  toBlogCategory(BlogCategoryCreationRequest request);
-
-    BlogCategoryResponse toBlogCategoryResponse(BlogCategory request);
 
     @Mapping(target = "blog", ignore = true)
-    void updateBlogCategory(@MappingTarget BlogCategory blogCategory, BlogCategoryUpdateRequest productRequestDTO);
+    BlogCategoryEntity toBlogCategory(BlogCategoryCreationRequest request);
+
+    BlogCategoryResponse toBlogCategoryResponse(BlogCategoryEntity request);
+
+    @Mapping(target = "blog", ignore = true)
+    void updateBlogCategory(@MappingTarget BlogCategoryEntity blogCategoryEntity, BlogCategoryUpdateRequest productRequestDTO);
 }
