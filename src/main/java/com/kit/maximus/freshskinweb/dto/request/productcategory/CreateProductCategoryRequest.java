@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.dto.request.productcategory;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -23,7 +24,7 @@ public class CreateProductCategoryRequest implements Serializable {
 
     String description;
 
-    int position;
+    Integer position;
 
     boolean featured;
 }

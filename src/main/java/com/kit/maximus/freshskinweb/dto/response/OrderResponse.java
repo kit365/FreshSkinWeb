@@ -9,11 +9,12 @@ import jakarta.persistence.*;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class OrderResponse {
+public class OrderResponse implements Serializable {
     Long orderId;
 
     @JsonIgnore

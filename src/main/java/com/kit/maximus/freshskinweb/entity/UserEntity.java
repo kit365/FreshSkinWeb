@@ -1,11 +1,13 @@
 package com.kit.maximus.freshskinweb.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.kit.maximus.freshskinweb.utils.TypeUser;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Setter
@@ -56,9 +58,20 @@ public class UserEntity extends AbstractEntity {
     @Column(name = "Type_user")
     TypeUser typeUser = TypeUser.NORMAL;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY)
-    @JsonIgnore
-    List<OrderEntity> orders;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonManagedReference
+    List<OrderEntity> orders  = new ArrayList<>();
+
+    public void createOrder(OrderEntity order) {
+            orders.add(order);
+            order.setUser(this);
+    }
+
+    public void removeOrder(OrderEntity order) {
+        orders.remove(order);
+        order.setUser(null);
+    }
+
 
 
 

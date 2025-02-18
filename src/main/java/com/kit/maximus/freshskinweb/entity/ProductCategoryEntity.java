@@ -30,14 +30,18 @@ public class ProductCategoryEntity extends AbstractEntity {
     String description;
 
     @Column(name = "Position")
-    int position;
+    Integer position;
+
+    @Column(name = "feature")
+    boolean featured;
 
     @Column(name = "image")
     String image;
 
     @JsonManagedReference
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "category")
-    List<ProductEntity> products = new ArrayList<>();
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, mappedBy = "category")
+    private List<ProductEntity> products = new ArrayList<>();
+
 
     public void createProduct(ProductEntity product) {
         products.add(product);

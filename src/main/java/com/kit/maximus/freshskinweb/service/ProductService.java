@@ -45,12 +45,13 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElse(null);
         ProductEntity productEntity = productMapper.productToProductEntity(request);
-        if(productCategoryEntity != null){
+
+        if (productCategoryEntity != null) {
             productEntity.setCategory(productCategoryEntity);
         }
 
-        if(request.getPosition() <= 0){
-        int size  = productRepository.findAll().size();
+        if (request.getPosition() == null || request.getPosition() <= 0) {
+            Integer size = productRepository.findAll().size();
             productEntity.setPosition(size + 1);
         }
 
@@ -68,12 +69,12 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         ProductEntity listProduct = getProductEntityById(productId);
         List<ProductVariantEntity> productVariantEntities = listProduct.getVariants();
 
-        for(ProductVariantEntity productVariantEntity : productVariantEntities) {
-            volumeMap.put(productVariantEntity.getVolume(),productVariantEntity);
+        for (ProductVariantEntity productVariantEntity : productVariantEntities) {
+            volumeMap.put(productVariantEntity.getVolume(), productVariantEntity);
         }
 
-        for(ProductVariantEntity productVariantEntity : entityList) {
-            if(volumeMap.containsKey(productVariantEntity.getVolume())) {
+        for (ProductVariantEntity productVariantEntity : entityList) {
+            if (volumeMap.containsKey(productVariantEntity.getVolume())) {
                 throw new AppException(ErrorCode.VOLUME_EXISTED);
             }
         }
@@ -94,9 +95,9 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             listProduct.setSlug(getSlug(request.getTitle()));
         }
 
-
-        if(request.getCategoryId() > 0){
-            ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElse(null);
+        //BO SUNG BAN LOI KHONG TIM THAY ID DANH MUC SAN PHAM
+        if (request.getCategoryId() > 0) {
+            ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
             listProduct.setCategory(productCategoryEntity);
         }
 
@@ -113,8 +114,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 } else {
                     for (ProductVariantEntity updatedVariant : listProduct.getVariants()) {
                         if (requestedVariant.getId().equals(updatedVariant.getId())) {
-                                updatedVariant.setVolume(requestedVariant.getVolume());
-                                updatedVariant.setPrice(requestedVariant.getPrice());
+                            updatedVariant.setVolume(requestedVariant.getVolume());
+                            updatedVariant.setPrice(requestedVariant.getPrice());
 
                         }
                     }

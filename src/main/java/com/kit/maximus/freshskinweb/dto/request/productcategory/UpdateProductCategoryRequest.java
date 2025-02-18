@@ -18,15 +18,13 @@ public class UpdateProductCategoryRequest implements Serializable {
 
     String title;
 
-    List<ProductEntity> product;
-
     String image;
-
-    String slug;
 
     String description;
 
-    int position;
+    Integer position;
+
+    String status;
 
     boolean featured;
 }
