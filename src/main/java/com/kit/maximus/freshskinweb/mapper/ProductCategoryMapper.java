@@ -13,13 +13,13 @@ public interface ProductCategoryMapper {
 
 
 //    @Mapping(target = "category", ignore = true)
-    ProductCategoryEntity productCategoryToProductEntity(CreateProductCategoryRequest productRequest);
+    ProductCategoryEntity productCategoryToProductEntity(CreateProductCategoryRequest request);
 
-    ProductCategoryResponse productCategoryToProductCategoryResponseDTO(ProductCategoryEntity product);
+    ProductCategoryResponse productCategoryToProductCategoryResponseDTO(ProductCategoryEntity request);
 
-    List<   ProductCategoryResponse > toProductCateroiesResponseDTO(List<ProductCategoryEntity> productEntities);
+    List<   ProductCategoryResponse > toProductCateroiesResponseDTO(List<ProductCategoryEntity> request);
 
     @Mapping(target = "id", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateProductCategory(@MappingTarget ProductCategoryEntity productCategoryEntity, UpdateProductCategoryRequest productCategoryRequestDTO);
+    void updateProductCategory(@MappingTarget ProductCategoryEntity productCategoryEntity, UpdateProductCategoryRequest request);
 }

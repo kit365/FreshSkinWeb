@@ -1,15 +1,14 @@
 package com.kit.maximus.freshskinweb.service;
 
-import com.kit.maximus.freshskinweb.dto.request.productcategory.CreateProductCategoryRequest;
-import com.kit.maximus.freshskinweb.dto.request.productcategory.UpdateProductCategoryRequest;
-import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
-import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
+import com.kit.maximus.freshskinweb.dto.request.product_brand.CreateProductBrandRequest;
+import com.kit.maximus.freshskinweb.dto.request.product_brand.UpdateProductBrandRequest;
+import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
+import com.kit.maximus.freshskinweb.entity.ProductBrandEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
-import com.kit.maximus.freshskinweb.mapper.ProductCategoryMapper;
-import com.kit.maximus.freshskinweb.repository.ProductCategoryRepository;
+import com.kit.maximus.freshskinweb.mapper.ProductBrandMapper;
+import com.kit.maximus.freshskinweb.repository.ProductBrandRepository;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,57 +30,55 @@ import java.util.Map;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
-public class ProductCategoryService implements BaseService<ProductCategoryResponse, CreateProductCategoryRequest, UpdateProductCategoryRequest, Long> {
+public class ProductBrandService implements BaseService<ProductBrandResponse, CreateProductBrandRequest, UpdateProductBrandRequest, Long> {
 
-    ProductCategoryRepository productCategoryRepository;
+    ProductBrandRepository productBrandRepository;
 
-    ProductCategoryMapper productCategoryMapper;
+    ProductBrandMapper productBrandMapper;
 
     @Override
-    public ProductCategoryResponse add(CreateProductCategoryRequest request) {
+    public ProductBrandResponse add(CreateProductBrandRequest request) {
         log.info("Request JSON: {}", request);
 
-        ProductCategoryEntity productCategoryEntity = productCategoryMapper.productCategoryToProductEntity(request);
-
+        ProductBrandEntity productBrandEntity = productBrandMapper.productBrandToProductEntity(request);
 
         if (request.getPosition() == null || request.getPosition() <= 0) {
-            Integer size = productCategoryRepository.findAll().size();
-            productCategoryEntity.setPosition(size + 1);
+            Integer size = productBrandRepository.findAll().size();
+            productBrandEntity.setPosition(size + 1);
         }
 
-        productCategoryEntity.setSlug(getSlug(request.getTitle()));
-        return productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryRepository.save(productCategoryEntity));
+        productBrandEntity.setSlug(getSlug(request.getTitle()));
+        return productBrandMapper.productBrandToProductBrandResponseDTO(productBrandRepository.save(productBrandEntity));
     }
 
-    public List<ProductCategoryResponse> getAll() {
-        return productCategoryMapper.toProductCateroiesResponseDTO(productCategoryRepository.findAll());
+    public List<ProductBrandResponse> getAll() {
+        return productBrandMapper.toProductBrandsResponseDTO(productBrandRepository.findAll());
     }
 
     @Override
-    public ProductCategoryResponse update(Long id, UpdateProductCategoryRequest request) {
-        ProductCategoryEntity productCategoryEntity = getCategoryById(id);
+    public ProductBrandResponse update(Long id, UpdateProductBrandRequest request) {
+        ProductBrandEntity brandEntity = getBrandById(id);
 
 
         if (StringUtils.hasLength(request.getStatus())) {
-            productCategoryEntity.setStatus(getStatus(request.getStatus()));
+            brandEntity.setStatus(getStatus(request.getStatus()));
         }
 
         if (StringUtils.hasLength(request.getTitle())) {
-            productCategoryEntity.setSlug(getSlug(request.getTitle()));
+            brandEntity.setSlug(getSlug(request.getTitle()));
         }
 
-
-        productCategoryMapper.updateProductCategory(productCategoryEntity, request);
-        return productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryRepository.save(productCategoryEntity));
+        productBrandMapper.updateProductBrand(brandEntity, request);
+        return productBrandMapper.productBrandToProductBrandResponseDTO(productBrandRepository.save(brandEntity));
     }
 
     @Override
     public boolean update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
 
-        productCategoryRepository.findAllById(id).forEach(productCategoryEntity -> {
-            productCategoryEntity.setStatus(statusEnum);
-            productCategoryRepository.save(productCategoryEntity);
+        productBrandRepository.findAllById(id).forEach(brandEntity -> {
+            brandEntity.setStatus(statusEnum);
+            productBrandRepository.save(brandEntity);
         });
 
         return true;
@@ -89,73 +86,72 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
     @Override
     public boolean delete(Long id) {
-        ProductCategoryEntity productCategoryEntity = getCategoryById(id);
+        ProductBrandEntity brandEntity = getBrandById(id);
         log.info("Delete: {}", id);
-        productCategoryRepository.delete(productCategoryEntity);
+        productBrandRepository.delete(brandEntity);
         return true;
     }
 
     @Override
     public boolean delete(List<Long> id) {
-        List<ProductCategoryEntity> list = productCategoryRepository.findAllById(id);
-        productCategoryRepository.deleteAll(list);
+        List<ProductBrandEntity> list = productBrandRepository.findAllById(id);
+        productBrandRepository.deleteAll(list);
         return true;
     }
 
     @Override
     public boolean deleteTemporarily(Long id) {
-        ProductCategoryEntity productCategoryEntity = getCategoryById(id);
-        productCategoryEntity.setDeleted(true);
+        ProductBrandEntity brandEntity = getBrandById(id);
+        brandEntity.setDeleted(true);
 
-        List<ProductEntity> products = productCategoryEntity.getProducts();
+        List<ProductEntity> products = brandEntity.getProducts();
         for (ProductEntity productEntity : products) {
             productEntity.setStatus(Status.INACTIVE);
         }
-        productCategoryRepository.save(productCategoryEntity);
+        productBrandRepository.save(brandEntity);
 
         return true;
     }
 
     @Override
     public boolean deleteTemporarily(List<Long> id) {
-        productCategoryRepository.findAllById(id).forEach(productCategoryEntity -> {
-            productCategoryEntity.setDeleted(true);
+        productBrandRepository.findAllById(id).forEach(brandEntity -> {
+            brandEntity.setDeleted(true);
 
-            List<ProductEntity> products = productCategoryEntity.getProducts();
+            List<ProductEntity> products = brandEntity.getProducts();
             for (ProductEntity productEntity : products) {
                 productEntity.setStatus(Status.INACTIVE);
             }
 
-
-            productCategoryRepository.save(productCategoryEntity);
+            productBrandRepository.save(brandEntity);
         });
         return true;
     }
 
     @Override
     public boolean restore(Long id) {
-        ProductCategoryEntity productCategoryEntity = getCategoryById(id);
-        productCategoryEntity.setDeleted(false);
+        ProductBrandEntity brandEntity = getBrandById(id);
+        brandEntity.setDeleted(false);
 
-        List<ProductEntity> products = productCategoryEntity.getProducts();
+        List<ProductEntity> products = brandEntity.getProducts();
         for (ProductEntity productEntity : products) {
             productEntity.setStatus(Status.ACTIVE);
         }
-        productCategoryRepository.save(productCategoryEntity);
+        productBrandRepository.save(brandEntity);
         return true;
     }
 
     @Override
     public boolean restore(List<Long> id) {
-        productCategoryRepository.findAllById(id).forEach(productCategoryEntity -> {
-            productCategoryEntity.setDeleted(false);
+        productBrandRepository.findAllById(id).forEach(productBrand -> {
+            productBrand.setDeleted(false);
 
-            List<ProductEntity> products = productCategoryEntity.getProducts();
+            List<ProductEntity> products = productBrand.getProducts();
             for (ProductEntity productEntity : products) {
                 productEntity.setStatus(Status.ACTIVE);
             }
 
-            productCategoryRepository.save(productCategoryEntity);
+            productBrandRepository.save(productBrand);
         });
         return true;
     }
@@ -169,29 +165,29 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         int p = (page > 0) ? page - 1 : 0;
         Pageable pageable = PageRequest.of(p, size, sort);
 
-        Page<ProductCategoryEntity> productCategoryEntities;
+        Page<ProductBrandEntity> productBrandEntities;
 
         // Tìm kiếm theo keyword trước
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status.equalsIgnoreCase("ALL")) {
                 // Tìm kiếm theo tên sản phẩm, không lọc theo status
-                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, false, pageable);
+                productBrandEntities = productBrandRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, false, pageable);
             } else {
                 // Tìm kiếm theo tên sản phẩm và status
                 Status statusEnum = getStatus(status);
-                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, false);
+                productBrandEntities = productBrandRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, false);
             }
         } else {
             // Nếu không có keyword, chỉ lọc theo status
             if (status == null || status.equalsIgnoreCase("ALL")) {
-                productCategoryEntities = productCategoryRepository.findAllByDeleted(false, pageable);
+                productBrandEntities = productBrandRepository.findAllByDeleted(false, pageable);
             } else {
                 Status statusEnum = getStatus(status);
-                productCategoryEntities = productCategoryRepository.findAllByStatusAndDeleted(statusEnum, false, pageable);
+                productBrandEntities = productBrandRepository.findAllByStatusAndDeleted(statusEnum, false, pageable);
             }
         }
 
-        Page<ProductCategoryResponse> list = productCategoryEntities.map(productCategoryMapper::productCategoryToProductCategoryResponseDTO);
+        Page<ProductBrandResponse> list = productBrandEntities.map(productBrandMapper::productBrandToProductBrandResponseDTO);
 
 //        if (!list.hasContent()) {
 //            return null;
@@ -214,29 +210,29 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         int p = (page > 0) ? page - 1 : 0;
         Pageable pageable = PageRequest.of(p, size, sort);
 
-        Page<ProductCategoryEntity> productCategoryEntities;
+        Page<ProductBrandEntity> productBrandEntities;
 
         // Tìm kiếm theo keyword trước
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status.equalsIgnoreCase("ALL")) {
                 // Tìm kiếm theo tên sản phẩm, không lọc theo status
-                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, true, pageable);
+                productBrandEntities = productBrandRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, true, pageable);
             } else {
                 // Tìm kiếm theo tên sản phẩm và status
                 Status statusEnum = getStatus(status);
-                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, true);
+                productBrandEntities = productBrandRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, true);
             }
         } else {
             // Nếu không có keyword, chỉ lọc theo status
             if (status == null || status.equalsIgnoreCase("ALL")) {
-                productCategoryEntities = productCategoryRepository.findAllByDeleted(true, pageable);
+                productBrandEntities = productBrandRepository.findAllByDeleted(true, pageable);
             } else {
                 Status statusEnum = getStatus(status);
-                productCategoryEntities = productCategoryRepository.findAllByStatusAndDeleted(statusEnum, true, pageable);
+                productBrandEntities = productBrandRepository.findAllByStatusAndDeleted(statusEnum, true, pageable);
             }
         }
 
-        Page<ProductCategoryResponse> list = productCategoryEntities.map(productCategoryMapper::productCategoryToProductCategoryResponseDTO);
+        Page<ProductBrandResponse> list = productBrandEntities.map(productBrandMapper::productBrandToProductBrandResponseDTO);
 
 //        if (!list.hasContent()) {
 //            return null;
@@ -249,7 +245,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         map.put("pageSize", list.getSize());
         return map;
     }
-
 
     private String getSlug(String slug) {
         return Normalizer.normalize(slug, Normalizer.Form.NFD)
@@ -280,33 +275,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     }
 
     //tra ve ProductEntity, Neu Id null -> nem loi
-    private ProductCategoryEntity getCategoryById(Long id) {
-        return productCategoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND));
+    private ProductBrandEntity getBrandById(Long id) {
+        return productBrandRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_BRAND_NOT_FOUND));
     }
-
-//    //chuyen String thanh Feature
-//    private boolean isFeature(String feature) {
-//        try {
-//            return Boolean.parseBoolean(feature);
-//        } catch (IllegalArgumentException e) {
-//            log.warn("Invalid feature provided: '{}'", feature);
-//            throw new AppException(ErrorCode.KEY_INVALID);
-//        }
-//    }
-
-//    private Boolean convertToBoolean(String feature) {
-//        if (feature == null) {
-//            return false;
-//        }
-//        if (feature.equalsIgnoreCase("true")) {
-//            return true;
-//        } else if (feature.equalsIgnoreCase("false")) {
-//            return false;
-//        } else {
-//            log.warn("Invalid feature provided: '{}'", feature);
-//            throw new AppException(ErrorCode.KEY_INVALID);
-//        }
-//    }
-
-
 }

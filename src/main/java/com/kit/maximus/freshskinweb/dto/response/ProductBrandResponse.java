@@ -1,7 +1,8 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,33 +17,29 @@ import java.util.List;
 @Getter
 @ToString
 @Builder
-public class ProductResponseDTO implements Serializable {
+public class ProductBrandResponse implements Serializable {
+
     Long id;
-    ProductCategoryResponse category;
-    ProductBrandResponse brand;
-    //    String DiscountID;
+
     String title;
+
     String slug;
+
     String description;
-    String thumbnail;
-    List<ProductVariantEntity> variants;
-    int discountPercent;
+
     Integer position;
-    String skinType;
-    /// ////////////////////////////////////////////
-    String origin;
-    String ingredients;
-    String usageInstructions;
-    String benefits;
-    String skinIssues;
-//    String thumbnailPayload;
-    /// ////////////////////////////////////////////
+
+    String image;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    List<ProductEntity> product;
+
     boolean featured;
+
     String status;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     Date createdAt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date updatedAt;
-
 }

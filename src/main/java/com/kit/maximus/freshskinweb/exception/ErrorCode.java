@@ -31,6 +31,12 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND(404, "Product Not Found"),
     INVALID_REQUEST_PRODUCTID(400, "Invalid Request ProductId[Missing 'id' key in request body]"),
     VOLUME_EXISTED(400, "Volume already existed"),
+
+    //ProductCategory
+    PRODUCT_CATEGORY_NOT_FOUND(404, "Product Category Not Found"),
+    //ProductBrand
+    PRODUCT_BRAND_NOT_FOUND(404, "Product Brand Not Found"),
+
     //Role
     ROLE_NOT_FOUND(404, "Role Not Found"),
 

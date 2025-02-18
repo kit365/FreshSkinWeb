@@ -17,6 +17,7 @@ public class UpdateProductRequest implements Serializable {
 
     String productDetailID;
     long categoryId;
+    long brandId;
 //    String DiscountID;
     String title;
     String description;
@@ -24,7 +25,6 @@ public class UpdateProductRequest implements Serializable {
     List<ProductVariantEntity> variants;
     int discountPercent;
     Integer position;
-    String brand;
     String skinType;
     /// ////////////////////////////////////////////
     String origin;

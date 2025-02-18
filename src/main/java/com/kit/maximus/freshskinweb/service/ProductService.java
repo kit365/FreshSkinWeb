@@ -4,12 +4,14 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
+import com.kit.maximus.freshskinweb.entity.ProductBrandEntity;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.ProductMapper;
+import com.kit.maximus.freshskinweb.repository.ProductBrandRepository;
 import com.kit.maximus.freshskinweb.repository.ProductCategoryRepository;
 import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.utils.Status;
@@ -40,14 +42,21 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     ProductCategoryRepository productCategoryRepository;
 
+    ProductBrandRepository productBrandRepository;
+
     @Override
     public ProductResponseDTO add(CreateProductRequest request) {
 
         ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElse(null);
+        ProductBrandEntity productBrandEntity = productBrandRepository.findById(request.getBrandId()).orElse(null);
         ProductEntity productEntity = productMapper.productToProductEntity(request);
 
         if (productCategoryEntity != null) {
             productEntity.setCategory(productCategoryEntity);
+        }
+
+        if (productBrandEntity != null) {
+            productEntity.setBrand(productBrandEntity);
         }
 
         if (request.getPosition() == null || request.getPosition() <= 0) {
@@ -84,7 +93,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     @Override
     public ProductResponseDTO update(Long id, UpdateProductRequest request) {
-
         if (StringUtils.hasLength(request.getStatus())) {
             request.setStatus(request.getStatus().toUpperCase());
             getStatus(request.getStatus());
@@ -97,8 +105,13 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         //BO SUNG BAN LOI KHONG TIM THAY ID DANH MUC SAN PHAM
         if (request.getCategoryId() > 0) {
-            ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+            ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND));
             listProduct.setCategory(productCategoryEntity);
+        }
+
+        if(request.getBrandId() > 0) {
+            ProductBrandEntity productBrandEntity = productBrandRepository.findById(request.getBrandId()).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_BRAND_NOT_FOUND));
+            listProduct.setBrand(productBrandEntity);
         }
 
         if (request.getVariants() != null) {

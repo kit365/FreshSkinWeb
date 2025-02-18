@@ -36,9 +36,11 @@ public class ProductEntity extends AbstractEntity {
     @OnDelete(action = OnDeleteAction.SET_NULL)
     ProductCategoryEntity category;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "BrandID")
-//    ProductBrandEntity brand;
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brandID")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    ProductBrandEntity brand;
 
     //    Mapper: Ánh xạ với fields bên N(product)
 //    @JoinColumn(name = "ProductID") không cần vì bên nhiều giữ khóa ngoại của bên 1 nên không cần
