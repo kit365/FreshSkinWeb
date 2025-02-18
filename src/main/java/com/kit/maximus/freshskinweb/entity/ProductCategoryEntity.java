@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,17 +32,20 @@ public class ProductCategoryEntity extends AbstractEntity {
     @Column(name = "Position")
     int position;
 
+    @Column(name = "image")
+    String image;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "categoryID")
-    List<ProductEntity> productEntities = new ArrayList<>();
+    @JsonManagedReference
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "category")
+    List<ProductEntity> products = new ArrayList<>();
 
-    public void addProduct(ProductEntity product) {
-        productEntities.add(product);
+    public void createProduct(ProductEntity product) {
+        products.add(product);
         product.setCategory(this);
     }
 
     public void removeProduct(ProductEntity product) {
-        productEntities.remove(product);
+        products.remove(product);
         product.setCategory(null);
     }
 

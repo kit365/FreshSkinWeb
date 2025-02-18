@@ -4,11 +4,13 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
+import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.ProductMapper;
+import com.kit.maximus.freshskinweb.repository.ProductCategoryRepository;
 import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
@@ -36,11 +38,16 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     ProductMapper productMapper;
 
+    ProductCategoryRepository productCategoryRepository;
 
     @Override
     public ProductResponseDTO add(CreateProductRequest request) {
-        ProductEntity productEntity = productMapper.productToProductEntity(request);
 
+        ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElse(null);
+        ProductEntity productEntity = productMapper.productToProductEntity(request);
+        if(productCategoryEntity != null){
+            productEntity.setCategory(productCategoryEntity);
+        }
 
         if(request.getPosition() <= 0){
         int size  = productRepository.findAll().size();
@@ -87,6 +94,11 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             listProduct.setSlug(getSlug(request.getTitle()));
         }
 
+
+        if(request.getCategoryId() > 0){
+            ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElse(null);
+            listProduct.setCategory(productCategoryEntity);
+        }
 
         if (request.getVariants() != null) {
 

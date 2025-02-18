@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.dto.request.product;
 
+import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import jakarta.persistence.Column;
 import lombok.AccessLevel;
@@ -19,8 +20,8 @@ import java.util.List;
 public class CreateProductRequest implements Serializable {
 
     String productDetailID;
-//    String categoryID;
-//    String DiscountID;
+    long categoryId;
+    //    String DiscountID;
     String title;
     String description;
     String thumbnail;
@@ -29,14 +30,14 @@ public class CreateProductRequest implements Serializable {
     int position;
     String brand;
     String skinType;
-/// ////////////////////////////////////////////
+    /// ////////////////////////////////////////////
     String origin;
     String ingredients;
     String usageInstructions;
     String benefits;
     String skinIssues;
 //    String thumbnailPayload;
-/// ////////////////////////////////////////////
+    /// ////////////////////////////////////////////
     boolean featured;
     String status;
 
