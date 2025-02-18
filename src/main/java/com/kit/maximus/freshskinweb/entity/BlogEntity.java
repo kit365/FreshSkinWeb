@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -22,7 +23,8 @@ public class BlogEntity extends AbstractEntity {
     @Column(name = "Username")
     String title;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER )
+    @JsonIgnore
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY )
     @JoinColumn(name = "BlogCategoryId")
     BlogCategory blogCategory;
 

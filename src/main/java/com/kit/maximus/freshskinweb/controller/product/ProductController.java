@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.controller;
+package com.kit.maximus.freshskinweb.controller.product;
 
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
@@ -27,6 +27,7 @@ public class ProductController {
 
     ProductService productService;
 
+
     @PostMapping("create")
     public ResponseAPI<ProductResponseDTO> createProduct(@RequestBody CreateProductRequest productRequestDTO) {
         String message = "Create Product successfull";
@@ -54,24 +55,6 @@ public class ProductController {
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
-    @GetMapping("/trash")
-    public ResponseAPI<Map<String, Object>> getAllProductInTrash(@RequestParam(defaultValue = "1") int page,
-                                                          @RequestParam(defaultValue = "4") int size,
-                                                          @RequestParam(defaultValue = "position") String sortKey,
-                                                          @RequestParam(defaultValue = "desc") String sortValue,
-                                                          @RequestParam(defaultValue = "ALL") String status,
-                                                          @RequestParam(name = "keyword", required = false) String keyword) {
-        String message = "Tim thay List Product";
-        log.info("GET ALL PRODUCTS");
-        Map<String, Object> result = productService.getTrash(page, size,sortKey, sortValue,status,keyword);
-
-//        if (result == null) {
-//            return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.NOT_FOUND.value()).message("Not Found").data(result).build();
-//        }
-
-//        return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
-        return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
-    }
 
     @PatchMapping("edit/{id}")
     public ResponseAPI<ProductResponseDTO> updateProduct(@PathVariable("id") Long id, @RequestBody UpdateProductRequest productRequestDTO) {

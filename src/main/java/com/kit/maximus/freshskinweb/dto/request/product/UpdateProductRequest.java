@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.dto.request.product;
 
+import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -15,7 +16,7 @@ import java.util.List;
 public class UpdateProductRequest implements Serializable {
 
     String productDetailID;
-    //    String categoryID;
+    long categoryId;
 //    String DiscountID;
     String title;
     String description;

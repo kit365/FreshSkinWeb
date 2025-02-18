@@ -4,6 +4,7 @@ import com.kit.maximus.freshskinweb.entity.BlogEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Getter
@@ -13,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class BlogCategoryUpdateRequest {
+public class BlogCategoryUpdateRequest implements Serializable {
     String blogCategoryName;
     String description;
     List<BlogEntity> blog;

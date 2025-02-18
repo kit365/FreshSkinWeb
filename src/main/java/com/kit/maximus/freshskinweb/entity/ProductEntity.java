@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,8 +27,15 @@ public class ProductEntity extends AbstractEntity {
 //    @Column(name = "DiscountID")
 //    DiscoundEntity discount;
 
-//    @Column(name = "CategoryID")
-//    String categoryID;
+
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoryID")
+    ProductCategoryEntity category;
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "BrandID")
+//    ProductBrandEntity brand;
 
     //    Mapper: Ánh xạ với fields bên N(product)
 //    @JoinColumn(name = "ProductID") không cần vì bên nhiều giữ khóa ngoại của bên 1 nên không cần
@@ -54,9 +62,6 @@ public class ProductEntity extends AbstractEntity {
     @Column(name = "Position")
     int position;
 
-    @Column(name = "Brand")
-    String brand;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "SkinType")
     SkinType skinType = SkinType.NORMAL;
@@ -80,13 +85,9 @@ public class ProductEntity extends AbstractEntity {
     @Column(name = "SkinIssues")
     String skinIssues;
 
-
-    /// ///////
-
-
     public void createProductVariant(ProductVariantEntity productVariantEntity) {
-            variants.add(productVariantEntity);
-            productVariantEntity.setProduct(this);
+        variants.add(productVariantEntity);
+        productVariantEntity.setProduct(this);
     }
 
 
@@ -94,11 +95,5 @@ public class ProductEntity extends AbstractEntity {
         variants.remove(productVariantEntity);
         productVariantEntity.setProduct(null);
     }
-
-//    FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID) ON DELETE SET NULL,
-//    FOREIGN KEY (DiscountID) REFERENCES Discount(DiscountID) ON DELETE SET NULL,
-//    FOREIGN KEY (ProductDetailID) REFERENCES ProductDetails(ProductDetailID) ON DELETE SET NULL
-//);
-
 
 }

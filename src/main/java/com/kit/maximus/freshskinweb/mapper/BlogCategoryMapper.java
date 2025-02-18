@@ -9,6 +9,9 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface BlogCategoryMapper {
     BlogCategory  toBlogCategory(BlogCategoryCreationRequest request);
+
     BlogCategoryResponse toBlogCategoryResponse(BlogCategory request);
+
+    @Mapping(target = "blog", ignore = true)
     void updateBlogCategory(@MappingTarget BlogCategory blogCategory, BlogCategoryUpdateRequest productRequestDTO);
 }
