@@ -5,7 +5,9 @@ import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.*;
 
-public class OrderItemResponse {
+import java.io.Serializable;
+
+public class OrderItemResponse implements Serializable {
     Long orderItemId;
 
     OrderEntity order;

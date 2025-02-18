@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.dto.request.user;
 
+import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -10,6 +11,7 @@ import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
@@ -28,6 +30,7 @@ public class CreateUserRequest implements Serializable {
     String lastName;
     String email;
     String phone;
+    List<OrderEntity> orders;
     String avatar;
     String token;
     String address;

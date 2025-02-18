@@ -3,6 +3,7 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
+import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -19,9 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -46,6 +45,8 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         }
         UserEntity userEntity = userMapper.toUserEntity(request);
         encodePassword(userEntity);
+//        List<OrderEntity> orders = Optional.ofNullable(request.getOrders()).orElse(new ArrayList<>());
+        request.getOrders().forEach(userEntity::createOrder);
         return userMapper.toUserResponseDTO(userRepository.save(userEntity));
     }
 
@@ -173,6 +174,32 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
 
     private UserEntity getUserEntityById(Long id) {
         return userRepository.findById(id).orElse(null);
+    }
+
+    //    public boolean deleteProductVariants(Long id, ProductVariantEntity productVariantEntities) {
+//        ProductEntity productEntity = getProductEntityById(id);
+//
+//        for (ProductVariantEntity request : productEntity.getVariants()) {
+//            if (request.getId().equals(productVariantEntities.getId())) {
+//                productEntity.removeProductVariant(productVariantEntities);
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
+    public Boolean deleteOrder(Long id, OrderEntity orderEntity) {
+        UserEntity user = getUserEntityById(id);
+
+        for (OrderEntity order : user.getOrders()) {
+            if(order.getOrderId().equals(orderEntity.getOrderId())){
+                user.removeOrder(order);
+                return true;
+            }
+        }
+
+        return false;
+
     }
 
 
