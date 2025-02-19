@@ -34,8 +34,12 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Bl
 //            throw new AppException(ErrorCode.BLOG_CATEGORY_NAME_EXISTED);
 //        }
         BlogCategoryEntity blogCategoryEntity = blogCategoryMapper.toBlogCategory(request);
-        request.getBlog().forEach(blogCategoryEntity::createBlog);
-
+        List<BlogEntity> blogEntities = request.getBlog();
+        if(blogEntities == null){
+            blogCategoryEntity.setBlog(null);
+        } else {
+            request.getBlog().forEach(blogCategoryEntity::createBlog);
+        }
         return blogCategoryMapper.toBlogCategoryResponse(blogCategoryRepository.save(blogCategoryEntity));
     }
 

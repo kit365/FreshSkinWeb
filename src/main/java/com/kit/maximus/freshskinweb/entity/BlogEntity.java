@@ -1,9 +1,12 @@
 package com.kit.maximus.freshskinweb.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Setter
 @Getter
@@ -34,7 +37,9 @@ public class BlogEntity extends AbstractEntity {
     @Column(name = "Featured")
     boolean featured;
 
-    @ManyToOne( fetch = FetchType.LAZY )
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "BlogCategoryId")
     BlogCategoryEntity blogCategory;
 

@@ -12,6 +12,7 @@ public interface BlogCategoryMapper {
     @Mapping(target = "blog", ignore = true)
     BlogCategoryEntity toBlogCategory(BlogCategoryCreationRequest request);
 
+    @Mapping(target = "blog", source = "blog")
     BlogCategoryResponse toBlogCategoryResponse(BlogCategoryEntity request);
 
     @Mapping(target = "blog", ignore = true)

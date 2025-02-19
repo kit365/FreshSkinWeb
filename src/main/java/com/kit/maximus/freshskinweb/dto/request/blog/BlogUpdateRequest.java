@@ -15,9 +15,10 @@ import java.io.Serializable;
 @Builder
 public class BlogUpdateRequest implements Serializable {
     String title;
-    BlogCategoryEntity blogCategoryEntity;
+
     String content;
     String thumbnail;
     int position;
     boolean featured;
+    Long categoryID;
 }

@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BlogCategoryRepository extends JpaRepository<BlogCategoryEntity, Long> {
     boolean existsByblogCategoryName (String blogCategoryName);
+
+
 }

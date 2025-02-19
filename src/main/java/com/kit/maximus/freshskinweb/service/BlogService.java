@@ -1,10 +1,12 @@
 package com.kit.maximus.freshskinweb.service;
 
+
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogCreationRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
+
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.BlogMapper;
@@ -28,11 +30,17 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
     BlogRepository blogRepository;
     BlogMapper blogMapper;
+    BlogCategoryRepository blogCategoryRepository;
 
     @Override
     public BlogResponse add(BlogCreationRequest request) {
+        System.out.println(request.getCategoryID());
         BlogEntity blogEntity = blogMapper.toBlogEntity(request);
-        blogEntity.setBlogCategory(request.getBlogCategoryEntity());
+      BlogCategoryEntity blogCategoryEntity = blogCategoryRepository.findById(request.getCategoryID()).orElseThrow(() -> new AppException(ErrorCode.BLOG_NOT_FOUND));
+        if(blogCategoryEntity != null) {
+            blogEntity.setBlogCategory(blogCategoryEntity);
+        }
+
         return blogMapper.toBlogResponse(blogRepository.save(blogEntity));
     }
 
@@ -42,15 +50,18 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         if(blogEntity == null){
             throw new AppException(ErrorCode.BLOG_NOT_FOUND);
         }
-        blogMapper.updateBlogEntity(blogEntity, request);
-        if(request.getBlogCategoryEntity() != null){
-            blogEntity.setBlogCategory(request.getBlogCategoryEntity());
+        BlogCategoryEntity blogCategoryEntity = blogCategoryRepository.findById(request.getCategoryID()).orElseThrow(() -> new AppException(ErrorCode.BLOG_NOT_FOUND));
+        if(blogCategoryEntity != null){
+            blogEntity.setBlogCategory(blogCategoryEntity);
         }
+        blogMapper.updateBlogEntity(blogEntity, request);
+
         return blogMapper.toBlogResponse(blogRepository.save(blogEntity));
     }
 
     @Override
     public boolean update(List<Long> id, String status) {
+
         return false;
     }
 
@@ -117,4 +128,5 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     private BlogEntity getBlogEntityById(Long id) {
         return blogRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.BLOG_NOT_FOUND));
     }
+
 }
