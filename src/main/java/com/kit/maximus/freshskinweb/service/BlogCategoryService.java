@@ -2,7 +2,10 @@ package com.kit.maximus.freshskinweb.service;
 
 import com.kit.maximus.freshskinweb.dto.request.blogCategory.BlogCategoryCreationRequest;
 import com.kit.maximus.freshskinweb.dto.request.blogCategory.BlogCategoryUpdateRequest;
+import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
+import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
+import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.BlogCategory;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -38,6 +41,8 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Bl
         return blogCategoryMapper.toBlogCategoryResponse(blogCategoryRepository.save(blogCategory));
     }
 
+
+
     @Override
     public BlogCategoryResponse update(Long aLong, BlogCategoryUpdateRequest request) {
         return null;
@@ -46,6 +51,11 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Bl
     @Override
     public boolean update(List<Long> id, String status) {
         return false;
+    }
+
+    @Override
+    public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
+        return null;
     }
 
     @Override
@@ -86,5 +96,10 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Bl
     @Override
     public Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         return Map.of();
+    }
+
+    @Override
+    public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
+        return null;
     }
 }

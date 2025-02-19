@@ -1,8 +1,11 @@
 package com.kit.maximus.freshskinweb.service;
 
+import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.role.CreateRoleRequest;
 import com.kit.maximus.freshskinweb.dto.request.role.UpdateRoleRequest;
+import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.RoleResponseDTO;
+import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.RoleEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -36,6 +39,7 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
         return roleMapper.toRoleResponseDTO(roleRepository.save(roleEntity));
     }
 
+
     @Override
     public RoleResponseDTO update(Long id, UpdateRoleRequest request) {
         RoleEntity roleEntity = getRoleEntityById(id);
@@ -52,6 +56,12 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
     public boolean update(List<Long> id, String status) {
         return false;
     }
+
+    @Override
+    public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
+        return null;
+    }
+
 
     @Override
     public boolean delete(Long id) {
@@ -110,6 +120,11 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
     @Override
     public Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         return Map.of();
+    }
+
+    @Override
+    public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
+        return null;
     }
 
     private RoleEntity getRoleEntityById(Long id) {

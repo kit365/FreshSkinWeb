@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.service;
 
+import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
@@ -7,10 +8,13 @@ import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
+import com.kit.maximus.freshskinweb.mapper.OrderMapper;
 import com.kit.maximus.freshskinweb.mapper.UserMapper;
+import com.kit.maximus.freshskinweb.repository.OrderRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.utils.Status;
 
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,14 +34,17 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService implements BaseService<UserResponseDTO, CreateUserRequest, UpdateUserRequest, Long> {
 
-   UserRepository userRepository;
+    UserRepository userRepository;
 
     UserMapper userMapper;
+
+    OrderMapper orderMapper;
+    private final OrderRepository orderRepository;
 
 
     @Override
     public UserResponseDTO add(CreateUserRequest request) {
-        if(userRepository.existsByUsername(request.getUsername())){
+        if (userRepository.existsByUsername(request.getUsername())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -45,20 +52,20 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         }
         UserEntity userEntity = userMapper.toUserEntity(request);
         encodePassword(userEntity);
-//        List<OrderEntity> orders = Optional.ofNullable(request.getOrders()).orElse(new ArrayList<>());
-        request.getOrders().forEach(userEntity::createOrder);
         return userMapper.toUserResponseDTO(userRepository.save(userEntity));
     }
+
+
 
 
     @Override
     public boolean delete(Long userId) {
         UserEntity userEntity = getUserEntityById(userId);
-        if(userEntity == null){
+        if (userEntity == null) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
-        if(userEntity != null){
-            log.info("Delete user id:{}",userId);
+        if (userEntity != null) {
+            log.info("Delete user id:{}", userId);
             userRepository.delete(userEntity);
             return true;
         }
@@ -151,6 +158,23 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         return false;
     }
 
+    @Override
+    public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
+        return null;
+    }
+
+    @Override
+    public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        OrderEntity order = orderMapper.toOrderEntity(request, user);
+        user.createOrder(order); // Gọi phương thức thêm đơn hàng vào danh sách
+
+        userRepository.save(user); // Lưu lại user với danh sách đơn hàng đã cập nhật
+        return userMapper.toUserResponseDTO(user);
+    }
+
 
     private void encodePassword(UserEntity user) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
@@ -173,7 +197,7 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
     }
 
     private UserEntity getUserEntityById(Long id) {
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
     //    public boolean deleteProductVariants(Long id, ProductVariantEntity productVariantEntities) {
@@ -188,18 +212,23 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
 //        return false;
 //    }
 
-    public Boolean deleteOrder(Long id, OrderEntity orderEntity) {
-        UserEntity user = getUserEntityById(id);
+    @Transactional
+    public Boolean deleteOrder(Long userId, Long orderId) {
+        UserEntity user = getUserEntityById(userId);
 
-        for (OrderEntity order : user.getOrders()) {
-            if(order.getOrderId().equals(orderEntity.getOrderId())){
-                user.removeOrder(order);
+
+        Iterator<OrderEntity> iterator = user.getOrders().iterator();
+        while (iterator.hasNext()) {
+            OrderEntity order = iterator.next();
+            if (order.getOrderId().equals(orderId)) {
+//                iterator.remove(); // Xóa khỏi danh sách
+                order.setDeleted(true);
+//                orderRepository.deleteById(orderId); // Xóa trong database
                 return true;
             }
         }
 
-        return false;
-
+        return false; // Không tìm thấy đơn hàng để xóa
     }
 
 

@@ -1,8 +1,11 @@
 package com.kit.maximus.freshskinweb.service;
 
+import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.CreateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.UpdateProductCategoryRequest;
+import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
+import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.mapper.ProductCategoryMapper;
@@ -43,6 +46,8 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
     }
 
+
+
     @Override
     public ProductCategoryResponse update(Long aLong, UpdateProductCategoryRequest request) {
         return null;
@@ -51,6 +56,11 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     @Override
     public boolean update(List<Long> id, String status) {
         return false;
+    }
+
+    @Override
+    public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
+        return null;
     }
 
     @Override
@@ -91,6 +101,11 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     @Override
     public Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         return Map.of();
+    }
+
+    @Override
+    public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
+        return null;
     }
 
 

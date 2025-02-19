@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.controller;
 
+import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
@@ -30,6 +31,12 @@ public class UserController {
     public ResponseAPI<UserResponseDTO> addUser(@Valid @RequestBody CreateUserRequest requestDTO) {
         String message = "Create user successfully";
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(userService.add(requestDTO)).build();
+    }
+
+    @PostMapping("addO/{id}")
+    public ResponseAPI<UserResponseDTO> addOrder(@PathVariable("id") Long id, @RequestBody CreateOrderRequest requestDTO) {
+        String message = "Create user successfully";
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(userService.addOrder(id, requestDTO)).build();
     }
 
     @GetMapping("show")
@@ -72,10 +79,10 @@ public class UserController {
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
-    @DeleteMapping("/deleteO/{id}")
-    public ResponseAPI<UserResponseDTO> deleteOrder(@PathVariable("id") Long id, OrderEntity order){
+    @DeleteMapping("/deleteO/{useId}/{orderId}")
+    public ResponseAPI<UserResponseDTO> deleteOrder(@PathVariable Long useId, @PathVariable Long orderId){
         String message = "Delete order successfully";
-        userService.deleteOrder(id, order);
+        userService.deleteOrder(useId, orderId);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 }

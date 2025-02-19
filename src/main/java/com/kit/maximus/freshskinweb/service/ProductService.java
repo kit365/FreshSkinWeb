@@ -1,9 +1,12 @@
 package com.kit.maximus.freshskinweb.service;
 
 
+import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
+import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
+import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
@@ -60,6 +63,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         return productMapper.productToProductResponseDTO(productRepository.save(productEntity));
     }
+
+
 
 
     public boolean checkDuplicateVolume(List<ProductVariantEntity> entityList, Long productId) {
@@ -136,6 +141,11 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                     productRepository.save(productEntity);
                 });
         return true;
+    }
+
+    @Override
+    public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
+        return null;
     }
 
 
@@ -334,6 +344,11 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         map.put("totalPages", list.getTotalPages());
         map.put("pageSize", list.getSize());
         return map;
+    }
+
+    @Override
+    public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
+        return null;
     }
 
 
