@@ -1,12 +1,9 @@
 package com.kit.maximus.freshskinweb.service;
 
 
-import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
-import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
-import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductBrandEntity;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
@@ -48,10 +45,9 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     ProductBrandRepository productBrandRepository;
 
     @Override
-    public ProductResponseDTO add(CreateProductRequest request) {
+    public boolean add(CreateProductRequest request) {
         ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElse(null);
         ProductBrandEntity productBrandEntity = productBrandRepository.findById(request.getBrandId()).orElse(null);
-        ProductBrandEntity r = productBrandRepository.findById(request.getBrandId()).orElse(null);
         ProductEntity productEntity = productMapper.productToProductEntity(request);
 
         if (productCategoryEntity != null) {
@@ -71,7 +67,9 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         request.getVariants().forEach(productEntity::createProductVariant);
 
-        return productMapper.productToProductResponseDTO(productRepository.save(productEntity));
+        productRepository.save(productEntity);
+
+        return true;
     }
 
 
@@ -127,29 +125,23 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     //thay doi thanh String de quan lý message
     @Override
-    public boolean update(List<Long> id, String status) {
+    public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
         List<ProductEntity> productEntities = productRepository.findAllById(id);
         if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
             productEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
             productRepository.saveAll(productEntities);
-//            return "Cập nhật trạng thái sản phẩm thành công";
+            return "Cập nhật trạng thái sản phẩm thành công";
         } else if (statusEnum == Status.SOFT_DELETED) {
             productEntities.forEach(productEntity -> productEntity.setDeleted(true));
             productRepository.saveAll(productEntities);
-//            return "Xóa mềm thành công";
+            return "Xóa mềm thành công";
         } else if (statusEnum == Status.RESTORED) {
             productEntities.forEach(productEntity -> productEntity.setDeleted(false));
             productRepository.saveAll(productEntities);
-//            return "Phục hồi thành công";
+            return "Phục hồi thành công";
         }
-//        return "Cập nhật thất bại";
-        return true;
-    }
-
-    @Override
-    public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
-        return null;
+        return "Cập nhật thất bại";
     }
 
 
@@ -226,6 +218,11 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         productRepository.save(productEntity);
 
         return true;
+    }
+
+    @Override
+    public ProductResponseDTO showDetail(Long id) {
+      return productMapper.productToProductResponseDTO(getProductEntityById(id));
     }
 
 
@@ -319,58 +316,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return map;
     }
 
-    @Override
-    public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
-        return null;
-    }
-
-    //-------------------------------------------------------------------------------------------------------------
-    /*
- Phục hồi: nhiều sản phẩm
- - Khôi phục trạng thái sản phẩm(ACTIVE) và thay đổi DELETE(False)
- input: List<long> id
- output: boolean
-*/
-    @Override
-    public boolean restore(List<Long> id) {
-//        List<ProductEntity> productEntities = productRepository.findAllByIdInAndStatus(id, Status.ACTIVE);
-//
-//        productEntities.forEach(productEntity -> {
-//            productEntity.setDeleted(false);
-//            productRepository.save(productEntity);
-//        });
-        return true;
-    }
-
-
-    //    //thay doi status
-//    @Override
-//    public boolean update(List<Long> id, String status) {
-//
-//        Status statusEnum = getStatus(status);
-//        productRepository.findAllById(id)
-//                .forEach(productEntity -> {
-//                    productEntity.setStatus(statusEnum);
-//                    productRepository.save(productEntity);
-//                });
-//        return true;
-//    }
-
-
-    /*
- Xóa(mềm) nhiều sản phẩm
- input: List<long> id
- output: boolean
-*/
-    @Override
-    public boolean deleteTemporarily(List<Long> id) {
-//        productRepository.findAllByIdInAndStatus(id, Status.ACTIVE)
-//                .forEach(productEntity -> {
-//                    productEntity.setDeleted(true);
-//                    productRepository.save(productEntity);
-//                });
-        return true;
-    }
 
     //-------------------------------------------------------------------------------------------------------------
     //tra ve ProductEntity, Neu Id null -> nem loi

@@ -3,8 +3,10 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
+import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -19,6 +21,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,11 +45,12 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
     UserMapper userMapper;
 
     OrderMapper orderMapper;
-    private final OrderRepository orderRepository;
+
+    OrderRepository orderRepository;
 
 
     @Override
-    public UserResponseDTO add(CreateUserRequest request) {
+    public boolean add(CreateUserRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
@@ -52,32 +59,33 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         }
         UserEntity userEntity = userMapper.toUserEntity(request);
         encodePassword(userEntity);
-        return userMapper.toUserResponseDTO(userRepository.save(userEntity));
+        userRepository.save(userEntity);
+        return true;
     }
-
-
 
 
     @Override
     public boolean delete(Long userId) {
         UserEntity userEntity = getUserEntityById(userId);
+
         if (userEntity == null) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
-        if (userEntity != null) {
-            log.info("Delete user id:{}", userId);
-            userRepository.delete(userEntity);
-            return true;
-        }
-        return false;
+
+        log.info("Delete user id:{}", userId);
+        userRepository.delete(userEntity);
+        return true;
+
+
     }
 
     @Override
     public boolean delete(List<Long> id) {
-        return false;
+        userRepository.deleteAllById(id);
+        return true;
     }
 
-    //Method: Xóa tạm thời => Status thành false, deleted thành true
+    //Method: Xóa tạm thời => deleted thành true
     @Override
     public boolean deleteTemporarily(Long id) {
         UserEntity userEntity = getUserEntityById(id);
@@ -89,40 +97,69 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
 
         log.info("Delete user id:{}", id);
         userEntity.setDeleted(true);
-        userEntity.setStatus(Status.INACTIVE);
         userRepository.save(userEntity);
         return true;
     }
 
-    //Method: Xóa tạm thời nhiều users => Status thành false, deleted thành true
-    @Override
-    public boolean deleteTemporarily(List<Long> request) {
-        List<UserEntity> users = request.stream() //chuyển List<> thành Stream<>
-                .map(this::getUserEntityById)     //lay user tu ID
-                .filter(Objects::nonNull)        //loai bo user khong tim thay
-                .peek(user -> {        //thuc hiện thao tác(set)
-                    log.info("Delete user id:{}", user.getId());
-                    user.setDeleted(true);
-                    user.setStatus(Status.INACTIVE);
-                }).toList(); //chuyển thành List
-        userRepository.saveAll(users);
-
-        return true;
-    }
 
     @Override
     public boolean restore(Long id) {
+        UserEntity userEntity = getUserEntityById(id);
+        userEntity.setDeleted(false);
+        userRepository.save(userEntity);
         return false;
     }
 
     @Override
-    public boolean restore(List<Long> id) {
-        return false;
+    public UserResponseDTO showDetail(Long aLong) {
+        return null;
     }
 
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
-        return Map.of();
+        Map<String, Object> map = new HashMap<>();
+
+        Sort.Direction direction = getSortDirection(sortDirection);
+        Sort sort = Sort.by(direction, sortKey);
+        int p = (page > 0) ? page - 1 : 0;
+        Pageable pageable = PageRequest.of(p, size, sort);
+
+        Page<UserEntity> userEntities;
+
+        // Tìm kiếm theo keyword trước
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            if (status.equalsIgnoreCase("ALL")) {
+                // Tìm kiếm theo tên User(LastName + FullName), không lọc theo status
+
+//                userEntities = userRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, false, pageable);
+            } else {
+                // Tìm kiếm theo tên tên User(LastName + FullName) và status
+                Status statusEnum = getStatus(status);
+//                userEntities = userRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, false);
+            }
+        } else {
+            // Nếu không có keyword, chỉ lọc theo status
+            if (status == null || status.equalsIgnoreCase("ALL")) {
+                userEntities = userRepository.findAllByDeleted(false, pageable);
+            } else {
+                Status statusEnum = getStatus(status);
+                userEntities = userRepository.findAllByStatusAndDeleted(statusEnum, false, pageable);
+            }
+        }
+
+//        Page<UserResponseDTO> list = userEntities.map(userMapper::toUserResponseDTO);
+
+
+//        if (!list.hasContent()) {
+//            return null;
+//        }
+
+//        map.put("products", list.getContent());
+//        map.put("currentPage", list.getNumber() + 1);
+//        map.put("totalItems", list.getTotalElements());
+//        map.put("totalPages", list.getTotalPages());
+//        map.put("pageSize", list.getSize());
+        return map;
     }
 
     @Override
@@ -154,16 +191,32 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
     }
 
     @Override
-    public boolean update(List<Long> id, String status) {
-        return false;
+    public String update(List<Long> id, String status) {
+        Status statusEnum = getStatus(status);
+        List<UserEntity> userEntities = userRepository.findAllById(id);
+        if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
+            userEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
+            userRepository.saveAll(userEntities);
+            return "Cập nhật trạng thái USER thành công";
+        } else if (statusEnum == Status.SOFT_DELETED) {
+            userEntities.forEach(productEntity -> productEntity.setDeleted(true));
+            userRepository.saveAll(userEntities);
+            return "Xóa mềm USER thành công";
+        } else if (statusEnum == Status.RESTORED) {
+            userEntities.forEach(productEntity -> productEntity.setDeleted(false));
+            userRepository.saveAll(userEntities);
+            return "Phục hồi USER thành công";
+        }
+        return "Cập nhật USER thất bại";
+
     }
 
-    @Override
+
     public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
         return null;
     }
 
-    @Override
+
     public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -191,6 +244,16 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         return userMapper.toUserResponseDTO(userRepository.searchByKeyword(username));
     }
 
+    private Sort.Direction getSortDirection(String sortDirection) {
+
+        if (!sortDirection.equalsIgnoreCase("asc") && !sortDirection.equalsIgnoreCase("desc")) {
+            log.info("SortDirection {} is invalid", sortDirection);
+            throw new AppException(ErrorCode.SORT_DIRECTION_INVALID);
+        }
+
+        return sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+    }
+
     public UserEntity getUser(String username) {
         var user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.toUserResponse(user);
@@ -198,6 +261,15 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
 
     private UserEntity getUserEntityById(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private Status getStatus(String status) {
+        try {
+            return Status.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid status provided: '{}'", status);
+            throw new AppException(ErrorCode.STATUS_INVALID);
+        }
     }
 
     //    public boolean deleteProductVariants(Long id, ProductVariantEntity productVariantEntities) {

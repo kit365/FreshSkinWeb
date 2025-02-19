@@ -1,11 +1,8 @@
 package com.kit.maximus.freshskinweb.service;
 
-import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.role.CreateRoleRequest;
 import com.kit.maximus.freshskinweb.dto.request.role.UpdateRoleRequest;
-import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.RoleResponseDTO;
-import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.RoleEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -31,12 +28,13 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
     RoleMapper roleMapper;
 
     @Override
-    public RoleResponseDTO add(CreateRoleRequest request) {
+    public boolean add(CreateRoleRequest request) {
         if(roleRepository.existsByRoleName(request.getRoleName())){
             throw new AppException(ErrorCode.USER_EXISTED);
         }
         RoleEntity roleEntity = roleMapper.toRoleEntity(request);
-        return roleMapper.toRoleResponseDTO(roleRepository.save(roleEntity));
+        roleRepository.save(roleEntity);
+        return true;
     }
 
 
@@ -53,15 +51,9 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
     }
 
     @Override
-    public boolean update(List<Long> id, String status) {
-        return false;
+    public String update(List<Long> id, String status) {
+        return "";
     }
-
-    @Override
-    public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
-        return null;
-    }
-
 
     @Override
     public boolean delete(Long id) {
@@ -97,10 +89,7 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
         return true;
     }
 
-    @Override
-    public boolean deleteTemporarily(List<Long> longs) {
-        return false;
-    }
+
 
     @Override
     public boolean restore(Long id) {
@@ -108,9 +97,10 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
     }
 
     @Override
-    public boolean restore(List<Long> id) {
-        return false;
+    public RoleResponseDTO showDetail(Long aLong) {
+        return null;
     }
+
 
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
@@ -122,10 +112,6 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
         return Map.of();
     }
 
-    @Override
-    public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
-        return null;
-    }
 
     private RoleEntity getRoleEntityById(Long id) {
         return roleRepository.findById(id).orElse(null);

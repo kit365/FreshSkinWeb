@@ -18,25 +18,24 @@ import java.util.Map;
 public interface BaseService<T, R, U, ID> {
 
     /** CRUD operations with request objects **/
-    T add(R request);
+    boolean add(R request);
     T update(ID id, U request);
-    boolean update(List<ID> id , String status);
+    String update(List<ID> id , String status);
 
-    UserResponseDTO addOrder(Long id, CreateUserRequest request);
+//    UserResponseDTO addOrder(Long id, CreateUserRequest request);
 
     /** Operations that require only ID **/
     boolean delete(ID id);
     boolean delete(List<ID> ids);
     boolean deleteTemporarily(ID id);
-    boolean deleteTemporarily(List<ID> ids);
     boolean restore(ID id);
-    boolean restore(List<ID> ids);
 
+    T showDetail(ID id);
 
     /** Fetching data **/
     Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection,String status, String keyword);
 
     Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection,String status, String keyword);
 
-    UserResponseDTO addOrder(Long id, CreateOrderRequest request);
+//    UserResponseDTO addOrder(Long id, CreateOrderRequest request);
 }

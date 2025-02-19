@@ -1,12 +1,8 @@
 package com.kit.maximus.freshskinweb.service;
 
-import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.CreateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.UpdateProductCategoryRequest;
-import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
-import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -41,7 +37,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     ProductCategoryMapper productCategoryMapper;
 
     @Override
-    public ProductCategoryResponse add(CreateProductCategoryRequest request) {
+    public boolean add(CreateProductCategoryRequest request) {
         log.info("Request JSON: {}", request);
 
         ProductCategoryEntity productCategoryEntity = productCategoryMapper.productCategoryToProductEntity(request);
@@ -53,7 +49,10 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         }
 
         productCategoryEntity.setSlug(getSlug(request.getTitle()));
-        return productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryRepository.save(productCategoryEntity));
+
+        productCategoryRepository.save(productCategoryEntity);
+
+        return true;
     }
 
     public List<ProductCategoryResponse> getAll() {
@@ -78,30 +77,25 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     }
 
     @Override
-    public boolean update(List<Long> id, String status) {
+    public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
         List<ProductCategoryEntity> productCategoryEntities = productCategoryRepository.findAllById(id);
         if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
             productCategoryEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
             productCategoryRepository.saveAll(productCategoryEntities);
-//            return "Cập nhật trạng thái danh mục sản phẩm thành công";
+            return "Cập nhật trạng thái danh mục sản phẩm thành công";
         } else if (statusEnum == Status.SOFT_DELETED) {
             productCategoryEntities.forEach(productEntity -> productEntity.setDeleted(true));
             productCategoryRepository.saveAll(productCategoryEntities);
-//            return "Xóa mềm danh mục sản phẩm thành công";
+            return "Xóa mềm danh mục sản phẩm thành công";
         } else if (statusEnum == Status.RESTORED) {
             productCategoryEntities.forEach(productEntity -> productEntity.setDeleted(false));
             productCategoryRepository.saveAll(productCategoryEntities);
-//            return "Phục hồi danh mục sản phẩm thành công";
+            return "Phục hồi danh mục sản phẩm thành công";
         }
-//        return "Cập nhật danh mục sản phẩm thất bại";
-        return true;
+        return "Cập nhật danh mục sản phẩm thất bại";
     }
 
-    @Override
-    public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
-        return null;
-    }
 
     @Override
     public boolean delete(Long id) {
@@ -132,21 +126,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return true;
     }
 
-    @Override
-    public boolean deleteTemporarily(List<Long> id) {
-//        productCategoryRepository.findAllById(id).forEach(productCategoryEntity -> {
-//            productCategoryEntity.setDeleted(true);
-//
-//            List<ProductEntity> products = productCategoryEntity.getProducts();
-//            for (ProductEntity productEntity : products) {
-//                productEntity.setStatus(Status.INACTIVE);
-//            }
-//
-//
-//            productCategoryRepository.save(productCategoryEntity);
-//        });
-        return true;
-    }
 
     @Override
     public boolean restore(Long id) {
@@ -162,19 +141,10 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     }
 
     @Override
-    public boolean restore(List<Long> id) {
-//        productCategoryRepository.findAllById(id).forEach(productCategoryEntity -> {
-//            productCategoryEntity.setDeleted(false);
-//
-//            List<ProductEntity> products = productCategoryEntity.getProducts();
-//            for (ProductEntity productEntity : products) {
-//                productEntity.setStatus(Status.ACTIVE);
-//            }
-//
-//            productCategoryRepository.save(productCategoryEntity);
-//        });
-        return true;
+    public ProductCategoryResponse showDetail(Long id) {
+        return productCategoryMapper.productCategoryToProductCategoryResponseDTO(getCategoryById(id));
     }
+
 
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
@@ -264,11 +234,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         map.put("totalPages", list.getTotalPages());
         map.put("pageSize", list.getSize());
         return map;
-    }
-
-    @Override
-    public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
-        return null;
     }
 
 

@@ -1,6 +1,5 @@
 package com.kit.maximus.freshskinweb.controller.product;
 
-import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
@@ -42,26 +41,18 @@ public class ProductControllerTrash {
 
     @PatchMapping("change-multi")
     public ResponseAPI<String> updateProduct(@RequestBody Map<String,Object>  productRequestDTO) {
-        if(!productRequestDTO.containsKey("id")) {
+        if (!productRequestDTO.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
             throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
         }
 
-        String message_succed = "Update Status Product successfull";
-        String message_failed = "Update Status Product failed";
 
-        List<Long> ids =  (List<Long>) productRequestDTO.get("id");
-        String status  =  productRequestDTO.get("status").toString();
+        List<Long> ids = (List<Long>) productRequestDTO.get("id");
+        String status = productRequestDTO.get("status").toString();
 
-        boolean result = productService.update(ids, status);
-        if (result) {
-            log.info("Product update successfully");
-            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
-        }
-        log.info("Product update failed");
-        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+        var result = productService.update(ids, status);
+        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
-
     @PatchMapping("edit/{id}")
     public ResponseAPI<ProductResponseDTO> updateProduct(@PathVariable("id") Long id, @RequestBody UpdateProductRequest productRequestDTO) {
         ProductResponseDTO result = productService.update(id, productRequestDTO);
@@ -134,5 +125,13 @@ public class ProductControllerTrash {
         log.info("Products delete failed");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
+
+    @GetMapping("{id}")
+    public ResponseAPI<ProductResponseDTO> getProduct(@PathVariable("id") Long id) {
+        ProductResponseDTO result = productService.showDetail(id);
+        return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).data(result).build();
+    }
+
+
 
 }

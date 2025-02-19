@@ -13,8 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @CrossOrigin(origins = "*")
 @Slf4j
 @RequestMapping("admin/role")
@@ -28,7 +26,8 @@ public class RoleController {
     @PostMapping("create")
     public ResponseAPI<RoleResponseDTO> addRole(@Valid @RequestBody CreateRoleRequest requestDTO) {
         String message = "Create role successfully";
-        return ResponseAPI.<RoleResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(roleService.add(requestDTO)).build();
+        var res = roleService.add(requestDTO);
+        return ResponseAPI.<RoleResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
 

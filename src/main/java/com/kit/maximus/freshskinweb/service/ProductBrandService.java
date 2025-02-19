@@ -1,11 +1,8 @@
 package com.kit.maximus.freshskinweb.service;
 
-import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.product_brand.CreateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.request.product_brand.UpdateProductBrandRequest;
-import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
-import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductBrandEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -40,7 +37,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
     ProductBrandMapper productBrandMapper;
 
     @Override
-    public ProductBrandResponse add(CreateProductBrandRequest request) {
+    public boolean add(CreateProductBrandRequest request) {
         log.info("Request JSON: {}", request);
 
         ProductBrandEntity productBrandEntity = productBrandMapper.productBrandToProductEntity(request);
@@ -51,7 +48,8 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         }
 
         productBrandEntity.setSlug(getSlug(request.getTitle()));
-        return productBrandMapper.productBrandToProductBrandResponseDTO(productBrandRepository.save(productBrandEntity));
+        productBrandRepository.save(productBrandEntity);
+        return true;
     }
 
     public List<ProductBrandResponse> getAll() {
@@ -59,29 +57,23 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
     }
 
     @Override
-    public boolean update(List<Long> id, String status) {
+    public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
         List<ProductBrandEntity> productBrandEntities = productBrandRepository.findAllById(id);
         if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
             productBrandEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
             productBrandRepository.saveAll(productBrandEntities);
-//            return "Cập nhật trạng thái thương hiệu sản phẩm thành công";
+            return "Cập nhật trạng thái thương hiệu sản phẩm thành công";
         } else if (statusEnum == Status.SOFT_DELETED) {
             productBrandEntities.forEach(productEntity -> productEntity.setDeleted(true));
             productBrandRepository.saveAll(productBrandEntities);
-//            return "Xóa mềm thương hiệu sản phẩm thành công";
+            return "Xóa mềm thương hiệu sản phẩm thành công";
         } else if (statusEnum == Status.RESTORED) {
             productBrandEntities.forEach(productEntity -> productEntity.setDeleted(false));
             productBrandRepository.saveAll(productBrandEntities);
-//            return "Phục hồi thương hiệu sản phẩm thành công";
+            return "Phục hồi thương hiệu sản phẩm thành công";
         }
-//        return "Cập nhật thương hiệu sản phẩm thất bại";
-        return true;
-    }
-
-    @Override
-    public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
-        return null;
+        return "Cập nhật thương hiệu sản phẩm thất bại";
     }
 
     @Override
@@ -141,6 +133,11 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         }
         productBrandRepository.save(brandEntity);
         return true;
+    }
+
+    @Override
+    public ProductBrandResponse showDetail(Long id) {
+        return productBrandMapper.productBrandToProductBrandResponseDTO(getBrandById(id));
     }
 
 
@@ -234,10 +231,6 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         return map;
     }
 
-    @Override
-    public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
-        return null;
-    }
 
     private String getSlug(String slug) {
         return Normalizer.normalize(slug, Normalizer.Form.NFD)
@@ -273,46 +266,5 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
     }
 
 
-    //--------------------------------------------------------------------------------------------------------------
-    //    @Override
-//    public boolean update(List<Long> id, String status) {
-//        Status statusEnum = getStatus(status);
-//
-//        productBrandRepository.findAllById(id).forEach(brandEntity -> {
-//            brandEntity.setStatus(statusEnum);
-//            productBrandRepository.save(brandEntity);
-//        });
-//
-//        return true;
-//    }
-    @Override
-    public boolean restore(List<Long> id) {
-//        productBrandRepository.findAllById(id).forEach(productBrand -> {
-//            productBrand.setDeleted(false);
-//
-//            List<ProductEntity> products = productBrand.getProducts();
-//            for (ProductEntity productEntity : products) {
-//                productEntity.setStatus(Status.ACTIVE);
-//            }
-//
-//            productBrandRepository.save(productBrand);
-//        });
-        return true;
-    }
-
-    @Override
-    public boolean deleteTemporarily(List<Long> id) {
-//        productBrandRepository.findAllById(id).forEach(brandEntity -> {
-//            brandEntity.setDeleted(true);
-//
-//            List<ProductEntity> products = brandEntity.getProducts();
-//            for (ProductEntity productEntity : products) {
-//                productEntity.setStatus(Status.INACTIVE);
-//            }
-//
-//            productBrandRepository.save(brandEntity);
-//        });
-        return true;
-    }
 }
 

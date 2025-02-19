@@ -1,10 +1,9 @@
 package com.kit.maximus.freshskinweb.controller.productcategory;
 
-import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.CreateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.UpdateProductCategoryRequest;
+import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -32,9 +31,9 @@ public class ProductCategoryController {
     @PostMapping("create")
     public ResponseAPI<ProductCategoryResponse> createProductCategory(@RequestBody CreateProductCategoryRequest request) {
         String message = "Create product_category successfull";
-        ProductCategoryResponse result = productCategoryService.add(request);
+        var result = productCategoryService.add(request);
         log.info("CREATE CATEGORY_PRODUCT REQUEST)");
-        return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+        return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
     @GetMapping()
@@ -78,19 +77,12 @@ public class ProductCategoryController {
             throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
         }
 
-        String message_succed = "Update Status Product_Category successfull";
-        String message_failed = "Update Status Product_Category failed";
-
         List<Long> ids = (List<Long>) productRequestDTO.get("id");
         String status = productRequestDTO.get("status").toString();
 
-        boolean result = productCategoryService.update(ids, status);
-        if (result) {
-            log.info("Product_Category update successfully");
-            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
-        }
-        log.info("Product_Category update failed");
-        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+        var result = productCategoryService.update(ids, status);
+
+        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
     @DeleteMapping("delete/{id}")
@@ -152,6 +144,12 @@ public class ProductCategoryController {
         }
         log.info("CategoryProduct delete failed");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+    }
+
+    @GetMapping("{id}")
+    public ResponseAPI<ProductCategoryResponse> getProductCategory(@PathVariable("id") Long id) {
+        ProductCategoryResponse result = productCategoryService.showDetail(id);
+        return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
 

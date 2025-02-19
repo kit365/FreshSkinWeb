@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class BlogCategoryCreationRequest implements Serializable {
+public class CreateBlogCategoryRequest implements Serializable {
     String blogCategoryName;
     String description;
     List<BlogEntity> blog;

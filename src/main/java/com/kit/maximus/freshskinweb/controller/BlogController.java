@@ -28,7 +28,7 @@ public class BlogController {
         String message = "Create blog successfully ";
         var result = blogService.add(request);
         log.info("CREATE BLOG REQUEST");
-        return ResponseAPI.<BlogResponse>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+        return ResponseAPI.<BlogResponse>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
     @PatchMapping("/edit/{id}")

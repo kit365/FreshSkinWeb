@@ -3,14 +3,10 @@ package com.kit.maximus.freshskinweb.service;
 
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogCreationRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
-import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
-import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
-import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
 
-import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.BlogMapper;
@@ -33,32 +29,32 @@ import java.util.Map;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 
-public class BlogService implements BaseService<BlogResponse, BlogCreationRequest, BlogUpdateRequest, Long>{
+public class BlogService implements BaseService<BlogResponse, BlogCreationRequest, BlogUpdateRequest, Long> {
 
     BlogRepository blogRepository;
     BlogMapper blogMapper;
     BlogCategoryRepository blogCategoryRepository;
 
     @Override
-    public BlogResponse add(BlogCreationRequest request) {
+    public boolean add(BlogCreationRequest request) {
         System.out.println(request.getCategoryID());
         BlogEntity blogEntity = blogMapper.toBlogEntity(request);
-      BlogCategoryEntity blogCategoryEntity = blogCategoryRepository.findById(request.getCategoryID()).orElseThrow(() -> new AppException(ErrorCode.BLOG_NOT_FOUND));
-        if(blogCategoryEntity != null) {
+        BlogCategoryEntity blogCategoryEntity = blogCategoryRepository.findById(request.getCategoryID()).orElseThrow(() -> new AppException(ErrorCode.BLOG_NOT_FOUND));
+        if (blogCategoryEntity != null) {
             blogEntity.setBlogCategory(blogCategoryEntity);
         }
-
-        return blogMapper.toBlogResponse(blogRepository.save(blogEntity));
+        blogRepository.save(blogEntity);
+        return true;
     }
 
     @Override
     public BlogResponse update(Long id, BlogUpdateRequest request) {
         BlogEntity blogEntity = getBlogEntityById(id);
-        if(blogEntity == null){
+        if (blogEntity == null) {
             throw new AppException(ErrorCode.BLOG_NOT_FOUND);
         }
         BlogCategoryEntity blogCategoryEntity = blogCategoryRepository.findById(request.getCategoryID()).orElseThrow(() -> new AppException(ErrorCode.BLOG_NOT_FOUND));
-        if(blogCategoryEntity != null){
+        if (blogCategoryEntity != null) {
             blogEntity.setBlogCategory(blogCategoryEntity);
         }
         blogMapper.updateBlogEntity(blogEntity, request);
@@ -69,33 +65,32 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     //Cập nhật trạng thái, xóa mềm, khôi phục cho All ID được chọn
     //Dùng khi user tích vào nhiều ô phẩn tử, sau đó chọn thao tác, ẩn, xóa mềm, khôi phục
     @Override
-    public boolean update(List<Long> id, String status) {
+    public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
         List<BlogEntity> blogEntities = blogRepository.findAllById(id);
 
         //CẬP NHẬT TRẠNG THÁI BLOG
-        if(statusEnum == Status.INACTIVE || statusEnum == Status.ACTIVE){
+        if (statusEnum == Status.INACTIVE || statusEnum == Status.ACTIVE) {
             blogEntities.forEach(blogEntity -> blogEntity.setStatus(statusEnum));
             blogRepository.saveAll(blogEntities);
+            return "Cập nhật trạng thái thành công";
 
             //CẬP NHẬT XÓA MỀM BLOG
-        } else if(statusEnum == Status.SOFT_DELETED){
+        } else if (statusEnum == Status.SOFT_DELETED) {
             blogEntities.forEach(blogEntity -> blogEntity.setDeleted(true));
 
             //CẬP NHẬT KHÔI PHỤC BLOG
             blogRepository.saveAll(blogEntities);
-        } else if(statusEnum == Status.RESTORED){
+            return "Xóa mềm thành công";
+        } else if (statusEnum == Status.RESTORED) {
             blogEntities.forEach(blogEntity -> blogEntity.setDeleted(false));
 
             blogRepository.saveAll(blogEntities);
+            return "Phục hồi thành công";
         }
-        return true;
+        return "Cập nhật hất bại";
     }
 
-    @Override
-    public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
-        return null;
-    }
 
     //XÓA CỨNG 1 BLOG
     @Override
@@ -119,38 +114,35 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
     //XÓA MỀM 1 BLOG
     @Override
-    public boolean deleteTemporarily(Long aLong) {
-//        BlogEntity blogEntity = getBlogEntityById(aLong);
-//        if(blogEntity == null){
-//            throw new AppException(ErrorCode.BLOG_NOT_FOUND);
-//        }
-//        log.info("Delete temporarily : {}", aLong);
-//        blogEntity.setDeleted(true);
-//        blogRepository.save(blogEntity);
+    public boolean deleteTemporarily(Long id) {
+        BlogEntity blogEntity = getBlogEntityById(id);
+        if (blogEntity == null) {
+            throw new AppException(ErrorCode.BLOG_NOT_FOUND);
+        }
+        log.info("Delete temporarily : {}", id);
+        blogEntity.setDeleted(true);
+        blogRepository.save(blogEntity);
+        return true;
+    }
+
+
+    @Override
+    public boolean restore(Long id) {
+        BlogEntity blogEntity = getBlogEntityById(id);
+        if (blogEntity == null) {
+            throw new AppException(ErrorCode.BLOG_NOT_FOUND);
+        }
+        log.info("Delete temporarily : {}", id);
+        blogEntity.setDeleted(false);
+        blogRepository.save(blogEntity);
         return true;
     }
 
     @Override
-    public boolean deleteTemporarily(List<Long> longs) {
-        return false;
+    public BlogResponse showDetail(Long aLong) {
+        return null;
     }
 
-    @Override
-    public boolean restore(Long aLong) {
-//        BlogEntity blogEntity = getBlogEntityById(aLong);
-//        if(blogEntity == null){
-//            throw new AppException(ErrorCode.BLOG_NOT_FOUND);
-//        }
-//        log.info("Delete temporarily : {}", aLong);
-//        blogEntity.setDeleted(false);
-//        blogRepository.save(blogEntity);
-        return true;
-    }
-
-    @Override
-    public boolean restore(List<Long> longs) {
-        return false;
-    }
 
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
@@ -162,10 +154,6 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         return Map.of();
     }
 
-    @Override
-    public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
-        return null;
-    }
 
     private String getSlug(String slug) {
         return Normalizer.normalize(slug, Normalizer.Form.NFD)

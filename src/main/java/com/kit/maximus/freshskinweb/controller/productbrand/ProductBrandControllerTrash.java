@@ -29,9 +29,9 @@ public class ProductBrandControllerTrash {
     @PostMapping("create")
     public ResponseAPI<ProductBrandResponse> createProductBrand(@RequestBody CreateProductBrandRequest request) {
         String message = "Create product_brand successfull";
-        ProductBrandResponse result = productBrandService.add(request);
+        var result = productBrandService.add(request);
         log.info("CREATE BRAND_PRODUCT REQUEST)");
-        return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+        return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
     @GetMapping()
@@ -56,21 +56,14 @@ public class ProductBrandControllerTrash {
             throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
         }
 
-        String message_succed = "Update Status Product_brand successfull";
-        String message_failed = "Update Status Product_brand failed";
-
         List<Long> ids = (List<Long>) productRequestDTO.get("id");
         String status = productRequestDTO.get("status").toString();
 
-        boolean result = productBrandService.update(ids, status);
-        if (result) {
-            log.info("Product_brand update successfully");
-            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
-        }
-        log.info("Product_brand update failed");
-        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
-    }
+        var result = productBrandService.update(ids, status);
 
+        log.info("Product_brand update failed");
+        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
+    }
 
     @GetMapping("show")
     public ResponseAPI<List<ProductBrandResponse>> getListProductBrand() {
@@ -150,6 +143,12 @@ public class ProductBrandControllerTrash {
         }
         log.info("BrandProduct delete failed");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+    }
+
+    @GetMapping("{id}")
+    public ResponseAPI<ProductBrandResponse> getProductBrand(@PathVariable("id") Long id) {
+        ProductBrandResponse result = productBrandService.showDetail(id);
+        return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
 }

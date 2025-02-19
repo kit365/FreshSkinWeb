@@ -32,7 +32,7 @@ public class ProductController {
         String message = "Create Product successfull";
         var result = productService.add(productRequestDTO);
         log.info("CREATE PRODUCT REQUEST)");
-        return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+        return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
     @GetMapping()
@@ -57,19 +57,11 @@ public class ProductController {
             throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
         }
 
-        String message_succed = "Update Status Product successfull";
-        String message_failed = "Update Status Product failed";
-
         List<Long> ids =  (List<Long>) productRequestDTO.get("id");
         String status  =  productRequestDTO.get("status").toString();
 
-        boolean result = productService.update(ids, status);
-        if (result) {
-            log.info("Product update successfully");
-            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
-        }
-        log.info("Product update failed");
-        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+        var result = productService.update(ids, status);
+            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
     @PatchMapping("edit/{id}")
@@ -147,4 +139,9 @@ public class ProductController {
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
+    @GetMapping("{id}")
+    public ResponseAPI<ProductResponseDTO> getProduct(@PathVariable("id") Long id) {
+        ProductResponseDTO result = productService.showDetail(id);
+        return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).data(result).build();
+    }
 }

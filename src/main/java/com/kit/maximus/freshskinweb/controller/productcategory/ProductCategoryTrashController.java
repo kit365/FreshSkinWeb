@@ -30,21 +30,21 @@ public class ProductCategoryTrashController {
     @PostMapping("create")
     public ResponseAPI<ProductCategoryResponse> createProductCategory(@RequestBody CreateProductCategoryRequest request) {
         String message = "Create product_category successfull";
-        ProductCategoryResponse result = productCategoryService.add(request);
+        var result = productCategoryService.add(request);
         log.info("CREATE CATEGORY_PRODUCT REQUEST)");
-        return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+        return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
     @GetMapping()
     public ResponseAPI<Map<String, Object>> getAllProductCategory(@RequestParam(defaultValue = "1") int page,
-                                                          @RequestParam(defaultValue = "4") int size,
-                                                          @RequestParam(defaultValue = "position") String sortKey,
-                                                          @RequestParam(defaultValue = "desc") String sortValue,
-                                                          @RequestParam(defaultValue = "ALL") String status,
-                                                          @RequestParam(name = "keyword", required = false) String keyword) {
+                                                                  @RequestParam(defaultValue = "4") int size,
+                                                                  @RequestParam(defaultValue = "position") String sortKey,
+                                                                  @RequestParam(defaultValue = "desc") String sortValue,
+                                                                  @RequestParam(defaultValue = "ALL") String status,
+                                                                  @RequestParam(name = "keyword", required = false) String keyword) {
         String message = "Tim thay List ProductCategory";
         log.info("GET ALL PRODUCTS CATEGORY");
-        Map<String, Object> result = productCategoryService.getTrash(page, size,sortKey, sortValue,status,keyword);
+        Map<String, Object> result = productCategoryService.getTrash(page, size, sortKey, sortValue, status, keyword);
 
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
@@ -69,26 +69,19 @@ public class ProductCategoryTrashController {
     }
 
     @PatchMapping("change-multi")
-    public ResponseAPI<String> updateProductCategory(@RequestBody Map<String,Object>  productRequestDTO) {
+    public ResponseAPI<String> updateProductCategory(@RequestBody Map<String, Object> productRequestDTO) {
 
-        if(!productRequestDTO.containsKey("id")) {
+        if (!productRequestDTO.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
             throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
         }
 
-        String message_succed = "Update Status Product_Category successfull";
-        String message_failed = "Update Status Product_Category failed";
+        List<Long> ids = (List<Long>) productRequestDTO.get("id");
+        String status = productRequestDTO.get("status").toString();
 
-        List<Long> ids =  (List<Long>) productRequestDTO.get("id");
-        String status  =  productRequestDTO.get("status").toString();
+        var result = productCategoryService.update(ids, status);
 
-        boolean result = productCategoryService.update(ids, status);
-        if (result) {
-            log.info("Product_Category update successfully");
-            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
-        }
-        log.info("Product_Category update failed");
-        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
     @DeleteMapping("delete/{id}")
@@ -132,9 +125,9 @@ public class ProductCategoryTrashController {
     }
 
     @DeleteMapping("delete")
-    public ResponseAPI<String> deleteProductCategory(@RequestBody Map<String,Object> productRequestDTO) {
+    public ResponseAPI<String> deleteProductCategory(@RequestBody Map<String, Object> productRequestDTO) {
 
-        if(!productRequestDTO.containsKey("id")) {
+        if (!productRequestDTO.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
             throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
         }
@@ -150,6 +143,12 @@ public class ProductCategoryTrashController {
         }
         log.info("CategoryProduct delete failed");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+    }
+
+    @GetMapping("{id}")
+    public ResponseAPI<ProductCategoryResponse> getProductCategory(@PathVariable("id") Long id) {
+        ProductCategoryResponse result = productCategoryService.showDetail(id);
+        return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
 }
