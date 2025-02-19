@@ -10,7 +10,7 @@ public enum ErrorCode {
     //util
     KEY_INVALID(400, "Key Invalid"),
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized Exception"),
-    STATUS_INVALID(400, "Status Invalid[Active || Inactive]"),
+    STATUS_INVALID(400, "Status Invalid[Active || Inactive || SOFT_DELETED || RESTORED]"),
 
     //User
     USER_NOT_FOUND(404, "User Not Found"),

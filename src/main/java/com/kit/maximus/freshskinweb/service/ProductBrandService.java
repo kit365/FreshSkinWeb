@@ -56,6 +56,27 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
     }
 
     @Override
+    public boolean update(List<Long> id, String status) {
+        Status statusEnum = getStatus(status);
+        List<ProductBrandEntity> productBrandEntities = productBrandRepository.findAllById(id);
+        if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
+            productBrandEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
+            productBrandRepository.saveAll(productBrandEntities);
+//            return "Cập nhật trạng thái thương hiệu sản phẩm thành công";
+        } else if (statusEnum == Status.SOFT_DELETED) {
+            productBrandEntities.forEach(productEntity -> productEntity.setDeleted(true));
+            productBrandRepository.saveAll(productBrandEntities);
+//            return "Xóa mềm thương hiệu sản phẩm thành công";
+        } else if (statusEnum == Status.RESTORED) {
+            productBrandEntities.forEach(productEntity -> productEntity.setDeleted(false));
+            productBrandRepository.saveAll(productBrandEntities);
+//            return "Phục hồi thương hiệu sản phẩm thành công";
+        }
+//        return "Cập nhật thương hiệu sản phẩm thất bại";
+        return true;
+    }
+
+    @Override
     public ProductBrandResponse update(Long id, UpdateProductBrandRequest request) {
         ProductBrandEntity brandEntity = getBrandById(id);
 
@@ -70,18 +91,6 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
 
         productBrandMapper.updateProductBrand(brandEntity, request);
         return productBrandMapper.productBrandToProductBrandResponseDTO(productBrandRepository.save(brandEntity));
-    }
-
-    @Override
-    public boolean update(List<Long> id, String status) {
-        Status statusEnum = getStatus(status);
-
-        productBrandRepository.findAllById(id).forEach(brandEntity -> {
-            brandEntity.setStatus(statusEnum);
-            productBrandRepository.save(brandEntity);
-        });
-
-        return true;
     }
 
     @Override
@@ -114,21 +123,6 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
     }
 
     @Override
-    public boolean deleteTemporarily(List<Long> id) {
-        productBrandRepository.findAllById(id).forEach(brandEntity -> {
-            brandEntity.setDeleted(true);
-
-            List<ProductEntity> products = brandEntity.getProducts();
-            for (ProductEntity productEntity : products) {
-                productEntity.setStatus(Status.INACTIVE);
-            }
-
-            productBrandRepository.save(brandEntity);
-        });
-        return true;
-    }
-
-    @Override
     public boolean restore(Long id) {
         ProductBrandEntity brandEntity = getBrandById(id);
         brandEntity.setDeleted(false);
@@ -141,20 +135,6 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         return true;
     }
 
-    @Override
-    public boolean restore(List<Long> id) {
-        productBrandRepository.findAllById(id).forEach(productBrand -> {
-            productBrand.setDeleted(false);
-
-            List<ProductEntity> products = productBrand.getProducts();
-            for (ProductEntity productEntity : products) {
-                productEntity.setStatus(Status.ACTIVE);
-            }
-
-            productBrandRepository.save(productBrand);
-        });
-        return true;
-    }
 
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
@@ -238,7 +218,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
 //            return null;
 //        }
 
-        map.put("product_category", list.getContent());
+        map.put("product_brand", list.getContent());
         map.put("currentPage", list.getNumber() + 1);
         map.put("totalItems", list.getTotalElements());
         map.put("totalPages", list.getTotalPages());
@@ -278,4 +258,48 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
     private ProductBrandEntity getBrandById(Long id) {
         return productBrandRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_BRAND_NOT_FOUND));
     }
+
+
+    //--------------------------------------------------------------------------------------------------------------
+    //    @Override
+//    public boolean update(List<Long> id, String status) {
+//        Status statusEnum = getStatus(status);
+//
+//        productBrandRepository.findAllById(id).forEach(brandEntity -> {
+//            brandEntity.setStatus(statusEnum);
+//            productBrandRepository.save(brandEntity);
+//        });
+//
+//        return true;
+//    }
+    @Override
+    public boolean restore(List<Long> id) {
+//        productBrandRepository.findAllById(id).forEach(productBrand -> {
+//            productBrand.setDeleted(false);
+//
+//            List<ProductEntity> products = productBrand.getProducts();
+//            for (ProductEntity productEntity : products) {
+//                productEntity.setStatus(Status.ACTIVE);
+//            }
+//
+//            productBrandRepository.save(productBrand);
+//        });
+        return true;
+    }
+
+    @Override
+    public boolean deleteTemporarily(List<Long> id) {
+//        productBrandRepository.findAllById(id).forEach(brandEntity -> {
+//            brandEntity.setDeleted(true);
+//
+//            List<ProductEntity> products = brandEntity.getProducts();
+//            for (ProductEntity productEntity : products) {
+//                productEntity.setStatus(Status.INACTIVE);
+//            }
+//
+//            productBrandRepository.save(brandEntity);
+//        });
+        return true;
+    }
 }
+

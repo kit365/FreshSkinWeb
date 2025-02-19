@@ -46,9 +46,9 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     @Override
     public ProductResponseDTO add(CreateProductRequest request) {
-
         ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElse(null);
         ProductBrandEntity productBrandEntity = productBrandRepository.findById(request.getBrandId()).orElse(null);
+        ProductBrandEntity r = productBrandRepository.findById(request.getBrandId()).orElse(null);
         ProductEntity productEntity = productMapper.productToProductEntity(request);
 
         if (productCategoryEntity != null) {
@@ -72,25 +72,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     }
 
 
-    public boolean checkDuplicateVolume(List<ProductVariantEntity> entityList, Long productId) {
-        Map<Integer, ProductVariantEntity> volumeMap = new HashMap<>();
-
-        ProductEntity listProduct = getProductEntityById(productId);
-        List<ProductVariantEntity> productVariantEntities = listProduct.getVariants();
-
-        for (ProductVariantEntity productVariantEntity : productVariantEntities) {
-            volumeMap.put(productVariantEntity.getVolume(), productVariantEntity);
-        }
-
-        for (ProductVariantEntity productVariantEntity : entityList) {
-            if (volumeMap.containsKey(productVariantEntity.getVolume())) {
-                throw new AppException(ErrorCode.VOLUME_EXISTED);
-            }
-        }
-        return true;
-    }
-
-
     @Override
     public ProductResponseDTO update(Long id, UpdateProductRequest request) {
         if (StringUtils.hasLength(request.getStatus())) {
@@ -109,7 +90,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             listProduct.setCategory(productCategoryEntity);
         }
 
-        if(request.getBrandId() > 0) {
+        if (request.getBrandId() > 0) {
             ProductBrandEntity productBrandEntity = productBrandRepository.findById(request.getBrandId()).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_BRAND_NOT_FOUND));
             listProduct.setBrand(productBrandEntity);
         }
@@ -140,15 +121,26 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return productMapper.productToProductResponseDTO(productRepository.save(listProduct));
     }
 
-    //thay doi status
+
+    //thay doi thanh String de quan lý message
     @Override
     public boolean update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
-        productRepository.findAllById(id)
-                .forEach(productEntity -> {
-                    productEntity.setStatus(statusEnum);
-                    productRepository.save(productEntity);
-                });
+        List<ProductEntity> productEntities = productRepository.findAllById(id);
+        if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
+            productEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
+            productRepository.saveAll(productEntities);
+//            return "Cập nhật trạng thái sản phẩm thành công";
+        } else if (statusEnum == Status.SOFT_DELETED) {
+            productEntities.forEach(productEntity -> productEntity.setDeleted(true));
+            productRepository.saveAll(productEntities);
+//            return "Xóa mềm thành công";
+        } else if (statusEnum == Status.RESTORED) {
+            productEntities.forEach(productEntity -> productEntity.setDeleted(false));
+            productRepository.saveAll(productEntities);
+//            return "Phục hồi thành công";
+        }
+//        return "Cập nhật thất bại";
         return true;
     }
 
@@ -197,20 +189,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return true;
     }
 
-    /*
-     Xóa(mềm) nhiều sản phẩm
-     input: List<long> id
-     output: boolean
-   */
-    @Override
-    public boolean deleteTemporarily(List<Long> id) {
-        productRepository.findAllByIdInAndStatus(id, Status.ACTIVE)
-                .forEach(productEntity -> {
-                    productEntity.setDeleted(true);
-                    productRepository.save(productEntity);
-                });
-        return true;
-    }
 
     //xóa product_variant
     public boolean deleteProductVariants(Long id, ProductVariantEntity productVariantEntities) {
@@ -242,23 +220,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return true;
     }
 
-
-    /*
-  Phục hồi: nhiều sản phẩm
-  - Khôi phục trạng thái sản phẩm(ACTIVE) và thay đổi DELETE(False)
-  input: List<long> id
-  output: boolean
-*/
-    @Override
-    public boolean restore(List<Long> id) {
-        List<ProductEntity> productEntities = productRepository.findAllByIdInAndStatus(id, Status.ACTIVE);
-
-        productEntities.forEach(productEntity -> {
-            productEntity.setDeleted(false);
-            productRepository.save(productEntity);
-        });
-        return true;
-    }
 
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
@@ -350,7 +311,55 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return map;
     }
 
+    //-------------------------------------------------------------------------------------------------------------
+    /*
+ Phục hồi: nhiều sản phẩm
+ - Khôi phục trạng thái sản phẩm(ACTIVE) và thay đổi DELETE(False)
+ input: List<long> id
+ output: boolean
+*/
+    @Override
+    public boolean restore(List<Long> id) {
+//        List<ProductEntity> productEntities = productRepository.findAllByIdInAndStatus(id, Status.ACTIVE);
+//
+//        productEntities.forEach(productEntity -> {
+//            productEntity.setDeleted(false);
+//            productRepository.save(productEntity);
+//        });
+        return true;
+    }
 
+
+    //    //thay doi status
+//    @Override
+//    public boolean update(List<Long> id, String status) {
+//
+//        Status statusEnum = getStatus(status);
+//        productRepository.findAllById(id)
+//                .forEach(productEntity -> {
+//                    productEntity.setStatus(statusEnum);
+//                    productRepository.save(productEntity);
+//                });
+//        return true;
+//    }
+
+
+    /*
+ Xóa(mềm) nhiều sản phẩm
+ input: List<long> id
+ output: boolean
+*/
+    @Override
+    public boolean deleteTemporarily(List<Long> id) {
+//        productRepository.findAllByIdInAndStatus(id, Status.ACTIVE)
+//                .forEach(productEntity -> {
+//                    productEntity.setDeleted(true);
+//                    productRepository.save(productEntity);
+//                });
+        return true;
+    }
+
+    //-------------------------------------------------------------------------------------------------------------
     //tra ve ProductEntity, Neu Id null -> nem loi
     private ProductEntity getProductEntityById(Long id) {
         return productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -384,4 +393,23 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 .replaceAll("\\s+", "-")
                 .toLowerCase();
     }
+
+    private boolean checkDuplicateVolume(List<ProductVariantEntity> entityList, Long productId) {
+        Map<Integer, ProductVariantEntity> volumeMap = new HashMap<>();
+
+        ProductEntity listProduct = getProductEntityById(productId);
+        List<ProductVariantEntity> productVariantEntities = listProduct.getVariants();
+
+        for (ProductVariantEntity productVariantEntity : productVariantEntities) {
+            volumeMap.put(productVariantEntity.getVolume(), productVariantEntity);
+        }
+
+        for (ProductVariantEntity productVariantEntity : entityList) {
+            if (volumeMap.containsKey(productVariantEntity.getVolume())) {
+                throw new AppException(ErrorCode.VOLUME_EXISTED);
+            }
+        }
+        return true;
+    }
+
 }

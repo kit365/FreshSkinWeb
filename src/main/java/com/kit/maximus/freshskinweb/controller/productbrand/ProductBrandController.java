@@ -28,7 +28,7 @@ public class ProductBrandController {
     ProductBrandService productBrandService;
 
     @PostMapping("create")
-    public ResponseAPI<ProductBrandResponse> create(@RequestBody CreateProductBrandRequest request) {
+    public ResponseAPI<ProductBrandResponse> createProductBrand(@RequestBody CreateProductBrandRequest request) {
         String message = "Create product_brand successfull";
         ProductBrandResponse result = productBrandService.add(request);
         log.info("CREATE BRAND_PRODUCT REQUEST)");
@@ -36,7 +36,7 @@ public class ProductBrandController {
     }
 
     @GetMapping()
-    public ResponseAPI<Map<String, Object>> getAllProduct(@RequestParam(defaultValue = "1") int page,
+    public ResponseAPI<Map<String, Object>> getAllProductBrand(@RequestParam(defaultValue = "1") int page,
                                                           @RequestParam(defaultValue = "4") int size,
                                                           @RequestParam(defaultValue = "position") String sortKey,
                                                           @RequestParam(defaultValue = "desc") String sortValue,
@@ -49,27 +49,8 @@ public class ProductBrandController {
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
-    @GetMapping("show")
-    public ResponseAPI<List<ProductBrandResponse>> getList() {
-        var result = productBrandService.getAll();
-        return ResponseAPI.<List<ProductBrandResponse>>builder().code(HttpStatus.OK.value()).data(result).build();
-    }
-
-    @PatchMapping("edit/{id}")
-    public ResponseAPI<ProductBrandResponse> updateProduct(@PathVariable("id") Long id, @RequestBody UpdateProductBrandRequest request) {
-        ProductBrandResponse result = productBrandService.update(id, request);
-        String message_succed = "Update product_brand successfull";
-        String message_failed = "Update product_brand failed";
-        if (result != null) {
-            log.info("Product_brand updated successfully");
-            return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
-        }
-        log.info("Product_brand update failed");
-        return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
-    }
-
-    @PatchMapping("updateStatus")
-    public ResponseAPI<String> updateProduct(@RequestBody Map<String, Object> productRequestDTO) {
+    @PatchMapping("change-multi")
+    public ResponseAPI<String> updateProductBrand(@RequestBody Map<String, Object> productRequestDTO) {
 
         if (!productRequestDTO.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
@@ -91,8 +72,28 @@ public class ProductBrandController {
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
+
+    @GetMapping("show")
+    public ResponseAPI<List<ProductBrandResponse>> getListProductBrand() {
+        var result = productBrandService.getAll();
+        return ResponseAPI.<List<ProductBrandResponse>>builder().code(HttpStatus.OK.value()).data(result).build();
+    }
+
+    @PatchMapping("edit/{id}")
+    public ResponseAPI<ProductBrandResponse> updateProductBrand(@PathVariable("id") Long id, @RequestBody UpdateProductBrandRequest request) {
+        ProductBrandResponse result = productBrandService.update(id, request);
+        String message_succed = "Update product_brand successfull";
+        String message_failed = "Update product_brand failed";
+        if (result != null) {
+            log.info("Product_brand updated successfully");
+            return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
+        }
+        log.info("Product_brand update failed");
+        return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+    }
+
     @DeleteMapping("delete/{id}")
-    public ResponseAPI<String> deleteProduct(@PathVariable("id") Long id) {
+    public ResponseAPI<String> deleteProductBrand(@PathVariable("id") Long id) {
         String message_succed = "Delete Product_brand successfull";
         String message_failed = "Delete Product_brand failed";
         boolean result = productBrandService.delete(id);
@@ -105,7 +106,7 @@ public class ProductBrandController {
     }
 
     @PatchMapping("deleteT/{id}")
-    public ResponseAPI<String> deleteProductT(@PathVariable("id") Long id) {
+    public ResponseAPI<String> deleteTProductBrand(@PathVariable("id") Long id) {
         String message_succed = "Delete Product_brand successfull";
         String message_failed = "Delete Product_brand failed";
         boolean result = productBrandService.deleteTemporarily(id);
@@ -117,30 +118,8 @@ public class ProductBrandController {
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
-
-    @PatchMapping("deleteT")
-    public ResponseAPI<String> deleteProductT(@RequestBody Map<String, Object> request) {
-
-        if (!request.containsKey("id")) {
-            log.warn("Request does not contain 'id' key");
-            throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
-        }
-
-        List<Long> ids = (List<Long>) request.get("id");
-
-        String message_succed = "Delete Product_Category successfull";
-        String message_failed = "Delete Product_Category failed";
-        var result = productBrandService.deleteTemporarily(ids);
-        if (result) {
-            log.info("Product_Category deleted successfully");
-            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
-        }
-        log.info("Product_Category delete failed");
-        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
-    }
-
     @PatchMapping("restore/{id}")
-    public ResponseAPI<String> restore(@PathVariable("id") Long id) {
+    public ResponseAPI<String> restoreProductBrand(@PathVariable("id") Long id) {
         String message_succed = "restore Product_Category successfull";
         String message_failed = "restore Product_Category failed";
         boolean result = productBrandService.restore(id);
@@ -153,24 +132,24 @@ public class ProductBrandController {
     }
 
 
-    @PatchMapping("restore")
-    public ResponseAPI<String> restore(@RequestBody Map<String, Object> request) {
+    @DeleteMapping("delete")
+    public ResponseAPI<String> deleteProductBrand(@RequestBody Map<String,Object> productRequestDTO) {
 
-        if (!request.containsKey("id")) {
+        if(!productRequestDTO.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
             throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
         }
 
-        List<Long> ids = (List<Long>) request.get("id");
+        List<Long> ids = (List<Long>) productRequestDTO.get("id");
 
-        String message_succed = "restore Product_Category successfull";
-        String message_failed = "restore Product_Category failed";
-        var result = productBrandService.restore(ids);
+        String message_succed = "delete Brand successfull";
+        String message_failed = "delete Brand failed";
+        var result = productBrandService.delete(ids);
         if (result) {
-            log.info("Product_Category restore successfully");
+            log.info("BrandProduct delete successfully");
             return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
         }
-        log.info("Product_Category restore failed");
+        log.info("BrandProduct delete failed");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 

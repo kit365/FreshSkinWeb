@@ -78,12 +78,21 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     @Override
     public boolean update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
-
-        productCategoryRepository.findAllById(id).forEach(productCategoryEntity -> {
-            productCategoryEntity.setStatus(statusEnum);
-            productCategoryRepository.save(productCategoryEntity);
-        });
-
+        List<ProductCategoryEntity> productCategoryEntities = productCategoryRepository.findAllById(id);
+        if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
+            productCategoryEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
+            productCategoryRepository.saveAll(productCategoryEntities);
+//            return "Cập nhật trạng thái danh mục sản phẩm thành công";
+        } else if (statusEnum == Status.SOFT_DELETED) {
+            productCategoryEntities.forEach(productEntity -> productEntity.setDeleted(true));
+            productCategoryRepository.saveAll(productCategoryEntities);
+//            return "Xóa mềm danh mục sản phẩm thành công";
+        } else if (statusEnum == Status.RESTORED) {
+            productCategoryEntities.forEach(productEntity -> productEntity.setDeleted(false));
+            productCategoryRepository.saveAll(productCategoryEntities);
+//            return "Phục hồi danh mục sản phẩm thành công";
+        }
+//        return "Cập nhật danh mục sản phẩm thất bại";
         return true;
     }
 
@@ -118,17 +127,17 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
     @Override
     public boolean deleteTemporarily(List<Long> id) {
-        productCategoryRepository.findAllById(id).forEach(productCategoryEntity -> {
-            productCategoryEntity.setDeleted(true);
-
-            List<ProductEntity> products = productCategoryEntity.getProducts();
-            for (ProductEntity productEntity : products) {
-                productEntity.setStatus(Status.INACTIVE);
-            }
-
-
-            productCategoryRepository.save(productCategoryEntity);
-        });
+//        productCategoryRepository.findAllById(id).forEach(productCategoryEntity -> {
+//            productCategoryEntity.setDeleted(true);
+//
+//            List<ProductEntity> products = productCategoryEntity.getProducts();
+//            for (ProductEntity productEntity : products) {
+//                productEntity.setStatus(Status.INACTIVE);
+//            }
+//
+//
+//            productCategoryRepository.save(productCategoryEntity);
+//        });
         return true;
     }
 
@@ -147,16 +156,16 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
     @Override
     public boolean restore(List<Long> id) {
-        productCategoryRepository.findAllById(id).forEach(productCategoryEntity -> {
-            productCategoryEntity.setDeleted(false);
-
-            List<ProductEntity> products = productCategoryEntity.getProducts();
-            for (ProductEntity productEntity : products) {
-                productEntity.setStatus(Status.ACTIVE);
-            }
-
-            productCategoryRepository.save(productCategoryEntity);
-        });
+//        productCategoryRepository.findAllById(id).forEach(productCategoryEntity -> {
+//            productCategoryEntity.setDeleted(false);
+//
+//            List<ProductEntity> products = productCategoryEntity.getProducts();
+//            for (ProductEntity productEntity : products) {
+//                productEntity.setStatus(Status.ACTIVE);
+//            }
+//
+//            productCategoryRepository.save(productCategoryEntity);
+//        });
         return true;
     }
 

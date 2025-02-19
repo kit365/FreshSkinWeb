@@ -27,8 +27,16 @@ public class ProductCategoryTrashController {
 
     ProductCategoryService productCategoryService;
 
+    @PostMapping("create")
+    public ResponseAPI<ProductCategoryResponse> createProductCategory(@RequestBody CreateProductCategoryRequest request) {
+        String message = "Create product_category successfull";
+        ProductCategoryResponse result = productCategoryService.add(request);
+        log.info("CREATE CATEGORY_PRODUCT REQUEST)");
+        return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+    }
+
     @GetMapping()
-    public ResponseAPI<Map<String, Object>> getAllProduct(@RequestParam(defaultValue = "1") int page,
+    public ResponseAPI<Map<String, Object>> getAllProductCategory(@RequestParam(defaultValue = "1") int page,
                                                           @RequestParam(defaultValue = "4") int size,
                                                           @RequestParam(defaultValue = "position") String sortKey,
                                                           @RequestParam(defaultValue = "desc") String sortValue,
@@ -42,13 +50,13 @@ public class ProductCategoryTrashController {
     }
 
     @GetMapping("show")
-    public ResponseAPI<List<ProductCategoryResponse>> getList() {
+    public ResponseAPI<List<ProductCategoryResponse>> getListProductCategory() {
         var result = productCategoryService.getAll();
         return ResponseAPI.<List<ProductCategoryResponse>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
     @PatchMapping("edit/{id}")
-    public ResponseAPI<ProductCategoryResponse> updateProduct(@PathVariable("id") Long id, @RequestBody UpdateProductCategoryRequest request) {
+    public ResponseAPI<ProductCategoryResponse> updateProductCategory(@PathVariable("id") Long id, @RequestBody UpdateProductCategoryRequest request) {
         ProductCategoryResponse result = productCategoryService.update(id, request);
         String message_succed = "Update product_category successfull";
         String message_failed = "Update product_category failed";
@@ -60,8 +68,8 @@ public class ProductCategoryTrashController {
         return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
-    @PatchMapping("updateStatus")
-    public ResponseAPI<String> updateProduct(@RequestBody Map<String,Object>  productRequestDTO) {
+    @PatchMapping("change-multi")
+    public ResponseAPI<String> updateProductCategory(@RequestBody Map<String,Object>  productRequestDTO) {
 
         if(!productRequestDTO.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
@@ -84,7 +92,7 @@ public class ProductCategoryTrashController {
     }
 
     @DeleteMapping("delete/{id}")
-    public ResponseAPI<String> deleteProduct(@PathVariable("id") Long id) {
+    public ResponseAPI<String> deleteProductCategory(@PathVariable("id") Long id) {
         String message_succed = "Delete Product_Category successfull";
         String message_failed = "Delete Product_Category failed";
         boolean result = productCategoryService.delete(id);
@@ -97,7 +105,7 @@ public class ProductCategoryTrashController {
     }
 
     @PatchMapping("deleteT/{id}")
-    public ResponseAPI<String> deleteProductT(@PathVariable("id") Long id) {
+    public ResponseAPI<String> deleteTProductCategory(@PathVariable("id") Long id) {
         String message_succed = "Delete Product_Category successfull";
         String message_failed = "Delete Product_Category failed";
         boolean result = productCategoryService.deleteTemporarily(id);
@@ -110,29 +118,8 @@ public class ProductCategoryTrashController {
     }
 
 
-    @PatchMapping("deleteT")
-    public ResponseAPI<String> deleteProductT(@RequestBody Map<String,Object> request) {
-
-        if(!request.containsKey("id")) {
-            log.warn("Request does not contain 'id' key");
-            throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
-        }
-
-        List<Long> ids = (List<Long>) request.get("id");
-
-        String message_succed = "Delete Product_Category successfull";
-        String message_failed = "Delete Product_Category failed";
-        var result = productCategoryService.deleteTemporarily(ids);
-        if (result) {
-            log.info("Product_Category deleted successfully");
-            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
-        }
-        log.info("Product_Category delete failed");
-        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
-    }
-
     @PatchMapping("restore/{id}")
-    public ResponseAPI<String> restore(@PathVariable("id") Long id) {
+    public ResponseAPI<String> restoreProductCategory(@PathVariable("id") Long id) {
         String message_succed = "restore Product_Category successfull";
         String message_failed = "restore Product_Category failed";
         boolean result = productCategoryService.restore(id);
@@ -144,25 +131,25 @@ public class ProductCategoryTrashController {
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
+    @DeleteMapping("delete")
+    public ResponseAPI<String> deleteProductCategory(@RequestBody Map<String,Object> productRequestDTO) {
 
-    @PatchMapping("restore")
-    public ResponseAPI<String> restore(@RequestBody Map<String,Object> request) {
-
-        if(!request.containsKey("id")) {
+        if(!productRequestDTO.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
             throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
         }
 
-        List<Long> ids = (List<Long>) request.get("id");
+        List<Long> ids = (List<Long>) productRequestDTO.get("id");
 
-        String message_succed = "restore Product_Category successfull";
-        String message_failed = "restore Product_Category failed";
-        var result = productCategoryService.restore(ids);
+        String message_succed = "delete Category successfull";
+        String message_failed = "delete Category failed";
+        var result = productCategoryService.delete(ids);
         if (result) {
-            log.info("Product_Category restore successfully");
+            log.info("CategoryProduct delete successfully");
             return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
         }
-        log.info("Product_Category restore failed");
+        log.info("CategoryProduct delete failed");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
+
 }
