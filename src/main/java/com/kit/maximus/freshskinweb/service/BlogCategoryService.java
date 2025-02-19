@@ -8,16 +8,20 @@ import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
+import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.BlogCategoryMapper;
 import com.kit.maximus.freshskinweb.repository.BlogCategoryRepository;
+import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +41,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Bl
 //            throw new AppException(ErrorCode.BLOG_CATEGORY_NAME_EXISTED);
 //        }
         BlogCategoryEntity blogCategoryEntity = blogCategoryMapper.toBlogCategory(request);
+
         List<BlogEntity> blogEntities = request.getBlog();
         if(blogEntities == null){
             blogCategoryEntity.setBlog(null);
@@ -59,7 +64,23 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Bl
 
     @Override
     public boolean update(List<Long> id, String status) {
-        return false;
+        Status statusEnum = getStatus(status);
+        List<BlogCategoryEntity> blogCategoryEntities = blogCategoryRepository.findAllById(id);
+        if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
+            blogCategoryEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
+            blogCategoryRepository.saveAll(blogCategoryEntities);
+
+        } else if (statusEnum == Status.SOFT_DELETED) {
+            blogCategoryEntities.forEach(productEntity -> productEntity.setDeleted(true));
+            blogCategoryRepository.saveAll(blogCategoryEntities);
+
+        } else if (statusEnum == Status.RESTORED) {
+            blogCategoryEntities.forEach(productEntity -> productEntity.setDeleted(false));
+            blogCategoryRepository.saveAll(blogCategoryEntities);
+
+        }
+
+        return true;
     }
 
     @Override
@@ -81,6 +102,8 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Bl
 
     @Override
     public boolean delete(List<Long> longs) {
+        List<BlogCategoryEntity> blogCategoryEntities = blogCategoryRepository.findAllById(longs);
+        blogCategoryRepository.deleteAll(blogCategoryEntities);
         return true;
     }
 
@@ -113,6 +136,37 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Bl
         blogCategoryEntity.setDeleted(false);
         blogCategoryRepository.save(blogCategoryEntity);
         return true;
+    }
+
+    private String getSlug(String slug) {
+        return Normalizer.normalize(slug, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .replaceAll("[^a-zA-Z0-9\\s]", "")
+                .trim()
+                .replaceAll("\\s+", "-")
+                .toLowerCase();
+    }
+
+
+    private Sort.Direction getSortDirection(String sortDirection) {
+
+        if (!sortDirection.equalsIgnoreCase("asc") && !sortDirection.equalsIgnoreCase("desc")) {
+            log.info("SortDirection {} is invalid", sortDirection);
+            throw new AppException(ErrorCode.SORT_DIRECTION_INVALID);
+        }
+
+        return sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+    }
+
+
+    //CHECK VIẾT HOA STATUS KHI TRUYỀN VÀO (ACTIVE, INACTIVE)
+    private Status getStatus(String status) {
+        try {
+            return Status.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid status provided: '{}'", status);
+            throw new AppException(ErrorCode.STATUS_INVALID);
+        }
     }
 
     @Override

@@ -64,7 +64,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     public ProductCategoryResponse update(Long id, UpdateProductCategoryRequest request) {
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
 
-
         if (StringUtils.hasLength(request.getStatus())) {
             productCategoryEntity.setStatus(getStatus(request.getStatus()));
         }
