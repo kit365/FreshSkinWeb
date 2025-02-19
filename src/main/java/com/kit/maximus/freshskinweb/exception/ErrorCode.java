@@ -10,7 +10,7 @@ public enum ErrorCode {
     //util
     KEY_INVALID(400, "Key Invalid"),
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized Exception"),
-    STATUS_INVALID(400, "Status Invalid[Active || Inactive]"),
+    STATUS_INVALID(400, "Status Invalid[Active || Inactive || SOFT_DELETED || RESTORED]"),
 
     //User
     USER_NOT_FOUND(404, "User Not Found"),
@@ -31,6 +31,12 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND(404, "Product Not Found"),
     INVALID_REQUEST_PRODUCTID(400, "Invalid Request ProductId[Missing 'id' key in request body]"),
     VOLUME_EXISTED(400, "Volume already existed"),
+
+    //ProductCategory
+    PRODUCT_CATEGORY_NOT_FOUND(404, "Product Category Not Found"),
+    //ProductBrand
+    PRODUCT_BRAND_NOT_FOUND(404, "Product Brand Not Found"),
+
     //Role
     ROLE_NOT_FOUND(404, "Role Not Found"),
 
@@ -39,7 +45,11 @@ public enum ErrorCode {
 
     //BLOG CATEGORY
     BLOG_CATEGORY_NAME_EXISTED(404, "Blog Category Name already existed"),
+    BLOG_CATEGORY_NOT_FOUND(404, "Blog Category Not Found"),
 
+    //BLOG
+    BLOG_NAME_EXISTED(404, "Blog Category Name already existed"),
+    BLOG_NOT_FOUND(404, "Blog Category Not Found"),
     ;
 
 

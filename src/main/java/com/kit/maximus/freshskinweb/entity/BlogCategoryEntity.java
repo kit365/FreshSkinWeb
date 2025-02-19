@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -15,7 +16,7 @@ import java.util.List;
 @ToString
 @Table(name = "BlogCategory")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class BlogCategory extends AbstractEntity {
+public class BlogCategoryEntity extends AbstractEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BlogCategoryID", insertable = false, updatable = false)
@@ -27,7 +28,8 @@ public class BlogCategory extends AbstractEntity {
     @Column(name = "Description")
     String description;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "blogCategory", orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany( cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, fetch = FetchType.LAZY, mappedBy = "blogCategory", orphanRemoval = false)
     List<BlogEntity> blog = new ArrayList<>();
 
 
@@ -35,7 +37,6 @@ public class BlogCategory extends AbstractEntity {
         blog.add(blogEntity);
         blogEntity.setBlogCategory(this);
     }
-
 
     public void removeBlog(BlogEntity blogEntity) {
         blog.remove(blogEntity);

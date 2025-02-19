@@ -12,7 +12,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @ToString
@@ -20,6 +19,7 @@ import java.util.List;
 public class ProductResponseDTO implements Serializable {
     Long id;
     ProductCategoryResponse category;
+    ProductBrandResponse brand;
     //    String DiscountID;
     String title;
     String slug;
@@ -27,8 +27,7 @@ public class ProductResponseDTO implements Serializable {
     String thumbnail;
     List<ProductVariantEntity> variants;
     int discountPercent;
-    int position;
-    String brand;
+    Integer position;
     String skinType;
     /// ////////////////////////////////////////////
     String origin;

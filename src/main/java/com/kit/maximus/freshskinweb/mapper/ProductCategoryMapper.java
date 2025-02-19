@@ -1,28 +1,25 @@
 package com.kit.maximus.freshskinweb.mapper;
 
-import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
-import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.CreateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.UpdateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
-import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import org.mapstruct.*;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ProductCategoryMapper {
 
 
 //    @Mapping(target = "category", ignore = true)
-    ProductCategoryEntity productCategoryToProductEntity(CreateProductCategoryRequest productRequest);
+    ProductCategoryEntity productCategoryToProductEntity(CreateProductCategoryRequest request);
 
-    ProductCategoryResponse productCategoryToProductResponseDTO(ProductCategoryEntity product);
+    ProductCategoryResponse productCategoryToProductCategoryResponseDTO(ProductCategoryEntity request);
 
-//    List<ProductResponseDTO> toUserResponseDTO(List<ProductEntity> productEntities);
+    List<   ProductCategoryResponse > toProductCateroiesResponseDTO(List<ProductCategoryEntity> request);
 
     @Mapping(target = "id", ignore = true)
-//    @Mapping(target = "category", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateProductCategory(@MappingTarget ProductCategoryEntity productCategoryEntity, UpdateProductCategoryRequest productCategoryRequestDTO);
+    void updateProductCategory(@MappingTarget ProductCategoryEntity productCategoryEntity, UpdateProductCategoryRequest request);
 }

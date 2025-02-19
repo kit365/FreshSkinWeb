@@ -13,6 +13,7 @@ public interface ProductMapper {
 
     @Mapping(target = "variants", ignore = true)
     @Mapping(target = "category", ignore = true)
+    @Mapping(target = "brand", ignore = true)
     ProductEntity productToProductEntity(CreateProductRequest productRequest);
 
     ProductResponseDTO productToProductResponseDTO(ProductEntity product);
@@ -22,7 +23,8 @@ public interface ProductMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "variants", ignore = true)
     @Mapping(target = "category", ignore = true)
+    @Mapping(target = "brand", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateProduct(@MappingTarget ProductEntity user,  UpdateProductRequest productRequestDTO);
+    void updateProduct(@MappingTarget ProductEntity user, UpdateProductRequest productRequestDTO);
 
 }

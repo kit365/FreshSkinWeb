@@ -1,18 +1,17 @@
 package com.kit.maximus.freshskinweb.service;
 
 
-import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
-import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
-import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
+import com.kit.maximus.freshskinweb.entity.ProductBrandEntity;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.ProductMapper;
+import com.kit.maximus.freshskinweb.repository.ProductBrandRepository;
 import com.kit.maximus.freshskinweb.repository.ProductCategoryRepository;
 import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.utils.Status;
@@ -43,17 +42,25 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     ProductCategoryRepository productCategoryRepository;
 
+    ProductBrandRepository productBrandRepository;
+
     @Override
     public ProductResponseDTO add(CreateProductRequest request) {
-
         ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElse(null);
+        ProductBrandEntity productBrandEntity = productBrandRepository.findById(request.getBrandId()).orElse(null);
+        ProductBrandEntity r = productBrandRepository.findById(request.getBrandId()).orElse(null);
         ProductEntity productEntity = productMapper.productToProductEntity(request);
-        if(productCategoryEntity != null){
+
+        if (productCategoryEntity != null) {
             productEntity.setCategory(productCategoryEntity);
         }
 
-        if(request.getPosition() <= 0){
-        int size  = productRepository.findAll().size();
+        if (productBrandEntity != null) {
+            productEntity.setBrand(productBrandEntity);
+        }
+
+        if (request.getPosition() == null || request.getPosition() <= 0) {
+            Integer size = productRepository.findAll().size();
             productEntity.setPosition(size + 1);
         }
 
@@ -65,30 +72,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     }
 
 
-
-
-    public boolean checkDuplicateVolume(List<ProductVariantEntity> entityList, Long productId) {
-        Map<Integer, ProductVariantEntity> volumeMap = new HashMap<>();
-
-        ProductEntity listProduct = getProductEntityById(productId);
-        List<ProductVariantEntity> productVariantEntities = listProduct.getVariants();
-
-        for(ProductVariantEntity productVariantEntity : productVariantEntities) {
-            volumeMap.put(productVariantEntity.getVolume(),productVariantEntity);
-        }
-
-        for(ProductVariantEntity productVariantEntity : entityList) {
-            if(volumeMap.containsKey(productVariantEntity.getVolume())) {
-                throw new AppException(ErrorCode.VOLUME_EXISTED);
-            }
-        }
-        return true;
-    }
-
-
     @Override
     public ProductResponseDTO update(Long id, UpdateProductRequest request) {
-
         if (StringUtils.hasLength(request.getStatus())) {
             request.setStatus(request.getStatus().toUpperCase());
             getStatus(request.getStatus());
@@ -99,10 +84,15 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             listProduct.setSlug(getSlug(request.getTitle()));
         }
 
-
-        if(request.getCategoryId() > 0){
-            ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElse(null);
+        //BO SUNG BAN LOI KHONG TIM THAY ID DANH MUC SAN PHAM
+        if (request.getCategoryId() > 0) {
+            ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND));
             listProduct.setCategory(productCategoryEntity);
+        }
+
+        if (request.getBrandId() > 0) {
+            ProductBrandEntity productBrandEntity = productBrandRepository.findById(request.getBrandId()).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_BRAND_NOT_FOUND));
+            listProduct.setBrand(productBrandEntity);
         }
 
         if (request.getVariants() != null) {
@@ -118,8 +108,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 } else {
                     for (ProductVariantEntity updatedVariant : listProduct.getVariants()) {
                         if (requestedVariant.getId().equals(updatedVariant.getId())) {
-                                updatedVariant.setVolume(requestedVariant.getVolume());
-                                updatedVariant.setPrice(requestedVariant.getPrice());
+                            updatedVariant.setVolume(requestedVariant.getVolume());
+                            updatedVariant.setPrice(requestedVariant.getPrice());
 
                         }
                     }
@@ -131,21 +121,27 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return productMapper.productToProductResponseDTO(productRepository.save(listProduct));
     }
 
-    //thay doi status
+
+    //thay doi thanh String de quan lý message
     @Override
     public boolean update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
-        productRepository.findAllById(id)
-                .forEach(productEntity -> {
-                    productEntity.setStatus(statusEnum);
-                    productRepository.save(productEntity);
-                });
+        List<ProductEntity> productEntities = productRepository.findAllById(id);
+        if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
+            productEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
+            productRepository.saveAll(productEntities);
+//            return "Cập nhật trạng thái sản phẩm thành công";
+        } else if (statusEnum == Status.SOFT_DELETED) {
+            productEntities.forEach(productEntity -> productEntity.setDeleted(true));
+            productRepository.saveAll(productEntities);
+//            return "Xóa mềm thành công";
+        } else if (statusEnum == Status.RESTORED) {
+            productEntities.forEach(productEntity -> productEntity.setDeleted(false));
+            productRepository.saveAll(productEntities);
+//            return "Phục hồi thành công";
+        }
+//        return "Cập nhật thất bại";
         return true;
-    }
-
-    @Override
-    public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
-        return null;
     }
 
 
@@ -193,20 +189,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return true;
     }
 
-    /*
-     Xóa(mềm) nhiều sản phẩm
-     input: List<long> id
-     output: boolean
-   */
-    @Override
-    public boolean deleteTemporarily(List<Long> id) {
-        productRepository.findAllByIdInAndStatus(id, Status.ACTIVE)
-                .forEach(productEntity -> {
-                    productEntity.setDeleted(true);
-                    productRepository.save(productEntity);
-                });
-        return true;
-    }
 
     //xóa product_variant
     public boolean deleteProductVariants(Long id, ProductVariantEntity productVariantEntities) {
@@ -238,23 +220,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return true;
     }
 
-
-    /*
-  Phục hồi: nhiều sản phẩm
-  - Khôi phục trạng thái sản phẩm(ACTIVE) và thay đổi DELETE(False)
-  input: List<long> id
-  output: boolean
-*/
-    @Override
-    public boolean restore(List<Long> id) {
-        List<ProductEntity> productEntities = productRepository.findAllByIdInAndStatus(id, Status.ACTIVE);
-
-        productEntities.forEach(productEntity -> {
-            productEntity.setDeleted(false);
-            productRepository.save(productEntity);
-        });
-        return true;
-    }
 
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
@@ -346,12 +311,55 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return map;
     }
 
+    //-------------------------------------------------------------------------------------------------------------
+    /*
+ Phục hồi: nhiều sản phẩm
+ - Khôi phục trạng thái sản phẩm(ACTIVE) và thay đổi DELETE(False)
+ input: List<long> id
+ output: boolean
+*/
     @Override
-    public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
-        return null;
+    public boolean restore(List<Long> id) {
+//        List<ProductEntity> productEntities = productRepository.findAllByIdInAndStatus(id, Status.ACTIVE);
+//
+//        productEntities.forEach(productEntity -> {
+//            productEntity.setDeleted(false);
+//            productRepository.save(productEntity);
+//        });
+        return true;
     }
 
 
+    //    //thay doi status
+//    @Override
+//    public boolean update(List<Long> id, String status) {
+//
+//        Status statusEnum = getStatus(status);
+//        productRepository.findAllById(id)
+//                .forEach(productEntity -> {
+//                    productEntity.setStatus(statusEnum);
+//                    productRepository.save(productEntity);
+//                });
+//        return true;
+//    }
+
+
+    /*
+ Xóa(mềm) nhiều sản phẩm
+ input: List<long> id
+ output: boolean
+*/
+    @Override
+    public boolean deleteTemporarily(List<Long> id) {
+//        productRepository.findAllByIdInAndStatus(id, Status.ACTIVE)
+//                .forEach(productEntity -> {
+//                    productEntity.setDeleted(true);
+//                    productRepository.save(productEntity);
+//                });
+        return true;
+    }
+
+    //-------------------------------------------------------------------------------------------------------------
     //tra ve ProductEntity, Neu Id null -> nem loi
     private ProductEntity getProductEntityById(Long id) {
         return productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -385,4 +393,23 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 .replaceAll("\\s+", "-")
                 .toLowerCase();
     }
+
+    private boolean checkDuplicateVolume(List<ProductVariantEntity> entityList, Long productId) {
+        Map<Integer, ProductVariantEntity> volumeMap = new HashMap<>();
+
+        ProductEntity listProduct = getProductEntityById(productId);
+        List<ProductVariantEntity> productVariantEntities = listProduct.getVariants();
+
+        for (ProductVariantEntity productVariantEntity : productVariantEntities) {
+            volumeMap.put(productVariantEntity.getVolume(), productVariantEntity);
+        }
+
+        for (ProductVariantEntity productVariantEntity : entityList) {
+            if (volumeMap.containsKey(productVariantEntity.getVolume())) {
+                throw new AppException(ErrorCode.VOLUME_EXISTED);
+            }
+        }
+        return true;
+    }
+
 }

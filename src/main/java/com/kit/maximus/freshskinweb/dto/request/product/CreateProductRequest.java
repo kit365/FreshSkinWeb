@@ -19,16 +19,15 @@ import java.util.List;
 @Builder
 public class CreateProductRequest implements Serializable {
 
-    String productDetailID;
     long categoryId;
+    long brandId;
     //    String DiscountID;
     String title;
     String description;
     String thumbnail;
     List<ProductVariantEntity> variants;
     int discountPercent;
-    int position;
-    String brand;
+    Integer position;
     String skinType;
     /// ////////////////////////////////////////////
     String origin;

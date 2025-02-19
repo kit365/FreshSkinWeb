@@ -1,7 +1,5 @@
-package com.kit.maximus.freshskinweb.dto.request.productcategory;
+package com.kit.maximus.freshskinweb.dto.request.product_brand;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,17 +12,17 @@ import java.io.Serializable;
 @Getter
 @ToString
 @Builder
-public class CreateProductCategoryRequest implements Serializable {
+public class UpdateProductBrandRequest implements Serializable {
 
     String title;
 
     String image;
 
-    String slug;
-
     String description;
 
     Integer position;
+
+    String status;
 
     boolean featured;
 }

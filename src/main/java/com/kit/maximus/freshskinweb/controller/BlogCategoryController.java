@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.controller;
 
-import com.kit.maximus.freshskinweb.dto.request.blogCategory.BlogCategoryCreationRequest;
+import com.kit.maximus.freshskinweb.dto.request.blog_category.BlogCategoryCreationRequest;
+import com.kit.maximus.freshskinweb.dto.request.blog_category.BlogCategoryUpdateRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.service.BlogCategoryService;
@@ -28,4 +29,52 @@ public class BlogCategoryController {
         log.info("CREATE BLOG CATEGORY REQUEST");
         return ResponseAPI.<BlogCategoryResponse>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
+
+    @GetMapping("/edit/{id}")
+    public ResponseAPI<BlogCategoryResponse> updateBlogCategory(@PathVariable Long id ,@RequestBody BlogCategoryUpdateRequest request){
+        String message = "Update blog category successfully";
+        BlogCategoryResponse result = blogCategoryService.update(id, request);
+        log.info("UPDATE BLOG CATEGORY REQUEST");
+        return ResponseAPI.<BlogCategoryResponse>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+    }
+
+    @DeleteMapping("delete/{id}")
+    public ResponseAPI<String> deleteBlogCategory(@PathVariable Long id) {
+        String message_succed = "Delete Blog Category successfull";
+        String message_failed = "Delete Blog Category failed";
+        boolean result = blogCategoryService.delete(id);
+        if (result) {
+            log.info(" Blog Category deleted successfully!");
+            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
+        }
+        log.info(" Blog Category delete failed");
+        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+    }
+
+//    @PatchMapping("deleteT/{id}")
+//    public ResponseAPI<String> deleteTBlogCategory(@PathVariable Long id) {
+//        String message_succed = "Delete Blog Category successfull";
+//        String message_failed = "Delete Blog Category failed";
+//        boolean result = blogCategoryService.deleteTemporarily(id);
+//        if (result) {
+//            log.info(" Blog Category deleted successfully!");
+//            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
+//        }
+//        log.info(" Blog Category delete failed");
+//        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+//    }
+
+//    @PatchMapping("/restore/{id}")
+//    public ResponseAPI<String> restoreBlogCategory(@PathVariable Long id) {
+//        String message_succed = "Restore Blog Category successfull";
+//        String message_failed = "Restore Blog Category failed";
+//        var result = blogCategoryService.restore(id);
+//        if (result) {
+//            log.info(" Blog Category Restored successfully!");
+//            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
+//        }
+//        log.info(" Blog Category Restored failed");
+//        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+//    }
+
 }
