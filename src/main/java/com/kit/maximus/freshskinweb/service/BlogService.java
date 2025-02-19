@@ -3,7 +3,10 @@ package com.kit.maximus.freshskinweb.service;
 
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogCreationRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
+import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
+import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
+import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
 
@@ -66,6 +69,11 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     }
 
     @Override
+    public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
+        return null;
+    }
+
+    @Override
     public boolean delete(Long id) {
         BlogEntity blogEntity = getBlogEntityById(id);
         if (blogEntity == null) {
@@ -123,6 +131,11 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     @Override
     public Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         return Map.of();
+    }
+
+    @Override
+    public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
+        return null;
     }
 
     private BlogEntity getBlogEntityById(Long id) {

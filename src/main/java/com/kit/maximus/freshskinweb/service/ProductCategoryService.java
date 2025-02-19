@@ -1,9 +1,12 @@
 package com.kit.maximus.freshskinweb.service;
 
+import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.CreateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.UpdateProductCategoryRequest;
+import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
+import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -94,6 +97,11 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         }
 //        return "Cập nhật danh mục sản phẩm thất bại";
         return true;
+    }
+
+    @Override
+    public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
+        return null;
     }
 
     @Override
@@ -257,6 +265,11 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         map.put("totalPages", list.getTotalPages());
         map.put("pageSize", list.getSize());
         return map;
+    }
+
+    @Override
+    public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
+        return null;
     }
 
 
