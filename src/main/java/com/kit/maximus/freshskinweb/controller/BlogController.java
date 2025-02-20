@@ -3,7 +3,10 @@ package com.kit.maximus.freshskinweb.controller;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogCreationRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
+import com.kit.maximus.freshskinweb.exception.AppException;
+import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.repository.BlogRepository;
 import com.kit.maximus.freshskinweb.service.BlogService;
 import lombok.AccessLevel;
@@ -12,6 +15,9 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -31,12 +37,45 @@ public class BlogController {
         return ResponseAPI.<BlogResponse>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
+    @GetMapping()
+    public ResponseAPI<Map<String, Object>> getAllBlog(@RequestParam(defaultValue = "1") int page,
+                                                          @RequestParam(defaultValue = "4") int size,
+                                                          @RequestParam(defaultValue = "position") String sortKey,
+                                                          @RequestParam(defaultValue = "desc") String sortValue,
+                                                          @RequestParam(defaultValue = "ALL") String status,
+                                                          @RequestParam(name = "keyword", required = false) String keyword) {
+        String message = "Tim thay List Blog";
+        log.info("GET ALL BLOGS");
+        Map<String, Object> result = blogService.getAll(page, size,sortKey, sortValue,status,keyword);
+        return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
+    }
+
+    @PatchMapping("change-multi")
+    public ResponseAPI<String> updateBlog(@RequestBody Map<String,Object>  blogRequest) {
+
+        if(!blogRequest.containsKey("id")) {
+            log.warn("Request does not contain 'id' key");
+            throw new AppException(ErrorCode.INVALID_REQUEST_BLOGID);
+        }
+
+        List<Long> ids =  (List<Long>) blogRequest.get("id");
+        String status  =  blogRequest.get("status").toString();
+
+        var result = blogService.update(ids, status);
+        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
+    }
+
     @PatchMapping("/edit/{id}")
     public ResponseAPI<BlogResponse> updateBlog(@PathVariable Long id,@RequestBody BlogUpdateRequest request) {
-        String message = "Update blog successfully ";
+        String message_succed = "Update Product successfull";
+        String message_failed = "Update Product failed";
         var result = blogService.update(id, request);
-        log.info("UPDATE BLOG REQUEST");
-        return ResponseAPI.<BlogResponse>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+        if (result != null) {
+            log.info("Product updated successfully");
+            return ResponseAPI.<BlogResponse>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
+        }
+        log.info("Product update failed");
+        return ResponseAPI.<BlogResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
     @DeleteMapping("/delete/{id}")
@@ -77,5 +116,32 @@ public class BlogController {
         }
         log.info(" Blog Restored failed");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+    }
+
+    @DeleteMapping("delete")
+    public ResponseAPI<String> deleteBlog(@RequestBody Map<String,Object> blogRequest) {
+
+        if(!blogRequest.containsKey("id")) {
+            log.warn("Request does not contain 'id' key");
+            throw new AppException(ErrorCode.INVALID_REQUEST_BLOGID);
+        }
+
+        List<Long> ids = (List<Long>) blogRequest.get("id");
+
+        String message_succed = "delete Product successfull";
+        String message_failed = "delete Product failed";
+        var result = blogService.delete(ids);
+        if (result) {
+            log.info("Products delete successfully");
+            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
+        }
+        log.info("Products delete failed");
+        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+    }
+
+    @GetMapping("{id}")
+    public ResponseAPI<BlogResponse> getBlog(@PathVariable("id") Long id) {
+        BlogResponse result = blogService.showDetail(id);
+        return ResponseAPI.<BlogResponse>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 }

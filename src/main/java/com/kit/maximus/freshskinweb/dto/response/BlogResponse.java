@@ -20,7 +20,8 @@ public class BlogResponse implements Serializable {
     String title;
     String content;
     String thumbnail;
-    int position;
+    Integer position;
+    String slug;
     boolean featured;
     BlogCategoryResponse blogCategory;
 }

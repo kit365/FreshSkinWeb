@@ -32,7 +32,10 @@ public class BlogEntity extends AbstractEntity {
     String thumbnail;
 
     @Column(name = "position")
-    int position;
+    Integer position;
+
+    @Column(name = "Slug")
+    String slug;
 
     @Column(name = "Featured")
     boolean featured;
@@ -42,6 +45,4 @@ public class BlogEntity extends AbstractEntity {
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "BlogCategoryId")
     BlogCategoryEntity blogCategory;
-
-
 }

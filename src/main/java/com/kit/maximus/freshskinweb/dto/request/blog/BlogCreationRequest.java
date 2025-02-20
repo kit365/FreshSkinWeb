@@ -17,7 +17,7 @@ public class BlogCreationRequest implements Serializable {
     String title;
     String content;
     String thumbnail;
-    int position;
+    Integer position;
     boolean featured;
     Long categoryID;
 }

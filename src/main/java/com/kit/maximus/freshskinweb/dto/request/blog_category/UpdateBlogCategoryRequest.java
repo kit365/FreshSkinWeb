@@ -15,7 +15,9 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class UpdateBlogCategoryRequest implements Serializable {
-    String blogCategoryName;
+    String title;
     String description;
+    Integer position;
+    String status;
     List<BlogEntity> blog;
 }

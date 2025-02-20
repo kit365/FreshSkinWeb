@@ -21,6 +21,8 @@ public class BlogCategoryResponse implements Serializable {
     Long blogCategoryId;
     String blogCategoryName;
     String description;
+    String slug;
+    Integer position;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<BlogEntity> blog;

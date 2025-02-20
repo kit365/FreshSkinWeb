@@ -50,6 +50,7 @@ public enum ErrorCode {
     //BLOG
     BLOG_NAME_EXISTED(404, "Blog Category Name already existed"),
     BLOG_NOT_FOUND(404, "Blog Category Not Found"),
+    INVALID_REQUEST_BLOGID(400, "Invalid Request BlogId"),
     ;
 
 

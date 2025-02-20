@@ -18,7 +18,7 @@ public class BlogUpdateRequest implements Serializable {
 
     String content;
     String thumbnail;
-    int position;
+    Integer position;
     boolean featured;
     Long categoryID;
 }

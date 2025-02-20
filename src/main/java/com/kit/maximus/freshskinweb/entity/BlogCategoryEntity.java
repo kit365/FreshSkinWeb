@@ -28,6 +28,12 @@ public class BlogCategoryEntity extends AbstractEntity {
     @Column(name = "Description")
     String description;
 
+    @Column(name = "Position")
+    Integer position;
+
+    @Column(name = "Slug")
+    String slug;
+
     @JsonIgnore
     @OneToMany( cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, fetch = FetchType.LAZY, mappedBy = "blogCategory", orphanRemoval = false)
     List<BlogEntity> blog = new ArrayList<>();

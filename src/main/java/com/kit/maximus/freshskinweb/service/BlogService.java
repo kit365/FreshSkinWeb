@@ -4,9 +4,12 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogCreationRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
 
+import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
+import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.BlogMapper;
@@ -17,10 +20,15 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.text.Normalizer;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,12 +45,16 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
     @Override
     public boolean add(BlogCreationRequest request) {
-        System.out.println(request.getCategoryID());
         BlogEntity blogEntity = blogMapper.toBlogEntity(request);
         BlogCategoryEntity blogCategoryEntity = blogCategoryRepository.findById(request.getCategoryID()).orElseThrow(() -> new AppException(ErrorCode.BLOG_NOT_FOUND));
         if (blogCategoryEntity != null) {
             blogEntity.setBlogCategory(blogCategoryEntity);
         }
+        if (request.getPosition() == null || request.getPosition() <= 0) {
+            Integer size = blogRepository.findAll().size();
+            blogEntity.setPosition(size + 1);
+        }
+        blogEntity.setSlug(getSlug(request.getTitle()));
         blogRepository.save(blogEntity);
         return true;
     }
@@ -57,6 +69,11 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         if (blogCategoryEntity != null) {
             blogEntity.setBlogCategory(blogCategoryEntity);
         }
+
+        if (StringUtils.hasLength(request.getTitle())) {
+            blogEntity.setSlug(getSlug(request.getTitle()));
+        }
+
         blogMapper.updateBlogEntity(blogEntity, request);
 
         return blogMapper.toBlogResponse(blogRepository.save(blogEntity));
@@ -140,18 +157,90 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
     @Override
     public BlogResponse showDetail(Long aLong) {
-        return null;
+        return blogMapper.toBlogResponse(getBlogEntityById(aLong));
     }
 
 
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
-        return Map.of();
+        Map<String, Object> map = new HashMap<>();
+
+        Sort.Direction direction = getSortDirection(sortDirection);
+        Sort sort = Sort.by(direction, sortKey);
+        int p = (page > 0) ? page - 1 : 0;
+        Pageable pageable = PageRequest.of(p, size, sort);
+
+        Page<BlogEntity> blogEntityPage;
+
+        // Tìm kiếm theo keyword trước
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            if (status.equalsIgnoreCase("ALL")) {
+                // Tìm kiếm theo tên sản phẩm, không lọc theo status
+                blogEntityPage = blogRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, false, pageable);
+            } else {
+                // Tìm kiếm theo tên sản phẩm và status
+                Status statusEnum = getStatus(status);
+                blogEntityPage = blogRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, false);
+            }
+        } else {
+            // Nếu không có keyword, chỉ lọc theo status
+            if (status == null || status.equalsIgnoreCase("ALL")) {
+                blogEntityPage = blogRepository.findAllByDeleted(false, pageable);
+            } else {
+                Status statusEnum = getStatus(status);
+                blogEntityPage = blogRepository.findAllByStatusAndDeleted(statusEnum, false, pageable);
+            }
+        }
+
+        Page<BlogResponse> list = blogEntityPage.map(blogMapper::toBlogResponse);
+
+        map.put("products", list.getContent());
+        map.put("currentPage", list.getNumber() + 1);
+        map.put("totalItems", list.getTotalElements());
+        map.put("totalPages", list.getTotalPages());
+        map.put("pageSize", list.getSize());
+        return map;
     }
 
     @Override
     public Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
-        return Map.of();
+        Map<String, Object> map = new HashMap<>();
+
+        Sort.Direction direction = getSortDirection(sortDirection);
+        Sort sort = Sort.by(direction, sortKey);
+        int p = (page > 0) ? page - 1 : 0;
+        Pageable pageable = PageRequest.of(p, size, sort);
+
+        Page<BlogEntity> blogEntityPage;
+
+        // Tìm kiếm theo keyword trước
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            if (status.equalsIgnoreCase("ALL")) {
+                // Tìm kiếm theo tên sản phẩm, không lọc theo status
+                blogEntityPage = blogRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, false, pageable);
+            } else {
+                // Tìm kiếm theo tên sản phẩm và status
+                Status statusEnum = getStatus(status);
+                blogEntityPage = blogRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, false);
+            }
+        } else {
+            // Nếu không có keyword, chỉ lọc theo status
+            if (status == null || status.equalsIgnoreCase("ALL")) {
+                blogEntityPage = blogRepository.findAllByDeleted(false, pageable);
+            } else {
+                Status statusEnum = getStatus(status);
+                blogEntityPage = blogRepository.findAllByStatusAndDeleted(statusEnum, false, pageable);
+            }
+        }
+
+        Page<BlogResponse> list = blogEntityPage.map(blogMapper::toBlogResponse);
+
+        map.put("products", list.getContent());
+        map.put("currentPage", list.getNumber() + 1);
+        map.put("totalItems", list.getTotalElements());
+        map.put("totalPages", list.getTotalPages());
+        map.put("pageSize", list.getSize());
+        return map;
     }
 
 
