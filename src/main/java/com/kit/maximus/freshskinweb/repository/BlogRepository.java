@@ -13,8 +13,6 @@ import java.util.List;
 @Repository
 public interface BlogRepository extends JpaRepository<BlogEntity, Long> {
 
-    List<BlogEntity> findAllByIdInAndStatus(List<Long> id, Status status);
-
     Page<BlogEntity> findByTitleContainingIgnoreCaseAndDeleted(String keyword, boolean b, Pageable pageable);
 
     Page<BlogEntity> findByTitleContainingIgnoreCaseAndStatusAndDeleted(String keyword, Status statusEnum, Pageable pageable, boolean b);

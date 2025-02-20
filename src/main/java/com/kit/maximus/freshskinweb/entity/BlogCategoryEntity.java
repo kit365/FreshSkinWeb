@@ -23,7 +23,7 @@ public class BlogCategoryEntity extends AbstractEntity {
     Long blogCategoryId;
 
     @Column(name = "Categoryname")
-    String blogCategoryName;
+    String title;
 
     @Column(name = "Description")
     String description;
