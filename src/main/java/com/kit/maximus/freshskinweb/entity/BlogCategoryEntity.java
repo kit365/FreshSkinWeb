@@ -38,7 +38,6 @@ public class BlogCategoryEntity extends AbstractEntity {
     @OneToMany( cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, fetch = FetchType.LAZY, mappedBy = "blogCategory", orphanRemoval = false)
     List<BlogEntity> blog = new ArrayList<>();
 
-
     public void createBlog(BlogEntity blogEntity) {
         blog.add(blogEntity);
         blogEntity.setBlogCategory(this);
