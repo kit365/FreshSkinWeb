@@ -153,10 +153,7 @@ public class ProductCategoryController {
         return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
-    @GetMapping("test")
-    public ResponseAPI<?> test() {
-        return new ResponseAPI<>(HttpStatus.OK.value(), "",productCategoryService.getAlls());
-    }
+
 
 
 }

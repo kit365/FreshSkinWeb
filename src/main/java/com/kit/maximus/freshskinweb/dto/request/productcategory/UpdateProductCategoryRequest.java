@@ -26,5 +26,9 @@ public class UpdateProductCategoryRequest implements Serializable {
 
     String status;
 
+    Long parentID;
+
+    List<ChildCategoryDTO> child;
+
     boolean featured;
 }

@@ -96,24 +96,28 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             listProduct.setBrand(productBrandEntity);
         }
 
-        if (request.getVariants() != null) {
+        if (request.getVariants() != null && !request.getVariants().isEmpty()) {
+            Map<Integer, ProductVariantEntity> requestList = listToMap(request.getVariants());
+            Map<Integer, ProductVariantEntity> currentList = listToMap(listProduct.getVariants());
 
-            for (ProductVariantEntity requestedVariant : request.getVariants()) {
-                if (requestedVariant.getId() == null) {
-                    boolean checkDuplicateVolume = checkDuplicateVolume(request.getVariants(), listProduct.getId());
-                    ProductVariantEntity newVariant = new ProductVariantEntity();
-                    newVariant.setVolume(requestedVariant.getVolume());
-                    newVariant.setPrice(requestedVariant.getPrice());
-                    newVariant.setProduct(listProduct);
-                    listProduct.createProductVariant(newVariant);
+
+//            List<ProductVariantEntity> newList = new ArrayList<>();
+
+            //duyệt vào cập nhật danh sách có trong request
+            for (ProductVariantEntity listUpdate : requestList.values()) {
+                if (currentList.containsKey(listUpdate.getVolume())) {
+                    ProductVariantEntity productVariantEntity = currentList.get(listUpdate.getVolume());
+                    //tương lai sẽ vứt loi
+                    if (productVariantEntity.getPrice() < 0) productVariantEntity.setPrice(0);
+                    productVariantEntity.setPrice(listUpdate.getPrice());
                 } else {
-                    for (ProductVariantEntity updatedVariant : listProduct.getVariants()) {
-                        if (requestedVariant.getId().equals(updatedVariant.getId())) {
-                            updatedVariant.setVolume(requestedVariant.getVolume());
-                            updatedVariant.setPrice(requestedVariant.getPrice());
+                    listProduct.createProductVariant(listUpdate);
+                }
+            }
 
-                        }
-                    }
+            for (ProductVariantEntity listUpdate : currentList.values()) {
+                if (!requestList.containsKey(listUpdate.getVolume())) {
+                    listProduct.removeProductVariant(listUpdate);
                 }
             }
         }
@@ -122,6 +126,13 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return productMapper.productToProductResponseDTO(productRepository.save(listProduct));
     }
 
+    private Map<Integer, ProductVariantEntity> listToMap(List<ProductVariantEntity> productEntity) {
+        Map<Integer, ProductVariantEntity> volumeMap = new HashMap<>();
+        for (ProductVariantEntity productVariantEntity : productEntity) {
+            volumeMap.put(productVariantEntity.getVolume(), productVariantEntity);
+        }
+        return volumeMap;
+    }
 
     //thay doi thanh String de quan lý message
     @Override
@@ -222,7 +233,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     @Override
     public ProductResponseDTO showDetail(Long id) {
-      return productMapper.productToProductResponseDTO(getProductEntityById(id));
+        return productMapper.productToProductResponseDTO(getProductEntityById(id));
     }
 
 
