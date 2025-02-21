@@ -1,18 +1,20 @@
 package com.kit.maximus.freshskinweb.dto.request.setting;
 
 
-import jakarta.persistence.Column;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
+import java.io.Serializable;
+
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @ToString
 @Builder
-public class CreateSettingRequest {
+public class SettingRequestDTO implements Serializable {
+
     String websiteName;
     String logo;
     String phone;

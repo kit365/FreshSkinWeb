@@ -1,8 +1,7 @@
 package com.kit.maximus.freshskinweb.controller;
 
 
-import com.kit.maximus.freshskinweb.dto.request.setting.CreateSettingRequest;
-import com.kit.maximus.freshskinweb.dto.request.setting.UpdateSettingRequest;
+import com.kit.maximus.freshskinweb.dto.request.setting.SettingRequestDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.SettingResponse;
 import com.kit.maximus.freshskinweb.service.SettingService;
@@ -22,13 +21,6 @@ public class SettingController {
     SettingService settingService;
 
 
-    @PostMapping("/create")
-    public ResponseAPI<SettingResponse> create(@RequestBody CreateSettingRequest createSettingRequest) {
-        String message = "Create Setting Success";
-        SettingResponse settingResponse = settingService.create(createSettingRequest);
-        return ResponseAPI.<SettingResponse>builder().code(HttpStatus.OK.value()).message(message).data(settingResponse).build();
-    }
-
     @GetMapping("/show")
     public ResponseAPI<List<SettingResponse>> show() {
         String message = "Show Setting Success";
@@ -36,18 +28,13 @@ public class SettingController {
         return ResponseAPI.<List<SettingResponse>>builder().code(HttpStatus.OK.value()).message(message).data(settingResponse).build();
     }
 
-    @PatchMapping("/update/{id}")
-    public ResponseAPI<SettingResponse> update(@PathVariable Long id, @RequestBody UpdateSettingRequest updateSettingRequest) {
+    @PatchMapping("/edit/{id}")
+    public ResponseAPI<SettingResponse> update(@PathVariable("id") String id, @RequestBody SettingRequestDTO settingRequestDTO) {
+        if(id.equalsIgnoreCase("null")) id = "0";
         String message = "Update Setting Success";
-        SettingResponse settingResponse = settingService.update(id, updateSettingRequest);
+        SettingResponse settingResponse = settingService.update(id, settingRequestDTO);
         return ResponseAPI.<SettingResponse>builder().code(HttpStatus.OK.value()).message(message).data(settingResponse).build();
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseAPI<SettingResponse> delete(@PathVariable Long id) {
-        String message = "Delete Setting Success";
-        boolean settingResponse = settingService.delete(id);
-        return ResponseAPI.<SettingResponse>builder().code(HttpStatus.OK.value()).message(message).build();
-    }
 
 }

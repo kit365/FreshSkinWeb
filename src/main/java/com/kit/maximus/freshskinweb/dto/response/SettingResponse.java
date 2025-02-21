@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Getter
 @Builder
 public class SettingResponse implements Serializable {
-    Long settingId;
+    long settingId;
     String websiteName;
     String logo;
     String phone;
