@@ -178,7 +178,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
 //            return null;
 //        }
 
-        map.put("product_category", list.getContent());
+        map.put("brand", list.getContent());
         map.put("currentPage", list.getNumber() + 1);
         map.put("totalItems", list.getTotalElements());
         map.put("totalPages", list.getTotalPages());
