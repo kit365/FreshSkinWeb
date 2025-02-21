@@ -31,7 +31,7 @@ public class OrderEntity extends AbstractEntity {
     UserEntity user;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "order")
-    List<OrderItemsEntity> orderItems;
+    List<OrderItemEntity> orderItems;
 
     @Column(name = "Username")
     String username;

@@ -33,7 +33,7 @@ public class ProductVariantEntity {
     ProductEntity product;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "product")
-    List<OrderItemsEntity> orderItems;
+    List<OrderItemEntity> orderItems;
 
 
 
