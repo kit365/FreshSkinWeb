@@ -4,16 +4,15 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
-import com.kit.maximus.freshskinweb.entity.ProductBrandEntity;
-import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
-import com.kit.maximus.freshskinweb.entity.ProductEntity;
-import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
+import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.ProductMapper;
 import com.kit.maximus.freshskinweb.repository.ProductBrandRepository;
 import com.kit.maximus.freshskinweb.repository.ProductCategoryRepository;
 import com.kit.maximus.freshskinweb.repository.ProductRepository;
+import com.kit.maximus.freshskinweb.repository.SkinTypeRepository;
+import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -44,8 +43,11 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     ProductBrandRepository productBrandRepository;
 
+    SkinTypeRepository skinTypeRepository;
+
     @Override
     public boolean add(CreateProductRequest request) {
+        System.out.println(request);
         ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElse(null);
         ProductBrandEntity productBrandEntity = productBrandRepository.findById(request.getBrandId()).orElse(null);
         ProductEntity productEntity = productMapper.productToProductEntity(request);
@@ -66,6 +68,9 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         productEntity.setSlug(getSlug(request.getTitle()));
 
         request.getVariants().forEach(productEntity::createProductVariant);
+
+        List<SkinTypeEntity> listSkinType = skinTypeRepository.findAllById(request.getSkinTypes());
+        productEntity.setSkinTypes(listSkinType);
 
         productRepository.save(productEntity);
 
@@ -341,6 +346,16 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         } catch (IllegalArgumentException e) {
             log.warn("Invalid status provided: '{}'", status);
             throw new AppException(ErrorCode.STATUS_INVALID);
+        }
+    }
+
+
+    private SkinType getSkinType(String skintype) {
+        try {
+            return SkinType.valueOf(skintype.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid skin type provided: '{}'", skintype);
+            throw new AppException(ErrorCode.SKINTYPE_INVALID);
         }
     }
 

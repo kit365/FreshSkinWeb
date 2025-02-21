@@ -2,6 +2,7 @@ package com.kit.maximus.freshskinweb.dto.request.product;
 
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
+import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
 import jakarta.persistence.Column;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -26,9 +27,9 @@ public class CreateProductRequest implements Serializable {
     String description;
     String thumbnail;
     List<ProductVariantEntity> variants;
+    List<Long> skinTypes;
     int discountPercent;
     Integer position;
-    String skinType;
     /// ////////////////////////////////////////////
     String origin;
     String ingredients;

@@ -2,6 +2,7 @@ package com.kit.maximus.freshskinweb.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -47,6 +48,15 @@ public class ProductEntity extends AbstractEntity {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     List<ProductVariantEntity> variants = new ArrayList<>();
 
+    @ManyToMany
+    @JsonManagedReference
+    @JoinTable(
+            name = "ProductSkinType", // Tên bảng trung gian tùy chỉnh
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "skin_type_id")
+    )
+    List<SkinTypeEntity> skinTypes = new ArrayList<>();
+
     @Column(name = "Title")
     String title;
 
@@ -65,10 +75,6 @@ public class ProductEntity extends AbstractEntity {
 
     @Column(name = "Position")
     Integer position;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "SkinType")
-    SkinType skinType = SkinType.NORMAL;
 
     @Column(name = "Featured")
     boolean featured;
@@ -100,7 +106,6 @@ public class ProductEntity extends AbstractEntity {
         productVariantEntity.setProduct(null);
     }
 
-
     @Override
     public String toString() {
         return "ProductEntity{" +
@@ -112,7 +117,6 @@ public class ProductEntity extends AbstractEntity {
                 ", thumbnail='" + thumbnail + '\'' +
                 ", discountPercent=" + discountPercent +
                 ", position=" + position +
-                ", skinType=" + skinType +
                 ", featured=" + featured +
                 ", origin='" + origin + '\'' +
                 ", ingredients='" + ingredients + '\'' +

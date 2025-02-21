@@ -2,6 +2,7 @@ package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
+import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,9 +27,9 @@ public class ProductResponseDTO implements Serializable {
     String description;
     String thumbnail;
     List<ProductVariantEntity> variants;
+    List<SkinTypeEntity> skinTypes;
     int discountPercent;
     Integer position;
-    String skinType;
     /// ////////////////////////////////////////////
     String origin;
     String ingredients;
