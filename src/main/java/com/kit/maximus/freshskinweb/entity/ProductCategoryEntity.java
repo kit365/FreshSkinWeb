@@ -43,12 +43,10 @@ public class ProductCategoryEntity extends AbstractEntity {
     String image;
 
 
-    @JsonManagedReference
-    @OneToMany(fetch = FetchType.EAGER,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
-            mappedBy = "category")
-//    @JsonIgnoreProperties(value = {"createdAt", "updatedAt","parent", "child"})
+    @ManyToMany(mappedBy = "category")
     List<ProductEntity> products = new ArrayList<>();
+
+
 
 
     @JsonBackReference

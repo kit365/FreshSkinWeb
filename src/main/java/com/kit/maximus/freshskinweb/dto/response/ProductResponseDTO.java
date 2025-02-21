@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
 import lombok.AccessLevel;
@@ -19,7 +20,7 @@ import java.util.List;
 @Builder
 public class ProductResponseDTO implements Serializable {
     Long id;
-    ProductCategoryResponse category;
+    List<ProductCategoryEntity> category;
     ProductBrandResponse brand;
     //    String DiscountID;
     String title;

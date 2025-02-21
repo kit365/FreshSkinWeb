@@ -17,7 +17,7 @@ import java.util.List;
 public class UpdateProductRequest implements Serializable {
 
     String productDetailID;
-    long categoryId;
+    List<Long> categoryId;
     long brandId;
 //    String DiscountID;
     String title;

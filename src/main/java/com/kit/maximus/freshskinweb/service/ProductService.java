@@ -47,8 +47,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     @Override
     public boolean add(CreateProductRequest request) {
-        System.out.println(request);
-        ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElse(null);
+        List<ProductCategoryEntity> productCategoryEntity = productCategoryRepository.findAllById(request.getCategoryId());
         ProductBrandEntity productBrandEntity = productBrandRepository.findById(request.getBrandId()).orElse(null);
         ProductEntity productEntity = productMapper.productToProductEntity(request);
 
@@ -91,8 +90,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         }
 
         //BO SUNG BAN LOI KHONG TIM THAY ID DANH MUC SAN PHAM
-        if (request.getCategoryId() > 0) {
-            ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(request.getCategoryId()).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND));
+        if (request.getCategoryId() != null) {
+            List<ProductCategoryEntity> productCategoryEntity = productCategoryRepository.findAllById(request.getCategoryId());
             listProduct.setCategory(productCategoryEntity);
         }
 

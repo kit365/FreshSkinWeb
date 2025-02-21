@@ -52,40 +52,40 @@ public class SettingEntity {
     @Column(name = "Instagram")
     String instagram;
 
-    @Column(name = "Policy1")
+    @Column(name = "Policy1",columnDefinition = "TEXT")
     String policy1;
 
-    @Column(name = "Policy2")
+    @Column(name = "Policy2",columnDefinition = "TEXT")
     String policy2;
 
-    @Column(name = "Policy3")
+    @Column(name = "Policy3",columnDefinition = "TEXT")
     String policy3;
 
-    @Column(name = "Policy4")
+    @Column(name = "Policy4",columnDefinition = "TEXT")
     String policy4;
 
-    @Column(name = "Policy5")
+    @Column(name = "Policy5",columnDefinition = "TEXT")
     String policy5;
 
-    @Column(name = "Policy6")
+    @Column(name = "Policy6",columnDefinition = "TEXT")
     String policy6;
 
-    @Column(name = "support1")
+    @Column(name = "support1",columnDefinition = "TEXT")
     String support1;
 
-    @Column(name = "support2")
+    @Column(name = "support2",columnDefinition = "TEXT")
     String support2;
 
-    @Column(name = "support3")
+    @Column(name = "support3",columnDefinition = "TEXT")
     String support3;
 
-    @Column(name = "support4")
+    @Column(name = "support4",columnDefinition = "TEXT")
     String support4;
 
-    @Column(name = "support5")
+    @Column(name = "support5",columnDefinition = "TEXT")
     String support5;
 
-    @Column(name = "support6")
+    @Column(name = "support6",columnDefinition = "TEXT")
     String support6;
 
 

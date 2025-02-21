@@ -20,7 +20,7 @@ import java.util.List;
 @Builder
 public class CreateProductRequest implements Serializable {
 
-    long categoryId;
+    List<Long> categoryId;
     long brandId;
     //    String DiscountID;
     String title;
