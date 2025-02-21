@@ -23,4 +23,16 @@ public class UpdateSettingRequest {
     String twitter;
     String youtube;
     String instagram;
+    String policy1;
+    String policy2;
+    String policy3;
+    String policy4;
+    String policy5;
+    String policy6;
+    String support1;
+    String support2;
+    String support3;
+    String support4;
+    String support5;
+    String support6;
 }

@@ -81,6 +81,7 @@ public class SettingService implements BaseService<SettingResponse, CreateSettin
         return false;
     }
 
+
     @Override
     public SettingResponse showDetail(Long aLong) {
         return null;

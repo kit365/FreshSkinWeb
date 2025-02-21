@@ -3,6 +3,7 @@ package com.kit.maximus.freshskinweb.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Setter
 @Getter
@@ -11,41 +12,81 @@ import lombok.*;
 @Entity
 @ToString
 @Table(name = "Setting")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class SettingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "SettingID")
-    private Long settingId;
+    Long settingId;
 
     @Column(name = "WebsiteName")
-    private String websiteName;
+    String websiteName;
 
     @Column(name = "Logo")
-    private String logo;
+    String logo;
 
     @Column(name = "Phone")
-    private String phone;
+    String phone;
 
     @Column(name = "Email")
-    private String email;
+    String email;
 
     @Column(name = "Address")
-    private String address;
+    String address;
 
     @Column(name = "Copyright")
-    private String copyright;
+    String copyright;
 
     @Column(name = "Facebook")
-    private String facebook;
+    String facebook;
 
     @Column(name = "Twitter")
-    private String twitter;
+    String twitter;
 
     @Column(name = "Youtube")
-    private String youtube;
+    String youtube;
 
     @Column(name = "Instagram")
-    private String instagram;
+    String instagram;
+
+    @Column(name = "Policy1")
+    String policy1;
+
+    @Column(name = "Policy2")
+    String policy2;
+
+    @Column(name = "Policy3")
+    String policy3;
+
+    @Column(name = "Policy4")
+    String policy4;
+
+    @Column(name = "Policy5")
+    String policy5;
+
+    @Column(name = "Policy6")
+    String policy6;
+
+    @Column(name = "support1")
+    String support1;
+
+    @Column(name = "support2")
+    String support2;
+
+    @Column(name = "support3")
+    String support3;
+
+    @Column(name = "support4")
+    String support4;
+
+    @Column(name = "support5")
+    String support5;
+
+    @Column(name = "support6")
+    String support6;
+
+
+
 }
 

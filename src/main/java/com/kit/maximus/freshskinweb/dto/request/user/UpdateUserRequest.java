@@ -19,10 +19,8 @@ public class UpdateUserRequest implements Serializable {
 
     @Size(min = 5, max = 20, message = "PASSWORD_INVALID")
     String password;
-
     String firstName;
     String lastName;
-
     String email;
     String phone;
     String avatar;
