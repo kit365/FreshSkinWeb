@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.text.Normalizer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,10 +67,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return true;
     }
 
-    public List<ProductCategoryEntity> getAlls() {
-        return productCategoryRepository.findAllByParentIsNull();
-    }
-
     public List<ProductCategoryResponse> getAll() {
         List<ProductCategoryEntity> list = productCategoryRepository.findAllByParentIsNull();
 
@@ -82,6 +77,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     public ProductCategoryResponse update(Long id, UpdateProductCategoryRequest request) {
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
 
+
         if (StringUtils.hasLength(request.getStatus())) {
             productCategoryEntity.setStatus(getStatus(request.getStatus()));
         }
@@ -89,6 +85,13 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         if (StringUtils.hasLength(request.getTitle())) {
             productCategoryEntity.setSlug(getSlug(request.getTitle()));
         }
+
+
+        if(request.getParentID() != null){
+            ProductCategoryEntity parentCategory = productCategoryRepository.findById(request.getParentID()).orElse(null);
+            productCategoryEntity.setParent(parentCategory);
+        }
+
 
         productCategoryMapper.updateProductCategory(productCategoryEntity, request);
         return productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryRepository.save(productCategoryEntity));
@@ -115,9 +118,25 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     }
 
 
+    //trước mắt về logic:
+    //Khi xóa 1 danh mục cha => các danh mục khác sẽ mồ côi
+    //khi xóa 1 danh mục có chứa product trong đó => hủy liên kết với product
     @Override
     public boolean delete(Long id) {
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
+
+        if(productCategoryEntity.getChild() != null){
+            productCategoryEntity.getChild().forEach(productCategoryEntity1 -> productCategoryEntity1.setParent(null));
+            productCategoryRepository.saveAll(productCategoryEntity.getChild());
+        }
+
+        if(productCategoryEntity.getProducts() != null){
+            productCategoryEntity.getProducts().forEach(productEntity -> {
+                productEntity.setCategory(null);
+                productCategoryRepository.save(productCategoryEntity);
+            });
+        }
+
         log.info("Delete: {}", id);
         productCategoryRepository.delete(productCategoryEntity);
         return true;
@@ -126,6 +145,14 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     @Override
     public boolean delete(List<Long> id) {
         List<ProductCategoryEntity> list = productCategoryRepository.findAllById(id);
+        list.forEach(productCategoryEntity -> {
+            if(productCategoryEntity.getChild() != null){
+                productCategoryEntity.setParent(null);
+            }
+        });
+        productCategoryRepository.saveAll(list);
+
+
         productCategoryRepository.deleteAll(list);
         return true;
     }
