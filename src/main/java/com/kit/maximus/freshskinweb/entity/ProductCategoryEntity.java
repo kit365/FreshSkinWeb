@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "ProductCategory")
+@Table(name = "Category")
 public class ProductCategoryEntity extends AbstractEntity {
 
     @Id

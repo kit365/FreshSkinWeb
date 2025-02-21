@@ -119,5 +119,7 @@ git pull origin main  # Hoặc develop
    git revert <commit_id>  # Tạo commit mới để đảo ngược commit lỗi
    git push origin develop  # Hoặc main
    ```
+   
+
 
 

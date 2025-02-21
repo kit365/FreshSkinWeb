@@ -208,19 +208,19 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status.equalsIgnoreCase("ALL")) {
                 // Tìm kiếm theo tên sản phẩm, không lọc theo status
-                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndDeletedAndParentIsNull(keyword, false, pageable);
+                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, false, pageable);
             } else {
                 // Tìm kiếm theo tên sản phẩm và status
                 Status statusEnum = getStatus(status);
-                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndStatusAndDeletedAndParentIsNull(keyword, statusEnum, pageable, false);
+                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, false);
             }
         } else {
             // Nếu không có keyword, chỉ lọc theo status
             if (status == null || status.equalsIgnoreCase("ALL")) {
-                productCategoryEntities = productCategoryRepository.findAllByDeletedAndParentIsNull(false, pageable);
+                productCategoryEntities = productCategoryRepository.findAllByDeleted(false, pageable);
             } else {
                 Status statusEnum = getStatus(status);
-                productCategoryEntities = productCategoryRepository.findAllByStatusAndDeletedAndParentIsNull(statusEnum, false, pageable);
+                productCategoryEntities = productCategoryRepository.findAllByStatusAndDeleted(statusEnum, false, pageable);
             }
         }
 
@@ -253,19 +253,19 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status.equalsIgnoreCase("ALL")) {
                 // Tìm kiếm theo tên sản phẩm, không lọc theo status
-                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndDeletedAndParentIsNull(keyword, false, pageable);
+                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, true, pageable);
             } else {
                 // Tìm kiếm theo tên sản phẩm và status
                 Status statusEnum = getStatus(status);
-                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndStatusAndDeletedAndParentIsNull(keyword, statusEnum, pageable, true);
+                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, true);
             }
         } else {
             // Nếu không có keyword, chỉ lọc theo status
             if (status == null || status.equalsIgnoreCase("ALL")) {
-                productCategoryEntities = productCategoryRepository.findAllByDeletedAndParentIsNull(true, pageable);
+                productCategoryEntities = productCategoryRepository.findAllByDeleted(true, pageable);
             } else {
                 Status statusEnum = getStatus(status);
-                productCategoryEntities = productCategoryRepository.findAllByStatusAndDeletedAndParentIsNull(statusEnum, true, pageable);
+                productCategoryEntities = productCategoryRepository.findAllByStatusAndDeleted(statusEnum, true, pageable);
             }
         }
 

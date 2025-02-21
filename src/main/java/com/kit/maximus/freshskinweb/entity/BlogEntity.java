@@ -17,9 +17,10 @@ import org.hibernate.annotations.OnDeleteAction;
 @Table(name = "Blog")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BlogEntity extends AbstractEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "BlogID", insertable = false, updatable = false)
+    @Column(name = "BlogID")
     Long id;
 
     @Column(name = "Title")

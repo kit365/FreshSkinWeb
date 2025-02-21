@@ -4,7 +4,9 @@ package com.kit.maximus.freshskinweb.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
+@CrossOrigin(origins = "*")
 @Setter
 @Getter
 @NoArgsConstructor

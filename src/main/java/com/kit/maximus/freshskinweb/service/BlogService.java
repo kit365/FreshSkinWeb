@@ -194,7 +194,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
         Page<BlogResponse> list = blogEntityPage.map(blogMapper::toBlogResponse);
 
-        map.put("products", list.getContent());
+        map.put("blogs", list.getContent());
         map.put("currentPage", list.getNumber() + 1);
         map.put("totalItems", list.getTotalElements());
         map.put("totalPages", list.getTotalPages());
@@ -217,25 +217,25 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status.equalsIgnoreCase("ALL")) {
                 // Tìm kiếm theo tên sản phẩm, không lọc theo status
-                blogEntityPage = blogRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, false, pageable);
+                blogEntityPage = blogRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, true, pageable);
             } else {
                 // Tìm kiếm theo tên sản phẩm và status
                 Status statusEnum = getStatus(status);
-                blogEntityPage = blogRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, false);
+                blogEntityPage = blogRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, true);
             }
         } else {
             // Nếu không có keyword, chỉ lọc theo status
             if (status == null || status.equalsIgnoreCase("ALL")) {
-                blogEntityPage = blogRepository.findAllByDeleted(false, pageable);
+                blogEntityPage = blogRepository.findAllByDeleted(true, pageable);
             } else {
                 Status statusEnum = getStatus(status);
-                blogEntityPage = blogRepository.findAllByStatusAndDeleted(statusEnum, false, pageable);
+                blogEntityPage = blogRepository.findAllByStatusAndDeleted(statusEnum, true, pageable);
             }
         }
 
         Page<BlogResponse> list = blogEntityPage.map(blogMapper::toBlogResponse);
 
-        map.put("products", list.getContent());
+        map.put("blogs", list.getContent());
         map.put("currentPage", list.getNumber() + 1);
         map.put("totalItems", list.getTotalElements());
         map.put("totalPages", list.getTotalPages());

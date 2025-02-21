@@ -1,13 +1,11 @@
-package com.kit.maximus.freshskinweb.controller;
+package com.kit.maximus.freshskinweb.controller.blog;
 
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogCreationRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
-import com.kit.maximus.freshskinweb.repository.BlogRepository;
 import com.kit.maximus.freshskinweb.service.BlogService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +22,8 @@ import java.util.Map;
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-@RequestMapping("/admin/blog")
-public class BlogController {
-
+@RequestMapping("/admin/blogs/trash")
+public class BlogControllerTrash {
     BlogService blogService;
 
     @PostMapping("/create")
@@ -39,14 +36,14 @@ public class BlogController {
 
     @GetMapping()
     public ResponseAPI<Map<String, Object>> getAllBlog(@RequestParam(defaultValue = "1") int page,
-                                                          @RequestParam(defaultValue = "4") int size,
-                                                          @RequestParam(defaultValue = "position") String sortKey,
-                                                          @RequestParam(defaultValue = "desc") String sortValue,
-                                                          @RequestParam(defaultValue = "ALL") String status,
-                                                          @RequestParam(name = "keyword", required = false) String keyword) {
+                                                       @RequestParam(defaultValue = "8") int size,
+                                                       @RequestParam(defaultValue = "position") String sortKey,
+                                                       @RequestParam(defaultValue = "desc") String sortValue,
+                                                       @RequestParam(defaultValue = "ALL") String status,
+                                                       @RequestParam(name = "keyword", required = false) String keyword) {
         String message = "Tim thay List Blog";
         log.info("GET ALL BLOGS");
-        Map<String, Object> result = blogService.getAll(page, size,sortKey, sortValue,status,keyword);
+        Map<String, Object> result = blogService.getTrash(page, size,sortKey, sortValue,status,keyword);
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
@@ -67,14 +64,14 @@ public class BlogController {
 
     @PatchMapping("/edit/{id}")
     public ResponseAPI<BlogResponse> updateBlog(@PathVariable Long id,@RequestBody BlogUpdateRequest request) {
-        String message_succed = "Update Product successfull";
-        String message_failed = "Update Product failed";
+        String message_succed = "Update Blog successfull";
+        String message_failed = "Update Blog failed";
         var result = blogService.update(id, request);
         if (result != null) {
-            log.info("Product updated successfully");
+            log.info("Blog updated successfully");
             return ResponseAPI.<BlogResponse>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
         }
-        log.info("Product update failed");
+        log.info("Blog update failed");
         return ResponseAPI.<BlogResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
