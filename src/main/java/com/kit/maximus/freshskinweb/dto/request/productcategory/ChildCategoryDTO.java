@@ -1,6 +1,10 @@
 package com.kit.maximus.freshskinweb.dto.request.productcategory;
 
-import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,24 +16,15 @@ import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
-@ToString
 @Builder
-public class CreateProductCategoryRequest implements Serializable {
-
+@ToString
+public class ChildCategoryDTO implements Serializable {
     String title;
-
-    String image;
-
-
+    String slug;
     String description;
-
     Integer position;
-
     boolean featured;
-
-    List<ChildCategoryDTO> child;
-
-    long parentID;
+    String image;
+    String status;
 
 }
-

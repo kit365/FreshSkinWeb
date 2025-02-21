@@ -16,7 +16,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@ToString
 @Table(name = "Product")
 public class ProductEntity extends AbstractEntity {
 
@@ -101,4 +100,25 @@ public class ProductEntity extends AbstractEntity {
         productVariantEntity.setProduct(null);
     }
 
+
+    @Override
+    public String toString() {
+        return "ProductEntity{" +
+                "id=" + id +
+                ", variants=" + variants +
+                ", title='" + title + '\'' +
+                ", slug='" + slug + '\'' +
+                ", description='" + description + '\'' +
+                ", thumbnail='" + thumbnail + '\'' +
+                ", discountPercent=" + discountPercent +
+                ", position=" + position +
+                ", skinType=" + skinType +
+                ", featured=" + featured +
+                ", origin='" + origin + '\'' +
+                ", ingredients='" + ingredients + '\'' +
+                ", usageInstructions='" + usageInstructions + '\'' +
+                ", benefits='" + benefits + '\'' +
+                ", skinIssues='" + skinIssues + '\'' +
+                '}';
+    }
 }

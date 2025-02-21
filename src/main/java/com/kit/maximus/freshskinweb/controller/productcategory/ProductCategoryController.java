@@ -5,6 +5,7 @@ import com.kit.maximus.freshskinweb.dto.request.productcategory.UpdateProductCat
 import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
+import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.service.ProductCategoryService;
@@ -150,6 +151,11 @@ public class ProductCategoryController {
     public ResponseAPI<ProductCategoryResponse> getProductCategory(@PathVariable("id") Long id) {
         ProductCategoryResponse result = productCategoryService.showDetail(id);
         return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).data(result).build();
+    }
+
+    @GetMapping("test")
+    public ResponseAPI<?> test() {
+        return new ResponseAPI<>(HttpStatus.OK.value(), "",productCategoryService.getAlls());
     }
 
 
