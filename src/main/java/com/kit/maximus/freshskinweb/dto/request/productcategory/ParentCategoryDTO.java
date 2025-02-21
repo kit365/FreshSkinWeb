@@ -1,6 +1,5 @@
 package com.kit.maximus.freshskinweb.dto.request.productcategory;
 
-import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,22 +13,7 @@ import java.util.List;
 @Getter
 @ToString
 @Builder
-public class CreateProductCategoryRequest implements Serializable {
-
-    String title;
-
-    String image;
-
-
-    String description;
-
-    Integer position;
-
-    boolean featured;
-
-    List<ChildCategoryDTO> child;
-
-    long parentID;
-
+public class ParentCategoryDTO implements Serializable {
+    Long id;
+    List<ChildCategoryDTO> children;
 }
-

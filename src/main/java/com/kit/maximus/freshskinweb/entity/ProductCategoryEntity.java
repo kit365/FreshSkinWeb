@@ -1,5 +1,8 @@
 package com.kit.maximus.freshskinweb.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,10 +12,9 @@ import java.util.List;
 
 @Setter
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
-@ToString
 @Table(name = "ProductCategory")
 public class ProductCategoryEntity extends AbstractEntity {
 
@@ -38,21 +40,64 @@ public class ProductCategoryEntity extends AbstractEntity {
     @Column(name = "image")
     String image;
 
+
     @JsonManagedReference
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, mappedBy = "category")
-    private List<ProductEntity> products = new ArrayList<>();
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
+            mappedBy = "category")
+//    @JsonIgnoreProperties(value = {"createdAt", "updatedAt","parent", "child"})
+    List<ProductEntity> products = new ArrayList<>();
 
 
-    public void createProduct(ProductEntity product) {
-        products.add(product);
-        product.setCategory(this);
+    @JsonBackReference
+//    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    ProductCategoryEntity parent;
+
+    @JsonManagedReference
+    @OneToMany(
+            mappedBy = "parent",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER,
+            orphanRemoval = false
+    )
+    List<ProductCategoryEntity> child = new ArrayList<>();
+
+
+//    public void createProduct(ProductEntity product) {
+//        products.add(product);
+//        product.setCategory(this);
+//    }
+//
+//    public void removeProduct(ProductEntity product) {
+//        products.remove(product);
+//        product.setCategory(null);
+//    }
+//
+//    public void createCategory(ProductCategoryEntity productCategory) {
+//        productCategory.setParent(this);
+//        child.add(productCategory);
+//    }
+//
+//    public void removeCategory(ProductCategoryEntity productCategory) {
+//        child.remove(productCategory);
+//        productCategory.setParent(null);
+//    }
+
+
+    @Override
+    public String toString() {
+        return "ProductCategoryEntity{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", slug='" + slug + '\'' +
+                ", description='" + description + '\'' +
+                ", position=" + position +
+                ", featured=" + featured +
+                ", image='" + image + '\'' +
+                ", products=" + products +
+                ", child=" + child +
+                '}';
     }
-
-    public void removeProduct(ProductEntity product) {
-        products.remove(product);
-        product.setCategory(null);
-    }
-
-
-
 }

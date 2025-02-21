@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,25 +39,43 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
     @Override
     public boolean add(CreateProductCategoryRequest request) {
+        System.out.println(request);
         log.info("Request JSON: {}", request);
 
-        ProductCategoryEntity productCategoryEntity = productCategoryMapper.productCategoryToProductEntity(request);
-
+        ProductCategoryEntity productCategory = productCategoryMapper.productCategoryToProductEntity(request);
 
         if (request.getPosition() == null || request.getPosition() <= 0) {
             Integer size = productCategoryRepository.findAll().size();
-            productCategoryEntity.setPosition(size + 1);
+            productCategory.setPosition(size + 1);
         }
 
-        productCategoryEntity.setSlug(getSlug(request.getTitle()));
+        //nếu cha = null => đây là danh mục chinh
+        ProductCategoryEntity parentCategory = productCategoryRepository.findById(request.getParentID()).orElse(null);
+        productCategory.setParent(parentCategory);
+        productCategory.setSlug(getSlug(request.getTitle()));
 
-        productCategoryRepository.save(productCategoryEntity);
+        //trường hợp tạo cha cùng lúc với con
+        if (request.getChild() != null && !request.getChild().isEmpty()) {
+            List<ProductCategoryEntity> children = productCategoryMapper.childCategoriesToEntity(request.getChild());
 
+            for (ProductCategoryEntity child : children) {
+                child.setParent(productCategory);
+            }
+            productCategory.setChild(children);
+        }
+
+        productCategoryRepository.save(productCategory);
         return true;
     }
 
+    public List<ProductCategoryEntity> getAlls() {
+        return productCategoryRepository.findAllByParentIsNull();
+    }
+
     public List<ProductCategoryResponse> getAll() {
-        return productCategoryMapper.toProductCateroiesResponseDTO(productCategoryRepository.findAll());
+        List<ProductCategoryEntity> list = productCategoryRepository.findAllByParentIsNull();
+
+        return productCategoryMapper.toProductCateroiesResponseDTO(list);
     }
 
     @Override
@@ -70,7 +89,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         if (StringUtils.hasLength(request.getTitle())) {
             productCategoryEntity.setSlug(getSlug(request.getTitle()));
         }
-
 
         productCategoryMapper.updateProductCategory(productCategoryEntity, request);
         return productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryRepository.save(productCategoryEntity));
@@ -142,7 +160,9 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
     @Override
     public ProductCategoryResponse showDetail(Long id) {
-        return productCategoryMapper.productCategoryToProductCategoryResponseDTO(getCategoryById(id));
+//      return productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryRepository.getProductCategoryById(id)
+//      );
+        return null;
     }
 
 
@@ -161,19 +181,19 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status.equalsIgnoreCase("ALL")) {
                 // Tìm kiếm theo tên sản phẩm, không lọc theo status
-                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, false, pageable);
+                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndDeletedAndParentIsNull(keyword, false, pageable);
             } else {
                 // Tìm kiếm theo tên sản phẩm và status
                 Status statusEnum = getStatus(status);
-                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, false);
+                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndStatusAndDeletedAndParentIsNull(keyword, statusEnum, pageable, false);
             }
         } else {
             // Nếu không có keyword, chỉ lọc theo status
             if (status == null || status.equalsIgnoreCase("ALL")) {
-                productCategoryEntities = productCategoryRepository.findAllByDeleted(false, pageable);
+                productCategoryEntities = productCategoryRepository.findAllByDeletedAndParentIsNull(false, pageable);
             } else {
                 Status statusEnum = getStatus(status);
-                productCategoryEntities = productCategoryRepository.findAllByStatusAndDeleted(statusEnum, false, pageable);
+                productCategoryEntities = productCategoryRepository.findAllByStatusAndDeletedAndParentIsNull(statusEnum, false, pageable);
             }
         }
 
@@ -206,19 +226,19 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status.equalsIgnoreCase("ALL")) {
                 // Tìm kiếm theo tên sản phẩm, không lọc theo status
-                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, true, pageable);
+                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndDeletedAndParentIsNull(keyword, false, pageable);
             } else {
                 // Tìm kiếm theo tên sản phẩm và status
                 Status statusEnum = getStatus(status);
-                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, true);
+                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndStatusAndDeletedAndParentIsNull(keyword, statusEnum, pageable, true);
             }
         } else {
             // Nếu không có keyword, chỉ lọc theo status
             if (status == null || status.equalsIgnoreCase("ALL")) {
-                productCategoryEntities = productCategoryRepository.findAllByDeleted(true, pageable);
+                productCategoryEntities = productCategoryRepository.findAllByDeletedAndParentIsNull(true, pageable);
             } else {
                 Status statusEnum = getStatus(status);
-                productCategoryEntities = productCategoryRepository.findAllByStatusAndDeleted(statusEnum, true, pageable);
+                productCategoryEntities = productCategoryRepository.findAllByStatusAndDeletedAndParentIsNull(statusEnum, true, pageable);
             }
         }
 
@@ -293,6 +313,10 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 //            throw new AppException(ErrorCode.KEY_INVALID);
 //        }
 //    }
+
+    public ProductCategoryEntity get(Long id) {
+        return productCategoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND));
+    }
 
 
 }
