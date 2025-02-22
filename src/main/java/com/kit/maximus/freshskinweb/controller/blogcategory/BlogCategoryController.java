@@ -119,6 +119,12 @@ public class BlogCategoryController {
         log.info("BlogCategory delete failed");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
+
+    @GetMapping("show")
+    public ResponseAPI<List<BlogCategoryResponse>> showBlogCategory() {
+        return  ResponseAPI.<List<BlogCategoryResponse>>builder().code(HttpStatus.OK.value()).data(blogCategoryService.getAll()).build();
+    }
+
 /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
