@@ -16,7 +16,7 @@ import java.util.Date;
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BlogResponse implements Serializable {
-    Long blogId;
+    Long id;
     String title;
     String content;
     String thumbnail;

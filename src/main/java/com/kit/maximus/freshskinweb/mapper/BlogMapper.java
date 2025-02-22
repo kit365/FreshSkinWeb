@@ -14,6 +14,7 @@ import java.lang.annotation.Target;
 public interface BlogMapper {
 
     @Mapping(target = "blogCategory", ignore = true)
+
     BlogEntity toBlogEntity (BlogCreationRequest request);
 
     @Mapping(target = "blogCategory", source = "blogCategory")
