@@ -254,7 +254,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         Page<ProductEntity> productEntityPage;
 
-        
+
         // Tìm kiếm theo keyword trước
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status.equalsIgnoreCase("ALL")) {
