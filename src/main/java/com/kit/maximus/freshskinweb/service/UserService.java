@@ -3,16 +3,15 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
-import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.OrderMapper;
 import com.kit.maximus.freshskinweb.mapper.UserMapper;
 import com.kit.maximus.freshskinweb.repository.OrderRepository;
+import com.kit.maximus.freshskinweb.repository.RoleRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.utils.Status;
 
@@ -48,6 +47,8 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
 
     OrderRepository orderRepository;
 
+    RoleRepository roleRepository;
+
 
     @Override
     public boolean add(CreateUserRequest request) {
@@ -58,11 +59,11 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
         UserEntity userEntity = userMapper.toUserEntity(request);
+        userEntity.setRole(roleRepository.findById(request.getRoleId()).orElse(null));
         encodePassword(userEntity);
         userRepository.save(userEntity);
         return true;
     }
-
 
     @Override
     public boolean delete(Long userId) {
@@ -186,6 +187,8 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
             userEntity.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
         }
 
+        // Cập nhật Role
+        userEntity.setRole(roleRepository.findById(userRequestDTO.getRoleId()).orElse(null));
         log.info("Cập nhật user id: {}", id);
         return userMapper.toUserResponseDTO(userRepository.save(userEntity));
     }

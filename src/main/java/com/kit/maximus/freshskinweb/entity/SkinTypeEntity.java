@@ -26,6 +26,9 @@ public class SkinTypeEntity {
     @Column(name = "Type")
     String type;
 
+    @Column(name = "Description")
+    String description;
+
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,CascadeType.REFRESH},fetch = FetchType.LAZY, mappedBy = "skinTypes")
     @JsonIgnore
     List<ProductEntity> Products = new ArrayList<>();

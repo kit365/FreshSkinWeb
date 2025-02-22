@@ -12,7 +12,8 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-
+    
+    @Mapping(target = "role", ignore = true)
     UserEntity toUserEntity(CreateUserRequest userRequestDTO);
 
     UserResponseDTO toUserResponseDTO(UserEntity userEntity);

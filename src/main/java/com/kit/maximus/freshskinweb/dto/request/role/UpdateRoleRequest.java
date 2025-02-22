@@ -12,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 public class UpdateRoleRequest {
     String roleName;
+    Long roleId;
     String title;
     String description;
     String permission;

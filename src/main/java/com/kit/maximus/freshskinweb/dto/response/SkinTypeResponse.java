@@ -11,4 +11,5 @@ import lombok.experimental.FieldDefaults;
 public class SkinTypeResponse {
     long id;
     String type;
+    String description;
 }

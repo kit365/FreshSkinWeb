@@ -4,12 +4,8 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogCreationRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
-
-import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
-import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.BlogMapper;
@@ -65,8 +61,10 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         if (blogEntity == null) {
             throw new AppException(ErrorCode.BLOG_NOT_FOUND);
         }
-        BlogCategoryEntity blogCategoryEntity = blogCategoryRepository.findById(request.getCategoryID()).orElseThrow(() -> new AppException(ErrorCode.BLOG_NOT_FOUND));
-        if (blogCategoryEntity != null) {
+
+        //Check nếu không thay đổi BlogCategory thì sẽ ko set giá trị mới
+        if(request.getCategoryID() != null){
+            BlogCategoryEntity blogCategoryEntity = blogCategoryRepository.findByblogCategoryId(request.getCategoryID());
             blogEntity.setBlogCategory(blogCategoryEntity);
         }
 
@@ -78,6 +76,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
         return blogMapper.toBlogResponse(blogRepository.save(blogEntity));
     }
+
 
     //Cập nhật trạng thái, xóa mềm, khôi phục cho All ID được chọn
     //Dùng khi user tích vào nhiều ô phẩn tử, sau đó chọn thao tác, ẩn, xóa mềm, khôi phục
@@ -126,7 +125,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     public boolean delete(List<Long> longs) {
         List<BlogEntity> blogEntities = blogRepository.findAllById(longs);
         blogRepository.deleteAll(blogEntities);
-        return false;
+        return true;
     }
 
     //XÓA MỀM 1 BLOG

@@ -40,6 +40,7 @@ public enum ErrorCode {
 
     //Role
     ROLE_NOT_FOUND(404, "Role Not Found"),
+    ROLE_EXISTED(400, "Role already existed"),
 
     //ORDER
     ORDER_NOT_FOUND(404, "Order Not Found"),

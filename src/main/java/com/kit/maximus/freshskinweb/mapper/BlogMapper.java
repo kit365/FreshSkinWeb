@@ -4,9 +4,8 @@ import com.kit.maximus.freshskinweb.dto.request.blog.BlogCreationRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
+import org.springframework.context.annotation.Bean;
 
 import java.lang.annotation.Target;
 
@@ -14,12 +13,12 @@ import java.lang.annotation.Target;
 public interface BlogMapper {
 
     @Mapping(target = "blogCategory", ignore = true)
-
-    BlogEntity toBlogEntity (BlogCreationRequest request);
+    BlogEntity toBlogEntity(BlogCreationRequest request);
 
     @Mapping(target = "blogCategory", source = "blogCategory")
-    BlogResponse toBlogResponse (BlogEntity request);
+    BlogResponse toBlogResponse(BlogEntity request);
 
     @Mapping(target = "blogCategory", ignore = true)
-    void updateBlogEntity (@MappingTarget BlogEntity entity, BlogUpdateRequest request);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateBlogEntity(@MappingTarget BlogEntity entity, BlogUpdateRequest request);
 }

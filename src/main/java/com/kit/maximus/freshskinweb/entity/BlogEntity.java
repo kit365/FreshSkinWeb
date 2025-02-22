@@ -20,7 +20,7 @@ public class BlogEntity extends AbstractEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "BlogID")
+    @Column(name = "Id")
     Long id;
 
     @Column(name = "Title")

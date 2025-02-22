@@ -1,11 +1,14 @@
 package com.kit.maximus.freshskinweb.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.kit.maximus.freshskinweb.utils.TypeUser;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +26,6 @@ public class UserEntity extends AbstractEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "UserID", insertable = false, updatable = false)
     Long id;
-
 
     @Column(name = "Username", updatable = false, unique = true, nullable = false)
     String username;
@@ -62,6 +64,12 @@ public class UserEntity extends AbstractEntity {
     @JsonManagedReference
     List<OrderEntity> orders  = new ArrayList<>();
 
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @JoinColumn(name = "role_id")
+    RoleEntity role;
+
     public void createOrder(OrderEntity order) {
             orders.add(order);
             order.setUser(this);
@@ -71,9 +79,6 @@ public class UserEntity extends AbstractEntity {
         orders.remove(order);
         order.setUser(null);
     }
-
-
-
 
 
 //    String roleId;

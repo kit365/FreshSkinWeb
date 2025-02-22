@@ -16,8 +16,12 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 
 public interface RoleMapper {
+
     RoleEntity toRoleEntity(CreateRoleRequest role);
+
     RoleResponseDTO toRoleResponseDTO(RoleEntity role);
+
     List<RoleResponseDTO> toRoleResponseDTO (List<RoleEntity> RoleEntities);
+
     void updateRole(@MappingTarget RoleEntity user, UpdateRoleRequest userDTO);
 }
