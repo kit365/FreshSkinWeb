@@ -30,7 +30,7 @@ public class ProductCategoryEntity extends AbstractEntity {
     @Column(name = "Slug")
     String slug;
 
-    @Column(name = "Description", columnDefinition = "TEXT")
+    @Column(name = "Description", columnDefinition = "MEDIUMTEXT")
     String description;
 
     @Column(name = "Position")

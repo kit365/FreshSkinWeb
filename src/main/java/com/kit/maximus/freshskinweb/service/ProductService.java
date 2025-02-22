@@ -246,12 +246,15 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         Map<String, Object> map = new HashMap<>();
 
         Sort.Direction direction = getSortDirection(sortDirection);
+
+
         Sort sort = Sort.by(direction, sortKey);
         int p = (page > 0) ? page - 1 : 0;
         Pageable pageable = PageRequest.of(p, size, sort);
 
         Page<ProductEntity> productEntityPage;
 
+        
         // Tìm kiếm theo keyword trước
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status.equalsIgnoreCase("ALL")) {

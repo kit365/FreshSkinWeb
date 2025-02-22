@@ -67,7 +67,7 @@ public class ProductEntity extends AbstractEntity {
     @Column(name = "Slug")
     String slug;
 
-    @Column(columnDefinition = "Text", name = "Description")
+    @Column(columnDefinition = "MEDIUMTEXT", name = "Description")
     String description;
 
     @Column(name = "Thumbnail")

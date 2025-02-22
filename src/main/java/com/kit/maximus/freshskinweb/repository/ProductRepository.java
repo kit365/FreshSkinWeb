@@ -6,6 +6,8 @@ import com.kit.maximus.freshskinweb.utils.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -22,4 +24,9 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     Page<ProductEntity> findAllByDeleted(boolean b, Pageable pageable);
 
     Page<ProductEntity> findAllByStatusAndDeleted(Status statusEnum, boolean b, Pageable pageable);
+
+//    @Query("SELECT p FROM ProductEntity p " +
+//            "JOIN p.variants v " +
+//            "WHERE v.price = :price")
+//    Page<ProductEntity> findByProductVariantPrice(@Param("price") double price);
 }

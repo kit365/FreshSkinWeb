@@ -25,7 +25,7 @@ public class RoleEntity extends AbstractEntity {
     @Column(name = "title")
     String title;
 
-    @Column(name = "description")
+    @Column(name = "description",columnDefinition = "MEDIUMTEXT")
     String description;
 
     @Column(name = "permission")

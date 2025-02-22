@@ -29,7 +29,7 @@ public class ProductBrandEntity extends AbstractEntity {
     @Column(name = "image")
     String image;
 
-    @Column(name = "Description", columnDefinition = "TEXT")
+    @Column(name = "Description", columnDefinition = "MEDIUMTEXT")
     String description;
 
     @Column(name = "Position")
