@@ -35,7 +35,7 @@ public class BlogCategoryController {
         return ResponseAPI.<BlogCategoryResponse>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
-    @GetMapping("/edit/{id}")
+    @PatchMapping("/edit/{id}")
     public ResponseAPI<BlogCategoryResponse> updateBlogCategory(@PathVariable Long id ,@RequestBody UpdateBlogCategoryRequest request){
         String message = "Update blog category successfully";
         BlogCategoryResponse result = blogCategoryService.update(id, request);

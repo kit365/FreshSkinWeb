@@ -19,5 +19,6 @@ public class UpdateBlogCategoryRequest implements Serializable {
     String description;
     Integer position;
     String status;
+    boolean deleted;
     List<BlogEntity> blog;
 }

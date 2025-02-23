@@ -23,5 +23,6 @@ public interface BlogCategoryMapper {
 
 
     @Mapping(target = "blog", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateBlogCategory(@MappingTarget BlogCategoryEntity blogCategoryEntity, UpdateBlogCategoryRequest productRequestDTO);
 }

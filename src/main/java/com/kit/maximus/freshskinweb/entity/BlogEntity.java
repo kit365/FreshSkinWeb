@@ -44,6 +44,6 @@ public class BlogEntity extends AbstractEntity {
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "BlogCategoryId")
+    @JoinColumn(name = "BlogCategoryId", nullable = true)
     BlogCategoryEntity blogCategory;
 }

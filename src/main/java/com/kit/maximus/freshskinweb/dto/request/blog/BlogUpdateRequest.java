@@ -17,7 +17,6 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class BlogUpdateRequest implements Serializable {
-
     String title;
     String content;
     String thumbnail;

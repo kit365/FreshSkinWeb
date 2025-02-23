@@ -31,6 +31,7 @@ public class BlogResponse implements Serializable {
     Date createdAt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date updatedAt;
+
     BlogCategoryResponse blogCategory;
 
 }

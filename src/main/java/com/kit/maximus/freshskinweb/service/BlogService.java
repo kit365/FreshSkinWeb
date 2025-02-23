@@ -42,15 +42,21 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     @Override
     public boolean add(BlogCreationRequest request) {
         BlogEntity blogEntity = blogMapper.toBlogEntity(request);
-        BlogCategoryEntity blogCategoryEntity = blogCategoryRepository.findById(request.getCategoryID()).orElseThrow(() -> new AppException(ErrorCode.BLOG_NOT_FOUND));
-        if (blogCategoryEntity != null) {
+        BlogCategoryEntity blogCategoryEntity = null;
+
+        if (request.getCategoryID() != null) {
+            blogCategoryEntity = blogCategoryRepository.findById(request.getCategoryID()).orElseThrow(()-> new AppException(ErrorCode.BLOG_CATEGORY_NOT_FOUND));
             blogEntity.setBlogCategory(blogCategoryEntity);
+        } else {
+            blogEntity.setBlogCategory(null);
         }
+
         if (request.getPosition() == null || request.getPosition() <= 0) {
             Integer size = blogRepository.findAll().size();
             blogEntity.setPosition(size + 1);
         }
         blogEntity.setSlug(getSlug(request.getTitle()));
+
         blogRepository.save(blogEntity);
         return true;
     }
@@ -63,9 +69,13 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         }
 
         //Check nếu không thay đổi BlogCategory thì sẽ ko set giá trị mới
-        if(request.getCategoryID() != null){
-            BlogCategoryEntity blogCategoryEntity = blogCategoryRepository.findByblogCategoryId(request.getCategoryID());
+        BlogCategoryEntity blogCategoryEntity = null;
+
+        if (request.getCategoryID() != null) {
+            blogCategoryEntity = blogCategoryRepository.findById(request.getCategoryID()).orElseThrow(()-> new AppException(ErrorCode.BLOG_CATEGORY_NOT_FOUND));
             blogEntity.setBlogCategory(blogCategoryEntity);
+        } else {
+            blogEntity.setBlogCategory(null);
         }
 
         if (StringUtils.hasLength(request.getTitle())) {
@@ -73,8 +83,10 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         }
 
         blogMapper.updateBlogEntity(blogEntity, request);
-
         return blogMapper.toBlogResponse(blogRepository.save(blogEntity));
+    }
+    public BlogCategoryEntity getBlogCategoryEntityById(Long id) {
+        return blogCategoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.BLOG_NOT_FOUND));
     }
 
 

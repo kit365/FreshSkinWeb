@@ -19,10 +19,10 @@ import java.util.List;
 public class BlogCategoryEntity extends AbstractEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "BlogCategoryID", insertable = false, updatable = false)
-    Long blogCategoryId;
+    @Column(name = "Id", insertable = false, updatable = false)
+    Long id;
 
-    @Column(name = "Categoryname")
+    @Column(name = "title")
     String title;
 
     @Column(name = "Description")
