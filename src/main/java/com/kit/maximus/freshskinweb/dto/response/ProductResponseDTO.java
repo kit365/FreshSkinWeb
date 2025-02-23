@@ -4,11 +4,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,6 +14,7 @@ import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
+@Setter
 @ToString
 @Builder
 public class ProductResponseDTO implements Serializable {
@@ -26,7 +25,8 @@ public class ProductResponseDTO implements Serializable {
     String title;
     String slug;
     String description;
-    String thumbnail;
+//    List<String> thumbnail;
+    List<MultipartFile> thumbnail;
     List<ProductVariantEntity> variants;
     List<SkinTypeEntity> skinTypes;
     int discountPercent;

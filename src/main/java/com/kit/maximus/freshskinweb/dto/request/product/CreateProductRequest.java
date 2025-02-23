@@ -1,14 +1,12 @@
 package com.kit.maximus.freshskinweb.dto.request.product;
 
-import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
-import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
-import jakarta.persistence.Column;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 import java.util.List;
@@ -25,7 +23,8 @@ public class CreateProductRequest implements Serializable {
     //    String DiscountID;
     String title;
     String description;
-    String thumbnail;
+    List<MultipartFile> thumbnail;
+//        List<String> thumbnail;
     List<ProductVariantEntity> variants;
     List<Long> skinTypes;
     int discountPercent;

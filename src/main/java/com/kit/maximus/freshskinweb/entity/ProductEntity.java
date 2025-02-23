@@ -70,9 +70,12 @@ public class ProductEntity extends AbstractEntity {
     @Column(columnDefinition = "MEDIUMTEXT", name = "Description")
     String description;
 
-    @Column(name = "Thumbnail")
-    String thumbnail;
+//    @ElementCollection // Lưu danh sách ảnh trong một bảng riêng
+//     List<String> thumbnail;
 
+    @ElementCollection
+    @Column(name = "Thumbnail")
+    List<String> thumbnail;
 
     @Column(name = "DiscountPercentage")
     int discountPercent;

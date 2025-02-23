@@ -1,6 +1,8 @@
 package com.kit.maximus.freshskinweb.service;
 
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
@@ -14,6 +16,7 @@ import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.repository.SkinTypeRepository;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.Status;
+import com.nimbusds.jose.util.IOUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,7 +27,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.Normalizer;
 import java.util.*;
 
@@ -45,11 +51,29 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     SkinTypeRepository skinTypeRepository;
 
+    Cloudinary cloudinary;
+
+
     @Override
     public boolean add(CreateProductRequest request) {
         List<ProductCategoryEntity> productCategoryEntity = productCategoryRepository.findAllById(request.getCategoryId());
         ProductBrandEntity productBrandEntity = productBrandRepository.findById(request.getBrandId()).orElse(null);
         ProductEntity productEntity = productMapper.productToProductEntity(request);
+
+
+        if (request.getThumbnail() != null) {
+            List<String> thumbnails = new ArrayList<>();
+            request.getThumbnail().forEach(s -> {
+                try {
+                    String img = uploadImage(s);
+                    thumbnails.add(img);
+                } catch (IOException e) {
+                    log.error("Upload image failed: {}", s, e);
+                }
+            });
+            productEntity.setThumbnail(thumbnails);
+        }
+
 
         if (productCategoryEntity != null) {
             productEntity.setCategory(productCategoryEntity);
@@ -77,17 +101,62 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     }
 
 
+    //noted: thêm set thumb vao entity sau khi update
     @Override
     public ProductResponseDTO update(Long id, UpdateProductRequest request) {
         if (StringUtils.hasLength(request.getStatus())) {
             request.setStatus(request.getStatus().toUpperCase());
             getStatus(request.getStatus());
         }
+
         ProductEntity listProduct = getProductEntityById(id);
+
+//        //Upload hinh => Xoa hinh cu, add hinh moi
+//        if (request.getThumbnail() != null) {
+//
+//            List<String> oldThumbnails = listProduct.getThumbnail();
+//            List<MultipartFile> newThumbnails = request.getThumbnail();
+//            List<String> updatedThumbnails = new ArrayList<>();
+
+//           String thumbnailBytes =  IOUtils.readFileToString( request.getThumbnail());
+
+
+//            //Xóa hình khi không có trong request
+//            for (String oldThumbnail : oldThumbnails) {
+//                if (!newThumbnails.contains(oldThumbnail)) {
+//                    try {
+//                        long start = System.currentTimeMillis();
+//                        deleteImageFromCloudinary(oldThumbnail);
+//                        long end = System.currentTimeMillis();
+//                        log.info("Thời gian xóa ảnh {}: {}ms", oldThumbnail, (end - start));
+//                    } catch (IOException e) {
+//                        log.error("delete image error: {}", oldThumbnail);
+//                        throw new RuntimeException(e);
+//                    }
+//                } else {
+//                    updatedThumbnails.add(oldThumbnail);
+//                }
+//            }
+//
+//            //Cập nhập lại hình mới
+//            for (MultipartFile newThumbnail : newThumbnails) {
+//                if (!oldThumbnails.contains(newThumbnail)) {
+//                    try {
+//                        String img = uploadImage(newThumbnail);
+//                        updatedThumbnails.add(img);
+//                    } catch (IOException e) {
+//                        log.error("delete image error: {}", newThumbnail);
+//                        throw new RuntimeException(e);
+//                    }
+//                }
+//            }
+//            listProduct.setThumbnail(updatedThumbnails);
+//        }
 
         if (StringUtils.hasLength(request.getTitle())) {
             listProduct.setSlug(getSlug(request.getTitle()));
         }
+
 
         //BO SUNG BAN LOI KHONG TIM THAY ID DANH MUC SAN PHAM
         if (request.getCategoryId() != null) {
@@ -101,12 +170,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         }
 
         if (request.getVariants() != null && !request.getVariants().isEmpty()) {
-            Map<Integer, ProductVariantEntity> requestList = listToMap(request.getVariants());
-            Map<Integer, ProductVariantEntity> currentList = listToMap(listProduct.getVariants());
-
-
-//            List<ProductVariantEntity> newList = new ArrayList<>();
-
+            Map<Integer, ProductVariantEntity> requestList = listProductVariantToMap(request.getVariants());
+            Map<Integer, ProductVariantEntity> currentList = listProductVariantToMap(listProduct.getVariants());
             //duyệt vào cập nhật danh sách có trong request
             for (ProductVariantEntity listUpdate : requestList.values()) {
                 if (currentList.containsKey(listUpdate.getVolume())) {
@@ -130,7 +195,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return productMapper.productToProductResponseDTO(productRepository.save(listProduct));
     }
 
-    private Map<Integer, ProductVariantEntity> listToMap(List<ProductVariantEntity> productEntity) {
+    private Map<Integer, ProductVariantEntity> listProductVariantToMap(List<ProductVariantEntity> productEntity) {
         Map<Integer, ProductVariantEntity> volumeMap = new HashMap<>();
         for (ProductVariantEntity productVariantEntity : productEntity) {
             volumeMap.put(productVariantEntity.getVolume(), productVariantEntity);
@@ -170,6 +235,16 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     public boolean delete(Long id) {
         ProductEntity productEntity = getProductEntityById(id);
 
+        if (productEntity.getThumbnail() != null) {
+            for (String deleteThumbnails : productEntity.getThumbnail()) {
+                try {
+                    deleteImageFromCloudinary(deleteThumbnails);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
         log.info("Delete: {}", id);
         productRepository.delete(productEntity);
         return true;
@@ -183,6 +258,19 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     @Override
     public boolean delete(List<Long> longs) {
         List<ProductEntity> productEntities = productRepository.findAllById(longs);
+
+        productEntities.forEach(productEntity -> {
+            if (productEntity.getThumbnail() != null) {
+                for (String deleteThumbnails : productEntity.getThumbnail()) {
+                    try {
+                        deleteImageFromCloudinary(deleteThumbnails);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+
+        });
 
         productRepository.deleteAll(productEntities);
         return true;
@@ -202,20 +290,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         productEntity.setDeleted(true);
         productRepository.save(productEntity);
         return true;
-    }
-
-
-    //xóa product_variant
-    public boolean deleteProductVariants(Long id, ProductVariantEntity productVariantEntities) {
-        ProductEntity productEntity = getProductEntityById(id);
-
-        for (ProductVariantEntity request : productEntity.getVariants()) {
-            if (request.getId().equals(productVariantEntities.getId())) {
-                productEntity.removeProductVariant(productVariantEntities);
-                return true;
-            }
-        }
-        return false;
     }
 
 
@@ -275,7 +349,11 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             }
         }
 
+
         Page<ProductResponseDTO> list = productEntityPage.map(productMapper::productToProductResponseDTO);
+        list.forEach(productResponseDTO -> {
+            productResponseDTO.setThumbnail(productResponseDTO.getThumbnail());
+        });
 
 //        if (!list.hasContent()) {
 //            return null;
@@ -380,22 +458,41 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 .toLowerCase();
     }
 
-    private boolean checkDuplicateVolume(List<ProductVariantEntity> entityList, Long productId) {
-        Map<Integer, ProductVariantEntity> volumeMap = new HashMap<>();
 
-        ProductEntity listProduct = getProductEntityById(productId);
-        List<ProductVariantEntity> productVariantEntities = listProduct.getVariants();
+    //Hàm up file dể up hinh len clound
+    private String uploadImage(MultipartFile file) throws IOException {
+        Map params = ObjectUtils.asMap(
+                "use_filename", true,
+                "unique_filename", false,
+                "overwrite", true
+        );
 
-        for (ProductVariantEntity productVariantEntity : productVariantEntities) {
-            volumeMap.put(productVariantEntity.getVolume(), productVariantEntity);
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
+        return uploadResult.get("secure_url").toString();
+    }
+
+    //Hàm up file bằng link
+    private String uploadImageFromUrl(String imageUrl) throws IOException {
+        Map params = ObjectUtils.asMap(
+                "use_filename", true,
+                "unique_filename", false,
+                "overwrite", true
+        );
+
+        Map uploadResult = cloudinary.uploader().upload(imageUrl, params);
+        return uploadResult.get("secure_url").toString();
+    }
+
+    private void deleteImageFromCloudinary(String imageUrl) throws IOException {
+        if (imageUrl != null) {
+            String publicId = extractPublicId(imageUrl);
+            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
         }
+    }
 
-        for (ProductVariantEntity productVariantEntity : entityList) {
-            if (volumeMap.containsKey(productVariantEntity.getVolume())) {
-                throw new AppException(ErrorCode.VOLUME_EXISTED);
-            }
-        }
-        return true;
+    //lấy hình từ ID
+    private String extractPublicId(String imageUrl) {
+        return imageUrl.substring(imageUrl.lastIndexOf("/") + 1, imageUrl.lastIndexOf(".")); // Lấy ID ảnh từ URL
     }
 
 }

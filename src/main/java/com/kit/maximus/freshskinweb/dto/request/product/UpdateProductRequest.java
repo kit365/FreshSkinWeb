@@ -5,6 +5,7 @@ import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 import java.util.List;
@@ -22,7 +23,8 @@ public class UpdateProductRequest implements Serializable {
 //    String DiscountID;
     String title;
     String description;
-    String thumbnail;
+    List<MultipartFile> thumbnail;
+//    List<String> thumbnail;
     List<ProductVariantEntity> variants;
     List<SkinTypeEntity> skinTypes;
     int discountPercent;
