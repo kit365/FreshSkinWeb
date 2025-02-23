@@ -100,6 +100,51 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return true;
     }
 
+    public boolean adds(CreateProductRequest request, List<MultipartFile> file ) {
+        List<ProductCategoryEntity> productCategoryEntity = productCategoryRepository.findAllById(request.getCategoryId());
+        ProductBrandEntity productBrandEntity = productBrandRepository.findById(request.getBrandId()).orElse(null);
+        ProductEntity productEntity = productMapper.productToProductEntity(request);
+
+
+        if (file != null) {
+            List<String> thumbnails = new ArrayList<>();
+            file.forEach(s -> {
+                try {
+                    String img = uploadImage(s);
+                    thumbnails.add(img);
+                } catch (IOException e) {
+                    log.error("Upload image failed: {}", s, e);
+                }
+            });
+            productEntity.setThumbnail(thumbnails);
+        }
+
+
+        if (productCategoryEntity != null) {
+            productEntity.setCategory(productCategoryEntity);
+        }
+
+        if (productBrandEntity != null) {
+            productEntity.setBrand(productBrandEntity);
+        }
+
+        if (request.getPosition() == null || request.getPosition() <= 0) {
+            Integer size = productRepository.findAll().size();
+            productEntity.setPosition(size + 1);
+        }
+
+        productEntity.setSlug(getSlug(request.getTitle()));
+
+        request.getVariants().forEach(productEntity::createProductVariant);
+
+        List<SkinTypeEntity> listSkinType = skinTypeRepository.findAllById(request.getSkinTypes());
+        productEntity.setSkinTypes(listSkinType);
+
+        productRepository.save(productEntity);
+
+        return true;
+    }
+
 
     //noted: thêm set thumb vao entity sau khi update
     @Override

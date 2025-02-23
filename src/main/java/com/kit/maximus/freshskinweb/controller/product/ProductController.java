@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.controller.product;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
@@ -12,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -27,13 +30,32 @@ public class ProductController {
 
     ProductService productService;
 
-    @PostMapping("create")
-    public ResponseAPI<ProductResponseDTO> createProduct(@RequestBody CreateProductRequest productRequestDTO) {
-        String message = "Create Product successfull";
-        var result = productService.add(productRequestDTO);
-        log.info("CREATE PRODUCT REQUEST)");
-        return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
+    @PostMapping(value = "create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseAPI<ProductResponseDTO> createProduct(
+            @RequestPart("request") String requestJson,  // Nhận JSON dưới dạng String
+            @RequestPart(value = "thumbnail", required = false) List<MultipartFile> images) { // Nhận hình ảnh
+        try {
+            // Chuyển requestJson (String) thành CreateProductRequest object
+            ObjectMapper objectMapper = new ObjectMapper();
+            CreateProductRequest productRequestDTO = objectMapper.readValue(requestJson, CreateProductRequest.class);
+                productRequestDTO.setThumbnail(images);
+            // Gọi service xử lý
+            var result = productService.add(productRequestDTO);
+
+            log.info("CREATE PRODUCT REQUEST SUCCESS");
+            return ResponseAPI.<ProductResponseDTO>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Create Product successful")
+                    .build();
+        } catch (Exception e) {
+            log.error("CREATE PRODUCT ERROR: " + e.getMessage());
+            return ResponseAPI.<ProductResponseDTO>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message("Error creating product")
+                    .build();
+        }
     }
+
 
     @GetMapping()
     public ResponseAPI<Map<String, Object>> getAllProduct(@RequestParam(defaultValue = "1") int page,
