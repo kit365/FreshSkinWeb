@@ -43,6 +43,19 @@ public class BlogCategoryController {
         return ResponseAPI.<BlogCategoryResponse>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
+    @GetMapping()
+    public ResponseAPI<Map<String, Object>> getAllBlogCategory(@RequestParam(defaultValue = "1") int page,
+                                                       @RequestParam(defaultValue = "8") int size,
+                                                       @RequestParam(defaultValue = "position") String sortKey,
+                                                       @RequestParam(defaultValue = "desc") String sortValue,
+                                                       @RequestParam(defaultValue = "ALL") String status,
+                                                       @RequestParam(name = "keyword", required = false) String keyword) {
+        String message = "Tim thay List Blog";
+        log.info("GET ALL BLOGS");
+        Map<String, Object> result = blogCategoryService.getAll(page, size,sortKey, sortValue,status,keyword);
+        return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
+    }
+
     @DeleteMapping("delete/{id}")
     public ResponseAPI<String> deleteBlogCategory(@PathVariable Long id) {
         String message_succed = "Delete Blog Category successfull";
