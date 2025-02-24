@@ -34,12 +34,15 @@ public class ProductController {
     public ResponseAPI<ProductResponseDTO> createProduct(
             @RequestPart("request") String requestJson,  // Nhận JSON dưới dạng String
             @RequestPart(value = "thumbnail", required = false) List<MultipartFile> images) { // Nhận hình ảnh
+
+        log.info("requestJson:{}", requestJson);
+        log.info("images:{}", images);
+
         try {
-            // Chuyển requestJson (String) thành CreateProductRequest object
             ObjectMapper objectMapper = new ObjectMapper();
             CreateProductRequest productRequestDTO = objectMapper.readValue(requestJson, CreateProductRequest.class);
-                productRequestDTO.setThumbnail(images);
-            // Gọi service xử lý
+            productRequestDTO.setThumbnail(images);
+
             var result = productService.add(productRequestDTO);
 
             log.info("CREATE PRODUCT REQUEST SUCCESS");
@@ -47,6 +50,7 @@ public class ProductController {
                     .code(HttpStatus.OK.value())
                     .message("Create Product successful")
                     .build();
+
         } catch (Exception e) {
             log.error("CREATE PRODUCT ERROR: " + e.getMessage());
             return ResponseAPI.<ProductResponseDTO>builder()
@@ -66,24 +70,24 @@ public class ProductController {
                                                           @RequestParam(name = "keyword", required = false) String keyword) {
         String message = "Tim thay List Product";
         log.info("GET ALL PRODUCTS");
-        Map<String, Object> result = productService.getAll(page, size,sortKey, sortValue,status,keyword);
+        Map<String, Object> result = productService.getAll(page, size, sortKey, sortValue, status, keyword);
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
 
     @PatchMapping("change-multi")
-    public ResponseAPI<String> updataProduct(@RequestBody Map<String,Object>  productRequestDTO) {
+    public ResponseAPI<String> updataProduct(@RequestBody Map<String, Object> productRequestDTO) {
 
-        if(!productRequestDTO.containsKey("id")) {
+        if (!productRequestDTO.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
             throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
         }
 
-        List<Long> ids =  (List<Long>) productRequestDTO.get("id");
-        String status  =  productRequestDTO.get("status").toString();
+        List<Long> ids = (List<Long>) productRequestDTO.get("id");
+        String status = productRequestDTO.get("status").toString();
 
         var result = productService.update(ids, status);
-            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
+        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
     @PatchMapping("edit/{id}")
@@ -141,9 +145,9 @@ public class ProductController {
 
 
     @DeleteMapping("delete")
-    public ResponseAPI<String> deleteProduct(@RequestBody Map<String,Object> productRequestDTO) {
+    public ResponseAPI<String> deleteProduct(@RequestBody Map<String, Object> productRequestDTO) {
 
-        if(!productRequestDTO.containsKey("id")) {
+        if (!productRequestDTO.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
             throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
         }

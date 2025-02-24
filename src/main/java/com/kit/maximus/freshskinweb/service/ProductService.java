@@ -16,7 +16,6 @@ import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.repository.SkinTypeRepository;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.Status;
-import com.nimbusds.jose.util.IOUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,9 +28,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.Normalizer;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -65,52 +65,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             List<String> thumbnails = new ArrayList<>();
             request.getThumbnail().forEach(s -> {
                 try {
-                    String img = uploadImage(s);
-                    thumbnails.add(img);
-                } catch (IOException e) {
-                    log.error("Upload image failed: {}", s, e);
-                }
-            });
-            productEntity.setThumbnail(thumbnails);
-        }
-
-
-        if (productCategoryEntity != null) {
-            productEntity.setCategory(productCategoryEntity);
-        }
-
-        if (productBrandEntity != null) {
-            productEntity.setBrand(productBrandEntity);
-        }
-
-        if (request.getPosition() == null || request.getPosition() <= 0) {
-            Integer size = productRepository.findAll().size();
-            productEntity.setPosition(size + 1);
-        }
-
-        productEntity.setSlug(getSlug(request.getTitle()));
-
-        request.getVariants().forEach(productEntity::createProductVariant);
-
-        List<SkinTypeEntity> listSkinType = skinTypeRepository.findAllById(request.getSkinTypes());
-        productEntity.setSkinTypes(listSkinType);
-
-        productRepository.save(productEntity);
-
-        return true;
-    }
-
-    public boolean adds(CreateProductRequest request, List<MultipartFile> file ) {
-        List<ProductCategoryEntity> productCategoryEntity = productCategoryRepository.findAllById(request.getCategoryId());
-        ProductBrandEntity productBrandEntity = productBrandRepository.findById(request.getBrandId()).orElse(null);
-        ProductEntity productEntity = productMapper.productToProductEntity(request);
-
-
-        if (file != null) {
-            List<String> thumbnails = new ArrayList<>();
-            file.forEach(s -> {
-                try {
-                    String img = uploadImage(s);
+                    String img = uploadImageFromFile(s,getSlug(request.getTitle()));
                     thumbnails.add(img);
                 } catch (IOException e) {
                     log.error("Upload image failed: {}", s, e);
@@ -504,27 +459,24 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     }
 
 
-    //Hàm up file dể up hinh len clound
-    private String uploadImage(MultipartFile file) throws IOException {
+    private String uploadImageFromFile(MultipartFile file, String slug) throws IOException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+        String timestamp = LocalDateTime.now().format(formatter);
+
+        // Tạo tên file: slug + ngày giờ
+        String fileName = getSlug(slug + "-" + timestamp);
+
+        System.out.println("Generated FileName: " + fileName);
+
         Map params = ObjectUtils.asMap(
                 "use_filename", true,
                 "unique_filename", false,
-                "overwrite", true
+                "overwrite", false,
+                "folder", "Product",
+                "public_id", fileName
         );
 
         Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
-        return uploadResult.get("secure_url").toString();
-    }
-
-    //Hàm up file bằng link
-    private String uploadImageFromUrl(String imageUrl) throws IOException {
-        Map params = ObjectUtils.asMap(
-                "use_filename", true,
-                "unique_filename", false,
-                "overwrite", true
-        );
-
-        Map uploadResult = cloudinary.uploader().upload(imageUrl, params);
         return uploadResult.get("secure_url").toString();
     }
 
