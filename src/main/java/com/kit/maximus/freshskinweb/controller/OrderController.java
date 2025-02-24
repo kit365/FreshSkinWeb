@@ -4,6 +4,7 @@ import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.service.OrderService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,7 +21,7 @@ public class OrderController {
     OrderService orderService;
 
     @PostMapping("/create")
-    public ResponseAPI<OrderResponse> createOrderByGuest(@RequestBody CreateOrderRequest createOrderRequest) {
+    public ResponseAPI<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest createOrderRequest) {
         String message = "Tạo đơn hàng thành công";
         var create = orderService.addOrder(createOrderRequest);
 

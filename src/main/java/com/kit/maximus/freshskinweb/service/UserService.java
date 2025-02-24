@@ -227,6 +227,7 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         OrderEntity order = orderMapper.toOrderEntity(request, user);
         user.createOrder(order); // Gọi phương thức thêm đơn hàng vào danh sách
 
+        orderRepository.save(order);
         userRepository.save(user); // Lưu lại user với danh sách đơn hàng đã cập nhật
         return userMapper.toUserResponseDTO(user);
     }
