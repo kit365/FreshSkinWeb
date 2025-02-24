@@ -16,12 +16,9 @@ public class OrderItemResponse implements Serializable {
 
     ProductVariantEntity product;
 
-
     Integer quantity;
 
     Double subtotal;
 
     Status status;
-
-    Boolean deleted;
 }

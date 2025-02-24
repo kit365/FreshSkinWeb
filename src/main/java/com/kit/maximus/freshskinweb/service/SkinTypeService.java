@@ -3,7 +3,10 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.skin_type.CreateSkinTypeRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_type.UpdateSkinTypeRequest;
 import com.kit.maximus.freshskinweb.dto.response.SkinTypeResponse;
+import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
+import com.kit.maximus.freshskinweb.exception.AppException;
+import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.SkinTypeMapper;
 import com.kit.maximus.freshskinweb.repository.SkinTypeRepository;
 import lombok.AccessLevel;
@@ -19,7 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
-public class SkinTypeService{
+public class SkinTypeService {
 
     SkinTypeRepository skinTypeRepository;
 
@@ -38,6 +41,15 @@ public class SkinTypeService{
     }
 
     public boolean delete(Long id) {
+        SkinTypeEntity skinType = skinTypeRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.BLOG_ITEM_NOT_FOUND));
+
+        //Set null skin type cho bảng trung gian
+        // Product là thằng tạo bảng trung gian => set skintype == null tại product có skintype ID mình truyền vào
+        skinType.getProducts().forEach(product -> {
+            product.setSkinTypes(null);
+        });
+
         skinTypeRepository.deleteById(id);
         return true;
     }

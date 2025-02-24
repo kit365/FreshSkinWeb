@@ -32,7 +32,7 @@ public class ProductVariantEntity {
     @JoinColumn(name = "ProductID")
     ProductEntity product;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "product")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "productVariant")
     List<OrderItemEntity> orderItems;
 
 

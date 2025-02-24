@@ -56,8 +56,8 @@ public class ProductEntity extends AbstractEntity {
     @JsonManagedReference
     @JoinTable(
             name = "ProductSkinType", // Tên bảng trung gian tùy chỉnh
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "skin_type_id")
+            joinColumns = @JoinColumn(name = "product_id", nullable = true),
+            inverseJoinColumns = @JoinColumn(name = "skin_type_id", nullable = true)
     )
     List<SkinTypeEntity> skinTypes = new ArrayList<>();
 
@@ -111,6 +111,11 @@ public class ProductEntity extends AbstractEntity {
     public void removeProductVariant(ProductVariantEntity productVariantEntity) {
         variants.remove(productVariantEntity);
         productVariantEntity.setProduct(null);
+    }
+
+    public void removeSkinType(SkinTypeEntity skinTypeEntity) {
+        variants.remove(skinTypeEntity);
+        skinTypeEntity.setProducts(null);
     }
 
     @Override

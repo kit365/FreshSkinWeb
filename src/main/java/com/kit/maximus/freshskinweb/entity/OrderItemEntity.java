@@ -20,23 +20,17 @@ public class OrderItemEntity extends AbstractEntity {
     Long orderItemId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "OrderId")
+    @JoinColumn(name = "OrderId", nullable = true)
     OrderEntity order;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ProductVariantId")
-    ProductVariantEntity product;
-
+    @JoinColumn(name = "ProductVariantId", nullable = true)
+    ProductVariantEntity productVariant;
 
     @Column(name = "Quantity")
     Integer quantity;
 
     @Column(name = "Subtotal")
     Double subtotal;
-
-
-
-
-
 
 }

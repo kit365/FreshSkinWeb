@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SkinTypeEntity {
+public class SkinTypeEntity extends AbstractEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column( name = "SkinTypeID")
@@ -29,7 +29,7 @@ public class SkinTypeEntity {
     @Column(name = "Description")
     String description;
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,CascadeType.REFRESH},fetch = FetchType.LAZY, mappedBy = "skinTypes")
-    @JsonIgnore
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,CascadeType.REFRESH}, fetch = FetchType.LAZY, mappedBy = "skinTypes" )
+    @JsonBackReference
     List<ProductEntity> Products = new ArrayList<>();
 }

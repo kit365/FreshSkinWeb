@@ -14,12 +14,9 @@ import java.io.Serializable;
 @ToString
 @Builder
 public class UpdateOrderItemRequest implements Serializable {
-    OrderEntity order;
-
-    ProductVariantEntity product;
-
-
+    Long order;
+    Long productVariant;
     Integer quantity;
-
     Double subtotal;
+    String status;
 }

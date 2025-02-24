@@ -38,7 +38,7 @@ public class SkinTypeController {
         return ResponseAPI.<SkinTypeResponse>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
-    @GetMapping()
+    @GetMapping("/show")
     public ResponseAPI<List<SkinTypeResponse>> getAll() {
         String message = "Get all skin type successfully";
         var result = skinTypeService.showAll();
@@ -52,10 +52,4 @@ public class SkinTypeController {
         return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
-    @DeleteMapping("/delete")
-    public ResponseAPI<String> deleteSelected(@RequestBody List<Long> id) {
-        String message = "Delete all skin type selected successfully";
-        skinTypeService.delete(id);
-        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message).build();
-    }
 }

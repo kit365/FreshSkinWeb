@@ -4,9 +4,7 @@ import com.kit.maximus.freshskinweb.dto.request.skin_type.CreateSkinTypeRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_type.UpdateSkinTypeRequest;
 import com.kit.maximus.freshskinweb.dto.response.SkinTypeResponse;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface SkinTypeMapper {
@@ -15,5 +13,6 @@ public interface SkinTypeMapper {
 
     SkinTypeResponse toSkinTypeResponse(SkinTypeEntity request);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateSkinType(@MappingTarget SkinTypeEntity skinTypeEntity, UpdateSkinTypeRequest request);
 }
