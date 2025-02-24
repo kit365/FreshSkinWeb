@@ -54,6 +54,34 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     Cloudinary cloudinary;
 
 
+    private String getNameFile(String slug, int count) {
+        String fileName;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+        String timestamp = LocalDateTime.now().format(formatter);
+        if (count <= 0) {
+            return slug + "_" + timestamp;
+        }
+        return slug + "_" + timestamp + "_" + (count + 1);
+
+    }
+
+    private String uploadImageFromFile(MultipartFile file, String slug, int count) throws IOException {
+
+        String fileName = getNameFile(slug, count);
+
+
+        Map params = ObjectUtils.asMap(
+                "use_filename", true,
+                "unique_filename", false,
+                "overwrite", false,
+                "folder", "product",
+                "public_id", fileName
+        );
+
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
+        return uploadResult.get("secure_url").toString();
+    }
+
     @Override
     public boolean add(CreateProductRequest request) {
         List<ProductCategoryEntity> productCategoryEntity = productCategoryRepository.findAllById(request.getCategoryId());
@@ -62,15 +90,17 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
 
         if (request.getThumbnail() != null) {
+            int count = 0;
             List<String> thumbnails = new ArrayList<>();
-            request.getThumbnail().forEach(s -> {
+
+            for(MultipartFile file : request.getThumbnail()) {
                 try {
-                    String img = uploadImageFromFile(s,getSlug(request.getTitle()));
+                    String img = uploadImageFromFile(file, "product", count++);
                     thumbnails.add(img);
                 } catch (IOException e) {
-                    log.error("Upload image failed: {}", s, e);
+                    log.error("Upload thumbnail error", e);
                 }
-            });
+            }
             productEntity.setThumbnail(thumbnails);
         }
 
@@ -458,27 +488,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 .toLowerCase();
     }
 
-
-    private String uploadImageFromFile(MultipartFile file, String slug) throws IOException {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
-        String timestamp = LocalDateTime.now().format(formatter);
-
-        // Tạo tên file: slug + ngày giờ
-        String fileName = getSlug(slug + "-" + timestamp);
-
-        System.out.println("Generated FileName: " + fileName);
-
-        Map params = ObjectUtils.asMap(
-                "use_filename", true,
-                "unique_filename", false,
-                "overwrite", false,
-                "folder", "Product",
-                "public_id", fileName
-        );
-
-        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
-        return uploadResult.get("secure_url").toString();
-    }
 
     private void deleteImageFromCloudinary(String imageUrl) throws IOException {
         if (imageUrl != null) {
