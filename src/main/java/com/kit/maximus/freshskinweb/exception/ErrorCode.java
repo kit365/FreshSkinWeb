@@ -43,9 +43,6 @@ public enum ErrorCode {
     TYPE_USER_INVALID(400, "Loại tài khoản chỉ được là 'NORMAL' hoặc 'VIP'"),
     ROLE_ID_NOT_BLANK(400, "Quyền người dùng không được để trống"),
 
-
-
-
     //Authentication
     UNAUTHENTICATED(401, "Unauthenticated"),
 
@@ -85,6 +82,9 @@ public enum ErrorCode {
     //ORDER ITEMS
     BLOG_ITEM_NOT_FOUND(404, "Blog Item Not Found"),
 
+
+    //SKIN_TYPE
+    SKIN_TYPE_NOT_FOUND(404, "Skin Type Not Found"),
     ;
 
 

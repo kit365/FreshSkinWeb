@@ -52,4 +52,9 @@ public class SkinTypeController {
         return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
+    @GetMapping("/{id}")
+    public ResponseAPI<SkinTypeResponse> update(@PathVariable("id") Long id ) {
+        var result = skinTypeService.searchById(id);
+        return ResponseAPI.<SkinTypeResponse>builder().data(result).build();
+    }
 }

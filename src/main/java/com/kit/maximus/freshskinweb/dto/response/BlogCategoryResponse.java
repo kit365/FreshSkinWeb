@@ -32,7 +32,7 @@ public class BlogCategoryResponse implements Serializable {
     Date updatedAt;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-            @JsonIgnore
+    @JsonIgnore
     List<BlogEntity> blog;
 
 }

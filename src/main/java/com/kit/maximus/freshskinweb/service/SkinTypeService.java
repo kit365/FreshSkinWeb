@@ -7,6 +7,7 @@ import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
+import com.kit.maximus.freshskinweb.mapper.BlogCategoryMapper;
 import com.kit.maximus.freshskinweb.mapper.SkinTypeMapper;
 import com.kit.maximus.freshskinweb.repository.SkinTypeRepository;
 import lombok.AccessLevel;
@@ -27,6 +28,7 @@ public class SkinTypeService {
     SkinTypeRepository skinTypeRepository;
 
     SkinTypeMapper skinTypeMapper;
+    BlogCategoryMapper mapper;
 
     public boolean add(CreateSkinTypeRequest request) {
         SkinTypeEntity skinTypeEntity = skinTypeMapper.toSkinTypeEntity(request);
@@ -62,6 +64,11 @@ public class SkinTypeService {
 
     public List<SkinTypeResponse> showAll() {
         return skinTypeRepository.findAll().stream().map(skinTypeMapper::toSkinTypeResponse).collect(Collectors.toList());
+    }
+
+    public SkinTypeResponse searchById(Long id) {
+        SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(id).orElseThrow(()-> new AppException(ErrorCode.SKIN_TYPE_NOT_FOUND));
+        return skinTypeMapper.toSkinTypeResponse(skinTypeEntity);
     }
 
 }
