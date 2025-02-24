@@ -2,12 +2,15 @@ package com.kit.maximus.freshskinweb.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -18,6 +21,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "[Order]")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderEntity extends AbstractEntity {
 
     @Id
@@ -26,29 +30,34 @@ public class OrderEntity extends AbstractEntity {
     Long orderId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "UserId")
+    @JoinColumn(name = "UserId", nullable = true)
     @JsonIgnore
     UserEntity user;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "order")
     List<OrderItemEntity> orderItems;
 
-    @Column(name = "Username")
-    String username;
+    @Column(name = "UserId", unique = true, nullable = false, insertable = false, updatable = false)
+    Long id;
 
     @Column(name = "FirstName")
+    @JsonIgnore
     String firstName;
 
     @Column(name = "LastName")
+    @JsonIgnore
     String lastName;
 
     @Column(name = "Email")
+    @JsonIgnore
     String email;
 
     @Column(name = "Address")
+    @JsonIgnore
     String address;
 
     @Column(name = "PhoneNumber")
+    @JsonIgnore
     String phoneNumber;
 
     @Column(name = "TotalAmount")
@@ -62,7 +71,9 @@ public class OrderEntity extends AbstractEntity {
     PaymentMethod paymentMethod;
 
     @Column(name = "OrderDate")
-    LocalDate OrderDate;
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreationTimestamp
+    Date OrderDate;
 
 
 

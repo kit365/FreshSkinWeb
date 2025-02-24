@@ -27,7 +27,7 @@ public interface OrderMapper {
 
     @Mapping(target = "orderId", ignore = true) // Bỏ qua ID vì nó tự tăng
     @Mapping(target = "user", source = "user", ignore = false) // Map UserEntity vào OrderEntity
-    @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "id", source = "user.id")
     @Mapping(target = "firstName", source = "user.firstName")
     @Mapping(target = "lastName", source = "user.lastName")
     @Mapping(target = "email", source = "user.email")

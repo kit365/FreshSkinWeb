@@ -2,6 +2,7 @@ package com.kit.maximus.freshskinweb.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.kit.maximus.freshskinweb.utils.TypeUser;
 import jakarta.persistence.*;
@@ -12,6 +13,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Setter
 @Getter
@@ -21,6 +23,7 @@ import java.util.List;
 @ToString
 @Table(name = "User")
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserEntity extends AbstractEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,8 +52,8 @@ public class UserEntity extends AbstractEntity {
     @Column(name = "Avatar")
     String avatar;
 
-    @Column(name = "Token")
-    String token;
+    @Column(name = "Token", nullable = false, unique = true)
+    private String token = UUID.randomUUID().toString();
 
     @Column(name = "Address")
     String address;
