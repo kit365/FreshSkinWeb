@@ -381,10 +381,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
 
         Page<ProductResponseDTO> list = productEntityPage.map(productMapper::productToProductResponseDTO);
-        list.forEach(productResponseDTO -> {
-            productResponseDTO.setThumbnail(productResponseDTO.getThumbnail());
-        });
-
 //        if (!list.hasContent()) {
 //            return null;
 //        }

@@ -14,6 +14,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,16 @@ public class ProductBrandController {
         log.info("CREATE BRAND_PRODUCT REQUEST)");
         return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.OK.value()).message(message).build();
     }
+
+//    @PostMapping("create")
+//    public ResponseAPI<ProductBrandResponse> createProductBrand(
+//            @RequestPart("request") CreateProductBrandRequest request
+//            @RequestPart("thumbail") List<MultipartFile> file  ) {
+//        String message = "Create product_brand successfull";
+//        var result = productBrandService.add(request);
+//        log.info("CREATE BRAND_PRODUCT REQUEST)");
+//        return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.OK.value()).message(message).build();
+//    }
 
     @GetMapping()
     public ResponseAPI<Map<String, Object>> getAllProductBrand(@RequestParam(defaultValue = "1") int page,
