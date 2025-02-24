@@ -3,6 +3,7 @@ package com.kit.maximus.freshskinweb.service;
 
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogCreationRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
+import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
@@ -59,6 +60,10 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
         blogRepository.save(blogEntity);
         return true;
+    }
+
+    public List<BlogResponse> getAll() {
+        return blogMapper.toBlogsResponseDTO(blogRepository.findAll());
     }
 
     @Override

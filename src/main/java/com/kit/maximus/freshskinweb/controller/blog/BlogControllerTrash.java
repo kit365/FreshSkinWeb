@@ -2,6 +2,7 @@ package com.kit.maximus.freshskinweb.controller.blog;
 
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogCreationRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
+import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -43,7 +44,7 @@ public class BlogControllerTrash {
                                                        @RequestParam(name = "keyword", required = false) String keyword) {
         String message = "Tim thay List Blog";
         log.info("GET ALL BLOGS");
-        Map<String, Object> result = blogService.getTrash(page, size,sortKey, sortValue,status,keyword);
+        Map<String, Object> result = blogService.getAll(page, size,sortKey, sortValue,status,keyword);
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
@@ -136,9 +137,15 @@ public class BlogControllerTrash {
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
+    @GetMapping("/show")
+    public ResponseAPI<List<BlogResponse>> showBlogCategory() {
+        return  ResponseAPI.<List<BlogResponse>>builder().code(HttpStatus.OK.value()).data(blogService.getAll()).build();
+    }
+
     @GetMapping("{id}")
     public ResponseAPI<BlogResponse> getBlog(@PathVariable("id") Long id) {
         BlogResponse result = blogService.showDetail(id);
         return ResponseAPI.<BlogResponse>builder().code(HttpStatus.OK.value()).data(result).build();
     }
+
 }
