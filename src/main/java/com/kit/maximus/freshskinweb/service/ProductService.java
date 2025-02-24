@@ -95,7 +95,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
             for(MultipartFile file : request.getThumbnail()) {
                 try {
-                    String img = uploadImageFromFile(file, "product", count++);
+                    String slg = getSlug(request.getTitle());
+                    String img = uploadImageFromFile(file, slg, count++);
                     thumbnails.add(img);
                 } catch (IOException e) {
                     log.error("Upload thumbnail error", e);

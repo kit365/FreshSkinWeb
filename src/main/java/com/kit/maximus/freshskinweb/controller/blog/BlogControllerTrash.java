@@ -22,7 +22,7 @@ import java.util.Map;
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-@RequestMapping("/admin/blogs/trash")
+@RequestMapping("admin/blogs/trash")
 public class BlogControllerTrash {
     BlogService blogService;
 
