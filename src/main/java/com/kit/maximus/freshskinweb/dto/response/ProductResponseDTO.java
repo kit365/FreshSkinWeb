@@ -27,7 +27,7 @@ public class ProductResponseDTO implements Serializable {
     String description;
 //    List<String> thumbnail;
     List<MultipartFile> thumbnail;
-    List<ProductVariantEntity> variants;
+    List<String> variants;
     List<SkinTypeEntity> skinTypes;
     int discountPercent;
     Integer position;

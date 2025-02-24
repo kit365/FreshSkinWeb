@@ -18,7 +18,7 @@ public interface ProductMapper {
     @Mapping(target = "thumbnail", ignore = true)
     ProductEntity productToProductEntity(CreateProductRequest productRequest);
 
-    @Mapping(target = "thumbnail", ignore = true)
+
     ProductResponseDTO productToProductResponseDTO(ProductEntity product);
 
 //    List<ProductResponseDTO> toUserResponseDTO(List<ProductEntity> productEntities);
