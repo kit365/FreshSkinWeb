@@ -27,6 +27,7 @@ public interface ProductMapper {
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "brand", ignore = true)
     @Mapping(target = "thumbnail", ignore = true)
+    @Mapping(target = "skinTypes", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateProduct(@MappingTarget ProductEntity product, UpdateProductRequest productRequestDTO);
 
