@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.controller.productbrand;
+package com.kit.maximus.freshskinweb.controller.trash;
 
 import com.kit.maximus.freshskinweb.dto.request.product_brand.CreateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.request.product_brand.UpdateProductBrandRequest;
@@ -23,7 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("admin/products/brand/trash")
-public class ProductBrandControllerTrash {
+public class ProductTrashBrandController {
     ProductBrandService productBrandService;
 
     @PostMapping("create")

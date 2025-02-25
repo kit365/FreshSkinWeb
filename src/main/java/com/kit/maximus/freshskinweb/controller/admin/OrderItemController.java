@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.controller.OrderItem;
+package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.kit.maximus.freshskinweb.dto.request.orderItem.OrderItemRequest;
 import com.kit.maximus.freshskinweb.dto.response.OrderItemResponse;

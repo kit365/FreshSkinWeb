@@ -1,9 +1,10 @@
-package com.kit.maximus.freshskinweb.controller.blog;
+package com.kit.maximus.freshskinweb.controller.admin;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogCreationRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
-import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -13,7 +14,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -23,16 +26,41 @@ import java.util.Map;
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-@RequestMapping("admin/blogs/trash")
-public class BlogControllerTrash {
+@RequestMapping("/admin/blogs")
+public class BlogAdminController {
+
     BlogService blogService;
 
-    @PostMapping("/create")
-    public ResponseAPI<BlogResponse> createBlog(@RequestBody BlogCreationRequest request) {
-        String message = "Create blog successfully ";
-        var result = blogService.add(request);
-        log.info("CREATE BLOG REQUEST");
-        return ResponseAPI.<BlogResponse>builder().code(HttpStatus.OK.value()).message(message).build();
+    @PostMapping(value = "create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseAPI<ProductResponseDTO> createProduct(
+            @RequestPart("request") String requestJson,
+            @RequestPart(value = "thumbnail", required = false) List<MultipartFile> images) {
+
+        log.info("requestJson:{}", requestJson);
+        log.info("images:{}", images);
+        String message_succed = "Tạo bài viết thành công";
+        String message_failed = "Tạo mục bài viết thất bại";
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            BlogCreationRequest blogRequest = objectMapper.readValue(requestJson, BlogCreationRequest.class);
+            blogRequest.setThumbnail(images);
+
+            var result = blogService.add(blogRequest);
+
+            log.info("CREATE BLOG-CATEGORY REQUEST SUCCESS");
+            return ResponseAPI.<ProductResponseDTO>builder()
+                    .code(HttpStatus.OK.value())
+                    .message(message_succed)
+                    .build();
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            log.error("CREATE BLOG-CATEGORY ERROR: " + e.getMessage());
+            return ResponseAPI.<ProductResponseDTO>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message(message_failed)
+                    .build();
+        }
     }
 
     @GetMapping()

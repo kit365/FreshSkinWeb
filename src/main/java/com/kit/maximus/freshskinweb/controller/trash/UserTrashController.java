@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.controller.user;
+package com.kit.maximus.freshskinweb.controller.trash;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -14,5 +14,5 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("admin/users/trash")
-public class UserControllerTrash {
+public class UserTrashController {
 }

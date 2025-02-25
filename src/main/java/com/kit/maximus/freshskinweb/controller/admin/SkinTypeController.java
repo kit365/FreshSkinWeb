@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.controller;
+package com.kit.maximus.freshskinweb.controller.admin;
 import com.kit.maximus.freshskinweb.dto.request.skin_type.CreateSkinTypeRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_type.UpdateSkinTypeRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;

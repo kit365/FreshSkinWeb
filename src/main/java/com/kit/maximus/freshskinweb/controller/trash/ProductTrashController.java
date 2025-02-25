@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.controller.product;
+package com.kit.maximus.freshskinweb.controller.trash;
 
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
@@ -22,7 +22,7 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 @RequestMapping("admin/products/trash")
-public class ProductControllerTrash {
+public class ProductTrashController {
 
     ProductService productService;
 

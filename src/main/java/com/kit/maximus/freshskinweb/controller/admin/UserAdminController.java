@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.controller.user;
+package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
@@ -25,7 +25,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UserController {
+public class UserAdminController {
 
     UserService userService;
 

@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.controller.product;
+package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +27,7 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 @RequestMapping("admin/products")
-public class ProductController {
+public class ProductAdminController {
 
     ProductService productService;
 

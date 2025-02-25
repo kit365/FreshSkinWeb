@@ -1,12 +1,10 @@
-package com.kit.maximus.freshskinweb.controller.productbrand;
+package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product_brand.CreateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.request.product_brand.UpdateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;

@@ -1,7 +1,6 @@
-package com.kit.maximus.freshskinweb.controller;
+package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.kit.maximus.freshskinweb.dto.request.review.ReviewRequest;
-import com.kit.maximus.freshskinweb.dto.response.OrderItemResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.ReviewResponse;
 import com.kit.maximus.freshskinweb.service.ReviewService;

@@ -78,9 +78,8 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
                     log.error(e.getMessage());
                     throw new RuntimeException(e);
                 }
-                ;
             }
-            blogCategoryEntity.setImage(images);
+            blogEntity.setThumbnail(images);
         }
 
         blogEntity.setSlug(getSlug(request.getTitle()));

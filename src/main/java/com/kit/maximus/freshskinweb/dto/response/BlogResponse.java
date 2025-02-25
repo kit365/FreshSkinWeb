@@ -21,7 +21,7 @@ public class BlogResponse implements Serializable {
     Long id;
     String title;
     String content;
-    List<String> image;
+    List<String> thumbnail;
     Integer position;
     String slug;
     boolean featured;
