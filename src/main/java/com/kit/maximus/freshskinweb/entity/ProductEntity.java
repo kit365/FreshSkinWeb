@@ -1,9 +1,7 @@
 package com.kit.maximus.freshskinweb.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,7 +29,6 @@ public class ProductEntity extends AbstractEntity {
 //    DiscoundEntity discount;
 
 
-    @JsonBackReference
     @ManyToMany(fetch = FetchType.EAGER,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
     @JoinTable(
@@ -41,22 +38,17 @@ public class ProductEntity extends AbstractEntity {
     )
     List<ProductCategoryEntity> category = new ArrayList<>();
 
-    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brandID")
     @OnDelete(action = OnDeleteAction.SET_NULL)
     ProductBrandEntity brand;
 
-    //    Mapper: Ánh xạ với fields bên N(product)
-//    @JoinColumn(name = "ProductID") không cần vì bên nhiều giữ khóa ngoại của bên 1 nên không cần
-    //Xóa một đối tượng bên N không còn map với bên 1 nữa -> orphanRemoval = true
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     List<ProductVariantEntity> variants = new ArrayList<>();
 
     @ManyToMany
-    @JsonManagedReference
     @JoinTable(
-            name = "ProductSkinType", // Tên bảng trung gian tùy chỉnh
+            name = "ProductSkinType",
             joinColumns = @JoinColumn(name = "product_id", nullable = true),
             inverseJoinColumns = @JoinColumn(name = "skin_type_id", nullable = true)
     )

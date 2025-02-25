@@ -15,10 +15,12 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ProductBrandMapper {
 
-    ProductBrandEntity productBrandToProductEntity(CreateProductBrandRequest request);
+    ProductBrandEntity productBrandToProductBrandEntity(CreateProductBrandRequest request);
 
+    @Mapping(target = "productIDs", ignore = true)
     ProductBrandResponse productBrandToProductBrandResponseDTO(ProductBrandEntity request);
 
+    @Mapping(target = "productIDs", ignore = true)
     List<ProductBrandResponse> toProductBrandsResponseDTO(List<ProductBrandEntity> request);
 
     @Mapping(target = "id", ignore = true)

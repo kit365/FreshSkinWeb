@@ -222,6 +222,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             }
         }
 
+
         productMapper.updateProduct(listProduct, request);
         return productMapper.productToProductResponseDTO(productRepository.save(listProduct));
     }
@@ -444,6 +445,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     private ProductEntity getProductEntityById(Long id) {
         return productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
     }
+
+
 
 
     private Status getStatus(String status) {

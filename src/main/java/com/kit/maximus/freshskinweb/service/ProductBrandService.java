@@ -3,6 +3,7 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.product_brand.CreateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.request.product_brand.UpdateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductBrandEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +42,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
     public boolean add(CreateProductBrandRequest request) {
         log.info("Request JSON: {}", request);
 
-        ProductBrandEntity productBrandEntity = productBrandMapper.productBrandToProductEntity(request);
+        ProductBrandEntity productBrandEntity = productBrandMapper.productBrandToProductBrandEntity(request);
 
         if (request.getPosition() == null || request.getPosition() <= 0) {
             Integer size = productBrandRepository.findAll().size();
@@ -137,7 +139,18 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
 
     @Override
     public ProductBrandResponse showDetail(Long id) {
-        return productBrandMapper.productBrandToProductBrandResponseDTO(getBrandById(id));
+        ProductBrandEntity brandEntity = getBrandById(id);
+        ProductBrandResponse productBrandResponse = productBrandMapper.productBrandToProductBrandResponseDTO(brandEntity);
+        productBrandResponse.setProductIDs(getProductIds(brandEntity));
+        return productBrandResponse;
+    }
+
+    private List<Long> getProductIds(ProductBrandEntity productBrandEntities) {
+        List<Long> productIds = new ArrayList<>();
+        productBrandEntities.getProducts().forEach(productEntity -> {
+            productIds.add(productEntity.getId());
+        });
+        return productIds;
     }
 
 

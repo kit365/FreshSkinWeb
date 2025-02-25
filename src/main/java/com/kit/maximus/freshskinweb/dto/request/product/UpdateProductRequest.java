@@ -24,7 +24,6 @@ public class UpdateProductRequest implements Serializable {
     String title;
     String description;
     List<MultipartFile> thumbnail;
-//    List<String> thumbnail;
     List<ProductVariantEntity> variants;
     List<SkinTypeEntity> skinTypes;
     int discountPercent;

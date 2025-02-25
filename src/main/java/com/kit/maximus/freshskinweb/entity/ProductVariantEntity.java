@@ -1,6 +1,6 @@
 package com.kit.maximus.freshskinweb.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @ToString
+
 @Table(name = "ProductVariant")
 public class ProductVariantEntity {
 
@@ -27,13 +28,12 @@ public class ProductVariantEntity {
     int volume;
 
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ProductID")
     ProductEntity product;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "productVariant")
-    List<OrderItemEntity> orderItems;
+//    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "productVariant")
+//    List<OrderItemEntity> orderItems;
 
 
 
