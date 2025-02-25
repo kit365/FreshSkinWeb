@@ -202,11 +202,20 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     @Override
     public boolean delete(List<Long> id) {
         List<ProductCategoryEntity> list = productCategoryRepository.findAllById(id);
-        list.forEach(productCategoryEntity -> {
-            if (productCategoryEntity.getChild() != null) {
-                productCategoryEntity.setParent(null);
+
+        for(ProductCategoryEntity productCategoryEntity : list){
+
+            if(productCategoryEntity.getChild() != null){
+                productCategoryEntity.getChild().forEach(productCategoryEntity1 -> productCategoryEntity1.setParent(null));
             }
-        });
+
+            if(productCategoryEntity.getProducts() != null){
+                for (ProductEntity productEntity : productCategoryEntity.getProducts()) {
+                    productEntity.setCategory(null);
+                }
+            }
+        }
+
         for (ProductCategoryEntity productCategoryEntity : list) {
             if (productCategoryEntity.getImage() != null) {
                 for (String img : productCategoryEntity.getImage()) {
