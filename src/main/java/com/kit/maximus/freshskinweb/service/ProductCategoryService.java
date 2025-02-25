@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         ProductCategoryEntity productCategory = productCategoryMapper.productCategoryToProductEntity(request);
 
         if (request.getPosition() == null || request.getPosition() <= 0) {
-            Integer size = productCategoryRepository.findAll().size();
+            int size = productCategoryRepository.findAll().size();
             productCategory.setPosition(size + 1);
         }
 
@@ -69,7 +70,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
     public List<ProductCategoryResponse> getAll() {
         List<ProductCategoryEntity> list = productCategoryRepository.findAllByParentIsNull();
-
         return productCategoryMapper.toProductCateroiesResponseDTO(list);
     }
 
@@ -87,11 +87,10 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         }
 
 
-        if(request.getParentID() != null){
+        if (request.getParentID() != null) {
             ProductCategoryEntity parentCategory = productCategoryRepository.findById(request.getParentID()).orElse(null);
             productCategoryEntity.setParent(parentCategory);
         }
-
 
         productCategoryMapper.updateProductCategory(productCategoryEntity, request);
         return productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryRepository.save(productCategoryEntity));
@@ -125,12 +124,12 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     public boolean delete(Long id) {
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
 
-        if(productCategoryEntity.getChild() != null){
+        if (productCategoryEntity.getChild() != null) {
             productCategoryEntity.getChild().forEach(productCategoryEntity1 -> productCategoryEntity1.setParent(null));
             productCategoryRepository.saveAll(productCategoryEntity.getChild());
         }
 
-        if(productCategoryEntity.getProducts() != null){
+        if (productCategoryEntity.getProducts() != null) {
             productCategoryEntity.getProducts().forEach(productEntity -> {
                 productEntity.setCategory(null);
                 productCategoryRepository.save(productCategoryEntity);
@@ -146,7 +145,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     public boolean delete(List<Long> id) {
         List<ProductCategoryEntity> list = productCategoryRepository.findAllById(id);
         list.forEach(productCategoryEntity -> {
-            if(productCategoryEntity.getChild() != null){
+            if (productCategoryEntity.getChild() != null) {
                 productCategoryEntity.setParent(null);
             }
         });
@@ -187,9 +186,18 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
     @Override
     public ProductCategoryResponse showDetail(Long id) {
-//      return productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryRepository.getProductCategoryById(id)
-//      );
-        return null;
+        ProductCategoryEntity productCategoryEntity = getCategoryById(id);
+        ProductCategoryResponse response = productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryEntity);
+        response.setProductIDs(getProductIDs(productCategoryEntity));
+        return response;
+    }
+
+    private List<Long> getProductIDs(ProductCategoryEntity productCategoryEntity) {
+        List<Long> idProduct = new ArrayList<>();
+        productCategoryEntity.getProducts().forEach(productEntity -> {
+            idProduct.add(productEntity.getId());
+        });
+        return idProduct;
     }
 
 
@@ -314,34 +322,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
     //tra ve ProductEntity, Neu Id null -> nem loi
     private ProductCategoryEntity getCategoryById(Long id) {
-        return productCategoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND));
-    }
-
-//    //chuyen String thanh Feature
-//    private boolean isFeature(String feature) {
-//        try {
-//            return Boolean.parseBoolean(feature);
-//        } catch (IllegalArgumentException e) {
-//            log.warn("Invalid feature provided: '{}'", feature);
-//            throw new AppException(ErrorCode.KEY_INVALID);
-//        }
-//    }
-
-//    private Boolean convertToBoolean(String feature) {
-//        if (feature == null) {
-//            return false;
-//        }
-//        if (feature.equalsIgnoreCase("true")) {
-//            return true;
-//        } else if (feature.equalsIgnoreCase("false")) {
-//            return false;
-//        } else {
-//            log.warn("Invalid feature provided: '{}'", feature);
-//            throw new AppException(ErrorCode.KEY_INVALID);
-//        }
-//    }
-
-    public ProductCategoryEntity get(Long id) {
         return productCategoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND));
     }
 

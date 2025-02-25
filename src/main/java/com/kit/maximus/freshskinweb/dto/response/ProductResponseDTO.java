@@ -19,15 +19,14 @@ import java.util.List;
 @Builder
 public class ProductResponseDTO implements Serializable {
     Long id;
-    List<ProductCategoryEntity> category;
+    List<ProductCategoryResponse> category;
     ProductBrandResponse brand;
     //    String DiscountID;
     String title;
     String slug;
     String description;
-//    List<String> thumbnail;
     List<String> thumbnail;
-    List<ProductVariantEntity> variants;
+    List<ProductVariantResponse> variants;
     List<SkinTypeEntity> skinTypes;
     int discountPercent;
     Integer position;

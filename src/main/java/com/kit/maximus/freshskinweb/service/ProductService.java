@@ -93,9 +93,10 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             int count = 0;
             List<String> thumbnails = new ArrayList<>();
 
-            for(MultipartFile file : request.getThumbnail()) {
+            for (MultipartFile file : request.getThumbnail()) {
                 try {
-                    String img = uploadImageFromFile(file, "product", count++);
+                    String slg = getSlug(request.getTitle());
+                    String img = uploadImageFromFile(file, slg, count++);
                     thumbnails.add(img);
                 } catch (IOException e) {
                     log.error("Upload thumbnail error", e);
@@ -141,6 +142,31 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         ProductEntity listProduct = getProductEntityById(id);
 
+
+
+
+        if (request.getThumbnail() != null) {
+            listProduct.getThumbnail().forEach(thumbnail -> {
+                try {
+                    deleteImageFromCloudinary(thumbnail);
+                } catch (IOException e) {
+                    log.error("Delete thumbnail error", e);
+                    throw new RuntimeException(e);
+                }
+            });
+            int count = 0;
+            List<String> newThumbnails = new ArrayList<>();
+            for (MultipartFile file : request.getThumbnail()) {
+                try {
+                    String url = uploadImageFromFile(file, getSlug(request.getTitle()), count++);
+                    newThumbnails.add(url);
+                } catch (IOException e) {
+                    log.error("Upload thumbnail error", e);
+                    throw new RuntimeException(e);
+                }
+            }
+            listProduct.setThumbnail(newThumbnails);
+        }
 //        //Upload hinh => Xoa hinh cu, add hinh moi
 //        if (request.getThumbnail() != null) {
 //
@@ -199,6 +225,12 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             listProduct.setBrand(productBrandEntity);
         }
 
+        if(request.getSkinTypeId() != null) {
+            List<SkinTypeEntity> skinTypeEntities = skinTypeRepository.findAllById(request.getSkinTypeId());
+            listProduct.setSkinTypes(skinTypeEntities);
+        }
+
+
         if (request.getVariants() != null && !request.getVariants().isEmpty()) {
             Map<Integer, ProductVariantEntity> requestList = listProductVariantToMap(request.getVariants());
             Map<Integer, ProductVariantEntity> currentList = listProductVariantToMap(listProduct.getVariants());
@@ -220,6 +252,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 }
             }
         }
+
 
         productMapper.updateProduct(listProduct, request);
         return productMapper.productToProductResponseDTO(productRepository.save(listProduct));
@@ -487,9 +520,12 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     private void deleteImageFromCloudinary(String imageUrl) throws IOException {
         if (imageUrl != null) {
             String publicId = extractPublicId(imageUrl);
-            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            //xóa vĩnh viễn khỏi cloud
+            Map options = ObjectUtils.asMap("invalidate", true);
+            cloudinary.uploader().destroy(publicId, options);
         }
     }
+
 
     //lấy hình từ ID
     private String extractPublicId(String imageUrl) {

@@ -25,10 +25,11 @@ public interface ProductCategoryMapper {
     List<ProductCategoryEntity> childCategoriesToEntity(List<ChildCategoryDTO> request);
 //    ProductCategoryEntity parentCategoriesToEntity(ParentCategoryDTO request);
 
+    @Mapping(target = "productIDs", ignore = true)
     ProductCategoryResponse productCategoryToProductCategoryResponseDTO(ProductCategoryEntity request);
 
+    @Mapping(target = "productIDs", ignore = true)
     @Mapping(target = "parent", ignore = true)
-    @Mapping(target = "products", source = "products")
     List<ProductCategoryResponse > toProductCateroiesResponseDTO(List<ProductCategoryEntity> request);
 
     @Mapping(target = "products", ignore = true)

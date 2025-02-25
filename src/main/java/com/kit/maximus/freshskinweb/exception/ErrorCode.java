@@ -43,32 +43,27 @@ public enum ErrorCode {
     TYPE_USER_INVALID(400, "Loại tài khoản chỉ được là 'NORMAL' hoặc 'VIP'"),
     ROLE_ID_NOT_BLANK(400, "Quyền người dùng không được để trống"),
 
-
-
-
     //Authentication
-    UNAUTHENTICATED(401, "Unauthenticated"),
+    UNAUTHENTICATED(401, "Chưa xác thực"),
 
-    //ProductVariant
-    PRODUCT_VARIANT_NOT_FOUND(404, "Không tìm thấy phiên bản sản phẩm"),
-
-   //Product
-    SORT_DIRECTION_INVALID(400, "Sort Direction Invalid[ASC or DESC]"),
-    PRODUCT_NOT_FOUND(404, "Product Not Found"),
-    INVALID_REQUEST_PRODUCTID(400, "Invalid Request ProductId[Missing 'id' key in request body]"),
-    VOLUME_EXISTED(400, "Volume already existed"),
+    //Product
+    SORT_DIRECTION_INVALID(400, "Hướng sắp xếp không hợp lệ [ASC hoặc DESC]"),
+    PRODUCT_NOT_FOUND(404, "Không tìm thấy sản phẩm"),
+    INVALID_REQUEST_PRODUCTID(400, "Yêu cầu không hợp lệ: Thiếu 'id' trong nội dung yêu cầu"),
+    VOLUME_EXISTED(400, "Dung tích đã tồn tại"),
 
     //ProductCategory
-    PRODUCT_CATEGORY_NOT_FOUND(404, "Product Category Not Found"),
+    PRODUCT_CATEGORY_NOT_FOUND(404, "Không tìm thấy danh mục sản phẩm"),
+
     //ProductBrand
-    PRODUCT_BRAND_NOT_FOUND(404, "Product Brand Not Found"),
+    PRODUCT_BRAND_NOT_FOUND(404, "Không tìm thấy thương hiệu sản phẩm"),
 
     //Role
-    ROLE_NOT_FOUND(404, "Role Not Found"),
-    ROLE_EXISTED(400, "Role already existed"),
+    ROLE_NOT_FOUND(404, "Không tìm thấy vai trò"),
+    ROLE_EXISTED(400, "Vai trò đã tồn tại"),
 
     //ORDER
-    ORDER_NOT_FOUND(404, "Order Not Found"),
+    ORDER_NOT_FOUND(404, "Không tìm thấy đơn hàng"),
     TOTAL_AMOUNT_NOT_NULL(400, "Tổng số lượng sản phẩm không được để trống"),
     TOTAL_AMOUNT_INVALID(400, "Tổng số lượng sản phẩm phải lớn hơn hoặc bằng 1"),
     TOTAL_PRICE_NOT_NULL(400, "Tổng giá trị đơn hàng không được để trống"),
@@ -77,18 +72,18 @@ public enum ErrorCode {
     ORDER_DATE_NOT_NUL(400, "Ngày đặt hàng không được để trống"),
 
     //BLOG CATEGORY
-    BLOG_CATEGORY_NAME_EXISTED(404, "Blog Category Name already existed"),
-    BLOG_CATEGORY_NOT_FOUND(404, "Blog Category Not Found"),
+    BLOG_CATEGORY_NAME_EXISTED(404, "Tên danh mục blog đã tồn tại"),
+    BLOG_CATEGORY_NOT_FOUND(404, "Không tìm thấy danh mục blog"),
 
     //BLOG
-    BLOG_NAME_EXISTED(404, "Blog Category Name already existed"),
-    BLOG_NOT_FOUND(404, "Blog Category Not Found"),
-    INVALID_REQUEST_BLOGID(400, "Invalid Request BlogId"),
+    BLOG_NAME_EXISTED(404, "Tên blog đã tồn tại"),
+    BLOG_NOT_FOUND(404, "Không tìm thấy blog"),
+    INVALID_REQUEST_BLOGID(400, "Yêu cầu không hợp lệ: BlogId không hợp lệ"),
 
     //ORDER ITEMS
-    ORDER_ITEM_NOT_FOUND(404, "Không tìm thấy mục đơn hàng"),
+    BLOG_ITEM_NOT_FOUND(404, "Không tìm thấy mục blog"),
 
-    //SKIN TYPE
+    //SKIN_TYPE
     SKIN_TYPE_NOT_FOUND(404, "Không tìm thấy loại da"),
 
     ;

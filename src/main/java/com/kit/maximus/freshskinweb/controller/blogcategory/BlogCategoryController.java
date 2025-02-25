@@ -3,6 +3,7 @@ package com.kit.maximus.freshskinweb.controller.blogcategory;
 import com.kit.maximus.freshskinweb.dto.request.blog_category.CreateBlogCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog_category.UpdateBlogCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
+import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -50,7 +51,7 @@ public class BlogCategoryController {
                                                        @RequestParam(defaultValue = "desc") String sortValue,
                                                        @RequestParam(defaultValue = "ALL") String status,
                                                        @RequestParam(name = "keyword", required = false) String keyword) {
-        String message = "Tim thay List Blog";
+        String message = "Tim thay List Blog Category";
         log.info("GET ALL BLOGS");
         Map<String, Object> result = blogCategoryService.getAll(page, size,sortKey, sortValue,status,keyword);
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
@@ -133,9 +134,15 @@ public class BlogCategoryController {
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
-    @GetMapping("show")
+    @GetMapping("/show")
     public ResponseAPI<List<BlogCategoryResponse>> showBlogCategory() {
         return  ResponseAPI.<List<BlogCategoryResponse>>builder().code(HttpStatus.OK.value()).data(blogCategoryService.getAll()).build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseAPI<BlogCategoryResponse> getBlog(@PathVariable("id") Long id) {
+        BlogCategoryResponse result = blogCategoryService.showDetail(id);
+        return ResponseAPI.<BlogCategoryResponse>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
 /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -18,5 +18,8 @@ public class CreateBlogCategoryRequest implements Serializable {
     String title;
     String description;
     Integer position;
+    boolean featured;
+    String image;
+    String status;
     List<BlogEntity> blog;
 }

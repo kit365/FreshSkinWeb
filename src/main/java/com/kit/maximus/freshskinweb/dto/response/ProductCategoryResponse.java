@@ -1,12 +1,12 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.kit.maximus.freshskinweb.entity.ProductEntity;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -14,6 +14,7 @@ import java.util.List;
 @Setter
 @ToString
 @Builder
+
 public class ProductCategoryResponse implements Serializable {
 
     Long id;
@@ -36,7 +37,9 @@ public class ProductCategoryResponse implements Serializable {
 
     List<ProductCategoryResponse> child;
 
-    List<ProductEntity> products;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty("product_ids")
+    List<Long> productIDs;
 
     // Chỉ áp dụng với danh mục cha
     @JsonInclude(JsonInclude.Include.NON_NULL)

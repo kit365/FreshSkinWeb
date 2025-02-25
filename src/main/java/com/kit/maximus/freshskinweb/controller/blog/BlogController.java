@@ -37,11 +37,11 @@ public class BlogController {
 
     @GetMapping()
     public ResponseAPI<Map<String, Object>> getAllBlog(@RequestParam(defaultValue = "1") int page,
-                                                          @RequestParam(defaultValue = "8") int size,
-                                                          @RequestParam(defaultValue = "position") String sortKey,
-                                                          @RequestParam(defaultValue = "desc") String sortValue,
-                                                          @RequestParam(defaultValue = "ALL") String status,
-                                                          @RequestParam(name = "keyword", required = false) String keyword) {
+                                                       @RequestParam(defaultValue = "8") int size,
+                                                       @RequestParam(defaultValue = "position") String sortKey,
+                                                       @RequestParam(defaultValue = "desc") String sortValue,
+                                                       @RequestParam(defaultValue = "ALL") String status,
+                                                       @RequestParam(name = "keyword", required = false) String keyword) {
         String message = "Tim thay List Blog";
         log.info("GET ALL BLOGS");
         Map<String, Object> result = blogService.getAll(page, size,sortKey, sortValue,status,keyword);
@@ -137,9 +137,15 @@ public class BlogController {
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
+    @GetMapping("/show")
+    public ResponseAPI<List<BlogResponse>> showBlogCategory() {
+        return  ResponseAPI.<List<BlogResponse>>builder().code(HttpStatus.OK.value()).data(blogService.getAll()).build();
+    }
+
     @GetMapping("{id}")
     public ResponseAPI<BlogResponse> getBlog(@PathVariable("id") Long id) {
         BlogResponse result = blogService.showDetail(id);
         return ResponseAPI.<BlogResponse>builder().code(HttpStatus.OK.value()).data(result).build();
     }
+
 }

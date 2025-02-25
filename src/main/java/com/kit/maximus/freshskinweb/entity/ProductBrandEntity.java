@@ -38,17 +38,9 @@ public class ProductBrandEntity extends AbstractEntity {
     @Column(name = "Featured")
     boolean featured;
 
-    @JsonManagedReference
+
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, mappedBy = "brand")
     private List<ProductEntity> products = new ArrayList<>();
 
-//    public void addProduct(ProductEntity product) {
-//        productEntities.add(product);
-//        product.setBrand(this);
-//    }
-//
-//    public void removeProduct(ProductEntity product) {
-//        productEntities.remove(product);
-//        product.setBrand(null);
-//    }
+
 }

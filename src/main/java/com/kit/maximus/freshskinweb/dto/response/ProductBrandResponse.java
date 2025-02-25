@@ -2,11 +2,9 @@ package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
@@ -15,6 +13,7 @@ import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
+@Setter
 @ToString
 @Builder
 public class ProductBrandResponse implements Serializable {
@@ -32,7 +31,8 @@ public class ProductBrandResponse implements Serializable {
     String image;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    List<ProductEntity> product;
+    @JsonProperty("product_ids")
+    List<Long> productIDs;
 
     boolean featured;
 

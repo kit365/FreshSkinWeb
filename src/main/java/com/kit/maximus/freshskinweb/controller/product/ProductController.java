@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.controller.product;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
@@ -48,15 +49,39 @@ public class ProductController {
             log.info("CREATE PRODUCT REQUEST SUCCESS");
             return ResponseAPI.<ProductResponseDTO>builder()
                     .code(HttpStatus.OK.value())
-                    .message("Create Product successful")
+                    .message("Tạo sản phẩm thành công")
                     .build();
 
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             log.error("CREATE PRODUCT ERROR: " + e.getMessage());
             return ResponseAPI.<ProductResponseDTO>builder()
                     .code(HttpStatus.BAD_REQUEST.value())
-                    .message("Error creating product")
+                    .message("Tạo sản phẩm thất bại")
                     .build();
+        }
+    }
+
+    @PatchMapping(value = "edit/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseAPI<ProductResponseDTO> updateProduct(@PathVariable("id") Long id,
+                                                         @RequestPart(value = "request") String requestJson,
+                                                         @RequestPart(value = "thumbnail",required = false) List<MultipartFile> images) {
+
+        log.info("requestJson:{}", requestJson);
+        log.info("images:{}", images);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String message_succed = "Cập nhật sản phẩm thành công";
+        String message_failed = "Cập nhật sản phẩm thất bại";
+        try {
+            UpdateProductRequest request = objectMapper.readValue(requestJson, UpdateProductRequest.class);
+            request.setThumbnail(images);
+            ProductResponseDTO result = productService.update(id, request);
+            log.info("Product updated successfully");
+            return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
+        } catch (JsonProcessingException e) {
+            log.info("Product update failed");
+            log.error(e.getMessage());
+            return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
         }
     }
 
@@ -90,18 +115,7 @@ public class ProductController {
         return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
-    @PatchMapping("edit/{id}")
-    public ResponseAPI<ProductResponseDTO> updataProduct(@PathVariable("id") Long id, @RequestBody UpdateProductRequest productRequestDTO) {
-        ProductResponseDTO result = productService.update(id, productRequestDTO);
-        String message_succed = "Update Product successfull";
-        String message_failed = "Update Product failed";
-        if (result != null) {
-            log.info("Product updated successfully");
-            return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
-        }
-        log.info("Product update failed");
-        return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
-    }
+
 
 
     @DeleteMapping("delete/{id}")

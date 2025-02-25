@@ -11,22 +11,24 @@ import java.io.Serializable;
 import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Setter
+@Getter
 @ToString
 @Builder
 public class UpdateProductRequest implements Serializable {
-
-    String productDetailID;
     List<Long> categoryId;
     long brandId;
 //    String DiscountID;
     String title;
     String description;
     List<MultipartFile> thumbnail;
-//    List<String> thumbnail;
     List<ProductVariantEntity> variants;
-    List<SkinTypeEntity> skinTypes;
+
+    List<Long> skinTypeId;
+
+
     int discountPercent;
     Integer position;
     /// ////////////////////////////////////////////

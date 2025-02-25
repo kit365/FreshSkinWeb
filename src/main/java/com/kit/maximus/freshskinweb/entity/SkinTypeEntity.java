@@ -31,5 +31,6 @@ public class SkinTypeEntity extends AbstractEntity {
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,CascadeType.REFRESH}, fetch = FetchType.LAZY, mappedBy = "skinTypes" )
     @JsonBackReference
+@JsonIgnore
     List<ProductEntity> Products = new ArrayList<>();
 }

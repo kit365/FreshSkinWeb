@@ -26,13 +26,15 @@ public class BlogCategoryResponse implements Serializable {
     Integer position;
     String status;
     boolean deleted;
+    boolean featured;
+
     @JsonFormat(pattern = "yyyy-MM-dd")
     Date createdAt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date updatedAt;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-            @JsonIgnore
+    @JsonIgnore
     List<BlogEntity> blog;
 
 }
