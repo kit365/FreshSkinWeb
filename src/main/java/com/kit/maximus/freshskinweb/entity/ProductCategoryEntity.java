@@ -37,13 +37,12 @@ public class ProductCategoryEntity extends AbstractEntity {
     boolean featured;
 
     @Column(name = "image")
-    String image;
+    @ElementCollection
+    List<String> image;
 
 
     @ManyToMany(mappedBy = "category")
     List<ProductEntity> products = new ArrayList<>();
-
-
 
 
     @JsonBackReference

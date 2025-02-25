@@ -1,5 +1,9 @@
 package com.kit.maximus.freshskinweb.controller.productcategory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kit.maximus.freshskinweb.dto.request.product_brand.CreateProductBrandRequest;
+import com.kit.maximus.freshskinweb.dto.request.product_brand.UpdateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.CreateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.UpdateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
@@ -14,7 +18,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -29,12 +35,22 @@ public class ProductCategoryController {
 
     ProductCategoryService productCategoryService;
 
-    @PostMapping("create")
-    public ResponseAPI<ProductCategoryResponse> createProductCategory(@RequestBody CreateProductCategoryRequest request) {
-        String message = "Create product_category successfull";
-        var result = productCategoryService.add(request);
-        log.info("CREATE CATEGORY_PRODUCT REQUEST)");
-        return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).message(message).build();
+    @PostMapping(value = "create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseAPI<ProductCategoryResponse> createProductCategory(@RequestPart String request,
+                                                                      @RequestPart(value = "thumbnail", required = false) List<MultipartFile> file) {
+        String message_succed = "Tạo danh mục sản phẩm thành công";
+        String message_failed = "Tạo danh mục sản phẩm thất bại";
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            CreateProductCategoryRequest createProductCategoryequest = objectMapper.readValue(request, CreateProductCategoryRequest.class);
+            createProductCategoryequest.setImage(file);
+            var result = productCategoryService.add(createProductCategoryequest);
+            log.info("CREATE BRAND_PRODUCT REQUEST)");
+            return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).message(message_succed).build();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.BAD_REQUEST.value()).message(message_failed).build();
+        }
     }
 
     @GetMapping()
@@ -57,17 +73,27 @@ public class ProductCategoryController {
         return ResponseAPI.<List<ProductCategoryResponse>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
-    @PatchMapping("edit/{id}")
-    public ResponseAPI<ProductCategoryResponse> updateProductCategory(@PathVariable("id") Long id, @RequestBody UpdateProductCategoryRequest request) {
-        ProductCategoryResponse result = productCategoryService.update(id, request);
-        String message_succed = "Update product_category successfull";
-        String message_failed = "Update product_category failed";
-        if (result != null) {
-            log.info("Product_Category updated successfully");
+    @PatchMapping(value = "edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseAPI<ProductCategoryResponse> updateProduct(@PathVariable("id") Long id,
+                                                           @RequestPart(value = "request") String requestJson,
+                                                           @RequestPart(value = "thumbnail", required = false) List<MultipartFile> images) {
+
+        log.info("requestJson:{}", requestJson);
+        log.info("images:{}", images);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String message_succed = "Cập nhật danh mục sản phẩm thành công";
+        String message_failed = "Cập nhật danh mục sản phẩm thất bại";
+        try {
+            UpdateProductCategoryRequest request = objectMapper.readValue(requestJson, UpdateProductCategoryRequest.class);
+            request.setImage(images);
+            ProductCategoryResponse result = productCategoryService.update(id, request);
+            log.info("ProductCategory updated successfully");
             return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
+        } catch (JsonProcessingException e) {
+            log.info("ProductCategory update failed");
+            log.error(e.getMessage());
+            return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
         }
-        log.info("Product_Category update failed");
-        return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
     @PatchMapping("change-multi")

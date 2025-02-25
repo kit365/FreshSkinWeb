@@ -53,35 +53,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     Cloudinary cloudinary;
 
-
-    private String getNameFile(String slug, int count) {
-        String fileName;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
-        String timestamp = LocalDateTime.now().format(formatter);
-        if (count <= 0) {
-            return slug + "_" + timestamp;
-        }
-        return slug + "_" + timestamp + "_" + (count + 1);
-
-    }
-
-    private String uploadImageFromFile(MultipartFile file, String slug, int count) throws IOException {
-
-        String fileName = getNameFile(slug, count);
-
-
-        Map params = ObjectUtils.asMap(
-                "use_filename", true,
-                "unique_filename", false,
-                "overwrite", false,
-                "folder", "product",
-                "public_id", fileName
-        );
-
-        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
-        return uploadResult.get("secure_url").toString();
-    }
-
     @Override
     public boolean add(CreateProductRequest request) {
         List<ProductCategoryEntity> productCategoryEntity = productCategoryRepository.findAllById(request.getCategoryId());
@@ -516,20 +487,48 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 .toLowerCase();
     }
 
-
     private void deleteImageFromCloudinary(String imageUrl) throws IOException {
         if (imageUrl != null) {
-            String publicId = extractPublicId(imageUrl);
-            //xóa vĩnh viễn khỏi cloud
             Map options = ObjectUtils.asMap("invalidate", true);
-            cloudinary.uploader().destroy(publicId, options);
+            String publicId = extractPublicId(imageUrl);
+            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
         }
     }
 
 
-    //lấy hình từ ID
     private String extractPublicId(String imageUrl) {
-        return imageUrl.substring(imageUrl.lastIndexOf("/") + 1, imageUrl.lastIndexOf(".")); // Lấy ID ảnh từ URL
+        String temp = imageUrl.substring(imageUrl.indexOf("upload/") + 7);
+        String publicId = temp.substring(temp.indexOf("/") + 1, temp.lastIndexOf("."));
+        System.out.println(publicId);
+        return  publicId;
+    }
+
+    private String getNameFile(String slug, int count) {
+        String fileName;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+        String timestamp = LocalDateTime.now().format(formatter);
+        if (count <= 0) {
+            return slug + "_" + timestamp;
+        }
+        return slug + "_" + timestamp + "_" + (count + 1);
+
+    }
+
+    private String uploadImageFromFile(MultipartFile file, String slug, int count) throws IOException {
+
+        String fileName = getNameFile(slug, count);
+
+
+        Map params = ObjectUtils.asMap(
+                "use_filename", true,
+                "unique_filename", false,
+                "overwrite", false,
+                "folder", "product",
+                "public_id", fileName
+        );
+
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
+        return uploadResult.get("secure_url").toString();
     }
 
 }

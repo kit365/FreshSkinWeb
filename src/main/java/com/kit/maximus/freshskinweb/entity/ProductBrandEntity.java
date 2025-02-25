@@ -27,7 +27,8 @@ public class ProductBrandEntity extends AbstractEntity {
     String slug;
 
     @Column(name = "image")
-    String image;
+    @ElementCollection
+    List<String> image;
 
     @Column(name = "Description", columnDefinition = "MEDIUMTEXT")
     String description;
