@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Setter
 @Getter
@@ -17,11 +18,10 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BlogResponse implements Serializable {
 
-
     Long id;
     String title;
     String content;
-    String thumbnail;
+    List<String> image;
     Integer position;
     String slug;
     boolean featured;

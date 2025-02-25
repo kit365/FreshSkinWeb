@@ -13,16 +13,18 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface BlogCategoryMapper {
 
-    @Mapping(target = "blog", ignore = true)
+
+    @Mapping(target = "image", ignore = true)
     BlogCategoryEntity toBlogCategory(CreateBlogCategoryRequest request);
 
-    @Mapping(target = "blog", source = "blog")
+    @Mapping(target = "blogID", ignore = true)
     BlogCategoryResponse toBlogCategoryResponse(BlogCategoryEntity request);
 
+    @Mapping(target = "blogID", ignore = true)
     List<BlogCategoryResponse> toBlogCateroiesResponseDTO(List<BlogCategoryEntity> request);
-
 
     @Mapping(target = "blog", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "image",ignore = true)
     void updateBlogCategory(@MappingTarget BlogCategoryEntity blogCategoryEntity, UpdateBlogCategoryRequest productRequestDTO);
 }

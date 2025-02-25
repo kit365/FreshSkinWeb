@@ -1,5 +1,7 @@
 package com.kit.maximus.freshskinweb.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.kit.maximus.freshskinweb.dto.request.blog_category.CreateBlogCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog_category.UpdateBlogCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
@@ -23,8 +25,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.text.Normalizer;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,34 +40,42 @@ import java.util.Map;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
-public class BlogCategoryService implements BaseService<BlogCategoryResponse, CreateBlogCategoryRequest, UpdateBlogCategoryRequest, Long>{
+public class BlogCategoryService implements BaseService<BlogCategoryResponse, CreateBlogCategoryRequest, UpdateBlogCategoryRequest, Long> {
 
     BlogCategoryRepository blogCategoryRepository;
 
     BlogCategoryMapper blogCategoryMapper;
 
+    Cloudinary cloudinary;
+
     @Override
     public boolean add(CreateBlogCategoryRequest request) {
         log.info("Request JSON: {}", request);
-
 //        if(!blogCategoryRepository.existsByblogCategoryName(request.getBlogCategoryName())){
 //            throw new AppException(ErrorCode.BLOG_CATEGORY_NAME_EXISTED);
 //        }
         BlogCategoryEntity blogCategoryEntity = blogCategoryMapper.toBlogCategory(request);
-
         if (request.getPosition() == null || request.getPosition() <= 0) {
             Integer size = blogCategoryRepository.findAll().size();
             blogCategoryEntity.setPosition(size + 1);
         }
 
-        blogCategoryEntity.setSlug(getSlug(request.getTitle()));
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
 
-        List<BlogEntity> blogEntities = request.getBlog();
-        if(blogEntities == null){
-            blogCategoryEntity.setBlog(null);
-        } else {
-            request.getBlog().forEach(blogCategoryEntity::createBlog);
+            List<String> images = new ArrayList<>();
+            int count = 0;
+            for (MultipartFile file : request.getImage()) {
+                try {
+                    String url = uploadImageFromFile(file, getSlug(request.getTitle()), count++);
+                    images.add(url);
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                    throw new RuntimeException(e);
+                }
+                blogCategoryEntity.setImage(images);
+            }
         }
+        blogCategoryEntity.setSlug(getSlug(request.getTitle()));
         blogCategoryRepository.save(blogCategoryEntity);
         return true;
     }
@@ -83,8 +98,36 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         if (StringUtils.hasLength(request.getTitle())) {
             blogCategoryEntity.setSlug(getSlug(request.getTitle()));
         }
-        blogCategoryMapper.updateBlogCategory(blogCategoryEntity, request);
 
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
+            for (String requests : blogCategoryEntity.getImage()) {
+                try {
+                    deleteImageFromCloudinary(requests);
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                    throw new RuntimeException(e);
+                }
+            }
+
+            int count = 0;
+            List<String> images = new ArrayList<>();
+            for (MultipartFile requests : request.getImage()) {
+                String slug = getSlug(blogCategoryEntity.getTitle());
+
+                if (StringUtils.hasLength(request.getTitle())) {
+                    slug = getSlug(request.getTitle());
+                }
+
+                try {
+                    String url = uploadImageFromFile(requests, slug, count++);
+                    images.add(url);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            blogCategoryEntity.setImage(images);
+        }
+        blogCategoryMapper.updateBlogCategory(blogCategoryEntity, request);
         return blogCategoryMapper.toBlogCategoryResponse(blogCategoryRepository.save(blogCategoryEntity));
     }
 
@@ -95,7 +138,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
             blogCategoryEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
             blogCategoryRepository.saveAll(blogCategoryEntities);
-        return "Cặp nhật trạng thái thành công";
+            return "Cặp nhật trạng thái thành công";
         } else if (statusEnum == Status.SOFT_DELETED) {
             blogCategoryEntities.forEach(productEntity -> productEntity.setDeleted(true));
             blogCategoryRepository.saveAll(blogCategoryEntities);
@@ -120,6 +163,16 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         if (blogCategoryEntity == null) {
             throw new AppException(ErrorCode.BLOG_CATEGORY_NOT_FOUND);
         }
+
+        if (blogCategoryEntity.getImage() == null || blogCategoryEntity.getImage().isEmpty()) {
+            for (String url : blogCategoryEntity.getImage()) {
+                try {
+                    deleteImageFromCloudinary(url);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
         log.info("Delete: {}", id);
         blogCategoryEntity.getBlog().forEach(blog -> blog.setBlogCategory(null));
         blogCategoryRepository.delete(blogCategoryEntity);
@@ -129,6 +182,19 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
     @Override
     public boolean delete(List<Long> longs) {
         List<BlogCategoryEntity> blogCategoryEntities = blogCategoryRepository.findAllById(longs);
+
+        for (BlogCategoryEntity blogCategoryEntity : blogCategoryEntities) {
+            if (blogCategoryEntity.getImage() == null || blogCategoryEntity.getImage().isEmpty()) {
+                for (String url : blogCategoryEntity.getImage()) {
+                    try {
+                        deleteImageFromCloudinary(url);
+                    } catch (IOException e) {
+                        log.error(e.getMessage());
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
         blogCategoryRepository.deleteAll(blogCategoryEntities);
         return true;
     }
@@ -152,11 +218,10 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
     }
 
 
-
     @Override
     public boolean restore(Long aLong) {
         BlogCategoryEntity blogCategoryEntity = getBlogCategoryEntityById(aLong);
-        if(blogCategoryEntity == null){
+        if (blogCategoryEntity == null) {
             throw new AppException(ErrorCode.BLOG_NOT_FOUND);
         }
         log.info("Delete temporarily : {}", aLong);
@@ -294,5 +359,50 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
 
     private BlogCategoryEntity getBlogCategoryEntityById(Long id) {
         return blogCategoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.BLOG_CATEGORY_NOT_FOUND));
+    }
+
+    private String getNameFile(String slug, int count) {
+        String fileName;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+        String timestamp = LocalDateTime.now().format(formatter);
+        if (count <= 0) {
+            return slug + "_" + timestamp;
+        }
+        return slug + "_" + timestamp + "_" + (count + 1);
+
+    }
+
+    private String uploadImageFromFile(MultipartFile file, String slug, int count) throws IOException {
+
+        String fileName = getNameFile(slug, count);
+
+
+        Map params = ObjectUtils.asMap(
+                "use_filename", true,
+                "unique_filename", false,
+                "overwrite", false,
+                "folder", "blog-category",
+                "public_id", fileName
+        );
+
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
+        return uploadResult.get("secure_url").toString();
+    }
+
+    private void deleteImageFromCloudinary(String imageUrl) throws IOException {
+        if (imageUrl != null) {
+            Map options = ObjectUtils.asMap("invalidate", true);
+            String publicId = extractPublicId(imageUrl);
+            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+        }
+    }
+
+
+    //lấy hình từ ID
+    private String extractPublicId(String imageUrl) {
+        String temp = imageUrl.substring(imageUrl.indexOf("upload/") + 7);
+        String publicId = temp.substring(temp.indexOf("/") + 1, temp.lastIndexOf("."));
+        System.out.println(publicId);
+        return publicId;
     }
 }

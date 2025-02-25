@@ -3,23 +3,24 @@ package com.kit.maximus.freshskinweb.dto.request.blog_category;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 import java.util.List;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @Setter
 @ToString
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder
 public class CreateBlogCategoryRequest implements Serializable {
+
     String title;
     String description;
     Integer position;
     boolean featured;
-    String image;
+    List<MultipartFile> image;
     String status;
-    List<BlogEntity> blog;
 }

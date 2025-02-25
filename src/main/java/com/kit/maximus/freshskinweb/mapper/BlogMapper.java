@@ -15,7 +15,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface BlogMapper {
 
-    @Mapping(target = "blogCategory", ignore = true)
+    @Mapping(target = "thumbnail", ignore = true)
     BlogEntity toBlogEntity(BlogCreationRequest request);
 
     @Mapping(target = "blogCategory", source = "blogCategory")
@@ -24,6 +24,7 @@ public interface BlogMapper {
     List<BlogResponse> toBlogsResponseDTO(List<BlogEntity> request);
 
     @Mapping(target = "blogCategory", ignore = true)
+    @Mapping(target = "thumbnail", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateBlogEntity(@MappingTarget BlogEntity entity, BlogUpdateRequest request);
 }

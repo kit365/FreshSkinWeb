@@ -34,8 +34,9 @@ public class BlogCategoryEntity extends AbstractEntity {
     @Column(name = "feature")
     boolean featured;
 
+    @ElementCollection
     @Column(name = "image")
-    String image;
+    List<String> image;
 
     @Column(name = "Slug")
     String slug;

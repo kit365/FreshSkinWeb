@@ -5,9 +5,11 @@ import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,12 +21,11 @@ import java.util.Date;
 public class BlogUpdateRequest implements Serializable {
     String title;
     String content;
-    String thumbnail;
+    List<MultipartFile> thumbnail;
     Integer position;
     boolean featured;
     String status;
     boolean deleted;
     BlogCategoryResponse blogCategory;
-
     Long categoryID;
 }

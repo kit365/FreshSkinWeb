@@ -3,6 +3,7 @@ package com.kit.maximus.freshskinweb.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kit.maximus.freshskinweb.entity.AbstractEntity;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
 import lombok.*;
@@ -19,8 +20,10 @@ import java.util.List;
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BlogCategoryResponse implements Serializable {
+
     Long id;
     String title;
+    List<String> image;
     String description;
     String slug;
     Integer position;
@@ -34,7 +37,7 @@ public class BlogCategoryResponse implements Serializable {
     Date updatedAt;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonIgnore
-    List<BlogEntity> blog;
+    @JsonProperty("blog_ids")
+    List<BlogResponse> blogID;
 
 }

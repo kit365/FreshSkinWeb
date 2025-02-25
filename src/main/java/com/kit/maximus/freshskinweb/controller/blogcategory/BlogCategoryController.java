@@ -1,9 +1,12 @@
 package com.kit.maximus.freshskinweb.controller.blogcategory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kit.maximus.freshskinweb.dto.request.blog_category.CreateBlogCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog_category.UpdateBlogCategoryRequest;
+import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -13,7 +16,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -28,13 +33,38 @@ public class BlogCategoryController {
 
     BlogCategoryService blogCategoryService;
 
-    @PostMapping("/create")
-    public ResponseAPI<BlogCategoryResponse> createBlogCategory(@RequestBody CreateBlogCategoryRequest request){
-        String message = "Create blog category successfully";
-        var result = blogCategoryService.add(request);
-        log.info("CREATE BLOG CATEGORY REQUEST");
-        return ResponseAPI.<BlogCategoryResponse>builder().code(HttpStatus.OK.value()).message(message).build();
+    @PostMapping(value = "create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseAPI<ProductResponseDTO> createProduct(
+            @RequestPart("request") String requestJson,
+            @RequestPart(value = "thumbnail", required = false) List<MultipartFile> images) {
+
+        log.info("requestJson:{}", requestJson);
+        log.info("images:{}", images);
+        String message_succed = "Tạo danh mục bài viết thành công";
+        String message_failed = "Tạo danh mục bài viết thất bại";
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            CreateBlogCategoryRequest blogCategoryRequest = objectMapper.readValue(requestJson, CreateBlogCategoryRequest.class);
+            blogCategoryRequest.setImage(images);
+
+            var result = blogCategoryService.add(blogCategoryRequest);
+
+            log.info("CREATE BLOG-CATEGORY REQUEST SUCCESS");
+            return ResponseAPI.<ProductResponseDTO>builder()
+                    .code(HttpStatus.OK.value())
+                    .message(message_succed)
+                    .build();
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            log.error("CREATE BLOG-CATEGORY ERROR: " + e.getMessage());
+            return ResponseAPI.<ProductResponseDTO>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message(message_failed)
+                    .build();
+        }
     }
+
 
     @PatchMapping("/edit/{id}")
     public ResponseAPI<BlogCategoryResponse> updateBlogCategory(@PathVariable Long id ,@RequestBody UpdateBlogCategoryRequest request){

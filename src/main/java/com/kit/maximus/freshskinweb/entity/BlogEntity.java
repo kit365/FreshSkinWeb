@@ -8,6 +8,8 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.util.List;
+
 @Setter
 @Getter
 @NoArgsConstructor
@@ -29,8 +31,9 @@ public class BlogEntity extends AbstractEntity {
     @Column(name = "content")
     String content;
 
+    @ElementCollection
     @Column(name = "thumbnail")
-    String thumbnail;
+    List<String> thumbnail;
 
     @Column(name = "position")
     Integer position;
@@ -41,7 +44,6 @@ public class BlogEntity extends AbstractEntity {
     @Column(name = "Featured")
     boolean featured;
 
-    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "BlogCategoryId", nullable = true)
