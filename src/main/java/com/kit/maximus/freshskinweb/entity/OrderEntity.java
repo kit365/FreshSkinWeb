@@ -35,6 +35,7 @@ public class OrderEntity extends AbstractEntity {
     UserEntity user;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "order")
+    @JsonIgnore
     List<OrderItemEntity> orderItems;
 
     @Column(name = "UserId", unique = true, nullable = false, insertable = false, updatable = false)

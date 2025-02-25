@@ -42,7 +42,7 @@ public class SkinTypeService {
 
     public boolean delete(Long id) {
         SkinTypeEntity skinType = skinTypeRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.BLOG_ITEM_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.SKIN_TYPE_NOT_FOUND));
 
         //Set null skin type cho bảng trung gian
         // Product là thằng tạo bảng trung gian => set skintype == null tại product có skintype ID mình truyền vào

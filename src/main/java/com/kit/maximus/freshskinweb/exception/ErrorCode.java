@@ -49,6 +49,9 @@ public enum ErrorCode {
     //Authentication
     UNAUTHENTICATED(401, "Unauthenticated"),
 
+    //ProductVariant
+    PRODUCT_VARIANT_NOT_FOUND(404, "Không tìm thấy phiên bản sản phẩm"),
+
    //Product
     SORT_DIRECTION_INVALID(400, "Sort Direction Invalid[ASC or DESC]"),
     PRODUCT_NOT_FOUND(404, "Product Not Found"),
@@ -83,7 +86,10 @@ public enum ErrorCode {
     INVALID_REQUEST_BLOGID(400, "Invalid Request BlogId"),
 
     //ORDER ITEMS
-    BLOG_ITEM_NOT_FOUND(404, "Blog Item Not Found"),
+    ORDER_ITEM_NOT_FOUND(404, "Không tìm thấy mục đơn hàng"),
+
+    //SKIN TYPE
+    SKIN_TYPE_NOT_FOUND(404, "Không tìm thấy loại da"),
 
     ;
 

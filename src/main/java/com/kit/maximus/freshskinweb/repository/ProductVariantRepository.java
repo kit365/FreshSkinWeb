@@ -1,4 +1,11 @@
 package com.kit.maximus.freshskinweb.repository;
 
-public interface ProductVariantRepository {
+import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ProductVariantRepository extends JpaRepository<ProductVariantEntity, Long> {
+
+//    Object findAllById(Long id);
 }

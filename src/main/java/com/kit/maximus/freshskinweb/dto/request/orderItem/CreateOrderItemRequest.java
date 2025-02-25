@@ -19,8 +19,8 @@ import java.io.Serializable;
 @ToString
 @Builder
 public class CreateOrderItemRequest implements Serializable {
-    Long order;
-    Long productVariant;
+    Long orderId;
+    Long productVariantId;
     Integer quantity;
     Double subtotal;
     String status;

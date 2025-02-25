@@ -12,7 +12,6 @@ public interface OrderItemMapper {
 
     @Mapping(target = "order", ignore = true)
     @Mapping(target = "productVariant", ignore = true)
-
     OrderItemEntity toOrderItemEntity(CreateOrderItemRequest request);
 
     OrderItemResponse toOrderItemResponse(OrderItemEntity orderItemEntity);
