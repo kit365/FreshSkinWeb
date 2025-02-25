@@ -38,7 +38,8 @@ public class ProductController {
 
         log.info("requestJson:{}", requestJson);
         log.info("images:{}", images);
-
+        String message_succed = "Tạo sản phẩm thành công";
+        String message_failed = "Tạo sản phẩm thất bại";
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             CreateProductRequest productRequestDTO = objectMapper.readValue(requestJson, CreateProductRequest.class);
@@ -49,7 +50,7 @@ public class ProductController {
             log.info("CREATE PRODUCT REQUEST SUCCESS");
             return ResponseAPI.<ProductResponseDTO>builder()
                     .code(HttpStatus.OK.value())
-                    .message("Tạo sản phẩm thành công")
+                    .message(message_succed)
                     .build();
 
         } catch (Exception e) {
@@ -57,15 +58,15 @@ public class ProductController {
             log.error("CREATE PRODUCT ERROR: " + e.getMessage());
             return ResponseAPI.<ProductResponseDTO>builder()
                     .code(HttpStatus.BAD_REQUEST.value())
-                    .message("Tạo sản phẩm thất bại")
+                    .message(message_failed)
                     .build();
         }
     }
 
-    @PatchMapping(value = "edit/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseAPI<ProductResponseDTO> updateProduct(@PathVariable("id") Long id,
                                                          @RequestPart(value = "request") String requestJson,
-                                                         @RequestPart(value = "thumbnail",required = false) List<MultipartFile> images) {
+                                                         @RequestPart(value = "thumbnail", required = false) List<MultipartFile> images) {
 
         log.info("requestJson:{}", requestJson);
         log.info("images:{}", images);
@@ -114,8 +115,6 @@ public class ProductController {
         var result = productService.update(ids, status);
         return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
-
-
 
 
     @DeleteMapping("delete/{id}")

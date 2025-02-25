@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 import java.util.List;
@@ -27,7 +28,7 @@ public class ProductCategoryResponse implements Serializable {
 
     Integer position;
 
-    String image;
+    List<String> image;
 
     boolean featured;
 

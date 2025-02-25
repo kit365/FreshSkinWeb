@@ -28,7 +28,7 @@ public class ProductBrandResponse implements Serializable {
 
     Integer position;
 
-    String image;
+    List<String> image;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("product_ids")

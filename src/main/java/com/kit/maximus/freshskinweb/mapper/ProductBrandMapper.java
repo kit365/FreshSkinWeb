@@ -15,6 +15,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ProductBrandMapper {
 
+    @Mapping(target = "image", ignore = true)
     ProductBrandEntity productBrandToProductBrandEntity(CreateProductBrandRequest request);
 
     @Mapping(target = "productIDs", ignore = true)
@@ -24,6 +25,7 @@ public interface ProductBrandMapper {
     List<ProductBrandResponse> toProductBrandsResponseDTO(List<ProductBrandEntity> request);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "image", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateProductBrand(@MappingTarget ProductBrandEntity productBrandEntity, UpdateProductBrandRequest request);
 }

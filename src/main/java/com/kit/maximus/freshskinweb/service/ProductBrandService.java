@@ -1,5 +1,7 @@
 package com.kit.maximus.freshskinweb.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.kit.maximus.freshskinweb.dto.request.product_brand.CreateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.request.product_brand.UpdateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
@@ -21,8 +23,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.text.Normalizer;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +44,8 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
 
     ProductBrandMapper productBrandMapper;
 
+    Cloudinary cloudinary;
+
     @Override
     public boolean add(CreateProductBrandRequest request) {
         log.info("Request JSON: {}", request);
@@ -47,6 +55,21 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         if (request.getPosition() == null || request.getPosition() <= 0) {
             Integer size = productBrandRepository.findAll().size();
             productBrandEntity.setPosition(size + 1);
+        }
+
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
+            List<String> images = new ArrayList<>();
+            int count = 0;
+            for (MultipartFile createImg : request.getImage()) {
+                try {
+                    String url = uploadImageFromFile(createImg, getSlug(request.getTitle()), count++);
+                    images.add(url);
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                    throw new RuntimeException(e);
+                }
+            }
+            productBrandEntity.setImage(images);
         }
 
         productBrandEntity.setSlug(getSlug(request.getTitle()));
@@ -91,6 +114,29 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
             brandEntity.setSlug(getSlug(request.getTitle()));
         }
 
+        if (request.getImage() != null) {
+            brandEntity.getImage().forEach(thumbnail -> {
+                try {
+                    deleteImageFromCloudinary(thumbnail);
+                } catch (IOException e) {
+                    log.error("Delete thumbnail error", e);
+                    throw new RuntimeException(e);
+                }
+            });
+            int count = 0;
+            List<String> newThumbnails = new ArrayList<>();
+            for (MultipartFile file : request.getImage()) {
+                try {
+                    String url = uploadImageFromFile(file, getSlug(request.getTitle()), count++);
+                    newThumbnails.add(url);
+                } catch (IOException e) {
+                    log.error("Upload thumbnail error", e);
+                    throw new RuntimeException(e);
+                }
+            }
+            brandEntity.setImage(newThumbnails);
+        }
+
         productBrandMapper.updateProductBrand(brandEntity, request);
         return productBrandMapper.productBrandToProductBrandResponseDTO(productBrandRepository.save(brandEntity));
     }
@@ -98,6 +144,18 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
     @Override
     public boolean delete(Long id) {
         ProductBrandEntity brandEntity = getBrandById(id);
+
+        if (brandEntity.getImage() != null && !brandEntity.getImage().isEmpty()) {
+            for (String s : brandEntity.getImage()) {
+                try {
+                    deleteImageFromCloudinary(s);
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
         log.info("Delete: {}", id);
         productBrandRepository.delete(brandEntity);
         return true;
@@ -106,6 +164,21 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
     @Override
     public boolean delete(List<Long> id) {
         List<ProductBrandEntity> list = productBrandRepository.findAllById(id);
+
+
+        for (ProductBrandEntity productBrandEntity : list) {
+            if (productBrandEntity.getImage() != null && !productBrandEntity.getImage().isEmpty()) {
+                for (String s : productBrandEntity.getImage()) {
+                    try {
+                        deleteImageFromCloudinary(s);
+                    } catch (IOException e) {
+                        log.error(e.getMessage());
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+
+        }
         productBrandRepository.deleteAll(list);
         return true;
     }
@@ -278,6 +351,50 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         return productBrandRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_BRAND_NOT_FOUND));
     }
 
+    private String getNameFile(String slug, int count) {
+        String fileName;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+        String timestamp = LocalDateTime.now().format(formatter);
+        if (count <= 0) {
+            return slug + "_" + timestamp;
+        }
+        return slug + "_" + timestamp + "_" + (count + 1);
+
+    }
+
+    private String uploadImageFromFile(MultipartFile file, String slug, int count) throws IOException {
+
+        String fileName = getNameFile(slug, count);
+
+
+        Map params = ObjectUtils.asMap(
+                "use_filename", true,
+                "unique_filename", false,
+                "overwrite", false,
+                "folder", "product-brand",
+                "public_id", fileName
+        );
+
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
+        return uploadResult.get("secure_url").toString();
+    }
+
+    private void deleteImageFromCloudinary(String imageUrl) throws IOException {
+        if (imageUrl != null) {
+            Map options = ObjectUtils.asMap("invalidate", true);
+            String publicId = extractPublicId(imageUrl);
+            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+        }
+    }
+
+
+    //lấy hình từ ID
+    private String extractPublicId(String imageUrl) {
+        String temp = imageUrl.substring(imageUrl.indexOf("upload/") + 7);
+        String publicId = temp.substring(temp.indexOf("/") + 1, temp.lastIndexOf("."));
+        System.out.println(publicId);
+        return  publicId;
+    }
 
 }
 

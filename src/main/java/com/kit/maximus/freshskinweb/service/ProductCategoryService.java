@@ -1,5 +1,7 @@
 package com.kit.maximus.freshskinweb.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.CreateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.UpdateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
@@ -20,8 +22,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.text.Normalizer;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +43,8 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
     ProductCategoryMapper productCategoryMapper;
 
+    Cloudinary cloudinary;
+
     @Override
     public boolean add(CreateProductCategoryRequest request) {
         System.out.println(request);
@@ -47,6 +55,22 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         if (request.getPosition() == null || request.getPosition() <= 0) {
             int size = productCategoryRepository.findAll().size();
             productCategory.setPosition(size + 1);
+        }
+
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
+            int count = 0;
+            List<String> images = new ArrayList<>();
+            try {
+                for (MultipartFile file : request.getImage()) {
+                    String url = uploadImageFromFile(file, getSlug(request.getTitle()), count++);
+                    images.add(url);
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                throw new RuntimeException(e);
+            }
+
+            productCategory.setImage(images);
         }
 
         //nếu cha = null => đây là danh mục chinh
@@ -90,6 +114,29 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         if (request.getParentID() != null) {
             ProductCategoryEntity parentCategory = productCategoryRepository.findById(request.getParentID()).orElse(null);
             productCategoryEntity.setParent(parentCategory);
+        }
+
+        if (request.getImage() != null) {
+            productCategoryEntity.getImage().forEach(thumbnail -> {
+                try {
+                    deleteImageFromCloudinary(thumbnail);
+                } catch (IOException e) {
+                    log.error("Delete thumbnail error", e);
+                    throw new RuntimeException(e);
+                }
+            });
+            int count = 0;
+            List<String> newThumbnails = new ArrayList<>();
+            for (MultipartFile file : request.getImage()) {
+                try {
+                    String url = uploadImageFromFile(file, getSlug(request.getTitle()), count++);
+                    newThumbnails.add(url);
+                } catch (IOException e) {
+                    log.error("Upload thumbnail error", e);
+                    throw new RuntimeException(e);
+                }
+            }
+            productCategoryEntity.setImage(newThumbnails);
         }
 
         productCategoryMapper.updateProductCategory(productCategoryEntity, request);
@@ -136,6 +183,17 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
             });
         }
 
+        if (productCategoryEntity.getImage() != null) {
+            for (String url : productCategoryEntity.getImage()) {
+                try {
+                    deleteImageFromCloudinary(url);
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
         log.info("Delete: {}", id);
         productCategoryRepository.delete(productCategoryEntity);
         return true;
@@ -149,9 +207,20 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                 productCategoryEntity.setParent(null);
             }
         });
+        for (ProductCategoryEntity productCategoryEntity : list) {
+            if (productCategoryEntity.getImage() != null) {
+                for (String img : productCategoryEntity.getImage()) {
+                    try {
+                        deleteImageFromCloudinary(img);
+                    } catch (IOException e) {
+                        log.error(e.getMessage());
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+
+        }
         productCategoryRepository.saveAll(list);
-
-
         productCategoryRepository.deleteAll(list);
         return true;
     }
@@ -323,6 +392,50 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     //tra ve ProductEntity, Neu Id null -> nem loi
     private ProductCategoryEntity getCategoryById(Long id) {
         return productCategoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND));
+    }
+
+    private String getNameFile(String slug, int count) {
+        String fileName;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+        String timestamp = LocalDateTime.now().format(formatter);
+        if (count <= 0) {
+            return slug + "_" + timestamp;
+        }
+        return slug + "_" + timestamp + "_" + (count + 1);
+
+    }
+
+    private String uploadImageFromFile(MultipartFile file, String slug, int count) throws IOException {
+
+        String fileName = getNameFile(slug, count);
+
+
+        Map params = ObjectUtils.asMap(
+                "use_filename", true,
+                "unique_filename", false,
+                "overwrite", false,
+                "folder", "product-category",
+                "public_id", fileName
+        );
+
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
+        return uploadResult.get("secure_url").toString();
+    }
+
+    private void deleteImageFromCloudinary(String imageUrl) throws IOException {
+        if (imageUrl != null) {
+            Map options = ObjectUtils.asMap("invalidate", true);
+            String publicId = extractPublicId(imageUrl);
+            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+        }
+    }
+
+
+    private String extractPublicId(String imageUrl) {
+        String temp = imageUrl.substring(imageUrl.indexOf("upload/") + 7);
+        String publicId = temp.substring(temp.indexOf("/") + 1, temp.lastIndexOf("."));
+        System.out.println(publicId);
+        return publicId;
     }
 
 

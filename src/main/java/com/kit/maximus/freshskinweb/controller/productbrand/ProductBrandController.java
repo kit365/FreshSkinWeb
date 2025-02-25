@@ -1,5 +1,8 @@
 package com.kit.maximus.freshskinweb.controller.productbrand;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product_brand.CreateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.request.product_brand.UpdateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
@@ -13,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,31 +33,34 @@ public class ProductBrandController {
 
     ProductBrandService productBrandService;
 
-    @PostMapping("create")
-    public ResponseAPI<ProductBrandResponse> createProductBrand(@RequestBody CreateProductBrandRequest request) {
-        String message = "Create product_brand successfull";
-        var result = productBrandService.add(request);
-        log.info("CREATE BRAND_PRODUCT REQUEST)");
-        return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.OK.value()).message(message).build();
-    }
+    @PostMapping(value = "create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseAPI<ProductBrandResponse> createProductBrand
+            (@RequestPart("request") String request,
+             @RequestPart(value = "thumbnail", required = false) List<MultipartFile> file) {
 
-//    @PostMapping("create")
-//    public ResponseAPI<ProductBrandResponse> createProductBrand(
-//            @RequestPart("request") CreateProductBrandRequest request
-//            @RequestPart("thumbail") List<MultipartFile> file  ) {
-//        String message = "Create product_brand successfull";
-//        var result = productBrandService.add(request);
-//        log.info("CREATE BRAND_PRODUCT REQUEST)");
-//        return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.OK.value()).message(message).build();
-//    }
+        String message_succed = "Tạo thương hiệu sản phẩm thành công";
+        String message_failed = "Tạo thương hiệu sản phẩm thất bại";
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            CreateProductBrandRequest createProductBrandRequest = objectMapper.readValue(request, CreateProductBrandRequest.class);
+            createProductBrandRequest.setImage(file);
+            var result = productBrandService.add(createProductBrandRequest);
+            log.info("CREATE BRAND_PRODUCT REQUEST)");
+            return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.OK.value()).message(message_succed).build();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.BAD_REQUEST.value()).message(message_failed).build();
+        }
+
+    }
 
     @GetMapping()
     public ResponseAPI<Map<String, Object>> getAllProductBrand(@RequestParam(defaultValue = "1") int page,
-                                                          @RequestParam(defaultValue = "4") int size,
-                                                          @RequestParam(defaultValue = "position") String sortKey,
-                                                          @RequestParam(defaultValue = "desc") String sortValue,
-                                                          @RequestParam(defaultValue = "ALL") String status,
-                                                          @RequestParam(name = "keyword", required = false) String keyword) {
+                                                               @RequestParam(defaultValue = "4") int size,
+                                                               @RequestParam(defaultValue = "position") String sortKey,
+                                                               @RequestParam(defaultValue = "desc") String sortValue,
+                                                               @RequestParam(defaultValue = "ALL") String status,
+                                                               @RequestParam(name = "keyword", required = false) String keyword) {
         String message = "Tim thay List ProductBrand";
         log.info("GET ALL PRODUCTS BRAND");
         Map<String, Object> result = productBrandService.getAll(page, size, sortKey, sortValue, status, keyword);
@@ -84,18 +91,30 @@ public class ProductBrandController {
         return ResponseAPI.<List<ProductBrandResponse>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
-    @PatchMapping("edit/{id}")
-    public ResponseAPI<ProductBrandResponse> updateProductBrand(@PathVariable("id") Long id, @RequestBody UpdateProductBrandRequest request) {
-        ProductBrandResponse result = productBrandService.update(id, request);
-        String message_succed = "Update product_brand successfull";
-        String message_failed = "Update product_brand failed";
-        if (result != null) {
-            log.info("Product_brand updated successfully");
+    @PatchMapping(value = "edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseAPI<ProductBrandResponse> updateProduct(@PathVariable("id") Long id,
+                                                           @RequestPart(value = "request") String requestJson,
+                                                           @RequestPart(value = "thumbnail", required = false) List<MultipartFile> images) {
+
+        log.info("requestJson:{}", requestJson);
+        log.info("images:{}", images);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String message_succed = "Cập nhật thương hiệu sản phẩm thành công";
+        String message_failed = "Cập nhật thương hiệu sản phẩm thất bại";
+        try {
+            UpdateProductBrandRequest request = objectMapper.readValue(requestJson, UpdateProductBrandRequest.class);
+            request.setImage(images);
+            ProductBrandResponse result = productBrandService.update(id, request);
+            log.info("ProductBrand updated successfully");
             return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
+        } catch (JsonProcessingException e) {
+            log.info("ProductBrand update failed");
+            log.error(e.getMessage());
+            return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
         }
-        log.info("Product_brand update failed");
-        return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
+
+
 
     @DeleteMapping("delete/{id}")
     public ResponseAPI<String> deleteProductBrand(@PathVariable("id") Long id) {
@@ -138,9 +157,9 @@ public class ProductBrandController {
 
 
     @DeleteMapping("delete")
-    public ResponseAPI<String> deleteProductBrand(@RequestBody Map<String,Object> productRequestDTO) {
+    public ResponseAPI<String> deleteProductBrand(@RequestBody Map<String, Object> productRequestDTO) {
 
-        if(!productRequestDTO.containsKey("id")) {
+        if (!productRequestDTO.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
             throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
         }
