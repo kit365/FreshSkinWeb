@@ -17,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "Product")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "category", "variants", "skinTypes", "reviews"})
 public class ProductEntity extends AbstractEntity {
 
     @Id
@@ -94,6 +95,9 @@ public class ProductEntity extends AbstractEntity {
 
     @Column(name = "SkinIssues")
     String skinIssues;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "product")
+    List<ReviewEntity> reviews = new ArrayList<>();
 
     public void createProductVariant(ProductVariantEntity productVariantEntity) {
         variants.add(productVariantEntity);

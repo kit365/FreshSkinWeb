@@ -1,9 +1,6 @@
 package com.kit.maximus.freshskinweb.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import com.kit.maximus.freshskinweb.utils.TypeUser;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,6 +21,7 @@ import java.util.UUID;
 @Table(name = "User")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "reviews", "orders"})
 public class UserEntity extends AbstractEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -72,6 +70,10 @@ public class UserEntity extends AbstractEntity {
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "role_id")
     RoleEntity role;
+
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "user")
+    List<ReviewEntity> reviews = new ArrayList<>();
 
     public void createOrder(OrderEntity order) {
             orders.add(order);

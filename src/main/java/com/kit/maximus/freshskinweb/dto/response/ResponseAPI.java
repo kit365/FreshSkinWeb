@@ -6,7 +6,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)

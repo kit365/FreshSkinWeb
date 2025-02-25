@@ -89,6 +89,10 @@ public enum ErrorCode {
     //SKIN_TYPE
     SKIN_TYPE_NOT_FOUND(404, "Không tìm thấy loại da"),
 
+    //REVIEW
+    RATING_INVALID(400, "Giá trị phải từ 1 đến 5"),
+    REVIEW_NOT_FOUND(404, "Không tìm thấy đánh giá"),
+
     ;
 
 

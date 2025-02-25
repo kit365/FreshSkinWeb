@@ -1,11 +1,5 @@
 package com.kit.maximus.freshskinweb.dto.request.orderItem;
 
-import com.kit.maximus.freshskinweb.entity.OrderEntity;
-import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,7 +12,7 @@ import java.io.Serializable;
 @Getter
 @ToString
 @Builder
-public class CreateOrderItemRequest implements Serializable {
+public class OrderItemRequest implements Serializable {
     Long orderId;
     Long productVariantId;
     Integer quantity;

@@ -1,9 +1,7 @@
 package com.kit.maximus.freshskinweb.mapper;
 
-import com.kit.maximus.freshskinweb.dto.request.orderItem.CreateOrderItemRequest;
-import com.kit.maximus.freshskinweb.dto.request.orderItem.UpdateOrderItemRequest;
+import com.kit.maximus.freshskinweb.dto.request.orderItem.OrderItemRequest;
 import com.kit.maximus.freshskinweb.dto.response.OrderItemResponse;
-import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.entity.OrderItemEntity;
 import org.mapstruct.*;
 
@@ -12,12 +10,12 @@ public interface OrderItemMapper {
 
     @Mapping(target = "order", ignore = true)
     @Mapping(target = "productVariant", ignore = true)
-    OrderItemEntity toOrderItemEntity(CreateOrderItemRequest request);
+    OrderItemEntity toOrderItemEntity(OrderItemRequest request);
 
     OrderItemResponse toOrderItemResponse(OrderItemEntity orderItemEntity);
 
     @Mapping(target = "order", ignore = true)
     @Mapping(target = "productVariant", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    public void updateOrderItems(@MappingTarget OrderItemEntity orderItemEntity, UpdateOrderItemRequest request);
+    public void updateOrderItems(@MappingTarget OrderItemEntity orderItemEntity, OrderItemRequest request);
 }

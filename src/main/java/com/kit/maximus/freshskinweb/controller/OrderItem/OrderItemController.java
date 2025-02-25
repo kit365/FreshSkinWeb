@@ -1,7 +1,6 @@
 package com.kit.maximus.freshskinweb.controller.OrderItem;
 
-import com.kit.maximus.freshskinweb.dto.request.orderItem.CreateOrderItemRequest;
-import com.kit.maximus.freshskinweb.dto.request.orderItem.UpdateOrderItemRequest;
+import com.kit.maximus.freshskinweb.dto.request.orderItem.OrderItemRequest;
 import com.kit.maximus.freshskinweb.dto.response.OrderItemResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.service.OrderItemService;
@@ -22,7 +21,7 @@ public class OrderItemController {
     OrderItemService orderItemService;
 
     @PostMapping("/create")
-    public ResponseAPI<OrderItemResponse> createOrderItem (@RequestBody CreateOrderItemRequest request) {
+    public ResponseAPI<OrderItemResponse> createOrderItem (@Valid @RequestBody OrderItemRequest request) {
         String message = "Sản phẩm trong đơn hàng được thêm vào giỏ ";
         orderItemService.add(request);
         return ResponseAPI.<OrderItemResponse>builder().code(HttpStatus.OK.value()).message(message).build();
@@ -40,7 +39,7 @@ public class OrderItemController {
     }
 
     @PatchMapping("/update/{id}")
-    public ResponseAPI<OrderItemResponse> update(@PathVariable Long id, @Valid @RequestBody UpdateOrderItemRequest request) {
+    public ResponseAPI<OrderItemResponse> update(@Valid @PathVariable Long id, @Valid @RequestBody OrderItemRequest request) {
         String message = "Thay đổi sản phẩm trong đơn hàng thành công!";
         orderItemService.update(id, request);
         return ResponseAPI.<OrderItemResponse>builder()
