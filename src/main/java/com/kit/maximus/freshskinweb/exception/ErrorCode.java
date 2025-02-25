@@ -55,6 +55,9 @@ public enum ErrorCode {
     //ProductCategory
     PRODUCT_CATEGORY_NOT_FOUND(404, "Không tìm thấy danh mục sản phẩm"),
 
+    //ProductVariant
+    PRODUCT_VARIANT_NOT_FOUND(404, "Không tìm thấy biến thể sản phẩm"),
+
     //ProductBrand
     PRODUCT_BRAND_NOT_FOUND(404, "Không tìm thấy thương hiệu sản phẩm"),
 
@@ -81,7 +84,7 @@ public enum ErrorCode {
     INVALID_REQUEST_BLOGID(400, "Yêu cầu không hợp lệ: BlogId không hợp lệ"),
 
     //ORDER ITEMS
-    BLOG_ITEM_NOT_FOUND(404, "Không tìm thấy mục blog"),
+    ORDER_ITEM_NOT_FOUND(404, "Không tìm thấy đơn hàng"),
 
     //SKIN_TYPE
     SKIN_TYPE_NOT_FOUND(404, "Không tìm thấy loại da"),

@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @ToString
-
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "orderItems", "product"})
 @Table(name = "ProductVariant")
 public class ProductVariantEntity {
 
@@ -30,10 +30,12 @@ public class ProductVariantEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ProductID")
+    @ToString.Exclude
     ProductEntity product;
 
-//    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "productVariant")
-//    List<OrderItemEntity> orderItems;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "productVariant")
+    @ToString.Exclude
+    List<OrderItemEntity> orderItems;
 
 
 
