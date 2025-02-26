@@ -203,13 +203,13 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     public boolean delete(List<Long> id) {
         List<ProductCategoryEntity> list = productCategoryRepository.findAllById(id);
 
-        for(ProductCategoryEntity productCategoryEntity : list){
+        for (ProductCategoryEntity productCategoryEntity : list) {
 
-            if(productCategoryEntity.getChild() != null){
+            if (productCategoryEntity.getChild() != null) {
                 productCategoryEntity.getChild().forEach(productCategoryEntity1 -> productCategoryEntity1.setParent(null));
             }
 
-            if(productCategoryEntity.getProducts() != null){
+            if (productCategoryEntity.getProducts() != null) {
                 for (ProductEntity productEntity : productCategoryEntity.getProducts()) {
                     productEntity.setCategory(null);
                 }
@@ -449,8 +449,56 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     /*
     HOME
      */
-    public List<ProductCategoryResponse> getFeaturedCategories(){
-        List<ProductCategoryEntity> productCategoryEntities = productCategoryRepository.findTop8ByStatusAndDeletedAndFeatured(Status.ACTIVE,false,true,Sort.by(Sort.Direction.DESC,"position"));
-        return productCategoryMapper.toProductCateroiesResponseDTO(productCategoryEntities);
+    public List<Map<String, Object>> getFeaturedCategories() {
+        List<ProductCategoryEntity> categories = productCategoryRepository.findTop8ByStatusAndDeletedAndFeatured(
+                Status.ACTIVE, false, true, Sort.by(Sort.Direction.DESC, "position")
+        );
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (ProductCategoryEntity categoryEntity : categories) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", categoryEntity.getId());
+            map.put("title", categoryEntity.getTitle());
+            map.put("slug", categoryEntity.getSlug());
+            map.put("description", categoryEntity.getDescription());
+            map.put("image", categoryEntity.getImage());
+
+            List<Map<String, Object>> listProducts = new ArrayList<>();
+
+            for (ProductEntity productEntity : categoryEntity.getProducts()) {
+                Map<String, Object> listProduct = new HashMap<>();
+                listProduct.put("product_id", productEntity.getId());
+                listProduct.put("product_title", productEntity.getTitle());
+                listProduct.put("product_slug", productEntity.getSlug());
+                listProduct.put("product_description", productEntity.getDescription());
+                listProduct.put("product_image", productEntity.getThumbnail());
+
+                listProducts.add(listProduct);
+            }
+
+            map.put("products", listProducts);
+            result.add(map);
+        }
+
+        return result;
     }
+
+
+
+//            List<Map<String, Object>> result = new ArrayList<>();
+//            Map<String, Object> map = new HashMap<>();
+//            map.put("id", categoryEntity.getId());
+//            map.put("title", categoryEntity.getTitle());
+//            map.put("slug", categoryEntity.getSlug());
+//            map.put("description", categoryEntity.getDescription());
+//            map.put("image", categoryEntity.getImage());
+//
+//            categoryEntity.getProducts().forEach(product -> {
+
+//
+//            });
+//
+
+//
+
 }

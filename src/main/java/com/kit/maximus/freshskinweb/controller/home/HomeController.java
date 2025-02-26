@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.controller.home;
 
 import com.kit.maximus.freshskinweb.dto.RouterDTO;
+import com.kit.maximus.freshskinweb.service.BlogCategoryService;
 import com.kit.maximus.freshskinweb.service.ProductCategoryService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,18 +23,22 @@ public class HomeController {
 
     ProductCategoryService productCategoryService;
 
+    BlogCategoryService blogCategoryService;
+
 
     @PutMapping
     public List<RouterDTO> home() {
         return List.of(
-                new RouterDTO("Danh mục bài viết", "/home/product/category")
+                new RouterDTO("Danh mục sản phẩm", "/home/product/category"),
+                new RouterDTO("Danh sách bài viết", "/home/product/category")
         );
     }
 
     @GetMapping
     public Map<String, Object> getHomeData() {
         return Map.of(
-                "featuredProduct-Category", productCategoryService.getFeaturedCategories());
+                "featuredProduct-Category", productCategoryService.getFeaturedCategories(),
+                "blog-category", blogCategoryService);
     }
 
 

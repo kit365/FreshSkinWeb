@@ -405,4 +405,55 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         System.out.println(publicId);
         return publicId;
     }
+
+    /*
+
+    User
+     */
+
+    public Map<String, Object> getBlogCategories(int page) {
+        int p = (page > 0) ? page - 1 : 0;
+
+        Map<String, Object> map = new HashMap<>();
+
+        Pageable pageable = PageRequest.of(p, 8);
+
+        Page<BlogCategoryEntity> blogCategoryEntities = blogCategoryRepository.findAllByStatusAndDeleted(Status.ACTIVE, false, pageable);
+
+        List<Map<String,Object>> listProductCategory = new ArrayList<>();
+        List<Map<String,Object>> listBlog = new ArrayList<>();
+        for (BlogCategoryEntity blogCategoryEntity : blogCategoryEntities) {
+            Map<String, Object> listBlogCategory = new HashMap<>();
+            listBlogCategory.put("blog_category_id", blogCategoryEntity.getId());
+            listBlogCategory.put("blog_category_title", blogCategoryEntity.getTitle());
+            listBlogCategory.put("blog_category_slug", blogCategoryEntity.getSlug());
+            listProductCategory.add(listBlogCategory);
+            if(blogCategoryEntity.getBlog() != null) {
+                for(BlogEntity blogs : blogCategoryEntity.getBlog()){
+                    Map<String, Object> blog = new HashMap<>();
+                    blog.put("blog_id", blogs.getId());
+                    blog.put("blog_image", blogs.getThumbnail());
+                    blog.put("blog_title", blogs.getTitle());
+                    blog.put("blog_slug", blogs.getSlug());
+                    blog.put("blog_content", blogs.getCreatedAt());
+                    listBlog.add(blog);
+                }
+                listBlogCategory.put("blogs", listBlog);
+            }
+        }
+        Map<String, Object> pageDetail = new HashMap<>();
+        pageDetail.put("currentPage", blogCategoryEntities.getNumber() + 1);
+        pageDetail.put("totalItems", blogCategoryEntities.getTotalElements());
+        pageDetail.put("totalPages", blogCategoryEntities.getTotalPages());
+        pageDetail.put("pageSize", blogCategoryEntities.getSize());
+
+        map.put("page", pageDetail);
+        map.put("blog_category", listProductCategory);
+        return map;
+    }
+
+
+
+
+
 }

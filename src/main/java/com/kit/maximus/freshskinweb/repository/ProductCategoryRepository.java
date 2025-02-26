@@ -30,9 +30,6 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
 
     Page<ProductCategoryEntity> findByTitleContainingIgnoreCaseAndDeleted(String keyword, boolean b, Pageable pageable);
 
-    List<ProductCategoryEntity> findAllByStatusAndDeletedAndFeatured(Status status, boolean b, boolean b1, Sort position);
-
     List<ProductCategoryEntity> findTop8ByStatusAndDeletedAndFeatured(Status status, boolean deleted, boolean featured, Sort position);
 
-    List<ProductCategoryEntity> findTop2ByStatusAndDeletedAndFeatured(Status status, boolean deleted, boolean featured, Sort position);
 }
