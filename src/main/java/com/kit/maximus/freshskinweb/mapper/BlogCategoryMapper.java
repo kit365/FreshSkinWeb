@@ -18,9 +18,11 @@ public interface BlogCategoryMapper {
     BlogCategoryEntity toBlogCategory(CreateBlogCategoryRequest request);
 
     @Mapping(target = "blogID", ignore = true)
+    @Mapping(target = "blogs", ignore = true)
     BlogCategoryResponse toBlogCategoryResponse(BlogCategoryEntity request);
 
     @Mapping(target = "blogID", ignore = true)
+    @Mapping(target = "blogs", ignore = true)
     List<BlogCategoryResponse> toBlogCateroiesResponseDTO(List<BlogCategoryEntity> request);
 
     @Mapping(target = "blog", ignore = true)

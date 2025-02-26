@@ -23,21 +23,33 @@ public class BlogCategoryResponse implements Serializable {
 
     Long id;
     String title;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     List<String> image;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String description;
     String slug;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     Integer position;
-    String status;
-    boolean deleted;
-    boolean featured;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String status;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Boolean deleted;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Boolean featured;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonFormat(pattern = "yyyy-MM-dd")
     Date createdAt;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date updatedAt;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("blog_ids")
-    List<BlogResponse> blogID;
+    List<Long> blogID;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    List<BlogResponse> blogs;
 
 }

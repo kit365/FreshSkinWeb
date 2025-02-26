@@ -5,8 +5,11 @@ import com.cloudinary.utils.ObjectUtils;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.CreateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.UpdateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
+import com.kit.maximus.freshskinweb.dto.response.ProductVariantResponse;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
+import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.ProductCategoryMapper;
@@ -449,56 +452,55 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     /*
     HOME
      */
-    public List<Map<String, Object>> getFeaturedCategories() {
+    public List<ProductCategoryResponse> getFeaturedProductCategories() {
         List<ProductCategoryEntity> categories = productCategoryRepository.findTop8ByStatusAndDeletedAndFeatured(
                 Status.ACTIVE, false, true, Sort.by(Sort.Direction.DESC, "position")
         );
-        List<Map<String, Object>> result = new ArrayList<>();
-
-        for (ProductCategoryEntity categoryEntity : categories) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", categoryEntity.getId());
-            map.put("title", categoryEntity.getTitle());
-            map.put("slug", categoryEntity.getSlug());
-            map.put("description", categoryEntity.getDescription());
-            map.put("image", categoryEntity.getImage());
-
-            List<Map<String, Object>> listProducts = new ArrayList<>();
-
-            for (ProductEntity productEntity : categoryEntity.getProducts()) {
-                Map<String, Object> listProduct = new HashMap<>();
-                listProduct.put("product_id", productEntity.getId());
-                listProduct.put("product_title", productEntity.getTitle());
-                listProduct.put("product_slug", productEntity.getSlug());
-                listProduct.put("product_description", productEntity.getDescription());
-                listProduct.put("product_image", productEntity.getThumbnail());
-
-                listProducts.add(listProduct);
-            }
-
-            map.put("products", listProducts);
-            result.add(map);
-        }
-
-        return result;
+        return mapToCategoryResponse(categories);
     }
 
+    private List<ProductCategoryResponse> mapToCategoryResponse(List<ProductCategoryEntity> categories) {
+        List<ProductCategoryResponse> categoryResponses = new ArrayList<>();
 
+        categories.forEach(productCategoryEntity -> {
+            ProductCategoryResponse response = new ProductCategoryResponse();
+            response.setId(productCategoryEntity.getId());
+            response.setTitle(productCategoryEntity.getTitle());
+            response.setSlug(productCategoryEntity.getSlug());
+            response.setDescription(productCategoryEntity.getDescription());
+            response.setImage(productCategoryEntity.getImage());
 
-//            List<Map<String, Object>> result = new ArrayList<>();
-//            Map<String, Object> map = new HashMap<>();
-//            map.put("id", categoryEntity.getId());
-//            map.put("title", categoryEntity.getTitle());
-//            map.put("slug", categoryEntity.getSlug());
-//            map.put("description", categoryEntity.getDescription());
-//            map.put("image", categoryEntity.getImage());
-//
-//            categoryEntity.getProducts().forEach(product -> {
+            // Tạo danh sách riêng cho từng danh mục
+            List<ProductResponseDTO> productResponseDTOS = new ArrayList<>();
 
-//
-//            });
-//
+            productCategoryEntity.getProducts().forEach(productEntity -> {
+                ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+                productResponseDTO.setId(productEntity.getId());
+                productResponseDTO.setTitle(productEntity.getTitle());
+                productResponseDTO.setSlug(productEntity.getSlug());
+                productResponseDTO.setDescription(productEntity.getDescription());
+                productResponseDTO.setThumbnail(productEntity.getThumbnail());
+                productResponseDTO.setDiscountPercent(productEntity.getDiscountPercent());
 
-//
+                // Tạo danh sách riêng cho từng sản phẩm
+                List<ProductVariantResponse> variantResponses = new ArrayList<>();
+
+                productEntity.getVariants().forEach(productVariantEntity -> {
+                    ProductVariantResponse productVariantResponse = new ProductVariantResponse();
+                    productVariantResponse.setPrice(productVariantEntity.getPrice());
+                    variantResponses.add(productVariantResponse);
+                });
+
+                productResponseDTO.setVariants(variantResponses);
+                productResponseDTOS.add(productResponseDTO);
+            });
+
+            response.setProducts(productResponseDTOS);
+            categoryResponses.add(response);
+        });
+
+        return categoryResponses;
+    }
+
 
 }

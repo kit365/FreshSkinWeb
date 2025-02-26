@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kit.maximus.freshskinweb.entity.AbstractEntity;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import lombok.*;
@@ -22,16 +23,24 @@ public class BlogResponse implements Serializable {
     String title;
     String content;
     List<String> thumbnail;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     Integer position;
     String slug;
-    boolean featured;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Boolean featured;
+    String author;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String status;
-    boolean deleted;
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Boolean deleted;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date createdAt;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date updatedAt;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     BlogCategoryResponse blogCategory;
 
 }

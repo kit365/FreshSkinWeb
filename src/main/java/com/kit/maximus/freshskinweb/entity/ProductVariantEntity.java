@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.entity;
 
 import com.fasterxml.jackson.annotation.*;
+import com.kit.maximus.freshskinweb.utils.UnitType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,6 +33,11 @@ public class ProductVariantEntity {
     @JoinColumn(name = "ProductID")
     @ToString.Exclude
     ProductEntity product;
+
+    @Column(name = "unit")
+    @Enumerated(EnumType.STRING)
+    UnitType unit;
+
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "productVariant")
     @ToString.Exclude

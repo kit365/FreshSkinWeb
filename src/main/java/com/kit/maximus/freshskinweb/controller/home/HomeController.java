@@ -9,7 +9,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,20 +25,20 @@ public class HomeController {
     BlogCategoryService blogCategoryService;
 
 
-    @PutMapping
-    public List<RouterDTO> home() {
+    @GetMapping("/routes")
+    public List<RouterDTO> getRoutes() {
         return List.of(
-                new RouterDTO("Danh mục sản phẩm", "/home/product/category"),
-                new RouterDTO("Danh sách bài viết", "/home/product/category")
+                new RouterDTO("HomePage", "/home"),
+                new RouterDTO("Danh sách danh mục bài viết", "/home/blogs/category")
         );
     }
 
     @GetMapping
     public Map<String, Object> getHomeData() {
         return Map.of(
-                "featuredProduct-Category", productCategoryService.getFeaturedCategories(),
-                "blog-category", blogCategoryService);
+                "featured/Product-Category", productCategoryService.getFeaturedProductCategories(),
+                "featured/Blog-Category", blogCategoryService.getFeaturedBlogCategories()
+//                "blog-category", blogCategoryService);
+    );
     }
-
-
 }

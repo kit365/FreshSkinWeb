@@ -44,6 +44,9 @@ public class BlogEntity extends AbstractEntity {
     @Column(name = "Featured")
     boolean featured;
 
+    @Column(name = "Author")
+    String author;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "BlogCategoryId", nullable = true)

@@ -26,6 +26,7 @@ public class BlogUpdateRequest implements Serializable {
     boolean featured;
     String status;
     boolean deleted;
-    BlogCategoryResponse blogCategory;
+    String author;
+//    BlogCategoryResponse blogCategory;
     Long categoryID;
 }

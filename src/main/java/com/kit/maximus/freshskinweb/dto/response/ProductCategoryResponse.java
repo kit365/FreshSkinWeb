@@ -11,11 +11,12 @@ import java.io.Serializable;
 import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @ToString
 @Builder
-
 public class ProductCategoryResponse implements Serializable {
 
     Long id;
@@ -41,6 +42,9 @@ public class ProductCategoryResponse implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("product_ids")
     List<Long> productIDs;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    List<ProductResponseDTO> products;
 
     // Chỉ áp dụng với danh mục cha
     @JsonInclude(JsonInclude.Include.NON_NULL)

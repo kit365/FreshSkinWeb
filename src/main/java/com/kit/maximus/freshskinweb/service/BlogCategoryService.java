@@ -5,6 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import com.kit.maximus.freshskinweb.dto.request.blog_category.CreateBlogCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog_category.UpdateBlogCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
+import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
@@ -411,48 +412,60 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
     User
      */
 
-    public Map<String, Object> getBlogCategories(int page) {
+    public Map<String, Object> getBlogCategories(int page, int size) {
         int p = (page > 0) ? page - 1 : 0;
 
         Map<String, Object> map = new HashMap<>();
 
-        Pageable pageable = PageRequest.of(p, 8);
+        Pageable pageable = PageRequest.of(p, size);
 
         Page<BlogCategoryEntity> blogCategoryEntities = blogCategoryRepository.findAllByStatusAndDeleted(Status.ACTIVE, false, pageable);
 
-        List<Map<String,Object>> listProductCategory = new ArrayList<>();
-        List<Map<String,Object>> listBlog = new ArrayList<>();
-        for (BlogCategoryEntity blogCategoryEntity : blogCategoryEntities) {
-            Map<String, Object> listBlogCategory = new HashMap<>();
-            listBlogCategory.put("blog_category_id", blogCategoryEntity.getId());
-            listBlogCategory.put("blog_category_title", blogCategoryEntity.getTitle());
-            listBlogCategory.put("blog_category_slug", blogCategoryEntity.getSlug());
-            listProductCategory.add(listBlogCategory);
-            if(blogCategoryEntity.getBlog() != null) {
-                for(BlogEntity blogs : blogCategoryEntity.getBlog()){
-                    Map<String, Object> blog = new HashMap<>();
-                    blog.put("blog_id", blogs.getId());
-                    blog.put("blog_image", blogs.getThumbnail());
-                    blog.put("blog_title", blogs.getTitle());
-                    blog.put("blog_slug", blogs.getSlug());
-                    blog.put("blog_content", blogs.getCreatedAt());
-                    listBlog.add(blog);
-                }
-                listBlogCategory.put("blogs", listBlog);
-            }
-        }
+        List<BlogCategoryResponse> blogResponses = mapToCategoryResponse(blogCategoryEntities.getContent());
         Map<String, Object> pageDetail = new HashMap<>();
         pageDetail.put("currentPage", blogCategoryEntities.getNumber() + 1);
         pageDetail.put("totalItems", blogCategoryEntities.getTotalElements());
         pageDetail.put("totalPages", blogCategoryEntities.getTotalPages());
         pageDetail.put("pageSize", blogCategoryEntities.getSize());
-
         map.put("page", pageDetail);
-        map.put("blog_category", listProductCategory);
+        map.put("blog_category", blogResponses);
         return map;
     }
 
+    public List<BlogCategoryResponse> getFeaturedBlogCategories() {
+        List<BlogCategoryEntity> blogCategoryEntities = blogCategoryRepository.findTop4ByStatusAndDeletedAndFeatured(Status.ACTIVE, false, true, Sort.by(Sort.Direction.DESC, "position"));
+        return mapToCategoryResponse(blogCategoryEntities);
+    }
 
+    private List<BlogCategoryResponse> mapToCategoryResponse(List<BlogCategoryEntity> blogCategoryEntities) {
+        List<BlogCategoryResponse> blogCategoryResponses = new ArrayList<>();
+
+        blogCategoryEntities.forEach(blogCategoryEntity -> {
+            BlogCategoryResponse blogCategoryResponse = new BlogCategoryResponse();
+            blogCategoryResponse.setId(blogCategoryEntity.getId());
+            blogCategoryResponse.setTitle(blogCategoryEntity.getTitle());
+            blogCategoryResponse.setSlug(blogCategoryEntity.getSlug());
+
+            List<BlogResponse> blogResponses = new ArrayList<>();
+
+            blogCategoryEntity.getBlog().forEach(blogEntity -> {
+                BlogResponse blogResponse = new BlogResponse();
+                blogResponse.setId(blogEntity.getId());
+                blogResponse.setAuthor(blogEntity.getAuthor());
+                blogResponse.setThumbnail(blogEntity.getThumbnail());
+                blogResponse.setTitle(blogEntity.getTitle());
+                blogResponse.setSlug(blogEntity.getSlug());
+                blogResponse.setContent(blogEntity.getContent());
+                blogResponse.setCreatedAt(blogEntity.getCreatedAt());
+                blogResponses.add(blogResponse);
+            });
+
+            blogCategoryResponse.setBlogs(blogResponses);
+            blogCategoryResponses.add(blogCategoryResponse);
+        });
+
+        return blogCategoryResponses;
+    }
 
 
 
