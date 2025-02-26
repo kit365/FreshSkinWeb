@@ -12,6 +12,8 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SkinTypeResponse implements Serializable {
 

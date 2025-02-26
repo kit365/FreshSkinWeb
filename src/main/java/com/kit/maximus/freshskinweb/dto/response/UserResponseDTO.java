@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 
@@ -14,10 +12,13 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Setter
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserResponseDTO implements Serializable {
 
     Long id;
