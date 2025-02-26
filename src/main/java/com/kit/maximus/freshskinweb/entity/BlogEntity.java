@@ -28,7 +28,7 @@ public class BlogEntity extends AbstractEntity {
     @Column(name = "Title")
     String title;
 
-    @Column(name = "content")
+    @Column(name = "content",columnDefinition = "MEDIUMTEXT")
     String content;
 
     @ElementCollection

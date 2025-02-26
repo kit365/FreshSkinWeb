@@ -270,15 +270,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return response;
     }
 
-    private List<Long> getProductIDs(ProductCategoryEntity productCategoryEntity) {
-        List<Long> idProduct = new ArrayList<>();
-        productCategoryEntity.getProducts().forEach(productEntity -> {
-            idProduct.add(productEntity.getId());
-        });
-        return idProduct;
-    }
-
-
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         Map<String, Object> map = new HashMap<>();
@@ -447,5 +438,19 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return publicId;
     }
 
+    private List<Long> getProductIDs(ProductCategoryEntity productCategoryEntity) {
+        List<Long> idProduct = new ArrayList<>();
+        productCategoryEntity.getProducts().forEach(productEntity -> {
+            idProduct.add(productEntity.getId());
+        });
+        return idProduct;
+    }
 
+    /*
+    HOME
+     */
+    public List<ProductCategoryResponse> getFeaturedCategories(){
+        List<ProductCategoryEntity> productCategoryEntities = productCategoryRepository.findTop8ByStatusAndDeletedAndFeatured(Status.ACTIVE,false,true,Sort.by(Sort.Direction.DESC,"position"));
+        return productCategoryMapper.toProductCateroiesResponseDTO(productCategoryEntities);
+    }
 }

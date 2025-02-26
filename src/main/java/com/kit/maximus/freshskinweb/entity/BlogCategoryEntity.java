@@ -25,7 +25,7 @@ public class BlogCategoryEntity extends AbstractEntity {
     @Column(name = "title")
     String title;
 
-    @Column(name = "Description")
+    @Column(name = "Description",columnDefinition = "MEDIUMTEXT")
     String description;
 
     @Column(name = "Position")

@@ -26,7 +26,7 @@ public class SkinTypeEntity extends AbstractEntity {
     @Column(name = "Type")
     String type;
 
-    @Column(name = "Description")
+    @Column(name = "Description",columnDefinition = "MEDIUMTEXT")
     String description;
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,CascadeType.REFRESH}, fetch = FetchType.LAZY, mappedBy = "skinTypes" )

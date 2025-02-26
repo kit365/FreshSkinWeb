@@ -79,19 +79,4 @@ public class ProductCategoryEntity extends AbstractEntity {
 //        productCategory.setParent(null);
 //    }
 
-
-    @Override
-    public String toString() {
-        return "ProductCategoryEntity{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", slug='" + slug + '\'' +
-                ", description='" + description + '\'' +
-                ", position=" + position +
-                ", featured=" + featured +
-                ", image='" + image + '\'' +
-                ", products=" + products +
-                ", child=" + child +
-                '}';
-    }
 }
