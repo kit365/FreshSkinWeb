@@ -2,6 +2,7 @@ package com.kit.maximus.freshskinweb.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,6 +14,8 @@ import lombok.experimental.FieldDefaults;
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "OrderItem")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "order"})
+
 public class OrderItemEntity extends AbstractEntity {
 
     @Id

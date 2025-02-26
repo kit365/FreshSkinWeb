@@ -353,7 +353,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
     }
 
 //    @Override
-//    public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
+//    public UserResponseDTO addOrder(Long id, OrderRequest request) {
 //        return null;
 //    }
 

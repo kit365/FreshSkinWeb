@@ -15,11 +15,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class CreateOrderRequest implements Serializable {
+public class OrderRequest implements Serializable {
 
-//    @NotBlank(message = "USERNAME_NOT_NULL")
-//    @Size(max = 50, message = "USERNAME_INVALID")
-//    String username;
+    Long userId;
 
     @NotBlank(message = "FIRSTNAME_NOT_BLANK")
     @Size(min = 2, max = 50, message = "FIRSTNAME_INVALID")

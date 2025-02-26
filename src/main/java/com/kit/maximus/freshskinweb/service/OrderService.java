@@ -1,6 +1,6 @@
 package com.kit.maximus.freshskinweb.service;
 
-import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
+import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
 import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -25,19 +25,20 @@ public class OrderService {
     OrderMapper orderMapper;
     UserService userService;
 
-    public OrderResponse addOrder(CreateOrderRequest createOrderRequest) {
 
-        var order = orderMapper.toOrderEntity(createOrderRequest);
+    public OrderResponse addOrder(OrderRequest orderRequest) {
+        var order = orderMapper.toOrderEntity(orderRequest);
+
+        if (orderRequest.getUserId() != null) {
+            var user = userRepository.findById(orderRequest.getUserId()).orElse(null);
+            order.setUser(user);
+        } else {
+            order.setUser(null);
+        }
+
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }
 
-
-//    public OrderResponse addOldUser(CreateOrderRequest createOrderRequest) {
-//        var user = userService.getUser(createOrderRequest.getUsername());
-//        var order = orderMapper.toOrderEntity(createOrderRequest, user);
-//
-//        return orderMapper.toOrderResponse(orderRepository.save(order));
-//    }
 
     public OrderResponse getOrderById(Long orderId) {
         OrderEntity order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
@@ -51,7 +52,7 @@ public class OrderService {
     }
 
     public void deleteOrder(Long orderId) {
-        if(!orderRepository.existsById(orderId)) {
+        if (!orderRepository.existsById(orderId)) {
             throw new AppException(ErrorCode.ORDER_NOT_FOUND);
         }
         orderRepository.deleteById(orderId);
@@ -66,27 +67,6 @@ public class OrderService {
 
         return orderMapper.toOrderResponse(result);
     }
-
-
-
-
-
-
-
-//    public OrderResponse updateOrder(Long orderId, UpdateOrderRequest updateOrderRequest) {
-//        // Lấy OrderEntity từ database (không phải OrderResponse)
-//        OrderEntity orderEntity = orderRepository.findById(orderId)
-//                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-//
-//        // Ánh xạ thông tin update từ request vào entity
-//        orderMapper.updateOrder(orderEntity, updateOrderRequest);
-//
-//        // Lưu lại vào database
-//        OrderEntity updatedOrder = orderRepository.save(orderEntity);
-//
-//        // Trả về OrderResponse (DTO)
-//        return orderMapper.toOrderResponse(updatedOrder);
-//    }
 
 
 }

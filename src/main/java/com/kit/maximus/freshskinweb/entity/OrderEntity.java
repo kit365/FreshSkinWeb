@@ -19,8 +19,8 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "[Order]")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@Table(name = "`Order`")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "order"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderEntity extends AbstractEntity {
 
@@ -31,15 +31,11 @@ public class OrderEntity extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UserId", nullable = true)
-    @JsonIgnore
     UserEntity user;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "order")
-    @JsonIgnore
     List<OrderItemEntity> orderItems;
 
-    @Column(name = "UserId", unique = true, nullable = false, insertable = false, updatable = false)
-    Long id;
 
     @Column(name = "FirstName")
     @JsonIgnore

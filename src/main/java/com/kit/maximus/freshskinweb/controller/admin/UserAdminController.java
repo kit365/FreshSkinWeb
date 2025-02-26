@@ -1,6 +1,6 @@
 package com.kit.maximus.freshskinweb.controller.admin;
 
-import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
+import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
@@ -37,7 +37,7 @@ public class UserAdminController {
     }
 
     @PostMapping("addO/{id}")
-    public ResponseAPI<UserResponseDTO> addOrder(@PathVariable("id") Long id, @RequestBody CreateOrderRequest requestDTO) {
+    public ResponseAPI<UserResponseDTO> addOrder(@PathVariable("id") Long id, @RequestBody OrderRequest requestDTO) {
         String message = "Create user successfully";
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(userService.addOrder(id, requestDTO)).build();
     }

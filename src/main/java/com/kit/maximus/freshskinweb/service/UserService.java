@@ -1,6 +1,6 @@
 package com.kit.maximus.freshskinweb.service;
 
-import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
+import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
@@ -220,7 +220,7 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
     }
 
 
-    public UserResponseDTO addOrder(Long id, CreateOrderRequest request) {
+    public UserResponseDTO addOrder(Long id, OrderRequest request) {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 

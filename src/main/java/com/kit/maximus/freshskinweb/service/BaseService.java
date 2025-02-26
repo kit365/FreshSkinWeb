@@ -1,9 +1,5 @@
 package com.kit.maximus.freshskinweb.service;
 
-import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
-import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
-import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
-
 import java.util.List;
 import java.util.Map;
 
@@ -37,5 +33,5 @@ public interface BaseService<T, R, U, ID> {
 
     Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection,String status, String keyword);
 
-//    UserResponseDTO addOrder(Long id, CreateOrderRequest request);
+//    UserResponseDTO addOrder(Long id, OrderRequest request);
 }

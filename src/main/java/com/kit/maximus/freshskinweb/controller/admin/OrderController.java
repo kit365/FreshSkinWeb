@@ -1,6 +1,6 @@
 package com.kit.maximus.freshskinweb.controller.admin;
 
-import com.kit.maximus.freshskinweb.dto.request.order.CreateOrderRequest;
+import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
 import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.service.OrderService;
@@ -21,25 +21,13 @@ public class OrderController {
     OrderService orderService;
 
     @PostMapping("/create")
-    public ResponseAPI<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest createOrderRequest) {
+    public ResponseAPI<OrderResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest) {
         String message = "Tạo đơn hàng thành công";
-        var create = orderService.addOrder(createOrderRequest);
+        var create = orderService.addOrder(orderRequest);
 
         return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).data(create).build();
     }
-//    @PostMapping("/create_user")
-//    public ResponseAPI<OrderResponse> createOrderByUser(@RequestBody CreateOrderRequest createOrderRequest) {
-//        String message = "Create Order Success";
-//        var create = orderService.addOldUser(createOrderRequest);
-//
-//        return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).data(create).build();
-//    }
-//    @GetMapping("/search/{orderId}")
-//    public ResponseAPI<OrderResponse> searchOrderByOrderId(@PathVariable long orderId) {
-//        String message = "Search Order Success";
-//        var order = orderService.getOrderById(orderId);
-//        return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
-//    }
+
     @GetMapping("/show")
     public ResponseAPI<List<OrderResponse>> getAllOrder() {
         String message = "Hiện tất cả các đơn hàng thành công";
