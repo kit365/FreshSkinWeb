@@ -28,16 +28,24 @@ public class HomeController {
     @GetMapping("/routes")
     public List<RouterDTO> getRoutes() {
         return List.of(
-                new RouterDTO("HomePage", "/home"),
-                new RouterDTO("Danh sách danh mục bài viết", "/home/blogs/category")
+                new RouterDTO("Trang chủ", "/home"),
+                new RouterDTO("Thương hiệu", "/brands"),
+                new RouterDTO("Dưỡng da", "/skincare"),
+                new RouterDTO("Khuyến mãi HOT", "/promotions"),
+                new RouterDTO("Sản phẩm mới", "/new-products"),
+                new RouterDTO("Top bán chạy", "/best-sellers"),
+                new RouterDTO("So sánh sản phẩm", "/compare"),
+                new RouterDTO("Loại Da Của Bạn", "/skin-type"),
+                new RouterDTO("Tạp Chí Làm Đẹp", "/home/blogs")
         );
     }
+
 
     @GetMapping
     public Map<String, Object> getHomeData() {
         return Map.of(
-                "featured/Product-Category", productCategoryService.getFeaturedProductCategories(),
-                "featured/Blog-Category", blogCategoryService.getFeaturedBlogCategories()
+                "featured-Product_Category", productCategoryService.getFeaturedProductCategories(),
+                "featured-Blog_Category", blogCategoryService.getFeaturedBlogCategories()
 //                "blog-category", blogCategoryService);
     );
     }

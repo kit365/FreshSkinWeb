@@ -17,7 +17,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/home/blogs")
-public class BlogCategoryHomeController {
+public class BlogHomeController {
 
     BlogCategoryService blogCategoryService;
 
