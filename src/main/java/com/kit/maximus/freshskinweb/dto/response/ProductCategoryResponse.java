@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
@@ -27,16 +28,21 @@ public class ProductCategoryResponse implements Serializable {
 
     String description;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     Integer position;
 
     List<String> image;
 
-    boolean featured;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Boolean featured;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String status;
 
-    boolean deleted;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Boolean deleted;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     List<ProductCategoryResponse> child;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -47,9 +53,9 @@ public class ProductCategoryResponse implements Serializable {
     List<ProductResponseDTO> products;
 
     // Chỉ áp dụng với danh mục cha
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String createdAt;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String updatedAt;
 }

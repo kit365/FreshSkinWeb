@@ -465,6 +465,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         categories.forEach(productCategoryEntity -> {
             ProductCategoryResponse response = new ProductCategoryResponse();
             response.setId(productCategoryEntity.getId());
+            response.setFeatured(productCategoryEntity.isFeatured());
             response.setTitle(productCategoryEntity.getTitle());
             response.setSlug(productCategoryEntity.getSlug());
             response.setDescription(productCategoryEntity.getDescription());
@@ -481,6 +482,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                 productResponseDTO.setDescription(productEntity.getDescription());
                 productResponseDTO.setThumbnail(productEntity.getThumbnail());
                 productResponseDTO.setDiscountPercent(productEntity.getDiscountPercent());
+                productResponseDTO.setFeatured(productEntity.isFeatured());
 
                 // Tạo danh sách riêng cho từng sản phẩm
                 List<ProductVariantResponse> variantResponses = new ArrayList<>();

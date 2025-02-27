@@ -445,7 +445,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
             blogCategoryResponse.setId(blogCategoryEntity.getId());
             blogCategoryResponse.setTitle(blogCategoryEntity.getTitle());
             blogCategoryResponse.setSlug(blogCategoryEntity.getSlug());
-
+            blogCategoryResponse.setFeatured(blogCategoryEntity.isFeatured());
             List<BlogResponse> blogResponses = new ArrayList<>();
 
             blogCategoryEntity.getBlog().forEach(blogEntity -> {
@@ -457,6 +457,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
                 blogResponse.setSlug(blogEntity.getSlug());
                 blogResponse.setContent(blogEntity.getContent());
                 blogResponse.setCreatedAt(blogEntity.getCreatedAt());
+                blogResponse.setFeatured(blogEntity.isFeatured());
                 blogResponses.add(blogResponse);
             });
 

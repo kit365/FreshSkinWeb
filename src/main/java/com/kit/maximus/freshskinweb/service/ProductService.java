@@ -5,6 +5,8 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
+import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
+import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -114,8 +116,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         ProductEntity listProduct = getProductEntityById(id);
 
 
-
-
         if (request.getThumbnail() != null) {
             listProduct.getThumbnail().forEach(thumbnail -> {
                 try {
@@ -196,7 +196,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             listProduct.setBrand(productBrandEntity);
         }
 
-        if(request.getSkinTypeId() != null) {
+        if (request.getSkinTypeId() != null) {
             List<SkinTypeEntity> skinTypeEntities = skinTypeRepository.findAllById(request.getSkinTypeId());
             listProduct.setSkinTypes(skinTypeEntities);
         }
@@ -357,7 +357,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         Sort sort = Sort.by(direction, sortKey);
 
-        if(sortKey.equalsIgnoreCase("price")) {
+        if (sortKey.equalsIgnoreCase("price")) {
             sort = Sort.by(direction, "variants.price");
         }
 
@@ -435,6 +435,26 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         Page<ProductResponseDTO> list = productEntityPage.map(productMapper::productToProductResponseDTO);
 
+
+        list.forEach(productResponseDTO -> {
+
+            productEntityPage.forEach(productEntity -> {
+                ProductBrandResponse productBrandResponse = new ProductBrandResponse();
+                productBrandResponse.setTitle(productEntity.getBrand().getTitle());
+                productResponseDTO.setBrand(productBrandResponse);
+                List<ProductCategoryResponse> categoryResponses = new ArrayList<>();
+                productEntity.getCategory().forEach(productCategory -> {
+                    ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
+                    productCategoryResponse.setTitle(productCategory.getTitle());
+                    categoryResponses.add(productCategoryResponse);
+                });
+                productResponseDTO.setCategory(categoryResponses);
+            });
+
+
+        });
+
+
 //        if (!list.hasContent()) {
 //            return null;
 //        }
@@ -506,7 +526,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         String temp = imageUrl.substring(imageUrl.indexOf("upload/") + 7);
         String publicId = temp.substring(temp.indexOf("/") + 1, temp.lastIndexOf("."));
         System.out.println(publicId);
-        return  publicId;
+        return publicId;
     }
 
     private String getNameFile(String slug, int count) {

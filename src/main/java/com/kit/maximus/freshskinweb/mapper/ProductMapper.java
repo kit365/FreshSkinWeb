@@ -18,6 +18,10 @@ public interface ProductMapper {
     @Mapping(target = "thumbnail", ignore = true)
     ProductEntity productToProductEntity(CreateProductRequest productRequest);
 
+
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "brand", ignore = true)
+    @Mapping(target = "skinTypes", ignore = true)
     ProductResponseDTO productToProductResponseDTO(ProductEntity product);
 
 //    List<ProductResponseDTO> toUserResponseDTO(List<ProductEntity> productEntities);
