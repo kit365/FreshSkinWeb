@@ -13,11 +13,13 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.weaver.ast.Var;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -170,9 +172,9 @@ public class ProductCategoryAdminController {
     }
 
     @GetMapping("{id}")
-    public ResponseAPI<ProductCategoryResponse> getProductCategory(@PathVariable("id") Long id) {
-        ProductCategoryResponse result = productCategoryService.showDetail(id);
-        return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).data(result).build();
+    public ResponseAPI< ProductCategoryResponse> getProductCategory(@PathVariable("id") Long id) {
+       ProductCategoryResponse result  =  productCategoryService.showDetail(id);
+        return ResponseAPI.<ProductCategoryResponse> builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
 

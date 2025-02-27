@@ -267,10 +267,56 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
     @Override
     public ProductCategoryResponse showDetail(Long id) {
+        //Khi trả th không trả Child mà chỉ trả parentID => PaerenTitle
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
-        ProductCategoryResponse response = productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryEntity);
-        response.setProductIDs(getProductIDs(productCategoryEntity));
-        return response;
+
+        ProductCategoryResponse productCategoryResponse = productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryEntity);
+
+        if(productCategoryEntity.getParent() != null) {
+            ProductCategoryEntity parent = productCategoryEntity.getParent();
+
+            ProductCategoryResponse parentID = new ProductCategoryResponse();
+            parentID.setTitle(parent.getTitle());
+
+            productCategoryResponse.setParent(parentID);
+
+        }
+
+
+
+        productCategoryResponse.setChild(null);
+//        if(productCategoryEntity.getParent() != null) {
+//            String parentTitle = productCategoryEntity.getParent().getTitle();
+//            productCategoryResponse.getParent().setTitle(parentTitle);
+//        }
+
+        return productCategoryResponse;
+    }
+
+    public  Map<String, Object> showDetaill(Long id) {
+        //Khi trả th không trả Child mà chỉ trả parentID => PaerenTitle
+        Map<String, Object> map = new HashMap<>();
+        ProductCategoryEntity productCategoryEntity = getCategoryById(id);
+
+//        ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
+
+
+        ProductCategoryResponse productCategoryResponse = productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryEntity);
+        productCategoryResponse.setChild(null);
+        String title = productCategoryEntity.getParent().getTitle();
+        map.put("productCategoryResponse", productCategoryResponse);
+        map.put("titleParent", title);
+
+
+//        response.setProductIDs(getProductIDs(productCategoryEntity));
+//
+//        productCategoryEntity.getChild().forEach(childCategoryEntity -> {
+//            ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
+//            parentCategoryResponse.setTitle(childCategoryEntity.getTitle());
+
+//        });
+
+        return map;
     }
 
     @Override

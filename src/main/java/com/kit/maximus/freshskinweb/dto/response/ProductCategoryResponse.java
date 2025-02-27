@@ -20,17 +20,18 @@ import java.util.List;
 @Builder
 public class ProductCategoryResponse implements Serializable {
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     Long id;
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String title;
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String slug;
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String description;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Integer position;
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     List<String> image;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -45,6 +46,8 @@ public class ProductCategoryResponse implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<ProductCategoryResponse> child;
 
+    ProductCategoryResponse parent;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("product_ids")
     List<Long> productIDs;
@@ -58,4 +61,6 @@ public class ProductCategoryResponse implements Serializable {
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String updatedAt;
+
+
 }
