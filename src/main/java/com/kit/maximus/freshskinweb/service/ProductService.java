@@ -356,6 +356,12 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         Sort.Direction direction = getSortDirection(sortDirection);
 
         Sort sort = Sort.by(direction, sortKey);
+
+        if(sortKey.equalsIgnoreCase("price")) {
+            sort = Sort.by(direction, "variants.price");
+        }
+
+
         int p = (page > 0) ? page - 1 : 0;
         Pageable pageable = PageRequest.of(p, size, sort);
 
