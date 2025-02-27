@@ -18,6 +18,8 @@ import java.util.List;
 public class SkinTypeResponse implements Serializable {
 
     long id;
+
+
     String type;
     String description;
 

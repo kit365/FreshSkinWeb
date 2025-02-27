@@ -32,7 +32,7 @@ public class ProductResponseDTO implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<ProductVariantResponse> variants;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    List<SkinTypeEntity> skinTypes;
+    List<SkinTypeResponse> skinTypes;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     int discountPercent;
     @JsonInclude(JsonInclude.Include.NON_NULL)

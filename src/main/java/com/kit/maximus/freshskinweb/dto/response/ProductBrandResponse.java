@@ -18,6 +18,7 @@ import java.util.List;
 @Setter
 @ToString
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductBrandResponse implements Serializable {
 
     Long id;
@@ -32,14 +33,14 @@ public class ProductBrandResponse implements Serializable {
 
     List<String> image;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
     @JsonProperty("product_ids")
     List<Long> productIDs;
 
-    boolean featured;
+    Boolean featured;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String status;
-
     @JsonFormat(pattern = "yyyy-MM-dd")
     Date createdAt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

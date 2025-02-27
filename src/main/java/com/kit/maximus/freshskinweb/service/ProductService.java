@@ -8,6 +8,7 @@ import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
+import com.kit.maximus.freshskinweb.dto.response.SkinTypeResponse;
 import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -35,6 +36,7 @@ import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 @Slf4j
@@ -345,9 +347,57 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     @Override
     public ProductResponseDTO showDetail(Long id) {
-        return productMapper.productToProductResponseDTO(getProductEntityById(id));
+        ProductEntity productEntity = getProductEntityById(id);
+        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+        productResponseDTO = productMapper.productToProductResponseDTO(productEntity);
+
+        productResponseDTO.setBrand(getProductBrandResponse(productEntity));
+        productResponseDTO.setCategory(getProductCategoryResponses(productEntity));
+        productResponseDTO.setSkinTypes(getSkinTypeResponses(productEntity));
+
+        return productResponseDTO;
     }
 
+    //Ham nay de tu map ProductBrand
+    private ProductBrandResponse getProductBrandResponse(ProductEntity productEntity) {
+        ProductBrandResponse productBrandResponse = new ProductBrandResponse();
+        productBrandResponse.setId(productEntity.getBrand().getId());
+        productBrandResponse.setTitle(productEntity.getBrand().getTitle());
+        productBrandResponse.setDescription(productEntity.getBrand().getDescription());
+        productBrandResponse.setImage(productEntity.getBrand().getImage());
+        productBrandResponse.setSlug(productEntity.getBrand().getSlug());
+        return productBrandResponse;
+    }
+
+    //Ham nay de tu map ProductSkinType
+    private List<SkinTypeResponse> getSkinTypeResponses(ProductEntity productEntity) {
+        List<SkinTypeResponse> skinTypeResponses = new ArrayList<>();
+
+        for (SkinTypeEntity skinTypeEntity : productEntity.getSkinTypes()) {
+            SkinTypeResponse skinTypeResponse = new SkinTypeResponse();
+            skinTypeResponse.setId(skinTypeEntity.getId());
+            skinTypeResponse.setType(skinTypeEntity.getType());
+            skinTypeResponse.setDescription(skinTypeEntity.getDescription());
+            skinTypeResponses.add(skinTypeResponse);
+        }
+        return skinTypeResponses;
+    }
+
+    //Ham nay de tu map ProductCategory
+    private List<ProductCategoryResponse> getProductCategoryResponses(ProductEntity productEntity) {
+        List<ProductCategoryResponse> productCategoryResponses = new ArrayList<>();
+
+        for (ProductCategoryEntity productCategoryEntity : productEntity.getCategory()) {
+            ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
+            productCategoryResponse.setId(productCategoryEntity.getId());
+            productCategoryResponse.setTitle(productCategoryEntity.getTitle());
+            productCategoryResponse.setDescription(productCategoryEntity.getDescription());
+            productCategoryResponse.setImage(productCategoryEntity.getImage());
+            productCategoryResponse.setSlug(productCategoryEntity.getSlug());
+            productCategoryResponses.add(productCategoryResponse);
+        }
+        return productCategoryResponses;
+    }
 
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
@@ -388,8 +438,20 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             }
         }
 
-
         Page<ProductResponseDTO> list = productEntityPage.map(productMapper::productToProductResponseDTO);
+
+        for(int i = 0; i < productEntityPage.getContent().size(); i++) {
+            ProductResponseDTO productResponseDTO = list.getContent().get(i);
+
+           ProductEntity productEntity =  productEntityPage.getContent().get(i);
+
+            productResponseDTO.setBrand(getProductBrandResponse(productEntity));
+            productResponseDTO.setCategory(getProductCategoryResponses(productEntity));
+            productResponseDTO.setSkinTypes(getSkinTypeResponses(productEntity));
+
+        }
+
+
 //        if (!list.hasContent()) {
 //            return null;
 //        }
@@ -436,28 +498,25 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         Page<ProductResponseDTO> list = productEntityPage.map(productMapper::productToProductResponseDTO);
 
 
-        list.forEach(productResponseDTO -> {
 
-            productEntityPage.forEach(productEntity -> {
-                ProductBrandResponse productBrandResponse = new ProductBrandResponse();
-                productBrandResponse.setTitle(productEntity.getBrand().getTitle());
-                productResponseDTO.setBrand(productBrandResponse);
-                List<ProductCategoryResponse> categoryResponses = new ArrayList<>();
-                productEntity.getCategory().forEach(productCategory -> {
-                    ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
-                    productCategoryResponse.setTitle(productCategory.getTitle());
-                    categoryResponses.add(productCategoryResponse);
-                });
-                productResponseDTO.setCategory(categoryResponses);
-            });
+//        list.forEach(productResponseDTO -> {
+//
+//            productEntityPage.forEach(productEntity -> {
+//                ProductBrandResponse productBrandResponse = new ProductBrandResponse();
+//                productBrandResponse.setTitle(productEntity.getBrand().getTitle());
+//                productResponseDTO.setBrand(productBrandResponse);
+//                List<ProductCategoryResponse> categoryResponses = new ArrayList<>();
+//                productEntity.getCategory().forEach(productCategory -> {
+//                    ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
+//                    productCategoryResponse.setTitle(productCategory.getTitle());
+//                    categoryResponses.add(productCategoryResponse);
+//                });
+//                productResponseDTO.setCategory(categoryResponses);
+//            });
+//
+//
+//        });
 
-
-        });
-
-
-//        if (!list.hasContent()) {
-//            return null;
-//        }
 
         map.put("products", list.getContent());
         map.put("currentPage", list.getNumber() + 1);
