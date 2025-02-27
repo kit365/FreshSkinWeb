@@ -44,8 +44,8 @@ public class HomeController {
     @GetMapping
     public Map<String, Object> getHomeData() {
         return Map.of(
-                "featured-Product_Category", productCategoryService.getFeaturedProductCategories(),
-                "featured-Blog_Category", blogCategoryService.getFeaturedBlogCategories()
+                "featuredProductCategory", productCategoryService.getFeaturedProductCategories(),
+                "featuredBlogCategory", blogCategoryService.getFeaturedBlogCategories()
 //                "blog-category", blogCategoryService);
     );
     }
