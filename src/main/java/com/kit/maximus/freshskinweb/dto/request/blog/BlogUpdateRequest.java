@@ -21,7 +21,7 @@ import java.util.List;
 public class BlogUpdateRequest implements Serializable {
     String title;
     String content;
-    List<MultipartFile> thumbnail;
+//    List<MultipartFile> thumbnail;
     Integer position;
     boolean featured;
     String status;

@@ -559,6 +559,9 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                 productEntity.getVariants().forEach(productVariantEntity -> {
                     ProductVariantResponse productVariantResponse = new ProductVariantResponse();
                     productVariantResponse.setPrice(productVariantEntity.getPrice());
+                    productVariantResponse.setId(productVariantEntity.getId());
+                    productVariantResponse.setVolume(productVariantEntity.getVolume());
+                    productVariantResponse.setUnit(productVariantEntity.getUnit());
                     variantResponses.add(productVariantResponse);
                 });
 
