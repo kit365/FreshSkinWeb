@@ -49,12 +49,13 @@ public class HomeController {
     public Map<String, Object> getHomeData() {
         List<String> FreshSkinSlogan = Arrays.asList("Gel Rửa Mặt", "Nước tẩy trang", "Nước Hoa Hồng");
         List<String> Top_moisturizing_products = Arrays.asList("Tẩy Da Chết", "Dụng Cụ / Phụ Kiện Chăm Sóc Da", "Loại sản phẩm");
-        List<String> beautyTrends = Arrays.asList("Tẩy Da Chết", "Dụng Cụ / Phụ Kiện Chăm Sóc Da", "Loại sản phẩm");
+        List<String> beautyTrends = Arrays.asList("Tẩy Da Chết", "Nước tẩy trang", "Loại sản phẩm");
         return Map.of(
                 "featuredProductCategory", productCategoryService.getFeaturedProductCategories(),
                 "featuredBlogCategory", blogCategoryService.getFeaturedBlogCategories(),
                 "Top7ProductFlashSale",productService.findTop7FlashSale(),
                 "FreshSkinSlogan",productCategoryService.getCategoryResponses(FreshSkinSlogan,6),
+                "Top_moisturizing_products",productCategoryService.getCategoryResponses(Top_moisturizing_products,10),
                 "BeautyTrends",productCategoryService.getCategoryResponses(beautyTrends,5)
     );
     }
