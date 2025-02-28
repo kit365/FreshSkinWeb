@@ -418,4 +418,23 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         return publicId;
     }
 
+    /*
+      Home
+     */
+
+    //trả về chi tiết của blog
+    public BlogResponse getBlogResponseBySlug(String slug) {
+        BlogEntity blogEntity = blogRepository.findBlogBySlug(slug);
+        BlogResponse blogResponse = new BlogResponse();
+        blogResponse = blogMapper.toBlogResponse(blogEntity);
+
+        blogResponse.setBlogCategory(null);
+        blogResponse.setDeleted(null);
+        blogResponse.setStatus(null);
+        blogResponse.setPosition(null);
+        blogResponse.setUpdatedAt(null);
+        blogResponse.setFeatured(null);
+        return blogResponse;
+    }
+
 }
