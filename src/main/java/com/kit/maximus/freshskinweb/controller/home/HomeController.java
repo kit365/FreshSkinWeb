@@ -55,7 +55,7 @@ public class HomeController {
                 "featuredBlogCategory", blogCategoryService.getFeaturedBlogCategories(),
                 "Top7ProductFlashSale",productService.findTop7FlashSale(),
                 "FreshSkinSlogan",productCategoryService.getCategoryResponses(FreshSkinSlogan,6),
-                "BeautyTrends",productCategoryService.getCategoryResponses(Top_moisturizing_products,5)
+                "BeautyTrends",productCategoryService.getCategoryResponses(beautyTrends,5)
     );
     }
 }
