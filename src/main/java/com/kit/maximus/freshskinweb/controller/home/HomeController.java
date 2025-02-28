@@ -3,6 +3,7 @@ package com.kit.maximus.freshskinweb.controller.home;
 import com.kit.maximus.freshskinweb.dto.RouterDTO;
 import com.kit.maximus.freshskinweb.service.BlogCategoryService;
 import com.kit.maximus.freshskinweb.service.ProductCategoryService;
+import com.kit.maximus.freshskinweb.service.ProductService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -23,6 +24,8 @@ public class HomeController {
     ProductCategoryService productCategoryService;
 
     BlogCategoryService blogCategoryService;
+
+    ProductService productService;
 
 
     @GetMapping("/routes")
@@ -45,8 +48,8 @@ public class HomeController {
     public Map<String, Object> getHomeData() {
         return Map.of(
                 "featuredProductCategory", productCategoryService.getFeaturedProductCategories(),
-                "featuredBlogCategory", blogCategoryService.getFeaturedBlogCategories()
-//                "blog-category", blogCategoryService);
+                "featuredBlogCategory", blogCategoryService.getFeaturedBlogCategories(),
+                "Top7ProductFlashSale",productService.findTop7FlashSale()
     );
     }
 }

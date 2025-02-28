@@ -5,10 +5,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
-import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
-import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
-import com.kit.maximus.freshskinweb.dto.response.SkinTypeResponse;
+import com.kit.maximus.freshskinweb.dto.response.*;
 import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -440,10 +437,10 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         Page<ProductResponseDTO> list = productEntityPage.map(productMapper::productToProductResponseDTO);
 
-        for(int i = 0; i < productEntityPage.getContent().size(); i++) {
+        for (int i = 0; i < productEntityPage.getContent().size(); i++) {
             ProductResponseDTO productResponseDTO = list.getContent().get(i);
 
-           ProductEntity productEntity =  productEntityPage.getContent().get(i);
+            ProductEntity productEntity = productEntityPage.getContent().get(i);
 
             productResponseDTO.setBrand(getProductBrandResponse(productEntity));
             productResponseDTO.setCategory(getProductCategoryResponses(productEntity));
@@ -496,7 +493,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         }
 
         Page<ProductResponseDTO> list = productEntityPage.map(productMapper::productToProductResponseDTO);
-
 
 
 //        list.forEach(productResponseDTO -> {
@@ -614,6 +610,53 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
         return uploadResult.get("secure_url").toString();
+    }
+
+/*
+    Trang home
+     */
+
+    //## 7 sản phẩm có lượt mua cao nhất
+    public List<ProductResponseDTO> findTop7FlashSale() {
+        List<ProductEntity> list = productRepository.findTop7ByStatusAndDeleted(Status.ACTIVE, false, Sort.by(Sort.Direction.DESC, "discountPercent"));
+
+        List<ProductResponseDTO> top7BestSellers = new ArrayList<>();
+
+        if(list != null && !list.isEmpty()) {
+            list.forEach(productEntity -> {
+                ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+                productResponseDTO.setId(productEntity.getId());
+                productResponseDTO.setSlug(productEntity.getSlug());
+                productResponseDTO.setTitle(productEntity.getTitle());
+                productResponseDTO.setThumbnail(productEntity.getThumbnail());
+                productResponseDTO.setDiscountPercent(productEntity.getDiscountPercent());
+
+                //Map với thương hiệu
+                if(productEntity.getBrand() != null) {
+                    ProductBrandResponse productBrandResponse = new ProductBrandResponse();
+                    productBrandResponse.setTitle(productEntity.getBrand().getTitle());
+                    productResponseDTO.setBrand(productBrandResponse);
+                }
+
+                //Lấy giá của product
+                if (productEntity.getVariants() != null) {
+                    List<ProductVariantResponse> productVariantResponses = new ArrayList<>();
+                    productEntity.getVariants().forEach(variantResponse -> {
+                        ProductVariantResponse productVariantResponse = new ProductVariantResponse();
+                        productVariantResponse.setId(variantResponse.getId());
+                        productVariantResponse.setPrice(variantResponse.getPrice());
+                        productVariantResponse.setVolume(variantResponse.getVolume());
+                        productVariantResponse.setUnit(variantResponse.getUnit());
+                        productVariantResponses.add(productVariantResponse);
+                    });
+                    productResponseDTO.setVariants(productVariantResponses);
+                }
+                top7BestSellers.add(productResponseDTO);
+            });
+        }
+
+
+        return top7BestSellers;
     }
 
 }

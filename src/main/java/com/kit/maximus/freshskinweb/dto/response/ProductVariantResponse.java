@@ -4,6 +4,7 @@ package com.kit.maximus.freshskinweb.dto.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
+import com.kit.maximus.freshskinweb.utils.UnitType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -22,7 +23,7 @@ public class ProductVariantResponse {
     Long id;
     double price;
     int volume;
-    String unit;
+    UnitType unit;
 
     @JsonProperty("product_ids")
     List<Long> productID;

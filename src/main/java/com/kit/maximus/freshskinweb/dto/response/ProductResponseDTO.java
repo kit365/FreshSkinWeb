@@ -27,6 +27,7 @@ public class ProductResponseDTO implements Serializable {
     //    String DiscountID;
     String title;
     String slug;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String description;
     List<String> thumbnail;
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -50,13 +51,14 @@ public class ProductResponseDTO implements Serializable {
     String skinIssues;
     /// ////////////////////////////////////////////
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    boolean featured;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Boolean featured;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String status;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonFormat(pattern = "yyyy-MM-dd")
     Date createdAt;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date updatedAt;
 
