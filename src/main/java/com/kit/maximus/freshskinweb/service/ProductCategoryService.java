@@ -14,11 +14,13 @@ import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.ProductCategoryMapper;
 import com.kit.maximus.freshskinweb.repository.ProductCategoryRepository;
+import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,10 +33,7 @@ import java.io.IOException;
 import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -45,6 +44,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     ProductCategoryRepository productCategoryRepository;
 
     ProductCategoryMapper productCategoryMapper;
+
 
     Cloudinary cloudinary;
 
@@ -272,7 +272,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
         ProductCategoryResponse productCategoryResponse = productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryEntity);
 
-        if(productCategoryEntity.getParent() != null) {
+        if (productCategoryEntity.getParent() != null) {
             ProductCategoryEntity parent = productCategoryEntity.getParent();
 
             ProductCategoryResponse parentID = new ProductCategoryResponse();
@@ -281,7 +281,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
             productCategoryResponse.setParent(parentID);
 
         }
-
 
 
         productCategoryResponse.setChild(null);
@@ -293,7 +292,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return productCategoryResponse;
     }
 
-    public  Map<String, Object> showDetaill(Long id) {
+    public Map<String, Object> showDetaill(Long id) {
         //Khi trả th không trả Child mà chỉ trả parentID => PaerenTitle
         Map<String, Object> map = new HashMap<>();
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
@@ -498,6 +497,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     /*
     HOME
      */
+    //Hàm này dùng để lấy ra top 8 danh mục nổi bật(Bao gồm chứa Product)
     public List<ProductCategoryResponse> getFeaturedProductCategories() {
         List<ProductCategoryEntity> categories = productCategoryRepository.findTop8ByStatusAndDeletedAndFeatured(
                 Status.ACTIVE, false, true, Sort.by(Sort.Direction.DESC, "position")
@@ -505,6 +505,30 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return mapToCategoryResponse(categories);
     }
 
+    //Hàm này dùng để lấy ra n danh mục tùy chọn, số lượng n sản phẩm
+    //#Mục đẹp: Da đẹp - thêm tự tin
+    // 3 danh mục, 10 sản phẩm
+    public List<ProductCategoryResponse> getCategoryResponses(List<String> titles, int limit) {
+        List<ProductCategoryResponse> result = new ArrayList<>();
+
+        for (String title : titles) {
+            List<ProductCategoryEntity> categories = productCategoryRepository
+                    .findAllByStatusAndDeletedAndTitleContainingIgnoreCase(Status.ACTIVE, false, title);
+
+            int count = 0;
+            for (ProductCategoryEntity category : categories) {
+                if (count >= limit) break;
+                result.add(mapToCategoryResponse(category));
+                count++;
+            }
+        }
+
+        return result;
+    }
+
+
+
+    //Hàm này dùng để map thủ công danh sách danh mục sản phẩm
     private List<ProductCategoryResponse> mapToCategoryResponse(List<ProductCategoryEntity> categories) {
         List<ProductCategoryResponse> categoryResponses = new ArrayList<>();
 
@@ -548,6 +572,48 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         });
 
         return categoryResponses;
+    }
+
+    private ProductCategoryResponse mapToCategoryResponse(ProductCategoryEntity productCategoryEntity) {
+
+        ProductCategoryResponse response = new ProductCategoryResponse();
+        response.setId(productCategoryEntity.getId());
+        response.setFeatured(productCategoryEntity.isFeatured());
+        response.setTitle(productCategoryEntity.getTitle());
+        response.setSlug(productCategoryEntity.getSlug());
+        response.setDescription(productCategoryEntity.getDescription());
+        response.setImage(productCategoryEntity.getImage());
+
+        // Tạo danh sách riêng cho từng danh mục
+        List<ProductResponseDTO> productResponseDTOS = new ArrayList<>();
+
+        productCategoryEntity.getProducts().forEach(productEntity -> {
+            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+            productResponseDTO.setId(productEntity.getId());
+            productResponseDTO.setTitle(productEntity.getTitle());
+            productResponseDTO.setSlug(productEntity.getSlug());
+            productResponseDTO.setDescription(productEntity.getDescription());
+            productResponseDTO.setThumbnail(productEntity.getThumbnail());
+            productResponseDTO.setDiscountPercent(productEntity.getDiscountPercent());
+            productResponseDTO.setFeatured(productEntity.isFeatured());
+
+            // Tạo danh sách riêng cho từng sản phẩm
+            List<ProductVariantResponse> variantResponses = new ArrayList<>();
+
+            productEntity.getVariants().forEach(productVariantEntity -> {
+                ProductVariantResponse productVariantResponse = new ProductVariantResponse();
+                productVariantResponse.setPrice(productVariantEntity.getPrice());
+                variantResponses.add(productVariantResponse);
+            });
+
+            productResponseDTO.setVariants(variantResponses);
+            productResponseDTOS.add(productResponseDTO);
+        });
+
+        response.setProducts(productResponseDTOS);
+
+
+        return response;
     }
 
 

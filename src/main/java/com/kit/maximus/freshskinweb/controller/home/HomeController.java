@@ -10,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -46,10 +47,14 @@ public class HomeController {
 
     @GetMapping
     public Map<String, Object> getHomeData() {
+        List<String> FreshSkinSlogan = Arrays.asList("Gel Rửa Mặt", "Nước tẩy trang", "Nước Hoa Hồng");
+        List<String> Top_moisturizing_products = Arrays.asList("Tẩy Da Chết", "Dụng Cụ / Phụ Kiện Chăm Sóc Da", "Loại sản phẩm");
         return Map.of(
                 "featuredProductCategory", productCategoryService.getFeaturedProductCategories(),
                 "featuredBlogCategory", blogCategoryService.getFeaturedBlogCategories(),
-                "Top7ProductFlashSale",productService.findTop7FlashSale()
+                "Top7ProductFlashSale",productService.findTop7FlashSale(),
+                "FreshSkinSlogan",productCategoryService.getCategoryResponses(FreshSkinSlogan,6),
+                "Top_moisturizing_products",productCategoryService.getCategoryResponses(Top_moisturizing_products,10)
     );
     }
 }
