@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.CreateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.UpdateProductCategoryRequest;
+import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ProductVariantResponse;
@@ -506,8 +507,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     }
 
     //Hàm này dùng để lấy ra n danh mục tùy chọn, số lượng n sản phẩm
-    //#Mục đẹp: Da đẹp - thêm tự tin
-    // 3 danh mục, 10 sản phẩm
+    //#Mục đẹp: Da đẹp - thêm tự tin && ##TOP SẢN PHẨM DƯỠNG DA ẨM MỊN
     public List<ProductCategoryResponse> getCategoryResponses(List<String> titles, int limit) {
         List<ProductCategoryResponse> result = new ArrayList<>();
 
@@ -525,7 +525,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
         return result;
     }
-
 
 
     //Hàm này dùng để map thủ công danh sách danh mục sản phẩm
@@ -574,6 +573,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return categoryResponses;
     }
 
+    //Hàm này dùng để map thủ công 1 ProductCategory
     private ProductCategoryResponse mapToCategoryResponse(ProductCategoryEntity productCategoryEntity) {
 
         ProductCategoryResponse response = new ProductCategoryResponse();
@@ -588,6 +588,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         List<ProductResponseDTO> productResponseDTOS = new ArrayList<>();
 
         productCategoryEntity.getProducts().forEach(productEntity -> {
+
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             productResponseDTO.setId(productEntity.getId());
             productResponseDTO.setTitle(productEntity.getTitle());
@@ -596,6 +597,10 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
             productResponseDTO.setThumbnail(productEntity.getThumbnail());
             productResponseDTO.setDiscountPercent(productEntity.getDiscountPercent());
             productResponseDTO.setFeatured(productEntity.isFeatured());
+
+            ProductBrandResponse productBrandResponse = new ProductBrandResponse();
+            productBrandResponse.setTitle(productEntity.getBrand().getTitle());
+            productResponseDTO.setBrand(productBrandResponse);
 
             // Tạo danh sách riêng cho từng sản phẩm
             List<ProductVariantResponse> variantResponses = new ArrayList<>();
@@ -615,6 +620,8 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
         return response;
     }
+
+
 
 
 }
