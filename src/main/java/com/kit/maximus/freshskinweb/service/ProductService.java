@@ -622,7 +622,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         List<ProductResponseDTO> top7BestSellers = new ArrayList<>();
 
-        if(list != null && !list.isEmpty()) {
+        if (list != null && !list.isEmpty()) {
             list.forEach(productEntity -> {
                 ProductResponseDTO productResponseDTO = new ProductResponseDTO();
                 productResponseDTO.setId(productEntity.getId());
@@ -632,7 +632,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 productResponseDTO.setDiscountPercent(productEntity.getDiscountPercent());
 
                 //Map với thương hiệu
-                if(productEntity.getBrand() != null) {
+                if (productEntity.getBrand() != null) {
                     ProductBrandResponse productBrandResponse = new ProductBrandResponse();
                     productBrandResponse.setTitle(productEntity.getBrand().getTitle());
                     productResponseDTO.setBrand(productBrandResponse);
@@ -658,6 +658,74 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return top7BestSellers;
     }
 
+
+    //## FRESH SKIN
+
+
+    //Tìm chi tiết Product bằng Slug
+
+    public ProductResponseDTO getProductBySlug(String slug) {
+        ProductEntity productResponseDTO = productRepository.findBySlug(slug);
+
+        return mapProductResponseDTO(productResponseDTO);
+    }
+
+
+    //Hàm Map thủ công 1 ProductResponse
+    private ProductResponseDTO mapProductResponseDTO(ProductEntity productEntity) {
+
+        //Map Product
+        ProductResponseDTO productResponseDTO = productMapper.productToProductResponseDTO(productEntity);
+
+
+        //Lấy thương thiệu của Product
+        if (productEntity.getBrand() != null) {
+            ProductBrandResponse productBrandResponse = new ProductBrandResponse();
+            productBrandResponse.setTitle(productEntity.getBrand().getTitle());
+            productResponseDTO.setBrand(productBrandResponse);
+        }
+
+        //Lấy loại da của Product
+        if (productEntity.getSkinTypes() != null) {
+            List<SkinTypeResponse> skinTypeResponses = new ArrayList<>();
+            productEntity.getSkinTypes().forEach(skinType -> {
+                SkinTypeResponse skinTypeResponse = new SkinTypeResponse();
+                skinTypeResponse.setType(skinType.getType());
+                skinTypeResponses.add(skinTypeResponse);
+            });
+            productResponseDTO.setSkinTypes(skinTypeResponses);
+        }
+
+        //Lấy danh sách danh mục của Product
+        if(productEntity.getCategory() != null) {
+            List<ProductCategoryResponse> categoryResponses = new ArrayList<>();
+            productEntity.getCategory().forEach(category -> {
+                ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
+                productCategoryResponse.setTitle(category.getTitle());
+                categoryResponses.add(productCategoryResponse);
+            });
+            productResponseDTO.setCategory(categoryResponses);
+        }
+
+//        //Lấy giá của product
+//        if (productEntity.getVariants() != null) {
+//            List<ProductVariantResponse> productVariantResponses = new ArrayList<>();
+//            productEntity.getVariants().forEach(variantResponse -> {
+//                ProductVariantResponse productVariantResponse = new ProductVariantResponse();
+//                productVariantResponse.setId(variantResponse.getId());
+//                productVariantResponse.setPrice(variantResponse.getPrice());
+//                productVariantResponse.setVolume(variantResponse.getVolume());
+//                productVariantResponse.setUnit(variantResponse.getUnit());
+//                productVariantResponses.add(productVariantResponse);
+//            });
+//            productResponseDTO.setVariants(productVariantResponses);
+//        }
+        productResponseDTO.setStatus(null);
+        productResponseDTO.setCreatedAt(null);
+        productResponseDTO.setUpdatedAt(null);
+        productResponseDTO.setPosition(null);
+        return productResponseDTO;
+    }
 
 
 }

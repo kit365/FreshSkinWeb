@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.repository;
 
 
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.utils.Status;
@@ -28,6 +29,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     Page<ProductEntity> findAllByStatusAndDeleted(Status statusEnum, boolean b, Pageable pageable);
 
     List<ProductEntity> findTop7ByStatusAndDeleted(Status status, boolean b, Sort discountPercent);
+
+    ProductEntity findBySlug(String slug);
 
 
 //    @Query("SELECT p FROM ProductEntity p " +

@@ -17,10 +17,13 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SkinTypeResponse implements Serializable {
 
-    long id;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Long id;
 
-
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String type;
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String description;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

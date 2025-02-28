@@ -39,7 +39,7 @@ public class BlogHomeController {
     }
 
     @GetMapping("{slug}")
-    public ResponseAPI<BlogResponse> getBlogCategory(@PathVariable("slug") String slug) {
+    public ResponseAPI<BlogResponse> getBlogDetail(@PathVariable("slug") String slug) {
         String message_succed = "Thành công!!!";
         String message_failed = "Thất bại!!!";
         try {
