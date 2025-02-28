@@ -7,6 +7,8 @@ import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import org.mapstruct.*;
 
+import java.util.List;
+
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
@@ -23,6 +25,11 @@ public interface ProductMapper {
     @Mapping(target = "brand", ignore = true)
     @Mapping(target = "skinTypes", ignore = true)
     ProductResponseDTO productToProductResponseDTO(ProductEntity product);
+
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "brand", ignore = true)
+    @Mapping(target = "skinTypes", ignore = true)
+    List<ProductResponseDTO> productToProductResponsesDTO(List<ProductEntity> product);
 
 //    List<ProductResponseDTO> toUserResponseDTO(List<ProductEntity> productEntities);
 

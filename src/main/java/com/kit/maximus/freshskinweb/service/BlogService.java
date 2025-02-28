@@ -113,36 +113,41 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
             blogEntity.setSlug(getSlug(request.getTitle()));
         }
 
-        if (request.getThumbnail() != null && !request.getThumbnail().isEmpty()) {
-            int count = 0;
-            List<String> images = new ArrayList<>();
-            for (String file : blogCategoryEntity.getImage()) {
-                try {
-                    deleteImageFromCloudinary(file);
-                } catch (IOException e) {
-                    log.error(e.getMessage());
-                    throw new RuntimeException(e);
-                }
-            }
-
-            for (MultipartFile file : request.getThumbnail()) {
-                String slug = getSlug(request.getTitle());
-
-                if (!StringUtils.hasLength(slug)) {
-                    slug = getSlug(request.getTitle());
-                }
-                try {
-                    String url = uploadImageFromFile(file, slug, count++);
-                } catch (IOException e) {
-                    log.error(e.getMessage());
-                    throw new RuntimeException(e);
-                }
-            }
-            blogCategoryEntity.setImage(images);
-        }
+//        if (request.getThumbnail() != null && !request.getThumbnail().isEmpty()) {
+//            int count = 0;
+//            List<String> images = new ArrayList<>();
+//            for (String file : blogCategoryEntity.getImage()) {
+//                try {
+//                    deleteImageFromCloudinary(file);
+//                } catch (IOException e) {
+//                    log.error(e.getMessage());
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//
+//            for (MultipartFile file : request.getThumbnail()) {
+//                String slug = getSlug(request.getTitle());
+//
+//                if (!StringUtils.hasLength(slug)) {
+//                    slug = getSlug(request.getTitle());
+//                }
+//                try {
+//                    String url = uploadImageFromFile(file, slug, count++);
+//                } catch (IOException e) {
+//                    log.error(e.getMessage());
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//            blogCategoryEntity.setImage(images);
+//        }
 
         blogMapper.updateBlogEntity(blogEntity, request);
-        return blogMapper.toBlogResponse(blogRepository.save(blogEntity));
+        BlogResponse blogResponse = blogMapper.toBlogResponse(blogRepository.save(blogEntity));
+        if (blogEntity.getBlogCategory() != null) {
+            blogResponse.setId(blogEntity.getBlogCategory().getId());
+            blogResponse.setTitle(blogEntity.getBlogCategory().getTitle());
+        }
+        return blogResponse;
     }
 
     public BlogCategoryEntity getBlogCategoryEntityById(Long id) {
@@ -188,7 +193,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
             throw new AppException(ErrorCode.BLOG_NOT_FOUND);
         }
 
-        if(blogEntity.getThumbnail() != null && !blogEntity.getThumbnail().isEmpty()) {
+        if (blogEntity.getThumbnail() != null && !blogEntity.getThumbnail().isEmpty()) {
             blogEntity.getThumbnail().forEach(s -> {
                 try {
                     deleteImageFromCloudinary(s);
@@ -207,15 +212,15 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     public boolean delete(List<Long> longs) {
         List<BlogEntity> blogEntities = blogRepository.findAllById(longs);
 
-        for(BlogEntity blogEntity : blogEntities) {
-            if(blogEntity.getThumbnail() != null && !blogEntity.getThumbnail().isEmpty()) {
-               for (String url : blogEntity.getThumbnail()) {
-                   try {
-                       deleteImageFromCloudinary(url);
-                   } catch (IOException e) {
-                       throw new RuntimeException(e);
-                   }
-               }
+        for (BlogEntity blogEntity : blogEntities) {
+            if (blogEntity.getThumbnail() != null && !blogEntity.getThumbnail().isEmpty()) {
+                for (String url : blogEntity.getThumbnail()) {
+                    try {
+                        deleteImageFromCloudinary(url);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
         }
 
@@ -251,7 +256,15 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
     @Override
     public BlogResponse showDetail(Long aLong) {
-        return blogMapper.toBlogResponse(getBlogEntityById(aLong));
+        BlogEntity blogEntity = getBlogEntityById(aLong);
+        BlogResponse blogResponse = blogMapper.toBlogResponse(getBlogEntityById(aLong));
+        if (blogEntity.getBlogCategory() != null) {
+            blogResponse.setTitle(blogEntity.getBlogCategory().getTitle());
+            blogResponse.setId(blogEntity.getBlogCategory().getId());
+        }
+
+
+        return blogResponse;
     }
 
 

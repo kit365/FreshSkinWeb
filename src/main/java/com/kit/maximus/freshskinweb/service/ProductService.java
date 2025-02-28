@@ -660,7 +660,15 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
 
     //## FRESH SKIN
-
+    // Show 3 san pham noi bat
+    public List<ProductResponseDTO> getProductsFeature() {
+        List<ProductEntity> productEntities = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status.ACTIVE, false, true);
+    List<ProductResponseDTO> productResponseDTO = mapProductResponsesDTO(productEntities);
+        productResponseDTO.forEach(productResponseDTO1 -> {
+            productResponseDTO1.setCategory(null);
+        });
+        return productResponseDTO;
+    }
 
     //Tìm chi tiết Product bằng Slug
 
@@ -670,6 +678,72 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return mapProductResponseDTO(productResponseDTO);
     }
 
+
+    //Hàm Map thủ công 1 ProductResponse
+    private List<ProductResponseDTO> mapProductResponsesDTO(List<ProductEntity> productEntity) {
+
+        //Map Product
+        List<ProductResponseDTO> productResponseDTO = productMapper.productToProductResponsesDTO(productEntity);
+
+        productResponseDTO.forEach(productResponseDTO1 -> {
+
+             for(ProductEntity product : productEntity) {
+                 //Lấy thương thiệu của Product
+                 if (product.getBrand() != null) {
+                     ProductBrandResponse productBrandResponse = new ProductBrandResponse();
+                     productBrandResponse.setTitle(product.getBrand().getTitle());
+                     productResponseDTO1.setBrand(productBrandResponse);
+                 }
+
+
+                 //Lấy loại da của Product
+                 if (product.getSkinTypes() != null) {
+                     List<SkinTypeResponse> skinTypeResponses = new ArrayList<>();
+                     product.getSkinTypes().forEach(skinType -> {
+                         SkinTypeResponse skinTypeResponse = new SkinTypeResponse();
+                         skinTypeResponse.setType(skinType.getType());
+                         skinTypeResponses.add(skinTypeResponse);
+                     });
+                     productResponseDTO1.setSkinTypes(skinTypeResponses);
+                 }
+
+                 //Lấy danh sách danh mục của Product
+                 if (product.getCategory() != null) {
+                     List<ProductCategoryResponse> categoryResponses = new ArrayList<>();
+                     product.getCategory().forEach(category -> {
+                         ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
+                         productCategoryResponse.setTitle(category.getTitle());
+                         categoryResponses.add(productCategoryResponse);
+                     });
+                     productResponseDTO1.setCategory(categoryResponses);
+                 }
+
+             }
+            productResponseDTO1.setFeatured(null);
+            productResponseDTO1.setStatus(null);
+            productResponseDTO1.setCreatedAt(null);
+            productResponseDTO1.setUpdatedAt(null);
+            productResponseDTO1.setPosition(null);
+                }
+        );
+
+
+//        //Lấy giá của product
+//        if (productEntity.getVariants() != null) {
+//            List<ProductVariantResponse> productVariantResponses = new ArrayList<>();
+//            productEntity.getVariants().forEach(variantResponse -> {
+//                ProductVariantResponse productVariantResponse = new ProductVariantResponse();
+//                productVariantResponse.setId(variantResponse.getId());
+//                productVariantResponse.setPrice(variantResponse.getPrice());
+//                productVariantResponse.setVolume(variantResponse.getVolume());
+//                productVariantResponse.setUnit(variantResponse.getUnit());
+//                productVariantResponses.add(productVariantResponse);
+//            });
+//            productResponseDTO.setVariants(productVariantResponses);
+//        }
+
+        return productResponseDTO;
+    }
 
     //Hàm Map thủ công 1 ProductResponse
     private ProductResponseDTO mapProductResponseDTO(ProductEntity productEntity) {
@@ -697,7 +771,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         }
 
         //Lấy danh sách danh mục của Product
-        if(productEntity.getCategory() != null) {
+        if (productEntity.getCategory() != null) {
             List<ProductCategoryResponse> categoryResponses = new ArrayList<>();
             productEntity.getCategory().forEach(category -> {
                 ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();

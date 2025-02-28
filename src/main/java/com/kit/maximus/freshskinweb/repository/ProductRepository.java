@@ -32,6 +32,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
     ProductEntity findBySlug(String slug);
 
+    List<ProductEntity> findTop3ByStatusAndDeletedAndFeatured(Status status, boolean b, boolean b1);
+
 
 //    @Query("SELECT p FROM ProductEntity p " +
 //            "JOIN p.variants v " +
