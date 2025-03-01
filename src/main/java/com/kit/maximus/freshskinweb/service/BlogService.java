@@ -47,16 +47,14 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     BlogRepository blogRepository;
     BlogMapper blogMapper;
     BlogCategoryRepository blogCategoryRepository;
-    BlogCategoryMapper blogCategoryMapper;
     Cloudinary cloudinary;
 
     @Override
     public boolean add(BlogCreationRequest request) {
         BlogEntity blogEntity = blogMapper.toBlogEntity(request);
-        BlogCategoryEntity blogCategoryEntity = null;
+        BlogCategoryEntity blogCategoryEntity = blogCategoryRepository.findById(request.getCategoryID()).orElse(null);
 
         if (request.getCategoryID() != null) {
-            blogCategoryEntity = blogCategoryRepository.findById(request.getCategoryID()).orElseThrow(() -> new AppException(ErrorCode.BLOG_CATEGORY_NOT_FOUND));
             blogEntity.setBlogCategory(blogCategoryEntity);
         } else {
             blogEntity.setBlogCategory(null);
@@ -145,11 +143,14 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
         blogMapper.updateBlogEntity(blogEntity, request);
         BlogResponse blogResponse = blogMapper.toBlogResponse(blogRepository.save(blogEntity));
-        blogResponse.setBlogCategory(blogCategoryMapper.toBlogCategoryResponse(blogEntity.getBlogCategory()));
-//        if (blogEntity.getBlogCategory() != null) {
-//            blogResponse.setId(blogEntity.getBlogCategory().getId());
-//            blogResponse.setTitle(blogEntity.getBlogCategory().getTitle());
-//        }
+
+        //Chỉ trả về 2 fields là ID và Title của thằng con, không trả hết
+        BlogCategoryResponse blogCategoryResponse = new BlogCategoryResponse();
+        if (blogEntity.getBlogCategory() != null) {
+            blogCategoryResponse.setId(blogEntity.getBlogCategory().getId());
+            blogCategoryResponse.setTitle(blogEntity.getBlogCategory().getTitle());
+            blogResponse.setBlogCategory(blogCategoryResponse);
+        }
         return blogResponse;
     }
 
