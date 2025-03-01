@@ -1,6 +1,5 @@
 package com.kit.maximus.freshskinweb.repository;
 
-import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.utils.Status;
 import org.springframework.data.domain.Page;
@@ -36,9 +35,11 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
 
     List<ProductCategoryEntity> findAllByStatusAndDeleted(Status status, boolean b);
 
-    ProductCategoryEntity findAllByStatusAndDeletedAndTitleIsContainingIgnoreCase(Status status, boolean b, String title);
 
-    ProductCategoryEntity findByStatusAndDeletedAndTitleIsContainingIgnoreCase(Status status, boolean b, String title);
 
     List<ProductCategoryEntity> findAllByStatusAndDeletedAndTitleContainingIgnoreCase(Status status, boolean b, String title);
+
+    Page<ProductCategoryEntity> findAllByStatusAndDeletedAndId(Status status, boolean b, Pageable pageable, Long id);
+
+    List<ProductCategoryEntity> findByParentId(Long parentId);
 }

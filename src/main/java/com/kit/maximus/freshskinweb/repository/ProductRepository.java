@@ -35,6 +35,14 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     List<ProductEntity> findTop3ByStatusAndDeletedAndFeatured(Status status, boolean b, boolean b1);
 
 
+    Page<ProductEntity> findAllByCategoryIn(List<ProductCategoryEntity> subCategories, Pageable pageable);
+
+
+//    List<ProductEntity> findByCategory_IdIn(List<Long> categoryIds);
+
+    List<ProductEntity> findTop10ByCategory_IdIn(List<Long> ids);
+
+
 //    @Query("SELECT p FROM ProductEntity p " +
 //            "JOIN p.variants v " +
 //            "WHERE v.price = :price")
