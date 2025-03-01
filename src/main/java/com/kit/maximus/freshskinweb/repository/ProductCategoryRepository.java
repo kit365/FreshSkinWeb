@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.repository;
 
+import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.utils.Status;
 import org.springframework.data.domain.Page;
@@ -42,4 +43,7 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
     Page<ProductCategoryEntity> findAllByStatusAndDeletedAndId(Status status, boolean b, Pageable pageable, Long id);
 
     List<ProductCategoryEntity> findByParentId(Long parentId);
+
+    List<ProductCategoryEntity> findAllByParentId(Long id);
+    Page<ProductCategoryEntity> findAllByParentId(Long id, Pageable pageable);
 }

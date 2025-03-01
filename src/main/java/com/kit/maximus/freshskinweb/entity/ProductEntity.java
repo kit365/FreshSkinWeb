@@ -81,19 +81,19 @@ public class ProductEntity extends AbstractEntity {
     boolean featured;
 
     /// /////////////
-    @Column(name = "Origin")
+    @Column(name = "Origin",columnDefinition = "MEDIUMTEXT" )
     String origin;
 
-    @Column(name = "Ingredients")
+    @Column(name = "Ingredients",columnDefinition = "MEDIUMTEXT")
     String ingredients;
 
-    @Column(name = "UsageInstructions")
+    @Column(name = "UsageInstructions",columnDefinition = "MEDIUMTEXT")
     String usageInstructions;
 
-    @Column(name = "Benefits")
+    @Column(name = "Benefits",columnDefinition = "MEDIUMTEXT")
     String benefits;
 
-    @Column(name = "SkinIssues")
+    @Column(name = "SkinIssues",columnDefinition = "MEDIUMTEXT")
     String skinIssues;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "product")

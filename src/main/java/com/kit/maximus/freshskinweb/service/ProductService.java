@@ -673,16 +673,17 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     //Tìm chi tiết Product bằng Slug
 
-    public List<Map<String, List<ProductResponseDTO>>> getProductBySlug(String slug) {
-        List<Map<String, List<ProductResponseDTO>>> list = new ArrayList<>();
-        Map<String, List<ProductResponseDTO>> map = new HashMap<>();
+    public List<Map<String, Object>>  getProductBySlug(String slug) {
+        List<Map<String, Object>> data = new ArrayList<>();
+        Map<String, Object>  map = new HashMap<>();
+
 
         // Lấy sản phẩm theo slug
         ProductEntity productEntity = productRepository.findBySlug(slug);
         ProductResponseDTO response = mapProductResponseDTO(productEntity);
 
         // Nhét sản phẩm chính vào map (bọc vào List)
-        map.put("productDetail", List.of(response));
+        map.put("productDetail", response);
 
         // Tìm id của các category
         List<Long> ids = new ArrayList<>();
@@ -705,12 +706,9 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             productRelatedResponse.setSkinIssues(null);
         });
         map.put("productsRelated", productRelatedResponses);
-
-
-        list.add(map);
-        return list;
+        data.add(map);
+        return data;
     }
-
 
 
     //Hàm Map thủ công 1 ProductResponse
@@ -844,30 +842,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return productResponseDTO;
     }
 
-    // ## Chăm sóc cơ thể - Xem tất cả
-    public Map<String, Object> getBodyCare(int size, int page, String sortDirection, Long parentId) {
-        Map<String, Object> list = new HashMap<>();
-        int p = (page > 0) ? page - 1 : 0;
-        Pageable pageable = PageRequest.of(p, size);
-
-        // Lấy tất cả danh mục con của danh mục cha
-        List<ProductCategoryEntity> subCategories = productCategoryRepository.findByParentId(parentId);
-
-        // Nếu danh mục cha không có danh mục con => Trả danh sách rỗng
-        if (subCategories.isEmpty()) {
-            list.put("categoryResponses", new ArrayList<>());
-            return list;
-        }
-
-        // Lấy danh sách sản phẩm thuộc các danh mục con
-        Page<ProductEntity> pageList = productRepository.findAllByCategoryIn(subCategories, pageable);
-
-        // Chuyển sang response
-        List<ProductResponseDTO> productResponseDTOS = mapProductResponsesDTO(pageList.getContent());
-        list.put("productResponse", productResponseDTOS);
-
-        return list;
-    }
 
 
 }
