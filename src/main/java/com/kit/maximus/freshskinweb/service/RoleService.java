@@ -4,6 +4,7 @@ import com.kit.maximus.freshskinweb.dto.request.role.CreateRoleRequest;
 import com.kit.maximus.freshskinweb.dto.request.role.UpdateRoleRequest;
 import com.kit.maximus.freshskinweb.dto.response.RoleResponseDTO;
 import com.kit.maximus.freshskinweb.entity.RoleEntity;
+import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.RoleMapper;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,7 +31,7 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
 
     @Override
     public boolean add(CreateRoleRequest request) {
-        if(roleRepository.existsByRoleName(request.getRoleName())){
+        if(roleRepository.existsByTitle(request.getTitle())){
             throw new AppException(ErrorCode.ROLE_EXISTED);
         }
         RoleEntity roleEntity = roleMapper.toRoleEntity(request);
@@ -52,9 +54,32 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
 
     @Override
     public String update(List<Long> id, String status) {
-        return "";
+        Status statusEnum = getStatus(status);
+        List<RoleEntity> roleEntities = roleRepository.findAllById(id);
+        if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
+            roleEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
+            roleRepository.saveAll(roleEntities);
+            return "Cập nhật trạng thái ROLE thành công";
+        } else if (statusEnum == Status.SOFT_DELETED) {
+            roleEntities.forEach(productEntity -> productEntity.setDeleted(true));
+            roleRepository.saveAll(roleEntities);
+            return "Xóa mềm ROLE thành công";
+        } else if (statusEnum == Status.RESTORED) {
+            roleEntities.forEach(productEntity -> productEntity.setDeleted(false));
+            roleRepository.saveAll(roleEntities);
+            return "Phục hồi ROLE thành công";
+        }
+        return "Cập nhật ROLE thất bại";
     }
 
+    private Status getStatus(String status) {
+        try {
+            return Status.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid status provided: '{}'", status);
+            throw new AppException(ErrorCode.STATUS_INVALID);
+        }
+    }
     @Override
     public boolean delete(Long id) {
         RoleEntity roleEntity = getRoleEntityById(id);
@@ -96,9 +121,13 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
         return false;
     }
 
+    public List<RoleResponseDTO> showAll() {
+        return roleRepository.findAll().stream().map(roleMapper::toRoleResponseDTO).collect(Collectors.toList());
+    }
+
     @Override
     public RoleResponseDTO showDetail(Long aLong) {
-        return null;
+        return roleRepository.findById(aLong).map(roleMapper::toRoleResponseDTO).orElse(null);
     }
 
 

@@ -21,9 +21,6 @@ public class RoleEntity extends AbstractEntity {
     @Column(name = "role_id")
     Long id;
 
-    @Column(name = "rolename")
-    String roleName;
-
     @Column(name = "title")
     String title;
 

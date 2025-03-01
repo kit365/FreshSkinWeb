@@ -14,7 +14,6 @@ import java.util.Date;
 @ToString
 @Builder
 public class CreateRoleRequest {
-    String roleName;
     String title;
     String description;
     String permission;

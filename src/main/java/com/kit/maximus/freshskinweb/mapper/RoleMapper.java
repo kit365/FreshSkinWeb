@@ -7,9 +7,7 @@ import com.kit.maximus.freshskinweb.dto.response.RoleResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.RoleEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
 import java.util.List;
 
@@ -23,5 +21,6 @@ public interface RoleMapper {
 
     List<RoleResponseDTO> toRoleResponseDTO (List<RoleEntity> RoleEntities);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateRole(@MappingTarget RoleEntity user, UpdateRoleRequest userDTO);
 }

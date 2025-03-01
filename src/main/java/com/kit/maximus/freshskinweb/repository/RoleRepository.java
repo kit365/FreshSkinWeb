@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
 
-    boolean existsByRoleName(String rolename);
+    boolean existsByTitle(String rolename);
 //    boolean existsByID(Long RoleID);
 //    Optional<RoleEntity> findAllByRolename(String rolename);
 //    @Query("SELECT s FROM RoleEntity s WHERE s.roleName LIKE %:keyword%")
