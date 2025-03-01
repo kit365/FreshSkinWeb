@@ -11,15 +11,14 @@ import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.ProductCategoryMapper;
 import com.kit.maximus.freshskinweb.repository.ProductCategoryRepository;
+import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.Status;
+import jdk.jfr.Category;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -481,6 +480,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return publicId;
     }
 
+
     private List<Long> getProductIDs(ProductCategoryEntity productCategoryEntity) {
         List<Long> idProduct = new ArrayList<>();
         productCategoryEntity.getProducts().forEach(productEntity -> {
@@ -520,52 +520,91 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return result;
     }
 
+    // ## Chăm sóc cơ thể - Xem tất cả
+    public Map<String, Object> getBodyCare(int size, int page, String sortDirection, Long id) {
+        Map<String, Object> map = new HashMap<>();
+        int p = (page > 0) ? page - 1 : 0;
+        Pageable pageable = PageRequest.of(p, size);
+
+        List<ProductCategoryEntity> productCategoryEntities = productCategoryRepository.findAllByParentId(id);
+        List<ProductCategoryResponse> categoryListResponses = mapToCategoryResponse(productCategoryEntities);
 
 
-//    @Override
-//    public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
-//        Map<String, Object> map = new HashMap<>();
-//
-//        Sort.Direction direction = getSortDirection(sortDirection);
-//        Sort sort = Sort.by(direction, sortKey);
-//        int p = (page > 0) ? page - 1 : 0;
-//        Pageable pageable = PageRequest.of(p, size, sort);
-//
-//        Page<ProductCategoryEntity> productCategoryEntities;
-//
-//        // Tìm kiếm theo keyword trước
-//        if (keyword != null && !keyword.trim().isEmpty()) {
-//            if (status.equalsIgnoreCase("ALL")) {
-//                // Tìm kiếm theo tên sản phẩm, không lọc theo status
-//                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, false, pageable);
-//            } else {
-//                // Tìm kiếm theo tên sản phẩm và status
-//                Status statusEnum = getStatus(status);
-//                productCategoryEntities = productCategoryRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, false);
-//            }
-//        } else {
-//            // Nếu không có keyword, chỉ lọc theo status
-//            if (status == null || status.equalsIgnoreCase("ALL")) {
-//                productCategoryEntities = productCategoryRepository.findAllByDeleted(false, pageable);
-//            } else {
-//                Status statusEnum = getStatus(status);
-//                productCategoryEntities = productCategoryRepository.findAllByStatusAndDeleted(statusEnum, false, pageable);
-//            }
-//        }
-//
-//        Page<ProductCategoryResponse> list = productCategoryEntities.map(productCategoryMapper::productCategoryToProductCategoryResponseDTO);
-//
-    ////        if (!list.hasContent()) {
-    ////            return null;
-    ////        }
-//
-//        map.put("product_category", list.getContent());
-//        map.put("currentPage", list.getNumber() + 1);
-//        map.put("totalItems", list.getTotalElements());
-//        map.put("totalPages", list.getTotalPages());
-//        map.put("pageSize", list.getSize());
-//        return map;
-//    }
+
+
+
+
+
+
+        //trả api danh sach danh mục con
+        Map<Long, ProductBrandResponse> brandResponses = new HashMap<>();
+        Map<Long, SkinTypeResponse> SkinResponses = new HashMap<>();
+        Map<Long, ProductResponseDTO> ProductResponseDTOMap = new HashMap<>();
+        List<ProductCategoryResponse> categoryResponses = new ArrayList<>();
+
+
+
+
+
+
+
+        categoryListResponses.forEach(productCategoryResponse -> {
+            ProductCategoryResponse categoryResponse = new ProductCategoryResponse();
+            categoryResponse.setId(productCategoryResponse.getId());
+            categoryResponse.setTitle(productCategoryResponse.getTitle());
+            categoryResponses.add(categoryResponse);
+            if(productCategoryResponse.getProducts() != null) {
+
+                productCategoryResponse.getProducts().forEach(product -> {
+                    ProductResponseDTOMap.putIfAbsent(product.getId(), product);
+
+                    //API Danh sach brand
+                    if(product.getBrand() != null) {
+                        ProductBrandResponse brandResponse = new ProductBrandResponse();
+                        brandResponse.setTitle(product.getBrand().getTitle());
+                        brandResponse.setId(product.getBrand().getId());
+                        brandResponses.putIfAbsent(product.getBrand().getId(), brandResponse );
+                    }
+
+                    //API Danh sach SkinType
+                    if(product.getSkinTypes() != null) {
+                        product.getSkinTypes().forEach(skinTypeEntity -> {
+                            SkinResponses.putIfAbsent(skinTypeEntity.getId(), skinTypeEntity);
+                        });
+                    }
+                });
+            }
+        });
+        List<ProductBrandResponse> brandResponsess = new ArrayList<>(brandResponses.values());
+        List<SkinTypeResponse> SkinResponsess = new ArrayList<>(SkinResponses.values());
+        List<ProductResponseDTO> productResponseDTOS = new ArrayList<>(ProductResponseDTOMap.values());
+
+
+        Page<ProductCategoryEntity> pageResponse;
+
+        pageResponse = productCategoryRepository.findAllByParentId(id, pageable);
+        PageImpl<ProductResponseDTO> response =  new PageImpl<>(productResponseDTOS);
+
+
+        map.put("category", categoryResponses);
+        map.put("brand", brandResponsess);
+        map.put("skinType", SkinResponsess);
+//        map.put("Product", productResponseDTOS);
+//        Map<String,Object> pageMap = new HashMap<>();
+//        pageMap.put("page", p);
+
+        map.put("Product_Page", response.getContent());
+        map.put("currentPage", response.getNumber() + 1);
+        map.put("totalItems", response.getTotalElements());
+        map.put("totalPages", response.getTotalPages());
+        map.put("pageSize", response.getSize());
+
+//        // Chuyển sang response
+//        List<ProductResponseDTO> productResponseDTOS = mapProductResponsesDTO(pageList.getContent());
+//        list.put("productResponse", productResponseDTOS);
+
+        return map;
+    }
 
 
 

@@ -28,26 +28,26 @@ public class ProductHomeController {
     ProductCategoryService productCategoryService;
 
     @GetMapping("{slug}")
-    public ResponseAPI<List<Map<String, List<ProductResponseDTO>>>> getProductDetail(@PathVariable("slug") String slug) {
+    public ResponseAPI<List<Map<String, Object>>> getProductDetail(@PathVariable("slug") String slug) {
         String message_succed = "Thành công!!!";
         String message_failed = "Thất bại!!!";
         try {
             var result = productService.getProductBySlug(slug);
-            return ResponseAPI.<List<Map<String, List<ProductResponseDTO>>>>builder().code(HttpStatus.OK.value()).data(result).message(message_succed).build();
+            return ResponseAPI.<List<Map<String, Object>>> builder().code(HttpStatus.OK.value()).data(result).message(message_succed).build();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return ResponseAPI.<List<Map<String, List<ProductResponseDTO>>>>builder().code(HttpStatus.OK.value()).message(message_failed).build();
+            return ResponseAPI.<List<Map<String, Object>> >builder().code(HttpStatus.OK.value()).message(message_failed).build();
         }
     }
 
-    @GetMapping("show/bodycare")
+    @GetMapping("show/bodycare/{id}")
     public ResponseAPI<Map<String, Object>> getProductDetailBodyCare(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "12") int size,
             @RequestParam(defaultValue = "desc") String sortValue,
-            @RequestParam("id") Long id) {
+            @PathVariable("id") Long id) {
 
-        Map<String, Object> data = productService.getBodyCare(size, page, sortValue, id);
+        Map<String, Object> data = productCategoryService.getBodyCare(size, page, sortValue, id);
         return ResponseAPI.<Map<String, Object>>builder()
                 .code(HttpStatus.OK.value())
                 .data(data)
