@@ -11,6 +11,7 @@ import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
+import com.kit.maximus.freshskinweb.mapper.BlogCategoryMapper;
 import com.kit.maximus.freshskinweb.mapper.BlogMapper;
 import com.kit.maximus.freshskinweb.repository.BlogCategoryRepository;
 import com.kit.maximus.freshskinweb.repository.BlogRepository;
@@ -46,6 +47,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     BlogRepository blogRepository;
     BlogMapper blogMapper;
     BlogCategoryRepository blogCategoryRepository;
+    BlogCategoryMapper blogCategoryMapper;
     Cloudinary cloudinary;
 
     @Override
@@ -143,10 +145,11 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
         blogMapper.updateBlogEntity(blogEntity, request);
         BlogResponse blogResponse = blogMapper.toBlogResponse(blogRepository.save(blogEntity));
-        if (blogEntity.getBlogCategory() != null) {
-            blogResponse.setId(blogEntity.getBlogCategory().getId());
-            blogResponse.setTitle(blogEntity.getBlogCategory().getTitle());
-        }
+        blogResponse.setBlogCategory(blogCategoryMapper.toBlogCategoryResponse(blogEntity.getBlogCategory()));
+//        if (blogEntity.getBlogCategory() != null) {
+//            blogResponse.setId(blogEntity.getBlogCategory().getId());
+//            blogResponse.setTitle(blogEntity.getBlogCategory().getTitle());
+//        }
         return blogResponse;
     }
 
