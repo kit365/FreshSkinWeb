@@ -93,6 +93,9 @@ public enum ErrorCode {
     RATING_INVALID(400, "Giá trị phải từ 1 đến 5"),
     REVIEW_NOT_FOUND(404, "Không tìm thấy đánh giá"),
 
+
+    //SKIN QUESTIONS
+    SKIN_QUESTIONS_NOT_FOUND(404, "Không tìm thấy bộ đề")
     ;
 
 
