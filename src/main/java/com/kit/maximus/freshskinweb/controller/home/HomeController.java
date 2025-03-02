@@ -2,6 +2,7 @@ package com.kit.maximus.freshskinweb.controller.home;
 
 import com.kit.maximus.freshskinweb.dto.RouterDTO;
 import com.kit.maximus.freshskinweb.service.BlogCategoryService;
+import com.kit.maximus.freshskinweb.service.ProductBrandService;
 import com.kit.maximus.freshskinweb.service.ProductCategoryService;
 import com.kit.maximus.freshskinweb.service.ProductService;
 import lombok.AccessLevel;
@@ -27,6 +28,8 @@ public class HomeController {
     BlogCategoryService blogCategoryService;
 
     ProductService productService;
+
+    ProductBrandService productBrandService;
 
 
     @GetMapping("/routes")
@@ -57,7 +60,8 @@ public class HomeController {
                 "FreshSkinSlogan",productCategoryService.getCategoryResponses(FreshSkinSlogan,6),
                 "Top_moisturizing_products",productCategoryService.getCategoryResponses(Top_moisturizing_products,10),
                 "BeautyTrends",productCategoryService.getCategoryResponses(beautyTrends,5),
-                "Top3ProductFeature",productService.getProductsFeature()
+                "Top3ProductFeature",productService.getProductsFeature(),
+                "AllBrand",productBrandService.getAll()
     );
     }
 }
