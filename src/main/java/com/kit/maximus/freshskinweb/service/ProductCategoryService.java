@@ -520,96 +520,9 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return result;
     }
 
-    // ## Chăm sóc cơ thể - Xem tất cả
-    public Map<String, Object> getBodyCare(int size, int page, String sortDirection, Long id) {
-        Map<String, Object> map = new HashMap<>();
-        int p = (page > 0) ? page - 1 : 0;
-        Pageable pageable = PageRequest.of(p, size);
-
-        List<ProductCategoryEntity> productCategoryEntities = productCategoryRepository.findAllByParentId(id);
-        List<ProductCategoryResponse> categoryListResponses = mapToCategoryResponse(productCategoryEntities);
-
-
-
-
-
-
-
-
-        //trả api danh sach danh mục con
-        Map<Long, ProductBrandResponse> brandResponses = new HashMap<>();
-        Map<Long, SkinTypeResponse> SkinResponses = new HashMap<>();
-        Map<Long, ProductResponseDTO> ProductResponseDTOMap = new HashMap<>();
-        List<ProductCategoryResponse> categoryResponses = new ArrayList<>();
-
-
-
-
-
-
-
-        categoryListResponses.forEach(productCategoryResponse -> {
-            ProductCategoryResponse categoryResponse = new ProductCategoryResponse();
-            categoryResponse.setId(productCategoryResponse.getId());
-            categoryResponse.setTitle(productCategoryResponse.getTitle());
-            categoryResponses.add(categoryResponse);
-            if(productCategoryResponse.getProducts() != null) {
-
-                productCategoryResponse.getProducts().forEach(product -> {
-                    ProductResponseDTOMap.putIfAbsent(product.getId(), product);
-
-                    //API Danh sach brand
-                    if(product.getBrand() != null) {
-                        ProductBrandResponse brandResponse = new ProductBrandResponse();
-                        brandResponse.setTitle(product.getBrand().getTitle());
-                        brandResponse.setId(product.getBrand().getId());
-                        brandResponses.putIfAbsent(product.getBrand().getId(), brandResponse );
-                    }
-
-                    //API Danh sach SkinType
-                    if(product.getSkinTypes() != null) {
-                        product.getSkinTypes().forEach(skinTypeEntity -> {
-                            SkinResponses.putIfAbsent(skinTypeEntity.getId(), skinTypeEntity);
-                        });
-                    }
-                });
-            }
-        });
-        List<ProductBrandResponse> brandResponsess = new ArrayList<>(brandResponses.values());
-        List<SkinTypeResponse> SkinResponsess = new ArrayList<>(SkinResponses.values());
-        List<ProductResponseDTO> productResponseDTOS = new ArrayList<>(ProductResponseDTOMap.values());
-
-
-        Page<ProductCategoryEntity> pageResponse;
-
-        pageResponse = productCategoryRepository.findAllByParentId(id, pageable);
-        PageImpl<ProductResponseDTO> response =  new PageImpl<>(productResponseDTOS);
-
-
-        map.put("category", categoryResponses);
-        map.put("brand", brandResponsess);
-        map.put("skinType", SkinResponsess);
-//        map.put("Product", productResponseDTOS);
-//        Map<String,Object> pageMap = new HashMap<>();
-//        pageMap.put("page", p);
-
-        map.put("Product_Page", response.getContent());
-        map.put("currentPage", response.getNumber() + 1);
-        map.put("totalItems", response.getTotalElements());
-        map.put("totalPages", response.getTotalPages());
-        map.put("pageSize", response.getSize());
-
-//        // Chuyển sang response
-//        List<ProductResponseDTO> productResponseDTOS = mapProductResponsesDTO(pageList.getContent());
-//        list.put("productResponse", productResponseDTOS);
-
-        return map;
-    }
-
-
 
     //Hàm này dùng để map thủ công danh sách danh mục sản phẩm
-    private List<ProductCategoryResponse> mapToCategoryResponse(List<ProductCategoryEntity> categories) {
+    protected List<ProductCategoryResponse> mapToCategoryResponse(List<ProductCategoryEntity> categories) {
         List<ProductCategoryResponse> categoryResponses = new ArrayList<>();
         List<ProductCategoryResponse> children = new ArrayList<>();
         categories.forEach(productCategoryEntity -> {
@@ -620,7 +533,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
             response.setSlug(productCategoryEntity.getSlug());
             response.setDescription(productCategoryEntity.getDescription());
             response.setImage(productCategoryEntity.getImage());
-            if(productCategoryEntity.getChild() != null) {
+            if (productCategoryEntity.getChild() != null) {
                 productCategoryEntity.getChild().forEach(child -> {
 //                    if(child.getProducts() != null) {
 //                        child.getProducts().forEach(product -> {
@@ -649,11 +562,22 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                 productResponseDTO.setThumbnail(productEntity.getThumbnail());
                 productResponseDTO.setDiscountPercent(productEntity.getDiscountPercent());
                 productResponseDTO.setFeatured(productEntity.isFeatured());
-                if(productEntity.getBrand() != null) {
+                if (productEntity.getBrand() != null) {
                     ProductBrandResponse brandResponse = new ProductBrandResponse();
                     brandResponse.setId(productEntity.getBrand().getId());
                     brandResponse.setTitle(productEntity.getBrand().getTitle());
                     productResponseDTO.setBrand(brandResponse);
+                }
+
+                if(productEntity.getSkinTypes() != null) {
+                    List<SkinTypeResponse> skinTypeResponses = new ArrayList<>();
+                    productEntity.getSkinTypes().forEach(skinTypeEntity -> {
+                        SkinTypeResponse skinTypeResponse = new SkinTypeResponse();
+                        skinTypeResponse.setId(skinTypeEntity.getId());
+                        skinTypeResponse.setType(skinTypeEntity.getType());
+                        skinTypeResponses.add(skinTypeResponse);
+                    });
+                    productResponseDTO.setSkinTypes(skinTypeResponses);
                 }
 
                 // Tạo danh sách riêng cho từng sản phẩm
@@ -727,8 +651,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
         return response;
     }
-
-
 
 
 }

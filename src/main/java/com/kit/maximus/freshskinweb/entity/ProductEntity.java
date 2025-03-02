@@ -45,6 +45,7 @@ public class ProductEntity extends AbstractEntity {
     ProductBrandEntity brand;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OrderBy("price ASC")
     List<ProductVariantEntity> variants = new ArrayList<>();
 
     @ManyToMany

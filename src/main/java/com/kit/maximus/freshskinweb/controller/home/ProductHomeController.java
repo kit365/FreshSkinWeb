@@ -40,18 +40,20 @@ public class ProductHomeController {
         }
     }
 
-    @GetMapping("show/bodycare/{id}")
-    public ResponseAPI<Map<String, Object>> getProductDetailBodyCare(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "12") int size,
-            @RequestParam(defaultValue = "desc") String sortValue,
-            @PathVariable("id") Long id) {
+//    @GetMapping("show/bodycare/{id}")
+//    public ResponseAPI<Map<String, Object>> getProductDetailBodyCare(
+//            @RequestParam(defaultValue = "1") int page,
+//            @RequestParam(defaultValue = "12") int size,
+//            @RequestParam(defaultValue = "desc") String sortValue,
+//            @PathVariable("id") Long id) {
+//
+//        Map<String, Object> data = productService.getBodyCare(size, page, sortValue, id);
+//        return ResponseAPI.<Map<String, Object>>builder()
+//                .code(HttpStatus.OK.value())
+//                .data(data)
+//                .build();
+//    }
 
-        Map<String, Object> data = productCategoryService.getBodyCare(size, page, sortValue, id);
-        return ResponseAPI.<Map<String, Object>>builder()
-                .code(HttpStatus.OK.value())
-                .data(data)
-                .build();
-    }
+
 
 }

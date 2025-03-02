@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,8 +34,8 @@ import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
+
+import static com.kit.maximus.freshskinweb.specification.ProductSpecification.*;
 
 
 @Slf4j
@@ -399,68 +400,51 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
+        System.out.println(status);
         Map<String, Object> map = new HashMap<>();
 
-        Sort.Direction direction = getSortDirection(sortDirection);
+        // Khởi tạo Specification với điều kiện mặc định là không phải đã xóa
+        Specification<ProductEntity> specification = Specification.where(isNotDeleted());
 
-        Sort sort = Sort.by(direction, sortKey);
-
-        if (sortKey.equalsIgnoreCase("price")) {
-            sort = Sort.by(direction, "variants.price");
-        }
-
-
-        int p = (page > 0) ? page - 1 : 0;
-        Pageable pageable = PageRequest.of(p, size, sort);
-
-        Page<ProductEntity> productEntityPage;
-
-
-        // Tìm kiếm theo keyword trước
+        // Lọc theo keyword
         if (keyword != null && !keyword.trim().isEmpty()) {
-            if (status.equalsIgnoreCase("ALL")) {
-                // Tìm kiếm theo tên sản phẩm, không lọc theo status
-                productEntityPage = productRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, false, pageable);
-            } else {
-                // Tìm kiếm theo tên sản phẩm và status
-                Status statusEnum = getStatus(status);
-                productEntityPage = productRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, false);
-            }
-        } else {
-            // Nếu không có keyword, chỉ lọc theo status
-            if (status == null || status.equalsIgnoreCase("ALL")) {
-                productEntityPage = productRepository.findAllByDeleted(false, pageable);
-            } else {
-                Status statusEnum = getStatus(status);
-                productEntityPage = productRepository.findAllByStatusAndDeleted(statusEnum, false, pageable);
-            }
+            specification = specification.and(filterByKeyword(keyword));  // Gán lại specification
         }
 
+        // Lọc theo status
+        if (status != null && !status.trim().isEmpty()) {
+            specification = specification.and(filterByStatus(getStatus(status)));  // Gán lại specification
+        }
+
+        // Lọc theo sortKey (price hoặc position)
+        if (sortKey.equalsIgnoreCase("position")) {
+            specification = specification.and(sortByPosition(getSortDirection(sortDirection)));  // Gán lại specification
+        } else if (sortKey.equalsIgnoreCase("price")) {
+            specification = specification.and(sortByPrice(getSortDirection(sortDirection)));  // Gán lại specification
+        }
+
+        // Tính toán số trang
+        int p = (page > 0) ? page - 1 : 0;
+        Pageable pageable = PageRequest.of(p, size);
+
+        // Thực hiện truy vấn với Specification và Pageable
+        Page<ProductEntity> productEntityPage = productRepository.findAll(specification, pageable);
+
+        // Map kết quả trả về thành DTO
         Page<ProductResponseDTO> list = productEntityPage.map(productMapper::productToProductResponseDTO);
 
-        for (int i = 0; i < productEntityPage.getContent().size(); i++) {
-            ProductResponseDTO productResponseDTO = list.getContent().get(i);
-
-            ProductEntity productEntity = productEntityPage.getContent().get(i);
-
-            productResponseDTO.setBrand(getProductBrandResponse(productEntity));
-            productResponseDTO.setCategory(getProductCategoryResponses(productEntity));
-            productResponseDTO.setSkinTypes(getSkinTypeResponses(productEntity));
-
-        }
-
-
-//        if (!list.hasContent()) {
-//            return null;
-//        }
-
+        // Đóng gói kết quả vào map
         map.put("products", list.getContent());
         map.put("currentPage", list.getNumber() + 1);
         map.put("totalItems", list.getTotalElements());
         map.put("totalPages", list.getTotalPages());
         map.put("pageSize", list.getSize());
+
         return map;
     }
+
+
+
 
     @Override
     public Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
@@ -671,12 +655,11 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return productResponseDTO;
     }
 
+
     //Tìm chi tiết Product bằng Slug
-
-    public List<Map<String, Object>>  getProductBySlug(String slug) {
+    public List<Map<String, Object>> getProductBySlug(String slug) {
         List<Map<String, Object>> data = new ArrayList<>();
-        Map<String, Object>  map = new HashMap<>();
-
+        Map<String, Object> map = new HashMap<>();
 
         // Lấy sản phẩm theo slug
         ProductEntity productEntity = productRepository.findBySlug(slug);
@@ -710,7 +693,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return data;
     }
 
-
     //Hàm Map thủ công 1 ProductResponse
     private List<ProductResponseDTO> mapProductResponsesDTO(List<ProductEntity> productEntity) {
 
@@ -726,7 +708,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                             productBrandResponse.setTitle(product.getBrand().getTitle());
                             productResponseDTO1.setBrand(productBrandResponse);
                         }
-
 
                         //Lấy loại da của Product
                         if (product.getSkinTypes() != null) {
@@ -809,14 +790,14 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             productEntity.getCategory().forEach(category -> {
                 ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
 
-                if(category.getParent() != null) {
+                if (category.getParent() != null) {
                     category.getParent().getProducts().forEach(product -> {
-                        if(Objects.equals(product.getId(), productEntity.getId())) {
+                        if (Objects.equals(product.getId(), productEntity.getId())) {
                             productCategoryResponse.setTitle(category.getTitle());
                             productCategoryResponse.setId(category.getId());
                             categoryResponses.add(productCategoryResponse);
                         }
-                    }) ;
+                    });
                 }
             });
             productResponseDTO.setCategory(categoryResponses);
@@ -841,7 +822,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         productResponseDTO.setPosition(null);
         return productResponseDTO;
     }
-
 
 
 }
