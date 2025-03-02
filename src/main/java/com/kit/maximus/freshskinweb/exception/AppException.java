@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.exception;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -11,7 +12,6 @@ public class AppException extends RuntimeException{
         super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
-
 
 
 }

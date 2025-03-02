@@ -1,16 +1,24 @@
 package com.kit.maximus.freshskinweb.entity;
 
 import com.fasterxml.jackson.annotation.*;
+import com.kit.maximus.freshskinweb.utils.RoleEnum;
 import com.kit.maximus.freshskinweb.utils.TypeUser;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Setter
 @Getter
@@ -22,7 +30,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "reviews", "orders"})
-public class UserEntity extends AbstractEntity {
+public class UserEntity extends AbstractEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "UserID", insertable = false, updatable = false)
@@ -71,6 +79,8 @@ public class UserEntity extends AbstractEntity {
     @JoinColumn(name = "role_id")
     RoleEntity role;
 
+//    RoleEnum roleEnum;
+
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "user")
     List<ReviewEntity> reviews = new ArrayList<>();
@@ -83,6 +93,42 @@ public class UserEntity extends AbstractEntity {
     public void removeOrder(OrderEntity order) {
         orders.remove(order);
         order.setUser(null);
+    }
+
+    @Override
+    public List<GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(this.role.toString()));
+        return authorities;
+    }
+
+//    @Override
+//    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@class")
+//    @JsonSubTypes({@Type(value = SimpleGrantedAuthority.class, name = "SimpleGrantedAuthority")})
+//    public Collection<? extends GrantedAuthority> getAuthorities() {
+//        Collection<GrantedAuthority> authorities = new ArrayList<>();
+//        authorities.add(new SimpleGrantedAuthority(this.role.toString()));
+//        return authorities;
+//    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return UserDetails.super.isAccountNonLocked();
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return UserDetails.super.isEnabled();
     }
 
 
