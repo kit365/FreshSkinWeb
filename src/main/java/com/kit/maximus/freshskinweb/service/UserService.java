@@ -5,6 +5,7 @@ import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
+import com.kit.maximus.freshskinweb.entity.RoleEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -13,6 +14,7 @@ import com.kit.maximus.freshskinweb.mapper.UserMapper;
 import com.kit.maximus.freshskinweb.repository.OrderRepository;
 import com.kit.maximus.freshskinweb.repository.RoleRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
+import com.kit.maximus.freshskinweb.utils.RoleEnum;
 import com.kit.maximus.freshskinweb.utils.Status;
 
 import jakarta.transaction.Transactional;
@@ -59,6 +61,7 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
         UserEntity userEntity = userMapper.toUserEntity(request);
+        userEntity.setRole(roleRepository.findById(6L).orElse(null));
         userEntity.setRole(roleRepository.findById(request.getRoleId()).orElse(null));
         encodePassword(userEntity);
         userRepository.save(userEntity);

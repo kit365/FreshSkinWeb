@@ -7,6 +7,7 @@ import com.kit.maximus.freshskinweb.dto.request.authentication.IntrospectRequest
 import com.kit.maximus.freshskinweb.dto.response.AuthenticationResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.IntrospectResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
+import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import lombok.AccessLevel;
@@ -42,6 +43,16 @@ public class AuthenticationController {
         IntrospectResponse result = authenticationService.introspect(request);
 
         return ResponseAPI.<IntrospectResponse>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+
+    }
+
+    @PostMapping("/getUser")
+    public ResponseAPI<UserResponseDTO> getUser(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
+        String message = "Lấy dữ liệu user thành công";
+        UserResponseDTO result = authenticationService.getUserByToken(request.getToken());
+
+
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
 
     }
 
