@@ -31,7 +31,6 @@ public class UserEntity extends AbstractEntity {
     @Column(name = "Username", updatable = false, unique = true, nullable = false)
     String username;
 
-
     @Column(name = "Password", nullable = false)
     String password;
 
@@ -74,6 +73,10 @@ public class UserEntity extends AbstractEntity {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "user")
     List<ReviewEntity> reviews = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "userEntity")
+    @JsonManagedReference
+    List<SkinTestEntity> skinTests = new ArrayList<>();
 
     public void createOrder(OrderEntity order) {
             orders.add(order);

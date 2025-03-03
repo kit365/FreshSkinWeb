@@ -54,22 +54,7 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
 
     @Override
     public String update(List<Long> id, String status) {
-        Status statusEnum = getStatus(status);
-        List<RoleEntity> roleEntities = roleRepository.findAllById(id);
-        if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
-            roleEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
-            roleRepository.saveAll(roleEntities);
-            return "Cập nhật trạng thái ROLE thành công";
-        } else if (statusEnum == Status.SOFT_DELETED) {
-            roleEntities.forEach(productEntity -> productEntity.setDeleted(true));
-            roleRepository.saveAll(roleEntities);
-            return "Xóa mềm ROLE thành công";
-        } else if (statusEnum == Status.RESTORED) {
-            roleEntities.forEach(productEntity -> productEntity.setDeleted(false));
-            roleRepository.saveAll(roleEntities);
-            return "Phục hồi ROLE thành công";
-        }
-        return "Cập nhật ROLE thất bại";
+        return "";
     }
 
     private Status getStatus(String status) {
@@ -100,21 +85,7 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
     }
 
     @Override
-    public boolean deleteTemporarily(Long id) {
-        RoleEntity roleEntity = getRoleEntityById(id);
-        if (roleEntity == null) {
-            log.info("Role id not exist");
-            return false;
-        }
-
-        log.info("Delete role id:{}", id);
-        roleEntity.setDeleted(true);
-        roleEntity.setStatus(Status.INACTIVE);
-        roleRepository.save(roleEntity);
-        return true;
-    }
-
-
+    public boolean deleteTemporarily(Long id) {return true;}
 
     @Override
     public boolean restore(Long id) {

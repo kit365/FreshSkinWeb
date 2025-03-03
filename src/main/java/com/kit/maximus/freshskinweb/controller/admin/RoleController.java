@@ -20,7 +20,7 @@ import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @Slf4j
-@RequestMapping("admin/role")
+@RequestMapping("admin/roles")
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -34,7 +34,6 @@ public class RoleController {
         var res = roleService.add(requestDTO);
         return ResponseAPI.<RoleResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
-
 
     @PatchMapping("edit/{id}")
     public ResponseAPI<RoleResponseDTO> updateRole(@PathVariable("id") Long id, @Valid @RequestBody UpdateRoleRequest roleRequestDTO){
@@ -55,34 +54,10 @@ public class RoleController {
         return ResponseAPI.<List<RoleResponseDTO>>builder().data(result).build();
     }
 
-    @PatchMapping("change-multi")
-    public ResponseAPI<String> updateRole(@RequestBody Map<String, Object> request) {
-
-        if (!request.containsKey("id")) {
-            log.warn("Request does not contain 'id' key");
-            //sua lai thong bao loi
-            throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
-        }
-
-        List<Long> ids = (List<Long>) request.get("id");
-        String status = request.get("status").toString();
-
-        var result = roleService.update(ids, status);
-        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
-    }
-
     @DeleteMapping("delete/{id}")
     public ResponseAPI<RoleResponseDTO> deleteRole(@PathVariable("id") Long id){
         String message = "Delete role successfully";
         roleService.delete(id);
-        log.info(message);
-        return ResponseAPI.<RoleResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
-    }
-
-    @PatchMapping("deleteT/{id}")
-    public ResponseAPI<RoleResponseDTO> deleteRoleT(@PathVariable("id") Long id){
-        String message = "Delete user successfully";
-        roleService.deleteTemporarily(id);
         log.info(message);
         return ResponseAPI.<RoleResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }

@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kit.maximus.freshskinweb.entity.AbstractEntity;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;

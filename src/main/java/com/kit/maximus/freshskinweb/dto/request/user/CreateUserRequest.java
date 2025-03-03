@@ -43,6 +43,7 @@
 
 package com.kit.maximus.freshskinweb.dto.request.user;
 
+import com.kit.maximus.freshskinweb.entity.SkinTestEntity;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -55,6 +56,7 @@ import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
@@ -94,8 +96,6 @@ public class CreateUserRequest implements Serializable {
     @NotBlank(message = "AVATAR_NOT_BLANK")
     String avatar;
 
-
-
     @NotBlank(message = "ADDRESS_NOT_BLANK")
     @Size(min = 5, max = 255, message = "ADDRESS_INVALID")
     String address;
@@ -107,6 +107,7 @@ public class CreateUserRequest implements Serializable {
     @NotBlank(message = "TYPE_USER_NOT_BLANK")
     @Pattern(regexp = "NORMAL|VIP", message = "TYPE_USER_INVALID")
     String typeUser;
+
 }
 
 

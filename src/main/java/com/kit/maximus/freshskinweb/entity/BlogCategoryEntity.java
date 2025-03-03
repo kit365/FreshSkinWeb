@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -41,7 +42,7 @@ public class BlogCategoryEntity extends AbstractEntity {
     @Column(name = "Slug")
     String slug;
 
-    @JsonIgnore
+    @JsonManagedReference
     @OneToMany( cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, fetch = FetchType.LAZY, mappedBy = "blogCategory", orphanRemoval = false)
     List<BlogEntity> blog = new ArrayList<>();
 

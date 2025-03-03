@@ -3,10 +3,12 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.skin_questions.CreateSkinQuestionsRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_questions.UpdateSkinQuestionsRequest;
 import com.kit.maximus.freshskinweb.dto.response.SkinQuestionsResponse;
+import com.kit.maximus.freshskinweb.entity.SkinAnswerEntity;
 import com.kit.maximus.freshskinweb.entity.SkinQuestionsEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.SkinQuestionsMapper;
+import com.kit.maximus.freshskinweb.repository.SkinAnswerRepository;
 import com.kit.maximus.freshskinweb.repository.SkinQuestionsRepository;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
@@ -15,8 +17,11 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -26,23 +31,65 @@ public class SkinQuestionService implements BaseService<SkinQuestionsResponse, C
 
     SkinQuestionsRepository repository;
     SkinQuestionsMapper mapper;
+    SkinAnswerRepository answerRepository;
 
     @Override
     public boolean add(CreateSkinQuestionsRequest request) {
         SkinQuestionsEntity entity = mapper.toSkinQuestionsEntity(request);
+        request.getSkinAnswers().forEach(entity :: addSkinAnswerEntity);
         repository.save(entity);
         return true;
+    }
+
+    public SkinAnswerEntity getAnswer(Long id){
+        return answerRepository.findById(id).orElse(null);
     }
 
     @Override
     public SkinQuestionsResponse update(Long aLong, UpdateSkinQuestionsRequest request) {
         SkinQuestionsEntity entity = getSkinQuestions(aLong);
-        System.out.println(entity);
+
+        if(!request.getSkinAnswers().isEmpty()){
+            //Chuyển đổi answer thành MAP
+            Map<String, SkinAnswerEntity> requestList = listAnswerstoMap(request.getSkinAnswers());
+            Map<String, SkinAnswerEntity> currentList = listAnswerstoMap(entity.getSkinAnswers());
+
+            //Xét nếu answer có trong request, mà entity ko có => add mới
+            // Nếu entity có => ghi đè lại thằng cũ
+            for (SkinAnswerEntity answerEntityList : requestList.values()) {
+                if(request.getSkinAnswers().contains(answerEntityList.getSkinOption())){
+                    SkinAnswerEntity answerEntity = currentList.get(answerEntityList.getSkinOption());
+                    answerEntityList.setSkinOption(answerEntityList.getSkinOption());
+                } else {
+                    entity.addSkinAnswerEntity(answerEntityList);
+                }
+            }
+
+            // Xét nếu entity ko có trong request, xóa luôn
+            for (SkinAnswerEntity answerEntityList : currentList.values()) {
+                if(!request.getSkinAnswers().contains(answerEntityList.getSkinOption())){
+                    entity.removeSkinAnswerEntity(answerEntityList);
+                }
+            }
+        }
+
+        // Vì phải set thủ công thằng con => đặt ở cuối
         mapper.updateSkinQuestionsEntity(entity, request);
         return mapper.toSkinQuestionsResponse(repository.save(entity));
     }
 
-    public Status getStatus (String status){
+    public Map<String, SkinAnswerEntity> listAnswerstoMap(List<SkinAnswerEntity> skinAnswerEntityList){
+        Map<String, SkinAnswerEntity> map = new HashMap<>();
+        if(skinAnswerEntityList != null && !skinAnswerEntityList.isEmpty()){
+            for (SkinAnswerEntity skinAnswerEntity : skinAnswerEntityList) {
+                map.put(skinAnswerEntity.getSkinOption(), skinAnswerEntity);
+            }
+            return map;
+        }
+        return null;
+    }
+
+    public Status getStatus(String status){
         try {
             return Status.valueOf(status.toUpperCase());
         }catch (IllegalStateException e){
@@ -76,6 +123,7 @@ public class SkinQuestionService implements BaseService<SkinQuestionsResponse, C
 
     @Override
     public boolean delete(Long aLong) {
+        repository.findById(aLong).orElseThrow(()-> new AppException(ErrorCode.SKIN_QUESTIONS_NOT_FOUND));
         repository.deleteById(aLong);
         return true;
     }
@@ -110,6 +158,32 @@ public class SkinQuestionService implements BaseService<SkinQuestionsResponse, C
     @Override
     public Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         return Map.of();
+    }
+
+    //Khi chọn được bộ đề, cần sắp xếp theo thứ tự câu để trả về
+    public List<SkinQuestionsResponse> showbyQuestionGroup(String questionGroup){
+        if(questionGroup == null || questionGroup.isEmpty()){
+            throw new AppException(ErrorCode.QUESTION_GROUP_NOT_EXISTED);
+        }
+        List<SkinQuestionsEntity> entities = repository.findByQuestionGroup(questionGroup);
+
+        // Debug log để kiểm tra dữ liệu trước khi xử lý
+        entities.forEach(q -> System.out.println("Before Mapping: " + q.getQuestionNumber()));
+
+        // Dùng Stream API để trả về theo thứ tự câu ( questionNumber phải là kiểu Interger )
+        List<SkinQuestionsResponse> sortedList = entities.stream()
+                .map(mapper::toSkinQuestionsResponse)
+                .sorted(Comparator.comparing(SkinQuestionsResponse::getQuestionNumber))
+                .toList();
+
+        // Debug log để kiểm tra dữ liệu sau khi sắp xếp
+        sortedList.forEach(q -> System.out.println("After Sorting: " + q.getQuestionNumber()));
+
+        return sortedList;
+    }
+
+    public List<SkinQuestionsResponse> showAll(){
+        return repository.findAll().stream().map(mapper::toSkinQuestionsResponse).collect(Collectors.toList());
     }
 
     public SkinQuestionsEntity getSkinQuestions(Long aLong) {

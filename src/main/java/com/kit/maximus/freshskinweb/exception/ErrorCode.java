@@ -86,16 +86,19 @@ public enum ErrorCode {
     //ORDER ITEMS
     ORDER_ITEM_NOT_FOUND(404, "Không tìm thấy đơn hàng"),
 
-    //SKIN_TYPE
+    //SKIN TYPE
     SKIN_TYPE_NOT_FOUND(404, "Không tìm thấy loại da"),
 
+    //SKIN TEST
+    SKIN_TEST_NOT_FOUND(404, "Không tìm thấy bài đánh giá loại da nào"),
     //REVIEW
     RATING_INVALID(400, "Giá trị phải từ 1 đến 5"),
     REVIEW_NOT_FOUND(404, "Không tìm thấy đánh giá"),
 
 
     //SKIN QUESTIONS
-    SKIN_QUESTIONS_NOT_FOUND(404, "Không tìm thấy bộ đề")
+    SKIN_QUESTIONS_NOT_FOUND(404, "Không tìm thấy câu hỏi"),
+    QUESTION_GROUP_NOT_EXISTED(404, "Không tìm thấy nhóm câu hỏi nào")
     ;
 
 
