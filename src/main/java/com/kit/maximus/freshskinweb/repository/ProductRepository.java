@@ -4,19 +4,20 @@ package com.kit.maximus.freshskinweb.repository;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
+import com.kit.maximus.freshskinweb.specification.ProductSpecification;
 import com.kit.maximus.freshskinweb.utils.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
-public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
+public interface ProductRepository extends JpaRepository<ProductEntity, Long>, JpaSpecificationExecutor<ProductEntity> {
 
     List<ProductEntity> findAllByIdInAndStatus(List<Long> id, Status status);
 

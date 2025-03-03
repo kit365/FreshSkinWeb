@@ -89,10 +89,10 @@ public class ProductAdminController {
 
     @GetMapping()
     public ResponseAPI<Map<String, Object>> getAllProduct(@RequestParam(defaultValue = "1") int page,
-                                                          @RequestParam(defaultValue = "4") int size,
+                                                          @RequestParam(defaultValue = "8") int size,
                                                           @RequestParam(defaultValue = "position") String sortKey,
                                                           @RequestParam(defaultValue = "desc") String sortValue,
-                                                          @RequestParam(defaultValue = "ALL") String status,
+                                                          @RequestParam(name = "status", required = false) String status,
                                                           @RequestParam(name = "keyword", required = false) String keyword) {
         String message = "Tim thay List Product";
         log.info("GET ALL PRODUCTS");

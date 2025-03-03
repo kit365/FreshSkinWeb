@@ -78,7 +78,20 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
     }
 
     public List<ProductBrandResponse> getAll() {
-        return productBrandMapper.toProductBrandsResponseDTO(productBrandRepository.findAll());
+        List<ProductBrandResponse> list =  productBrandMapper.toProductBrandsResponseDTO(productBrandRepository.findAll());
+
+        list.forEach(productBrandResponse -> {
+            productBrandResponse.setStatus(null);
+            productBrandResponse.setCreatedAt(null);
+            productBrandResponse.setUpdatedAt(null);
+            productBrandResponse.setDescription(null);
+            productBrandResponse.setImage(null);
+            productBrandResponse.setImage(null);
+            productBrandResponse.setPosition(null);
+            productBrandResponse.setFeatured(null);
+        });
+
+        return list;
     }
 
     @Override

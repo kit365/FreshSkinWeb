@@ -10,6 +10,7 @@ import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
+import com.kit.maximus.freshskinweb.mapper.UserMapper;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -21,7 +22,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,13 +40,27 @@ import java.util.Date;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class AuthenticationService {
+public class AuthenticationService implements UserDetailsService {
     UserRepository userRepository;
+
+    UserMapper userMapper;
 
     @NonFinal
     @Value("${jwt.signerKey}")
     String SIGNER_KEY;
 
+    public UserResponseDTO getUserByToken(String token) throws ParseException, JOSEException {
+        JWSVerifier jwsVerifier = new MACVerifier(SIGNER_KEY.getBytes());
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
+        var verify = signedJWT.verify(jwsVerifier);
+        if(verify && expirationDate.after(new Date())) {
+            String username = signedJWT.getJWTClaimsSet().getSubject();
+            UserEntity user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+            return userMapper.toUserResponseDTO(user);
+        }
+        return null;
+    }
 
     public IntrospectResponse introspect(IntrospectRequest introspectRequest) throws JOSEException, ParseException {
         var token = introspectRequest.getToken();
@@ -65,7 +84,7 @@ public class AuthenticationService {
         }
         var token = generateToken(authenticationRequest.getUsername());
         return AuthenticationResponseDTO.builder()
-                .token(token).authenticated(true).build();
+                .token(token).authenticated(authenticated).build();
 
     }
     private String generateToken(String username) {
@@ -90,5 +109,10 @@ public class AuthenticationService {
             throw new RuntimeException(e);
         }
 
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return null;
     }
 }
