@@ -102,7 +102,7 @@ public class ProductAdminController {
 
 
     @PatchMapping("change-multi")
-    public ResponseAPI<String> updataProduct(@RequestBody Map<String, Object> productRequestDTO) {
+    public ResponseAPI<String> updateProduct(@RequestBody Map<String, Object> productRequestDTO) {
 
         if (!productRequestDTO.containsKey("id")) {
             log.warn("Request does not contain 'id' key");

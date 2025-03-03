@@ -46,4 +46,6 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
 
     List<ProductCategoryEntity> findAllByParentId(Long id);
     Page<ProductCategoryEntity> findAllByParentId(Long id, Pageable pageable);
+
+    ProductCategoryEntity findBySlug(String slug);
 }

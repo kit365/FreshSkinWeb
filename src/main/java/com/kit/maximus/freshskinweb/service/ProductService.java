@@ -20,10 +20,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -400,7 +397,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
-        System.out.println(status);
         Map<String, Object> map = new HashMap<>();
 
         // Khởi tạo Specification với điều kiện mặc định là không phải đã xóa
@@ -408,19 +404,22 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         // Lọc theo keyword
         if (keyword != null && !keyword.trim().isEmpty()) {
-            specification = specification.and(filterByKeyword(keyword));  // Gán lại specification
+            specification = specification.and(filterByKeyword(keyword));
         }
 
         // Lọc theo status
         if (status != null && !status.trim().isEmpty()) {
-            specification = specification.and(filterByStatus(getStatus(status)));  // Gán lại specification
+            specification = specification.and(filterByStatus(getStatus(status)));
         }
 
         // Lọc theo sortKey (price hoặc position)
         if (sortKey.equalsIgnoreCase("position")) {
-            specification = specification.and(sortByPosition(getSortDirection(sortDirection)));  // Gán lại specification
-        } else if (sortKey.equalsIgnoreCase("price")) {
-            specification = specification.and(sortByPrice(getSortDirection(sortDirection)));  // Gán lại specification
+            specification = specification.and(sortByPosition(getSortDirection(sortDirection)));
+        }
+        else if (sortKey.equalsIgnoreCase("price")) {
+            specification = specification.and(sortByPrice(getSortDirection(sortDirection)));
+        } else if (sortKey.equalsIgnoreCase("title")) {
+            specification = specification.and(sortByTitle(getSortDirection(sortDirection)));
         }
 
         // Tính toán số trang
@@ -450,60 +449,43 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     public Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         Map<String, Object> map = new HashMap<>();
 
-        Sort.Direction direction = getSortDirection(sortDirection);
-        Sort sort = Sort.by(direction, sortKey);
-        int p = (page > 0) ? page - 1 : 0;
-        Pageable pageable = PageRequest.of(p, size, sort);
+        // Khởi tạo Specification với điều kiện mặc định là không phải đã xóa
+        Specification<ProductEntity> specification = Specification.where(isDeleted());
 
-        Page<ProductEntity> productEntityPage;
-
-        // Tìm kiếm theo keyword trước
+        // Lọc theo keyword
         if (keyword != null && !keyword.trim().isEmpty()) {
-            if (status.equalsIgnoreCase("ALL")) {
-                // Tìm kiếm theo tên sản phẩm, không lọc theo status
-                productEntityPage = productRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, true, pageable);
-            } else {
-                // Tìm kiếm theo tên sản phẩm và status
-                Status statusEnum = getStatus(status);
-                productEntityPage = productRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, true);
-            }
-        } else {
-            // Nếu không có keyword, chỉ lọc theo status
-            if (status == null || status.equalsIgnoreCase("ALL")) {
-                productEntityPage = productRepository.findAllByDeleted(true, pageable);
-            } else {
-                Status statusEnum = getStatus(status);
-                productEntityPage = productRepository.findAllByStatusAndDeleted(statusEnum, true, pageable);
-            }
+            specification = specification.and(filterByKeyword(keyword));
         }
 
+        // Lọc theo status
+        if (status != null && !status.trim().isEmpty()) {
+            specification = specification.and(filterByStatus(getStatus(status)));
+        }
+
+        // Lọc theo sortKey (price hoặc position)
+        if (sortKey.equalsIgnoreCase("position")) {
+            specification = specification.and(sortByPosition(getSortDirection(sortDirection)));
+        } else if (sortKey.equalsIgnoreCase("price")) {
+            specification = specification.and(sortByPrice(getSortDirection(sortDirection)));
+        }
+
+        // Tính toán số trang
+        int p = (page > 0) ? page - 1 : 0;
+        Pageable pageable = PageRequest.of(p, size);
+
+        // Thực hiện truy vấn với Specification và Pageable
+        Page<ProductEntity> productEntityPage = productRepository.findAll(specification, pageable);
+
+        // Map kết quả trả về thành DTO
         Page<ProductResponseDTO> list = productEntityPage.map(productMapper::productToProductResponseDTO);
 
-
-//        list.forEach(productResponseDTO -> {
-//
-//            productEntityPage.forEach(productEntity -> {
-//                ProductBrandResponse productBrandResponse = new ProductBrandResponse();
-//                productBrandResponse.setTitle(productEntity.getBrand().getTitle());
-//                productResponseDTO.setBrand(productBrandResponse);
-//                List<ProductCategoryResponse> categoryResponses = new ArrayList<>();
-//                productEntity.getCategory().forEach(productCategory -> {
-//                    ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
-//                    productCategoryResponse.setTitle(productCategory.getTitle());
-//                    categoryResponses.add(productCategoryResponse);
-//                });
-//                productResponseDTO.setCategory(categoryResponses);
-//            });
-//
-//
-//        });
-
-
+        // Đóng gói kết quả vào map
         map.put("products", list.getContent());
         map.put("currentPage", list.getNumber() + 1);
         map.put("totalItems", list.getTotalElements());
         map.put("totalPages", list.getTotalPages());
         map.put("pageSize", list.getSize());
+
         return map;
     }
 
@@ -663,6 +645,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         // Lấy sản phẩm theo slug
         ProductEntity productEntity = productRepository.findBySlug(slug);
+
+
         ProductResponseDTO response = mapProductResponseDTO(productEntity);
 
         // Nhét sản phẩm chính vào map (bọc vào List)
@@ -692,6 +676,55 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         data.add(map);
         return data;
     }
+
+    public Map<String, Object> getBodyCare(int size, int page, String sortValue, String slug) {
+        Specification<ProductEntity> specification = findByParentCategorySlug(slug)
+                .and(isNotDeleted())
+                .and(filterByStatus(Status.ACTIVE));
+
+
+        //tìm id danh mục cha để xóa phần tử thừa
+        ProductCategoryEntity parentCategory = productCategoryRepository.findBySlug(slug);
+
+
+        int p = (page > 0) ? page - 1 : 0;
+        Pageable pageable = PageRequest.of(p, size);
+        Page<ProductEntity> productEntityPage = productRepository.findAll(specification, pageable);
+
+        Map<String, Object> map = new HashMap<>();
+
+        Map<Long, ProductCategoryResponse> productCategoryResponseMap = new HashMap<>();
+
+        productEntityPage.forEach(productEntity -> {
+
+            if(productEntity.getCategory() != null) {}
+                if(parentCategory != null) {
+                  ;
+
+
+
+                }
+
+
+
+
+        });
+
+
+
+        List<ProductCategoryResponse> categoryResponses = new ArrayList<>(productCategoryResponseMap.values());
+
+
+
+        List<ProductResponseDTO> productResponseDTOs = mapProductResponsesDTO(productEntityPage.getContent());
+
+        map.put("products", productResponseDTOs);
+        map.put("category", categoryResponses);
+
+        // Trả về kết quả
+        return map;
+    }
+
 
     //Hàm Map thủ công 1 ProductResponse
     private List<ProductResponseDTO> mapProductResponsesDTO(List<ProductEntity> productEntity) {
