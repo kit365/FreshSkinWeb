@@ -90,12 +90,15 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     }
 
     public List<ProductCategoryResponse> getAll() {
-        // Lấy title, parent, child, id
+            List<ProductCategoryEntity> list = productCategoryRepository.findAllByParentIsNull();
+            return productCategoryMapper.toProductCateroiesResponseDTO(list);
+    }
 
+
+    public List<ProductCategoryResponse> getAlls() {
+        // Lấy title, parent, child, id
         List<ProductCategoryEntity> list = productCategoryRepository.findAll();
         List<ProductCategoryResponse> responses = mapToCategoryResponse(list);
-
-
         responses.forEach(response -> {
             response.setSlug(getSlug(response.getTitle()));
             response.setDescription(null);
@@ -103,10 +106,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
             response.setImage(null);
             response.setProducts(null);
             response.setChild(null);
-
         });
-
-
         return responses;
     }
 
