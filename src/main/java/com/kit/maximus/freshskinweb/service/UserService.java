@@ -1,11 +1,13 @@
 package com.kit.maximus.freshskinweb.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
-import com.kit.maximus.freshskinweb.entity.RoleEntity;
+import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -14,7 +16,6 @@ import com.kit.maximus.freshskinweb.mapper.UserMapper;
 import com.kit.maximus.freshskinweb.repository.OrderRepository;
 import com.kit.maximus.freshskinweb.repository.RoleRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
-import com.kit.maximus.freshskinweb.utils.RoleEnum;
 import com.kit.maximus.freshskinweb.utils.Status;
 
 import jakarta.transaction.Transactional;
@@ -30,7 +31,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.text.Normalizer;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,6 +57,8 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
 
     RoleRepository roleRepository;
 
+    Cloudinary cloudinary;
+
 
     @Override
     public boolean add(CreateUserRequest request) {
@@ -64,6 +72,19 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         userEntity.setRole(roleRepository.findById(6L).orElse(null));
         userEntity.setRole(roleRepository.findById(request.getRoleId()).orElse(null));
         encodePassword(userEntity);
+
+        if (request.getAvatar() != null) {
+            try {
+                MultipartFile file = request.getAvatar();
+                String slg = getSlug(request.getLastName() + " " + request.getFirstName());
+
+                String img = uploadImageFromFile(file, slg);
+                userEntity.setAvatar(img);
+            } catch (IOException e) {
+                log.error("Upload avatar error", e);
+            }
+        }
+
         userRepository.save(userEntity);
         return true;
     }
@@ -76,6 +97,15 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
 
+        //Xóa ảnh từ cloud khi xóa user
+        if(userEntity.getAvatar() != null) {
+            try {
+                deleteImageFromCloudinary(userEntity.getAvatar());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         log.info("Delete user id:{}", userId);
         userRepository.delete(userEntity);
         return true;
@@ -86,6 +116,19 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
     @Override
     public boolean delete(List<Long> id) {
         userRepository.deleteAllById(id);
+        List<UserEntity> userEntities = userRepository.findAllById(id);
+
+
+        userEntities.forEach(UserEntity -> {
+                    if (UserEntity.getAvatar() != null) {
+                        try {
+                            deleteImageFromCloudinary(UserEntity.getAvatar());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+
         return true;
     }
 
@@ -193,6 +236,27 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         // Cập nhật Role
         userEntity.setRole(roleRepository.findById(userRequestDTO.getRoleId()).orElse(null));
         log.info("Cập nhật user id: {}", id);
+
+//        //Cập nhật Avatar
+//        if (userRequestDTO.getAvatar() != null) {
+//            try {
+//                // Xóa ảnh cũ trên Cloudinary nếu tồn tại
+//                if (userEntity.getAvatar() != null) {
+//                    deleteImageFromCloudinary(userEntity.getAvatar());
+//                }
+//
+//                // Upload ảnh mới
+//                MultipartFile file = (MultipartFile) userRequestDTO.getAvatar();
+//                String url = uploadImageFromFile(file, getSlug(userRequestDTO.getLastName() + " " + userRequestDTO.getFirstName()));
+//
+//                // Lưu URL của ảnh mới vào database
+//                userEntity.setAvatar(url);
+//            } catch (IOException e) {
+//                log.error("Upload thumbnail error", e);
+//                throw new RuntimeException(e);
+//            }
+//        }
+//
         return userMapper.toUserResponseDTO(userRepository.save(userEntity));
     }
 
@@ -308,6 +372,60 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         }
 
         return false; // Không tìm thấy đơn hàng để xóa
+    }
+
+    private String getSlug(String slug) {
+        return Normalizer.normalize(slug, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .replaceAll("[^a-zA-Z0-9\\s]", "")
+                .trim()
+                .replaceAll("\\s+", "-")
+                .toLowerCase();
+    }
+
+    //Xóa ảnh từ Cloud
+    private void deleteImageFromCloudinary(String imageUrl) throws IOException {
+        if (imageUrl != null) {
+            Map options = ObjectUtils.asMap("invalidate", true);
+            String publicId = extractPublicId(imageUrl);
+            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+        }
+    }
+
+    //Tách publicId từ URL của ảnh trên Cloudinary (dùng khi cần xóa ảnh).
+    private String extractPublicId(String imageUrl) {
+        String temp = imageUrl.substring(imageUrl.indexOf("upload/") + 7);
+        return temp.substring(temp.indexOf("/") + 1, temp.lastIndexOf("."));
+    }
+
+
+    //Lấy tên file
+    private String getNameFile(String slug, int count) {
+        String fileName;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+        String timestamp = LocalDateTime.now().format(formatter);
+        if (count <= 0) {
+            return slug + "_" + timestamp;
+        }
+        return slug + "_" + timestamp + "_" + (count + 1);
+
+    }
+
+    //Up ảnh lên cloud
+    private String uploadImageFromFile(MultipartFile file, String username) throws IOException {
+
+        String fileName = getNameFile(username, 0);
+
+        Map params = ObjectUtils.asMap(
+                "use_filename", true,
+                "unique_filename", false,
+                "overwrite", true, //Cho phép ghi đè ảnh cũ
+                "folder", "avatars",
+                "public_id", fileName
+        );
+
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
+        return uploadResult.get("secure_url").toString(); // Trả về URL của ảnh
     }
 
 

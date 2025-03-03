@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 
@@ -24,7 +25,7 @@ public class UpdateUserRequest implements Serializable {
     String lastName;
     String email;
     String phone;
-    String avatar;
+    MultipartFile avatar;
     String token;
     String address;
     String status;   // ACTIVE / INACTIVE

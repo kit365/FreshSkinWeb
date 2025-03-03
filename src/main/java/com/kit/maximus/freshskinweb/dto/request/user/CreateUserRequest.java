@@ -54,6 +54,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 import java.util.List;
@@ -94,7 +95,7 @@ public class CreateUserRequest implements Serializable {
 
     @NotNull(message = "AVATAR_NOT_NULL")
     @NotBlank(message = "AVATAR_NOT_BLANK")
-    String avatar;
+    MultipartFile avatar;
 
     @NotBlank(message = "ADDRESS_NOT_BLANK")
     @Size(min = 5, max = 255, message = "ADDRESS_INVALID")

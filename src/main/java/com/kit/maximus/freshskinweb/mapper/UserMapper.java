@@ -14,6 +14,7 @@ import java.util.List;
 public interface UserMapper {
     
     @Mapping(target = "role", ignore = true)
+    @Mapping(target = "avatar", ignore = true)
     UserEntity toUserEntity(CreateUserRequest userRequestDTO);
 
     @Mapping(target = "orders", source = "orders")
@@ -29,6 +30,7 @@ public interface UserMapper {
 
     @Mapping(target = "username", ignore = true)
     @Mapping(target = "password", ignore = true)
+    @Mapping(target = "avatar", ignore = true)
     void updateUser(@MappingTarget UserEntity user,  UpdateUserRequest userDTO);
 
 
