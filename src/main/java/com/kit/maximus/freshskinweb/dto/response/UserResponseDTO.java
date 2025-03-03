@@ -22,7 +22,7 @@ import java.util.List;
 public class UserResponseDTO implements Serializable {
 
     Long id;
-    RoleResponseDTO roleId;
+    RoleResponseDTO role;
     String password;
     String username;
     String firstName;

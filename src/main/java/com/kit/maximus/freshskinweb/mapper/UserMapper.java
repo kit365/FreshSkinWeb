@@ -20,8 +20,8 @@ public interface UserMapper {
     @Mapping(target = "orders", source = "orders")
     UserResponseDTO toUserResponseDTO(UserEntity userEntity);
 
-    UserEntity toUserResponse(UserEntity userEntity);
 
+    @Mapping(target = "role", ignore = true)
     List<UserResponseDTO> toUserResponseDTO(List<UserEntity> userEntities);
 
 //    @Mapping(target = "username", ignore = true)
@@ -31,6 +31,7 @@ public interface UserMapper {
     @Mapping(target = "username", ignore = true)
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "avatar", ignore = true)
+    @Mapping(target = "role", ignore = true)
     void updateUser(@MappingTarget UserEntity user,  UpdateUserRequest userDTO);
 
 

@@ -1,8 +1,11 @@
 package com.kit.maximus.freshskinweb.controller.admin;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
+import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -14,7 +17,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -29,11 +34,38 @@ public class UserAdminController {
 
     UserService userService;
 
-    @PostMapping("create")
-    public ResponseAPI<UserResponseDTO> addUser(@Valid @RequestBody CreateUserRequest requestDTO) {
-        String message = "Create user successfully";
-        var result = userService.add(requestDTO);
-        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
+    @PostMapping(value = "create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseAPI<UserResponseDTO> addUser(
+            @RequestPart("request") String requestJson,  // Nhận JSON dưới dạng String
+            @RequestPart(value = "avatar", required = false) MultipartFile image) { // Nhận hình ảnh
+        log.info("requestJson:{}", requestJson);
+        log.info("images:{}", image);
+        String message_succed = "Tạo user thành công";
+        String message_failed = "Tạo user thất bại";
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            CreateUserRequest createProductRequest = objectMapper.readValue(requestJson, CreateUserRequest.class);
+            createProductRequest.setAvatar(image);
+
+            userService.add(createProductRequest);
+
+            log.info("CREATE USER REQUEST SUCCESS");
+
+            return ResponseAPI.<UserResponseDTO>builder()
+                    .code(HttpStatus.OK.value())
+                    .message(message_succed)
+                    .build();
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            log.error("CREATE USER ERROR: " + e.getMessage());
+
+            return ResponseAPI.<UserResponseDTO>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message(message_failed)
+                    .build();
+        }
     }
 
     @PostMapping("addO/{id}")
@@ -47,6 +79,13 @@ public class UserAdminController {
         String message = "Get all users successfully";
         var result = userService.getAllUsers();
         return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+    }
+
+    @GetMapping("show/{id}")
+    public ResponseAPI<UserResponseDTO> showDetailUser(@PathVariable Long id) {
+        String message = "Get user successfully";
+        var result = userService.showDetail(id);
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
     @GetMapping("search")
@@ -113,6 +152,15 @@ public class UserAdminController {
         }
     }
 
+    @DeleteMapping("deleteAll")
+    public ResponseAPI<UserResponseDTO> deleteUser() {
+        {
+            String message = "Delete all users successfully";
+            userService.deleteAllUsers();
+            log.info(message);
+            return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
+        }
+    }
 
     @PatchMapping("deleteT/{id}")
     public ResponseAPI<UserResponseDTO> deleteUserT(@PathVariable("id") Long id) {

@@ -70,7 +70,7 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         }
         UserEntity userEntity = userMapper.toUserEntity(request);
         userEntity.setRole(roleRepository.findById(6L).orElse(null));
-        userEntity.setRole(roleRepository.findById(request.getRoleId()).orElse(null));
+        userEntity.setRole(roleRepository.findById(request.getRole()).orElse(null));
         encodePassword(userEntity);
 
         if (request.getAvatar() != null) {
@@ -132,6 +132,11 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         return true;
     }
 
+    public boolean deleteAllUsers() {
+        userRepository.deleteAll();
+        return true;
+    }
+
     //Method: Xóa tạm thời => deleted thành true
     @Override
     public boolean deleteTemporarily(Long id) {
@@ -159,7 +164,7 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
 
     @Override
     public UserResponseDTO showDetail(Long aLong) {
-        return null;
+        return userMapper.toUserResponseDTO(userRepository.findById(aLong).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND)));
     }
 
     @Override
@@ -234,7 +239,7 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         }
 
         // Cập nhật Role
-        userEntity.setRole(roleRepository.findById(userRequestDTO.getRoleId()).orElse(null));
+        userEntity.setRole(roleRepository.findById(userRequestDTO.getRole()).orElse(null));
         log.info("Cập nhật user id: {}", id);
 
 //        //Cập nhật Avatar
@@ -326,11 +331,10 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
     }
 
     public UserEntity getUser(String username) {
-        var user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        return userMapper.toUserResponse(user);
+        return userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
-    private UserEntity getUserEntityById(Long id) {
+    public UserEntity getUserEntityById(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
