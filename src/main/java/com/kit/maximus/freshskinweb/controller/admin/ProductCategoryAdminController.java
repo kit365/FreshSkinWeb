@@ -71,6 +71,12 @@ public class ProductCategoryAdminController {
         return ResponseAPI.<List<ProductCategoryResponse>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
+    @GetMapping("shows")
+    public ResponseAPI<List<ProductCategoryResponse>> getAllListProductCategory() {
+        var result = productCategoryService.getAlls();
+        return ResponseAPI.<List<ProductCategoryResponse>>builder().code(HttpStatus.OK.value()).data(result).build();
+    }
+
     @PatchMapping(value = "edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseAPI<ProductCategoryResponse> updateProduct(@PathVariable("id") Long id,
                                                            @RequestPart(value = "request") String requestJson,

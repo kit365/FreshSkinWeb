@@ -7,6 +7,7 @@ import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.criteria.*;
+import jdk.jfr.Category;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,11 +20,11 @@ import java.util.List;
 public class ProductSpecification {
 
     public static Specification<ProductEntity> filterByKeyword(String keyword) {
-        return  (root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("title"), "%" + keyword + "%");
+        return (root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("title"), "%" + keyword + "%");
     }
 
     public static Specification<ProductEntity> filterByStatus(Status status) {
-      return  (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), status);
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), status);
     }
 
     public static Specification<ProductEntity> sortByPrice(Sort.Direction sortDirection) {
@@ -36,8 +37,6 @@ public class ProductSpecification {
 
             // Group by product để tính toán min price cho mỗi sản phẩm
             query.groupBy(root.get("id"));
-
-
 
             query.orderBy(
                     sortDirection == Sort.Direction.ASC ? criteriaBuilder.asc(minPrice) :
@@ -59,12 +58,18 @@ public class ProductSpecification {
     }
 
 
-
-
     public static Specification<ProductEntity> sortByPosition(Sort.Direction sortDirection) {
         return (root, query, criteriaBuilder) -> {
 
             query.orderBy(sortDirection == Sort.Direction.ASC ? criteriaBuilder.asc(root.get("position")) : criteriaBuilder.desc(root.get("position")));
+            return query.getRestriction();
+        };
+    }
+
+    public static Specification<ProductEntity> sortByTitle(Sort.Direction sortDirection) {
+        return (root, query, criteriaBuilder) -> {
+
+            query.orderBy(sortDirection == Sort.Direction.ASC ? criteriaBuilder.asc(root.get("title")) : criteriaBuilder.desc(root.get("title")));
             return query.getRestriction();
         };
     }
@@ -78,16 +83,23 @@ public class ProductSpecification {
     }
 
 
+    public static Specification<ProductEntity> findByParentCategorySlug(String slug) {
+        return (root, query, criteriaBuilder) -> {
+            Join<ProductEntity, ProductCategoryEntity> product_category = root.join("category");
+            return criteriaBuilder.equal(product_category.get("parent").get("slug"), slug);
+        };
+    }
+
 
     public static Specification<ProductEntity> filterByCategory(List<String> categoryNames) {
         if (categoryNames.isEmpty()) {
             return null;
         }
 
-       return (root, query, criteriaBuilder) -> {
-         Join<ProductEntity,ProductCategoryEntity> product_category = root.join("category");
-        return product_category.get("title").in(categoryNames);
-       };
+        return (root, query, criteriaBuilder) -> {
+            Join<ProductEntity, ProductCategoryEntity> product_category = root.join("category");
+            return product_category.get("title").in(categoryNames);
+        };
 
         //SELECT * FROM Product p
         //JOIN Product_Category pc ON p.ProductId = pc.productID
@@ -96,11 +108,11 @@ public class ProductSpecification {
     }
 
     public static Specification<ProductEntity> filterByBrand(List<String> brandNames) {
-        if(brandNames.isEmpty()) {
+        if (brandNames.isEmpty()) {
             return null;
         }
 
-        return((root, query, criteriaBuilder) -> root.get("brand").get("title") .in(brandNames));
+        return ((root, query, criteriaBuilder) -> root.get("brand").get("title").in(brandNames));
 
         //SELECT * FROM Product p
         //WHERE p.brandID IN (
@@ -109,16 +121,16 @@ public class ProductSpecification {
     }
 
     public static Specification<ProductEntity> filterBySkinType(List<String> skinTypeNames) {
-        if(skinTypeNames.isEmpty()) {
+        if (skinTypeNames.isEmpty()) {
             return null;
         }
 
         List<SkinType> skinTypes = new ArrayList<>();
-        for(String skinTypeName : skinTypeNames) {
+        for (String skinTypeName : skinTypeNames) {
             skinTypes.add(SkinType.valueOf(skinTypeName));
         }
 
-        return((root, query, criteriaBuilder) -> {
+        return ((root, query, criteriaBuilder) -> {
             Join<ProductEntity, SkinTypeEntity> product_skinType = root.join("skinTypes");
             return product_skinType.get("type").in(skinTypes);
         });
@@ -139,7 +151,6 @@ public class ProductSpecification {
             return null;
         };
     }
-
 
 
 }

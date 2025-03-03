@@ -1,7 +1,5 @@
 package com.kit.maximus.freshskinweb.controller.home;
 
-import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.service.ProductCategoryService;
 import com.kit.maximus.freshskinweb.service.ProductService;
@@ -40,19 +38,19 @@ public class ProductHomeController {
         }
     }
 
-//    @GetMapping("show/bodycare/{id}")
-//    public ResponseAPI<Map<String, Object>> getProductDetailBodyCare(
-//            @RequestParam(defaultValue = "1") int page,
-//            @RequestParam(defaultValue = "12") int size,
-//            @RequestParam(defaultValue = "desc") String sortValue,
-//            @PathVariable("id") Long id) {
-//
-//        Map<String, Object> data = productService.getBodyCare(size, page, sortValue, id);
-//        return ResponseAPI.<Map<String, Object>>builder()
-//                .code(HttpStatus.OK.value())
-//                .data(data)
-//                .build();
-//    }
+    @GetMapping("show/bodycare/{slug}")
+    public ResponseAPI<Map<String, Object>> getProductDetailBodyCare(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "desc") String sortValue,
+            @PathVariable("slug") String slug) {
+
+        Map<String, Object> data = productService.getBodyCare(size, page, sortValue, slug);
+        return ResponseAPI.<Map<String, Object>>builder()
+                .code(HttpStatus.OK.value())
+                .data(data)
+                .build();
+    }
 
 
 
