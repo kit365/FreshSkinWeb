@@ -7,7 +7,6 @@ import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.criteria.*;
-import jdk.jfr.Category;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -85,8 +84,17 @@ public class ProductSpecification {
 
     public static Specification<ProductEntity> findByParentCategorySlug(String slug) {
         return (root, query, criteriaBuilder) -> {
-            Join<ProductEntity, ProductCategoryEntity> product_category = root.join("category");
-            return criteriaBuilder.equal(product_category.get("parent").get("slug"), slug);
+
+            Join<ProductEntity, ProductCategoryEntity> productCategory = root.join("category", JoinType.INNER);
+
+            Join<ProductCategoryEntity, ProductCategoryEntity> parentCategory = productCategory.join("parent", JoinType.LEFT);
+
+            Join<ProductCategoryEntity, ProductCategoryEntity> grandParentCategory = parentCategory.join("parent", JoinType.LEFT);
+
+            return criteriaBuilder.or(
+                    criteriaBuilder.equal(parentCategory.get("slug"), slug),
+                    criteriaBuilder.equal(grandParentCategory.get("slug"), slug)
+            );
         };
     }
 
@@ -136,15 +144,31 @@ public class ProductSpecification {
         });
     }
 
-//    public static Specification<ProductEntity> filterByPrice(String minPrice, String maxPrice){
-//
-//        if(minPrice.isEmpty() || maxPrice.isEmpty()) {
-//            return null;
-//        }
-//
-//        return((root, query, criteriaBuilder) -> {
-//            return criteriaBuilder.between(root.get("price"), minPrice, maxPrice);
-//        });
+    public static Specification<ProductEntity> filterByPrice(Double minPrice, Double maxPrice) {
+        if (minPrice == null || maxPrice == null || minPrice < 0 || maxPrice < 0 || minPrice > maxPrice) {
+            return null;
+        }
+
+        return (root, query, criteriaBuilder) -> {
+            Join<ProductEntity, ProductVariantEntity> productVariantJoin = root.join("variants", JoinType.LEFT);
+
+            Expression<Double> minVariantPrice = criteriaBuilder.min(productVariantJoin.get("price"));
+
+            //đảm bảo mỗi sản phẩm chỉ có 1 giá min duy nhất
+            query.groupBy(root.get("id"));
+
+            if (minPrice.equals(maxPrice)) {
+                return criteriaBuilder.equal(minVariantPrice, minPrice);
+            } else if (maxPrice < 100000) {
+                return criteriaBuilder.lessThan(minVariantPrice, maxPrice);
+            } else if (maxPrice >= 100000 && maxPrice <= 700000) {
+                return criteriaBuilder.between(minVariantPrice, minPrice, maxPrice);
+            }
+            return criteriaBuilder.greaterThanOrEqualTo(minVariantPrice, minPrice);
+        };
+    }
+
+
 
     public static Specification<ProductEntity> sortByPrice(String sortDirection) {
         return (root, query, criteriaBuilder) -> {

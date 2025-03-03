@@ -42,16 +42,20 @@ public class ProductHomeController {
     public ResponseAPI<Map<String, Object>> getProductDetailBodyCare(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "12") int size,
-            @RequestParam(defaultValue = "desc") String sortValue,
-            @PathVariable("slug") String slug) {
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(defaultValue = "position") String sortValue,
+            @PathVariable("slug") String slug,
+            @RequestParam(value = "brand", required = false) List<String> brand,
+            @RequestParam(value = "category", required = false) List<String> category,
+            @RequestParam(value = "skinType", required = false) List<String> skinType,
+            @RequestParam(defaultValue = "0") double minPrice,
+            @RequestParam(defaultValue = "0") double maxPrice) {
 
-        Map<String, Object> data = productService.getBodyCare(size, page, sortValue, slug);
+        Map<String, Object> data = productService.getBodyCare(size, page, sortValue,sortDirection, slug, brand, category, skinType, minPrice, maxPrice);
         return ResponseAPI.<Map<String, Object>>builder()
                 .code(HttpStatus.OK.value())
                 .data(data)
                 .build();
     }
-
-
 
 }
