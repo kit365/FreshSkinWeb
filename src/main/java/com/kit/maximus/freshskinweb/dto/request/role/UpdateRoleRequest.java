@@ -1,15 +1,14 @@
 package com.kit.maximus.freshskinweb.dto.request.role;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Setter
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @ToString
-@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateRoleRequest {
     Long roleId;
     String title;

@@ -1,8 +1,12 @@
 package com.kit.maximus.freshskinweb.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +18,7 @@ import java.util.List;
 @Entity
 @ToString
 @Table(name = "Role")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoleEntity extends AbstractEntity {
 
     @Id
@@ -30,17 +35,4 @@ public class RoleEntity extends AbstractEntity {
     @Column(name = "permission")
     String permission;
 
-    @JsonIgnore
-    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.LAZY, mappedBy = "role", orphanRemoval = false)
-    List<UserEntity> Users = new ArrayList<>();
-
-    public void createUser(UserEntity userEntity){
-        Users.add(userEntity);
-        userEntity.setRole(this);
-    }
-
-    public void removeUser(UserEntity userEntity){
-        Users.remove(userEntity);
-        userEntity.setRole(null);
-    }
 }

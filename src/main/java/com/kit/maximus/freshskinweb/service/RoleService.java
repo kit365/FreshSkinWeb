@@ -39,7 +39,6 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
         return true;
     }
 
-
     @Override
     public RoleResponseDTO update(Long id, UpdateRoleRequest request) {
         RoleEntity roleEntity = getRoleEntityById(id);
