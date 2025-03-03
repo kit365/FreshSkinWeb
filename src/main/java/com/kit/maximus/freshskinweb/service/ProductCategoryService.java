@@ -104,12 +104,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
             response.setProducts(null);
             response.setChild(null);
 
-            ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
-            parentCategoryResponse.setTitle(response.getParent().getTitle());
-            parentCategoryResponse.setId(response.getParent().getId());
-            response.setParent(parentCategoryResponse);
-
-
         });
 
 
