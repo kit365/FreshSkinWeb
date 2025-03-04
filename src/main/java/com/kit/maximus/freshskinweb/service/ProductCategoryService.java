@@ -90,8 +90,8 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     }
 
     public List<ProductCategoryResponse> getAll() {
-            List<ProductCategoryEntity> list = productCategoryRepository.findAllByParentIsNull();
-            return productCategoryMapper.toProductCateroiesResponseDTO(list);
+        List<ProductCategoryEntity> list = productCategoryRepository.findAllByParentIsNull();
+        return productCategoryMapper.toProductCateroiesResponseDTO(list);
     }
 
 
@@ -509,16 +509,21 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     HOME
      */
     //Hàm này dùng để lấy ra top 8 danh mục nổi bật(Bao gồm chứa Product)
+
     public List<ProductCategoryResponse> getFeaturedProductCategories() {
         List<ProductCategoryEntity> categories = productCategoryRepository.findTop8ByStatusAndDeletedAndFeatured(
                 Status.ACTIVE, false, true, Sort.by(Sort.Direction.DESC, "position")
         );
-        return mapToCategoryResponse(categories);
+
+        List<ProductCategoryResponse> productCategoryFeature = mapToCategoryResponse(categories);
+        productCategoryFeature.forEach(category ->
+                category.getProducts().forEach(product -> product.setDescription(null))
+        );
+        return productCategoryFeature ;
     }
 
     //Hàm này dùng để lấy ra n danh mục tùy chọn, số lượng n sản phẩm
-    //#Mục đẹp: Da đẹp - thêm tự tin && ##TOP SẢN PHẨM DƯỠNG DA ẨM MỊN
-    public List<ProductCategoryResponse> getCategoryResponses(List<String> titles, int limit) {
+    public List<ProductCategoryResponse> getFilteredCategories(List<String> titles, int limit) {
         List<ProductCategoryResponse> result = new ArrayList<>();
 
         for (String title : titles) {
@@ -532,6 +537,8 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                 count++;
             }
         }
+
+        result.forEach(productCategoryResponse -> productCategoryResponse.setDescription(null));
 
         return result;
     }

@@ -173,6 +173,26 @@
 <!--            <version>3.3.4</version>-->
 <!--        </dependency>-->
 
+<!--        thư viện cache-->
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-cache -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+
+<!--        cấu hình time refreshCache-->
+        <!-- https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine -->
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+
+
+
+
+
 
     </dependencies>
 

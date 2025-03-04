@@ -31,6 +31,7 @@ import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.kit.maximus.freshskinweb.specification.ProductSpecification.*;
 
@@ -617,7 +618,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 top7BestSellers.add(productResponseDTO);
             });
         }
-
+        top7BestSellers.forEach(productResponseDTO -> productResponseDTO.setDescription(null));
         return top7BestSellers;
     }
 
@@ -723,6 +724,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         }
 
         if(skinTypes != null) {
+
             specification = specification.and(filterBySkinType(skinTypes));
         }
 

@@ -20,6 +20,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -432,6 +433,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         return map;
     }
 
+    @Cacheable("featuredProductCategory")
     public List<BlogCategoryResponse> getFeaturedBlogCategories() {
         List<BlogCategoryEntity> blogCategoryEntities = blogCategoryRepository.findTop4ByStatusAndDeletedAndFeatured(Status.ACTIVE, false, true, Sort.by(Sort.Direction.DESC, "position"));
         return mapToCategoryResponse(blogCategoryEntities);
