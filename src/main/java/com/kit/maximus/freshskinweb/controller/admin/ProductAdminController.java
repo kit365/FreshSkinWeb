@@ -63,23 +63,39 @@ public class ProductAdminController {
         }
     }
 
-    @PatchMapping(value = "edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseAPI<ProductResponseDTO> updateProduct(@PathVariable("id") Long id,
-                                                         @RequestPart(value = "request") String requestJson,
-                                                         @RequestPart(value = "thumbnail", required = false) List<MultipartFile> images) {
+//    @PatchMapping(value = "edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseAPI<ProductResponseDTO> updateProduct(@PathVariable("id") Long id,
+//                                                         @RequestPart(value = "request") String requestJson,
+//                                                         @RequestPart(value = "thumbnail", required = false) List<MultipartFile> images) {
+//
+//        log.info("requestJson:{}", requestJson);
+//        log.info("images:{}", images);
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        String message_succed = "Cập nhật sản phẩm thành công";
+//        String message_failed = "Cập nhật sản phẩm thất bại";
+//        try {
+//            UpdateProductRequest request = objectMapper.readValue(requestJson, UpdateProductRequest.class);
+//            request.setThumbnail(images);
+//            ProductResponseDTO result = productService.update(id, request);
+//            log.info("Product updated successfully");
+//            return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
+//        } catch (JsonProcessingException e) {
+//            log.info("Product update failed");
+//            log.error(e.getMessage());
+//            return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+//        }
+//    }
 
-        log.info("requestJson:{}", requestJson);
-        log.info("images:{}", images);
-        ObjectMapper objectMapper = new ObjectMapper();
+    @PatchMapping(value = "edit/{id}")
+    public ResponseAPI<ProductResponseDTO> updateProduct(@RequestBody UpdateProductRequest request, @PathVariable Long id) {
+
         String message_succed = "Cập nhật sản phẩm thành công";
         String message_failed = "Cập nhật sản phẩm thất bại";
         try {
-            UpdateProductRequest request = objectMapper.readValue(requestJson, UpdateProductRequest.class);
-            request.setThumbnail(images);
             ProductResponseDTO result = productService.update(id, request);
             log.info("Product updated successfully");
             return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             log.info("Product update failed");
             log.error(e.getMessage());
             return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
