@@ -99,7 +99,10 @@ public enum ErrorCode {
 
     //SKIN QUESTIONS
     SKIN_QUESTIONS_NOT_FOUND(404, "Không tìm thấy câu hỏi"),
-    QUESTION_GROUP_NOT_EXISTED(404, "Không tìm thấy nhóm câu hỏi nào")
+    QUESTION_GROUP_NOT_EXISTED(404, "Không tìm thấy nhóm câu hỏi nào"),
+
+    //PERMISSION
+    PERMISSION_NOT_FOUND(404, "Không tìm thấy quyền"),
     ;
 
 

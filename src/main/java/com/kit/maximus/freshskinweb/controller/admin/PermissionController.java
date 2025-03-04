@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,21 +26,21 @@ public class PermissionController {
     public ResponseAPI<PermissionResponse> createPermission(@Valid @RequestBody PermissionRequest request) {
         String message = "Tạo quyền thành công";
         permissionService.createPermission(request);
-        return ResponseAPI.<PermissionResponse>builder().code(200).message(message).build();
+        return ResponseAPI.<PermissionResponse>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
     @GetMapping("/show")
     public ResponseAPI<List<PermissionResponse>> showAll() {
         String message = "Hiển thị danh sách quyền thành công";
         List<PermissionResponse> data = permissionService.getAllPermissions();
-        return ResponseAPI.<List<PermissionResponse>>builder().code(200).message(message).data(data).build();
+        return ResponseAPI.<List<PermissionResponse>>builder().code(HttpStatus.OK.value()).message(message).data(data).build();
     }
 
     @DeleteMapping("/delete")
-    public ResponseAPI<Boolean> deletePermission(@RequestBody String name) {
+    public ResponseAPI<PermissionResponse> deletePermission(@RequestBody String name) {
         String message = "Xóa quyền thành công";
         permissionService.deletePermission(name);
-        return ResponseAPI.<Boolean>builder().code(200).message(message).build();
+        return ResponseAPI.<PermissionResponse>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
 }

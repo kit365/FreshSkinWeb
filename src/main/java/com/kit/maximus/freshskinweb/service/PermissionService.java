@@ -3,6 +3,8 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.permission.PermissionRequest;
 import com.kit.maximus.freshskinweb.dto.response.PermissionResponse;
 import com.kit.maximus.freshskinweb.entity.PermissionEntity;
+import com.kit.maximus.freshskinweb.exception.AppException;
+import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.PermissionMapper;
 import com.kit.maximus.freshskinweb.repository.PermissionRepository;
 import lombok.AccessLevel;
@@ -12,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,7 +37,11 @@ public class PermissionService {
     }
 
     public void deletePermission(String name) {
+        Optional<PermissionEntity> permissionEntity =  permissionRepository.findById(name);
+        if(permissionEntity == null) {
+            throw new AppException(ErrorCode.PERMISSION_NOT_FOUND);
+        }
+        permissionRepository.deleteById(name);
 
-        permissionRepository.deleteByName(name);
     }
 }

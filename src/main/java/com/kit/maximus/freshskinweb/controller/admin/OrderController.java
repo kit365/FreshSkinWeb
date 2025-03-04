@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping("/orders")
+@RequestMapping("/admin/orders")
 public class OrderController {
     OrderService orderService;
 

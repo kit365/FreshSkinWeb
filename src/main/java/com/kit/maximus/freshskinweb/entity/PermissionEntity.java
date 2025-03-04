@@ -15,8 +15,8 @@ import java.util.Set;
 @Table(name = "Permission")
 public class PermissionEntity {
 
-    @Id
     @Column(name = "Name")
+    @Id
     String name;
     @Column(name = "Description")
     String description;
