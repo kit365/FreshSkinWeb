@@ -77,23 +77,41 @@ public class ProductCategoryAdminController {
         return ResponseAPI.<List<ProductCategoryResponse>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
-    @PatchMapping(value = "edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseAPI<ProductCategoryResponse> updateProduct(@PathVariable("id") Long id,
-                                                           @RequestPart(value = "request") String requestJson,
-                                                           @RequestPart(value = "thumbnail", required = false) List<MultipartFile> images) {
+//    @PatchMapping(value = "edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseAPI<ProductCategoryResponse> updateProduct(@PathVariable("id") Long id,
+//                                                           @RequestPart(value = "request") String requestJson,
+//                                                           @RequestPart(value = "thumbnail", required = false) List<MultipartFile> images) {
+//
+//        log.info("requestJson:{}", requestJson);
+//        log.info("images:{}", images);
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        String message_succed = "Cập nhật danh mục sản phẩm thành công";
+//        String message_failed = "Cập nhật danh mục sản phẩm thất bại";
+//        try {
+//            UpdateProductCategoryRequest request = objectMapper.readValue(requestJson, UpdateProductCategoryRequest.class);
+//            request.setImage(images);
+//            ProductCategoryResponse result = productCategoryService.update(id, request);
+//            log.info("ProductCategory updated successfully");
+//            return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
+//        } catch (JsonProcessingException e) {
+//            log.info("ProductCategory update failed");
+//            log.error(e.getMessage());
+//            return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+//        }
+//    }
 
-        log.info("requestJson:{}", requestJson);
-        log.info("images:{}", images);
-        ObjectMapper objectMapper = new ObjectMapper();
+    @PatchMapping(value = "edit/{id}")
+    public ResponseAPI<ProductCategoryResponse> updateProduct(@PathVariable("id") Long id,
+                                                             @RequestBody UpdateProductCategoryRequest updateProductCategoryRequest) {
+
+
         String message_succed = "Cập nhật danh mục sản phẩm thành công";
         String message_failed = "Cập nhật danh mục sản phẩm thất bại";
         try {
-            UpdateProductCategoryRequest request = objectMapper.readValue(requestJson, UpdateProductCategoryRequest.class);
-            request.setImage(images);
-            ProductCategoryResponse result = productCategoryService.update(id, request);
+            ProductCategoryResponse result = productCategoryService.update(id, updateProductCategoryRequest);
             log.info("ProductCategory updated successfully");
             return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             log.info("ProductCategory update failed");
             log.error(e.getMessage());
             return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();

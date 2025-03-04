@@ -113,7 +113,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         ProductEntity listProduct = getProductEntityById(id);
 
-
         if (request.getThumbnail() != null) {
             listProduct.getThumbnail().forEach(thumbnail -> {
                 try {

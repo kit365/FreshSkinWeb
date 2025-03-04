@@ -19,8 +19,10 @@ import java.util.List;
 public class ProductSpecification {
 
     public static Specification<ProductEntity> filterByKeyword(String keyword) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("title"), "%" + keyword + "%");
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), "%" + keyword.toLowerCase() + "%");
     }
+
 
     public static Specification<ProductEntity> filterByStatus(Status status) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), status);
