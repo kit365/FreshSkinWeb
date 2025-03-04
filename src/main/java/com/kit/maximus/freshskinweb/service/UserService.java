@@ -7,7 +7,6 @@ import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
-import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -219,6 +218,17 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         return Map.of();
     }
 
+    public boolean updatePassword(Long userId, UpdateUserRequest request) {
+        UserEntity userEntity = getUserEntityById(userId);
+        if (StringUtils.hasLength(request.getPassword())) {
+            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+            userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
+            userRepository.save(userEntity);
+            return true;
+        }
+        return false;
+    }
+
     public UserResponseDTO update(Long id, UpdateUserRequest userRequestDTO) {
         UserEntity userEntity = getUserEntityById(id);
 
@@ -233,17 +243,9 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
 
-        // Chỉ mã hóa mật khẩu nếu có thay đổi
-        if (StringUtils.hasLength(userRequestDTO.getPassword())) {
-            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-            userEntity.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
-        }
-
         // Cập nhật Role
-//        userEntity.setRole(roleRepository.findById(userRequestDTO.getRole()).orElse(null));
-
         //Vì role có rằng buộc != null, = null là báo lỗi => xét điều kiện cho Role trước khi set vào userEntity
-        // nếu trong update ko cập nhật role => set lại role cũ chứ không phải set = null
+        // nếu trong update ko cập nhật role => set lại role cũ chứ không phải set role = null như lúc đầu mất 2 tiếng để fix
         // @BeanMapping lo việc set lại role cũ cho User
         if(userRequestDTO.getRole() != null) {
             userEntity.setRole(roleRepository.findById(userRequestDTO.getRole()).orElse(null));
