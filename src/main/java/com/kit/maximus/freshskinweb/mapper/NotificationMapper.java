@@ -12,17 +12,17 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface NotificationMapper {
-    @Mapping(target = "user", ignore = true)
-    @Mapping(target = "orders", ignore = true)
-    NotificationEntity toNotificationEntity(CreationNotificationRequest request);
-
-
-    NotificationResponse toNotificationResponse(NotificationEntity entity);
-
-    List<NotificationResponse> toNotificationResponse(List<NotificationEntity> entities);
-
-    @Mapping(target = "user", ignore = true)
-    @Mapping(target = "orders", ignore = true)
-    @BeanMapping(nullValuePropertyMappingStrategy = org.mapstruct.NullValuePropertyMappingStrategy.IGNORE)
-    void updateNotificationEntity(@MappingTarget  NotificationEntity entity, CreationNotificationRequest request);
+//    @Mapping(target = "user", ignore = true)
+//    @Mapping(target = "orders", ignore = true)
+//    NotificationEntity toNotificationEntity(CreationNotificationRequest request);
+//
+//
+//    NotificationResponse toNotificationResponse(NotificationEntity entity);
+//
+//    List<NotificationResponse> toNotificationResponse(List<NotificationEntity> entities);
+//
+//    @Mapping(target = "user", ignore = true)
+//    @Mapping(target = "orders", ignore = true)
+//    @BeanMapping(nullValuePropertyMappingStrategy = org.mapstruct.NullValuePropertyMappingStrategy.IGNORE)
+//    void updateNotificationEntity(@MappingTarget  NotificationEntity entity, CreationNotificationRequest request);
 }

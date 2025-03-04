@@ -14,6 +14,7 @@ public interface SkinTestMapper  {
     @Mapping(target = "questionGroup", ignore = true)
     SkinTestEntity toSkinTestEntity(CreationSkinTestRequest request);
 
+    @Mapping(target = "userEntity", ignore = true)
     SkinTestResponse toSkinTestResponse(SkinTestEntity skinTestEntity);
 
     @Mapping(target = "userEntity", ignore = true)
