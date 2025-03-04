@@ -1,9 +1,6 @@
 package com.kit.maximus.freshskinweb.specification;
 
-import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
-import com.kit.maximus.freshskinweb.entity.ProductEntity;
-import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
-import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
+import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.criteria.*;
@@ -97,6 +94,12 @@ public class ProductSpecification {
                     criteriaBuilder.equal(parentCategory.get("slug"), slug),
                     criteriaBuilder.equal(grandParentCategory.get("slug"), slug)
             );
+        };
+    }
+
+    public static Specification<ProductEntity> findByBrandSlug(String slug) {
+        return (root, query, criteriaBuilder) -> {
+           return  criteriaBuilder.equal(root.get("brand").get("slug"), slug);
         };
     }
 
