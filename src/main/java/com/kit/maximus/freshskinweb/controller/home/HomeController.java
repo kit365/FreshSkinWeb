@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.controller.home;
 
 import com.kit.maximus.freshskinweb.dto.RouterDTO;
+import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.service.BlogCategoryService;
 import com.kit.maximus.freshskinweb.service.ProductBrandService;
 import com.kit.maximus.freshskinweb.service.ProductCategoryService;
@@ -9,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -69,5 +71,25 @@ public class HomeController {
                 "Top3ProductFeature",productService.getProductsFeature(),
                 "AllBrand",productBrandService.getAll()
     );
+    }
+
+    @GetMapping("/{slug}")
+    public ResponseAPI<Map<String, Object>> getProductByCategorySlug(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(defaultValue = "position") String sortValue,
+            @PathVariable("slug") String slug,
+            @RequestParam(value = "brand", required = false) List<String> brand,
+            @RequestParam(value = "category", required = false) List<String> category,
+            @RequestParam(value = "skinType", required = false) List<String> skinType,
+            @RequestParam(defaultValue = "0") double minPrice,
+            @RequestParam(defaultValue = "0") double maxPrice) {
+
+        Map<String, Object> data = productService.getProductByCategoryOrBrandSlug(size, page, sortValue,sortDirection, slug, brand, category, skinType, minPrice, maxPrice);
+        return ResponseAPI.<Map<String, Object>>builder()
+                .code(HttpStatus.OK.value())
+                .data(data)
+                .build();
     }
 }
