@@ -6,6 +6,7 @@ import com.kit.maximus.freshskinweb.dto.response.NotificationResponse;
 import com.kit.maximus.freshskinweb.entity.NotificationEntity;
 import com.kit.maximus.freshskinweb.mapper.NotificationMapper;
 import com.kit.maximus.freshskinweb.repository.NotificationRepository;
+import com.kit.maximus.freshskinweb.repository.OrderRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -26,17 +27,22 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
     NotificationRepository notificationRepository;
     NotificationMapper notificationMapper;
     UserRepository userRepository;
+    OrderRepository orderRepository;
 
 
     @Override
     public boolean add(CreationNotificationRequest request) {
-    NotificationEntity entity = notificationMapper.toNotificationEntity(request);
+        NotificationEntity entity = notificationMapper.toNotificationEntity(request);
 
-    if(request.getUserId() != null) {
-        entity.setUser(re);
-    }
+        if(request.getUserId() != null) {
+            entity.setUser(userRepository.findById(request.getUserId()).orElse(null));
+        }
 
-        return false;
+        if(request.getOrderId() != null) {
+            entity.setOrder(orderRepository.findById(request.getOrderId()).orElse(null));
+        }
+        notificationRepository.save(entity);
+            return true;
     }
 
     @Override

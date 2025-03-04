@@ -6,6 +6,7 @@ import com.kit.maximus.freshskinweb.entity.NotificationEntity;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
@@ -23,5 +24,5 @@ public interface NotificationMapper {
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "orders", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = org.mapstruct.NullValuePropertyMappingStrategy.IGNORE)
-    void updateNotificationEntity(NotificationEntity entity, CreationNotificationRequest request);
+    void updateNotificationEntity(@MappingTarget  NotificationEntity entity, CreationNotificationRequest request);
 }
