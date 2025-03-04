@@ -1,25 +1,32 @@
-package com.kit.maximus.freshskinweb.controller.admin;
+package com.kit.maximus.freshskinweb.controller.home;
 
 import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
 import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.service.OrderService;
+import com.kit.maximus.freshskinweb.service.ProductCategoryService;
+import com.kit.maximus.freshskinweb.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "*")
+@Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 @RestController
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping("/admin/orders")
-public class OrderController {
+@RequestMapping("/home/order")
+public class OrderHomeController {
+
     OrderService orderService;
+
 
     @PostMapping("/create")
     public ResponseAPI<OrderResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest) {
@@ -36,27 +43,6 @@ public class OrderController {
         return ResponseAPI.<List<OrderResponse>>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
     }
 
-//    @PatchMapping("/update/{orderId}")
-//    public ResponseAPI<OrderResponse> updateOrder(@Valid @PathVariable Long orderId, @RequestBody UpdateOrderRequest updateOrderRequest) {
-//        String message = "Update Order Success";
-//        var create = orderService.updateOrder(orderId, updateOrderRequest);
-//
-//        return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).data(create).build();
-//    }
-
-    @DeleteMapping("/delete/{orderId}")
-    public ResponseAPI<OrderResponse> deleteOrderByOrderId(@PathVariable Long orderId) {
-        String message = "Xóa đơn hàng thành công";
-        orderService.deleteOrder(orderId);
-        return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).build();
-    }
-
-    @DeleteMapping("/deleted/{orderId}")
-    public ResponseAPI<OrderResponse> deleteByOrderId(@PathVariable Long orderId) {
-        String message = "Xóa đơn hàng thành công";
-        var order = orderService.deleted(orderId);
-        return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
-    }
 
 
 }
