@@ -50,9 +50,15 @@ public class HomeController {
 
     @GetMapping
     public Map<String, Object> getHomeData() {
-        List<String> FreshSkinSlogan = Arrays.asList("Gel Rửa Mặt", "Nước tẩy trang", "Nước Hoa Hồng");
-        List<String> Top_moisturizing_products = Arrays.asList("Tẩy Da Chết", "Dụng Cụ / Phụ Kiện Chăm Sóc Da", "Loại sản phẩm");
-        List<String> beautyTrends = Arrays.asList("Tẩy Da Chết", "Nước tẩy trang", "Loại sản phẩm");
+//        List<String> FreshSkinSlogan = Arrays.asList("Gel Rửa Mặt", "Nước tẩy trang", "Nước Hoa Hồng");
+//        List<String> Top_moisturizing_products = Arrays.asList("Tẩy Da Chết", "Dụng Cụ / Phụ Kiện Chăm Sóc Da", "Loại sản phẩm");
+//        List<String> beautyTrends = Arrays.asList("Tẩy Da Chết", "Nước tẩy trang", "Loại sản phẩm");
+
+
+        List<String> FreshSkinSlogan = Arrays.asList(" Nước tẩy trang", "Nước tẩy trang", "Sữa rữa mặt");
+        List<String> Top_moisturizing_products = Arrays.asList("Nước tẩy trang", "Sữa rữa mặt", "Nước tẩy trang");
+        List<String> beautyTrends = Arrays.asList("Nước tẩy trang", "Sữa rữa mặt", "Nước tẩy trang");
+
         return Map.of(
                 "featuredProductCategory", productCategoryService.getFeaturedProductCategories(),
                 "featuredBlogCategory", blogCategoryService.getFeaturedBlogCategories(),
