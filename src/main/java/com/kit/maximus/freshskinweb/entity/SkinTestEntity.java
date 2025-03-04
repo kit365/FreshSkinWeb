@@ -24,20 +24,19 @@ public class SkinTestEntity extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "User_ID")
+    @JoinColumn(name = "User_ID", nullable = true)
     @JsonBackReference
     UserEntity userEntity;
 
+    String questionGroup;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "skinType_ID")
+    @JoinColumn(name = "skinType_ID", nullable = true)
     @JsonBackReference
     SkinTypeEntity skinType;
 
     @Column(name = "notes", columnDefinition = "MEDIUMTEXT")
     String notes;
-
-    @Column(name = "date")
-    Date date;
 
 }

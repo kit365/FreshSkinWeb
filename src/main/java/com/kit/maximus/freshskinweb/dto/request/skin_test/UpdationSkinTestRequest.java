@@ -12,14 +12,14 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class UpdationSkinTestRequest extends AbstractEntity {
+public class UpdationSkinTestRequest {
 
     Long userEntity;
 
     Long skinType;
 
-    String notes;
+    String questionGroup;
 
-    Date date;
+    String notes;
 
 }

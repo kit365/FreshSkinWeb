@@ -34,7 +34,7 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "UserID", insertable = false, updatable = false)
-    Long id;
+    Long userID;
 
     @Column(name = "Username", updatable = false, unique = true, nullable = false)
     String username;
@@ -78,7 +78,6 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     RoleEntity role;
 
 //    RoleEnum roleEnum;
-
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "user")
     List<ReviewEntity> reviews = new ArrayList<>();

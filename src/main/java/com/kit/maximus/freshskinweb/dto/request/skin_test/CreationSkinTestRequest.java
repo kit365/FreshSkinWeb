@@ -1,28 +1,21 @@
 package com.kit.maximus.freshskinweb.dto.request.skin_test;
 
-import com.kit.maximus.freshskinweb.entity.AbstractEntity;
-import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
-import com.kit.maximus.freshskinweb.entity.UserEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
-import java.util.Date;
+import lombok.*;
 
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class CreationSkinTestRequest extends AbstractEntity {
+public class CreationSkinTestRequest {
 
     Long userEntity;
 
     Long skinType;
 
-    String notes;
+    String questionGroup;
 
-    Date date;
+    String notes;
 
 }

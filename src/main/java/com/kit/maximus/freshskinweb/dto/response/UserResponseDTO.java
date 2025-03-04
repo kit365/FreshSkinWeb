@@ -21,7 +21,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserResponseDTO implements Serializable {
 
-    Long id;
+    Long userID;
     RoleResponseDTO role;
     String password;
     String username;

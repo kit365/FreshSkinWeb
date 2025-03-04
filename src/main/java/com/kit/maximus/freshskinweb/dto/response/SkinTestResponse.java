@@ -19,11 +19,11 @@ public class SkinTestResponse {
 
     String notes;
 
-    Date date;
-
     UserResponseDTO userEntity;
 
     SkinTypeResponse skinType;
+
+    String questionGroup;
 
     boolean deleted;
 

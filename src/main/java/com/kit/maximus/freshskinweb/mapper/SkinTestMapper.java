@@ -5,20 +5,21 @@ import com.kit.maximus.freshskinweb.dto.request.skin_test.CreationSkinTestReques
 import com.kit.maximus.freshskinweb.dto.request.skin_test.UpdationSkinTestRequest;
 import com.kit.maximus.freshskinweb.dto.response.SkinTestResponse;
 import com.kit.maximus.freshskinweb.entity.SkinTestEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface SkinTestMapper  {
     @Mapping(target = "userEntity", ignore = true)
     @Mapping(target = "skinType", ignore = true)
+    @Mapping(target = "questionGroup", ignore = true)
     SkinTestEntity toSkinTestEntity(CreationSkinTestRequest request);
 
     SkinTestResponse toSkinTestResponse(SkinTestEntity skinTestEntity);
 
     @Mapping(target = "userEntity", ignore = true)
     @Mapping(target = "skinType", ignore = true)
+    @Mapping(target = "questionGroup", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateSkinTestEntity(@MappingTarget SkinTestEntity skinTestEntity, UpdationSkinTestRequest request);
 
 

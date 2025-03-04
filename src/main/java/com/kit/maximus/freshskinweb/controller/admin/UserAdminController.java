@@ -2,10 +2,8 @@ package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
-import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -96,13 +94,19 @@ public class UserAdminController {
         return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(user).build();
     }
 
+    @PatchMapping("change-password/{id}")
+    public ResponseAPI<Boolean> updateUserPassword(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest request) {
+        String message = "Update user password successfully";
+        userService.updatePassword(id, request);
+        return ResponseAPI.<Boolean>builder().code(HttpStatus.OK.value()).message(message).build();
+    }
+
     @PatchMapping("edit/{id}")
     public ResponseAPI<UserResponseDTO> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest userRequestDTO) {
         String message = "Update user successfully";
         var result = userService.update(id, userRequestDTO);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
-
 
     @PatchMapping("change-multi")
     public ResponseAPI<String> updataUser(@RequestBody Map<String, Object> request) {

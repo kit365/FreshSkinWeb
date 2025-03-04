@@ -10,6 +10,7 @@ import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.SkinTestMapper;
 import com.kit.maximus.freshskinweb.mapper.SkinTypeMapper;
 import com.kit.maximus.freshskinweb.mapper.UserMapper;
+import com.kit.maximus.freshskinweb.repository.SkinQuestionsRepository;
 import com.kit.maximus.freshskinweb.repository.SkinTestRepository;
 import com.kit.maximus.freshskinweb.repository.SkinTypeRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -33,16 +35,24 @@ public class SkinTestService implements BaseService<SkinTestResponse, CreationSk
     SkinTestMapper skinTestMapper;
     UserRepository userRepository;
     SkinTypeRepository skinTypeRepository;
+    SkinQuestionsRepository skinQuestionsRepository;
 
     @Override
     public boolean add(CreationSkinTestRequest request) {
+        System.out.println(request);
         SkinTestEntity entity = skinTestMapper.toSkinTestEntity(request);
 
         entity.setUserEntity(userRepository.findById(request.getUserEntity()).orElse(null));
         entity.setSkinType(skinTypeRepository.findById(request.getSkinType()).orElse(null));
 
-        skinTestRepository.save(entity);
-        return true;
+        //Phải có bộ đề thì mới cho làm test được
+        if(skinQuestionsRepository.findByQuestionGroup(request.getQuestionGroup()) == null && skinQuestionsRepository.findByQuestionGroup(request.getQuestionGroup()).isEmpty()) {
+            throw new AppException(ErrorCode.QUESTION_GROUP_NOT_EXISTED);
+        } else {
+            entity.setQuestionGroup(request.getQuestionGroup());
+            skinTestRepository.save(entity);
+            return true;
+        }
     }
 
     @Override
@@ -51,6 +61,7 @@ public class SkinTestService implements BaseService<SkinTestResponse, CreationSk
 
         skinTestMapper.updateSkinTestEntity(entity, request);
 
+        entity.setQuestionGroup(request.getQuestionGroup());
         entity.setUserEntity(userRepository.findById(request.getUserEntity()).orElse(null));
         entity.setSkinType(skinTypeRepository.findById(request.getSkinType()).orElse(null));
 
@@ -112,6 +123,9 @@ public class SkinTestService implements BaseService<SkinTestResponse, CreationSk
         return skinTestMapper.toSkinTestResponse(entity);
     }
 
+    public List<SkinTestResponse> showAll() {
+    return skinTestRepository.findAll().stream().map(skinTestMapper::toSkinTestResponse).collect(Collectors.toList());
+    }
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         return Map.of();

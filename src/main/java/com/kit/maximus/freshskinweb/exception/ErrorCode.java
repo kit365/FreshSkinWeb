@@ -91,6 +91,7 @@ public enum ErrorCode {
 
     //SKIN TEST
     SKIN_TEST_NOT_FOUND(404, "Không tìm thấy bài đánh giá loại da nào"),
+
     //REVIEW
     RATING_INVALID(400, "Giá trị phải từ 1 đến 5"),
     REVIEW_NOT_FOUND(404, "Không tìm thấy đánh giá"),
