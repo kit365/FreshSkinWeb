@@ -5,7 +5,5 @@ public enum Status {
     INACTIVE,             //dừng hoạt động
     SOFT_DELETED,         // Xóa mềm (có thể khôi phục)
     RESTORED ,            //khôi phục(xóa mềm)
-//    SHIPPING,
-//    DELIVERED,
-//    RETURNED
+
 }
