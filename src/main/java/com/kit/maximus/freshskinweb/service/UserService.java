@@ -226,6 +226,7 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
 
         // Cập nhật thông tin từ request (trừ password)
         userMapper.updateUser(userEntity, userRequestDTO);
+
         userEntity.setUsername(userEntity.getUsername());
         if (userRepository.existsByEmail(userRequestDTO.getEmail())) {
             log.info("Email exist");
@@ -239,29 +240,17 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         }
 
         // Cập nhật Role
-        userEntity.setRole(roleRepository.findById(userRequestDTO.getRole()).orElse(null));
+//        userEntity.setRole(roleRepository.findById(userRequestDTO.getRole()).orElse(null));
+
+        //Vì role có rằng buộc != null, = null là báo lỗi => xét điều kiện cho Role trước khi set vào userEntity
+        // nếu trong update ko cập nhật role => set lại role cũ chứ không phải set = null
+        // @BeanMapping lo việc set lại role cũ cho User
+        if(userRequestDTO.getRole() != null) {
+            userEntity.setRole(roleRepository.findById(userRequestDTO.getRole()).orElse(null));
+        }
+
         log.info("Cập nhật user id: {}", id);
 
-//        //Cập nhật Avatar
-//        if (userRequestDTO.getAvatar() != null) {
-//            try {
-//                // Xóa ảnh cũ trên Cloudinary nếu tồn tại
-//                if (userEntity.getAvatar() != null) {
-//                    deleteImageFromCloudinary(userEntity.getAvatar());
-//                }
-//
-//                // Upload ảnh mới
-//                MultipartFile file = (MultipartFile) userRequestDTO.getAvatar();
-//                String url = uploadImageFromFile(file, getSlug(userRequestDTO.getLastName() + " " + userRequestDTO.getFirstName()));
-//
-//                // Lưu URL của ảnh mới vào database
-//                userEntity.setAvatar(url);
-//            } catch (IOException e) {
-//                log.error("Upload thumbnail error", e);
-//                throw new RuntimeException(e);
-//            }
-//        }
-//
         return userMapper.toUserResponseDTO(userRepository.save(userEntity));
     }
 
@@ -283,9 +272,7 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
             return "Phục hồi USER thành công";
         }
         return "Cập nhật USER thất bại";
-
     }
-
 
     public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
         return null;
