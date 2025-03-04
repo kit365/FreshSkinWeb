@@ -13,7 +13,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -69,9 +72,14 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @JsonManagedReference
     List<OrderEntity> orders  = new ArrayList<>();
 
-    @JsonBackReference
-    @ManyToMany
-    Set<RoleEntity> roles;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @JoinColumn(name = "role_id", nullable = true)
+    RoleEntity role;
+
+//    @JsonBackReference
+//    @ManyToMany
+//    Set<RoleEntity> roles;
 
 //    RoleEnum roleEnum;
 
@@ -95,7 +103,7 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @Override
     public List<GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(this.roles.toString()));
+        authorities.add(new SimpleGrantedAuthority(this.role.toString()));
         return authorities;
     }
 

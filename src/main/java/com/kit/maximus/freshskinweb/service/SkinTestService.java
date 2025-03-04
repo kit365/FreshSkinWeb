@@ -43,6 +43,8 @@ public class SkinTestService implements BaseService<SkinTestResponse, CreationSk
         SkinTestEntity entity = skinTestMapper.toSkinTestEntity(request);
 
         entity.setUserEntity(userRepository.findById(request.getUserEntity()).orElse(null));
+
+        //Nhớ code thêm ràng buộc, phải làm skin test xong thì mới được set skin type
         entity.setSkinType(skinTypeRepository.findById(request.getSkinType()).orElse(null));
 
         //Phải có bộ đề thì mới cho làm test được
@@ -61,14 +63,24 @@ public class SkinTestService implements BaseService<SkinTestResponse, CreationSk
 
         skinTestMapper.updateSkinTestEntity(entity, request);
 
-        entity.setQuestionGroup(request.getQuestionGroup());
-        entity.setUserEntity(userRepository.findById(request.getUserEntity()).orElse(null));
-        entity.setSkinType(skinTypeRepository.findById(request.getSkinType()).orElse(null));
+        if(request.getQuestionGroup() != null) {
+            entity.setQuestionGroup(request.getQuestionGroup());
+        }
+
+        if (request.getUserEntity() != null) {
+            entity.setUserEntity(userRepository.findById(request.getUserEntity()).orElse(null));
+        } else {
+            entity.setUserEntity(entity.getUserEntity());
+        }
+
+        if(request.getSkinType() != null){
+            entity.setSkinType(skinTypeRepository.findById(request.getSkinType()).orElse(null));
+        } else{
+            entity.setSkinType(entity.getSkinType());
+        }
 
         return skinTestMapper.toSkinTestResponse(skinTestRepository.save(entity));
     }
-
-
 
     @Override
     public String update(List<Long> id, String status) {
