@@ -10,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -22,17 +23,17 @@ import java.util.List;
 public class RoleEntity extends AbstractEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_id")
-    Long id;
+    @Column(name = "role_name")
+    String name;
 
     @Column(name = "title")
     String title;
 
-    @Column(name = "description",columnDefinition = "MEDIUMTEXT")
+    @Column(name = "description", columnDefinition = "MEDIUMTEXT")
     String description;
 
     @Column(name = "permission")
-    String permission;
+    @ManyToMany
+    Set<PermissionEntity> permission;
 
 }

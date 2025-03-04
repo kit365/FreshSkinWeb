@@ -69,11 +69,15 @@
             <version>1.6.3</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt -->
+<!--        &lt;!&ndash; https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.nimbusds</groupId>-->
+<!--            <artifactId>nimbus-jose-jwt</artifactId>-->
+<!--            <version>10.0.1</version>-->
+<!--        </dependency>-->
         <dependency>
-            <groupId>com.nimbusds</groupId>
-            <artifactId>nimbus-jose-jwt</artifactId>
-            <version>10.0.1</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
 
 

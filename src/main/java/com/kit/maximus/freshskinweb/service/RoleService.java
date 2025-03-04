@@ -31,7 +31,7 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
 
     @Override
     public boolean add(CreateRoleRequest request) {
-        if(roleRepository.existsByTitle(request.getTitle())){
+        if(roleRepository.existsByName(request.getName())){
             throw new AppException(ErrorCode.ROLE_EXISTED);
         }
         RoleEntity roleEntity = roleMapper.toRoleEntity(request);

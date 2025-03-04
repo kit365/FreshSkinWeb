@@ -7,6 +7,7 @@ import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
+import com.kit.maximus.freshskinweb.entity.RoleEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -68,8 +69,8 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
         UserEntity userEntity = userMapper.toUserEntity(request);
-        userEntity.setRole(roleRepository.findById(6L).orElse(null));
-        userEntity.setRole(roleRepository.findById(request.getRole()).orElse(null));
+        RoleEntity role = roleRepository.findByName(request.getRoleName())
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
         encodePassword(userEntity);
 
         if (request.getAvatar() != null) {
@@ -247,8 +248,9 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         //Vì role có rằng buộc != null, = null là báo lỗi => xét điều kiện cho Role trước khi set vào userEntity
         // nếu trong update ko cập nhật role => set lại role cũ chứ không phải set role = null như lúc đầu mất 2 tiếng để fix
         // @BeanMapping lo việc set lại role cũ cho User
-        if(userRequestDTO.getRole() != null) {
-            userEntity.setRole(roleRepository.findById(userRequestDTO.getRole()).orElse(null));
+        if(userRequestDTO.getRoleName() != null) {
+            RoleEntity role = roleRepository.findByName(userRequestDTO.getRoleName())
+                    .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
         }
 
         log.info("Cập nhật user id: {}", id);

@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Date;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -12,7 +13,7 @@ import java.util.Date;
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CreateRoleRequest {
-    String title;
+    String name;
     String description;
-    String permission;
+    Set<String> permission;
 }

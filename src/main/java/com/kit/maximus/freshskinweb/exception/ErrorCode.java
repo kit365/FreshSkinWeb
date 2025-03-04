@@ -41,7 +41,7 @@ public enum ErrorCode {
     STATUS_NOT_BLANK(400, "Trạng thái không được để trống"),
     TYPE_USER_NOT_BLANK(400, "Loại tài khoản không được để trống"),
     TYPE_USER_INVALID(400, "Loại tài khoản chỉ được là 'NORMAL' hoặc 'VIP'"),
-    ROLE_ID_NOT_BLANK(400, "Quyền người dùng không được để trống"),
+    ROLE_NAME_NOT_BLANK(400, "Quyền người dùng không được để trống"),
 
     //Authentication
     UNAUTHENTICATED(401, "Chưa xác thực"),

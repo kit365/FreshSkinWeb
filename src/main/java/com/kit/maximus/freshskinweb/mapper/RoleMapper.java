@@ -15,12 +15,15 @@ import java.util.List;
 
 public interface RoleMapper {
 
+    @Mapping(target = "permission", ignore = true)
     RoleEntity toRoleEntity(CreateRoleRequest role);
 
+    @Mapping(target = "permission", ignore = true)
     RoleResponseDTO toRoleResponseDTO(RoleEntity role);
 
     List<RoleResponseDTO> toRoleResponseDTO (List<RoleEntity> RoleEntities);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "permission", ignore = true)
     void updateRole(@MappingTarget RoleEntity user, UpdateRoleRequest userDTO);
 }

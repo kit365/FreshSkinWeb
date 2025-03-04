@@ -11,7 +11,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     
-    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "roles", ignore = true)
     @Mapping(target = "avatar", ignore = true)
     UserEntity toUserEntity(CreateUserRequest userRequestDTO);
 
@@ -29,7 +29,7 @@ public interface UserMapper {
     @Mapping(target = "username", ignore = true)
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "avatar", ignore = true)
-    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "roles", ignore = true)
     @Mapping(target = "reviews", ignore = true)
     @Mapping(target = "skinTests", ignore = true)
     @Mapping(target = "orders", ignore = true)
