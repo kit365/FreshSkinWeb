@@ -91,6 +91,7 @@ public class ProductSpecification {
             Join<ProductCategoryEntity, ProductCategoryEntity> grandParentCategory = parentCategory.join("parent", JoinType.LEFT);
 
             return criteriaBuilder.or(
+                    criteriaBuilder.equal(productCategory.get("slug"), slug),
                     criteriaBuilder.equal(parentCategory.get("slug"), slug),
                     criteriaBuilder.equal(grandParentCategory.get("slug"), slug)
             );
@@ -138,14 +139,9 @@ public class ProductSpecification {
             return null;
         }
 
-        List<SkinType> skinTypes = new ArrayList<>();
-        for (String skinTypeName : skinTypeNames) {
-            skinTypes.add(SkinType.valueOf(skinTypeName));
-        }
-
         return ((root, query, criteriaBuilder) -> {
             Join<ProductEntity, SkinTypeEntity> product_skinType = root.join("skinTypes");
-            return product_skinType.get("type").in(skinTypes);
+            return product_skinType.get("type").in(skinTypeNames);
         });
     }
 
