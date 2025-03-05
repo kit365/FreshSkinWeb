@@ -83,11 +83,9 @@ public class ProductSpecification {
 
     public static Specification<ProductEntity> findByParentCategorySlug(String slug) {
         return (root, query, criteriaBuilder) -> {
-
-            Join<ProductEntity, ProductCategoryEntity> productCategory = root.join("category", JoinType.INNER);
-
+            query.distinct(true);
+            Join<ProductEntity, ProductCategoryEntity> productCategory = root.join("category", JoinType.LEFT);
             Join<ProductCategoryEntity, ProductCategoryEntity> parentCategory = productCategory.join("parent", JoinType.LEFT);
-
             Join<ProductCategoryEntity, ProductCategoryEntity> grandParentCategory = parentCategory.join("parent", JoinType.LEFT);
 
             return criteriaBuilder.or(
@@ -98,7 +96,19 @@ public class ProductSpecification {
         };
     }
 
+
     public static Specification<ProductEntity> findByBrandSlug(String slug) {
+        if(slug.isBlank()){
+            return null;
+        }
+
+        if(slug.equals("thuong-hieu")) {
+            return (root, query, criteriaBuilder) -> {
+                return criteriaBuilder.conjunction();
+            };
+        }
+
+
         return (root, query, criteriaBuilder) -> {
            return  criteriaBuilder.equal(root.get("brand").get("slug"), slug);
         };
