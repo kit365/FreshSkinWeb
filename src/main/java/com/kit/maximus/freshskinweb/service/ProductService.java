@@ -676,6 +676,10 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     public Map<String, Object> getProductByCategoryOrBrandSlug(int size, int page, String sortValue, String sortDirection, String slug, List<String> brand, List<String> category, List<String> skinTypes, double minPrice, double maxPrice) {
 
+
+//        thuong-hieu
+
+
         // Lấy danh sách brand,category và skintype có trong product
 
         Map<Long, ProductCategoryResponse> productCategoryResponseMap = new HashMap<>();
@@ -773,10 +777,12 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         pageMap.put("totalPages", productEntityPage.getTotalPages());
         pageMap.put("pageSize", productEntityPage.getSize());
 
-        ProductCategoryEntity parentCategory = productCategoryRepository.findCategoryBySlug(slug);
-
-        if (parentCategory != null) {
-            map.put("title", parentCategory.getTitle());
+        ProductCategoryEntity titleCate = productCategoryRepository.findCategoryBySlug(slug);
+        ProductBrandEntity titleBrand = productBrandRepository.findBySlug(slug);
+        if (titleCate != null) {
+            map.put("title", titleCate.getTitle());
+        } else if (titleBrand != null) {
+            map.put("title", titleBrand.getTitle());
         }
 
 

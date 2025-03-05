@@ -18,6 +18,5 @@ public interface ProductBrandRepository extends JpaRepository<ProductBrandEntity
 
     Page<ProductBrandEntity> findAllByStatusAndDeleted(Status statusEnum, boolean b, Pageable pageable);
 
-
     ProductBrandEntity findBySlug(String slug);
 }
