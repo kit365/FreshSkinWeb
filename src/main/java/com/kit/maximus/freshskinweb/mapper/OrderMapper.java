@@ -33,5 +33,9 @@ public interface OrderMapper {
     @Mapping(target = "email", source = "user.email")
     @Mapping(target = "phoneNumber", source = "user.phone")
     @Mapping(target = "address", source = "user.address")
+    @Mapping(target = "createdAt", source = "user.createdAt")
+    @Mapping(target = "updatedAt", source = "user.updatedAt")
+    @Mapping(target = "deleted", source = "user.deleted")
+    @Mapping(target = "status", source = "user.status")
     OrderEntity toOrderEntity(OrderRequest request, UserEntity user);
 }

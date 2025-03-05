@@ -75,7 +75,7 @@ public class OrderEntity extends AbstractEntity {
     @Column(name = "OrderDate")
     @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp
-    Date OrderDate;
+    Date orderDate;
 
 
 

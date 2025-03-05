@@ -1,5 +1,7 @@
 package com.kit.maximus.freshskinweb.dto.request.order;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.kit.maximus.freshskinweb.entity.AbstractEntity;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -7,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -15,7 +18,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class OrderRequest implements Serializable {
+public class OrderRequest extends AbstractEntity implements Serializable {
 
     Long userId;
 
@@ -50,7 +53,5 @@ public class OrderRequest implements Serializable {
     @NotNull(message = "PAYMENT_METHOD_NOT_NULL")
     PaymentMethod paymentMethod;
 
-    @NotNull(message = "ORDER_DATE_NOT_NUL")
-    LocalDate orderDate;
 
 }
