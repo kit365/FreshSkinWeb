@@ -770,6 +770,13 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         pageMap.put("totalPages", productEntityPage.getTotalPages());
         pageMap.put("pageSize", productEntityPage.getSize());
 
+
+        ProductCategoryEntity parentCategory = productCategoryRepository.findCategoryBySlug(slug);
+        if(parentCategory != null){
+            map.put("title", parentCategory.getTitle());
+        }
+
+
         map.put("products", productResponseDTOs);
         map.put("categories", categoryResponses);
         map.put("brands", brandResponses);
