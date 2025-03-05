@@ -72,14 +72,14 @@ public class UserAdminController {
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(userService.addOrder(id, requestDTO)).build();
     }
 
-    @GetMapping("show")
+    @GetMapping("")
     public ResponseAPI<List<UserResponseDTO>> getUsers() {
         String message = "Get all users successfully";
         var result = userService.getAllUsers();
         return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
-    @GetMapping("show/{id}")
+    @GetMapping("{id}")
     public ResponseAPI<UserResponseDTO> showDetailUser(@PathVariable Long id) {
         String message = "Get user successfully";
         var result = userService.showDetail(id);
