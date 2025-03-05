@@ -74,7 +74,7 @@ public class UserEntity extends AbstractEntity implements UserDetails {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "role_id", nullable = true)
+    @JoinColumn(name = "roleId", nullable = true)
     RoleEntity role;
 
 //    @JsonBackReference

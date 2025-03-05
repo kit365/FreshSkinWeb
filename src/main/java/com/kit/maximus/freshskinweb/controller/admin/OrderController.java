@@ -36,6 +36,13 @@ public class OrderController {
         return ResponseAPI.<List<OrderResponse>>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
     }
 
+    @GetMapping("/search/{id}")
+    public ResponseAPI<OrderResponse> getOrderById(@PathVariable Long id) {
+        String message = "Tạo đơn hàng thành công";
+        var order = orderService.getOrderById(id);
+
+        return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
+    }
 //    @PatchMapping("/update/{orderId}")
 //    public ResponseAPI<OrderResponse> updateOrder(@Valid @PathVariable Long orderId, @RequestBody UpdateOrderRequest updateOrderRequest) {
 //        String message = "Update Order Success";

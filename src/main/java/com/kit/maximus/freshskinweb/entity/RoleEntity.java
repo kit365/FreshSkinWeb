@@ -23,17 +23,22 @@ import java.util.Set;
 public class RoleEntity extends AbstractEntity {
 
     @Id
-    @Column(name = "role_name")
-    String name;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "RoleId")
+    Long roleId;
 
-    @Column(name = "title")
+    @Column(name = "Title")
     String title;
 
-    @Column(name = "description", columnDefinition = "MEDIUMTEXT")
+    @Column(name = "Description", columnDefinition = "MEDIUMTEXT")
     String description;
+    @Column(name = "Permission")
+    String permission;
 
-    @Column(name = "permission")
-    @ManyToMany
-    Set<PermissionEntity> permission;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role", fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonManagedReference
+    List<UserEntity> user = new ArrayList<>();
+
+
 
 }

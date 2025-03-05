@@ -13,7 +13,7 @@ import java.util.Set;
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CreateRoleRequest {
-    String name;
+    String title;
     String description;
-    Set<String> permission;
+    String permission;
 }

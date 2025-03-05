@@ -19,7 +19,7 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoleResponseDTO {
-    Long id;
+    Long roleId;
     String title;
     String description;
     String permission;
