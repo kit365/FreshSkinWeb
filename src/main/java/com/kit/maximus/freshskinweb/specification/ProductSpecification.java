@@ -98,6 +98,17 @@ public class ProductSpecification {
 
 
     public static Specification<ProductEntity> findByBrandSlug(String slug) {
+        if(slug.isBlank()){
+            return null;
+        }
+
+        if(slug.equals("thuong-hieu")) {
+            return (root, query, criteriaBuilder) -> {
+                return criteriaBuilder.conjunction();
+            };
+        }
+
+
         return (root, query, criteriaBuilder) -> {
            return  criteriaBuilder.equal(root.get("brand").get("slug"), slug);
         };

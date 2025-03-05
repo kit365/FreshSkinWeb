@@ -677,9 +677,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     public Map<String, Object> getProductByCategoryOrBrandSlug(int size, int page, String sortValue, String sortDirection, String slug, List<String> brand, List<String> category, List<String> skinTypes, double minPrice, double maxPrice) {
 
 
-//        thuong-hieu
-
-
         // Lấy danh sách brand,category và skintype có trong product
 
         Map<Long, ProductCategoryResponse> productCategoryResponseMap = new HashMap<>();
@@ -783,8 +780,9 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             map.put("title", titleCate.getTitle());
         } else if (titleBrand != null) {
             map.put("title", titleBrand.getTitle());
+        } else if(slug.equals("thuong-hieu")) {
+            map.put("title", "Thương Hiệu");
         }
-
 
         map.put("products", productResponseDTOs);
         map.put("categories", categoryResponses);
