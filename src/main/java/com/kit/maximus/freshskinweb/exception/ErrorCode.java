@@ -42,6 +42,10 @@ public enum ErrorCode {
     TYPE_USER_NOT_BLANK(400, "Loại tài khoản không được để trống"),
     TYPE_USER_INVALID(400, "Loại tài khoản chỉ được là 'NORMAL' hoặc 'VIP'"),
     ROLE_NAME_NOT_BLANK(400, "Quyền người dùng không được để trống"),
+    THIS_USER_NOT_ALLOWED_TO_DELETE(400, "Đây là tài khoản của khách hàng, không được xóa"),
+    THIS_USER_NOT_ALLOWED_TO_UPDATE(400, "Đây là tài khoản của khách hàng, không được cập nhật"),
+    THIS_ACCOUNT_CAN_NOT_SHOW(400, "Đây là tài khoản của khách hàng, không thể xem"),
+
 
     //Authentication
     UNAUTHENTICATED(401, "Chưa xác thực"),
@@ -103,6 +107,11 @@ public enum ErrorCode {
 
     //PERMISSION
     PERMISSION_NOT_FOUND(404, "Không tìm thấy quyền"),
+
+    //NOTIFICATION
+    NOTIFICATION_NOT_FOUND(404, "Không tìm thấy thông báo"),
+    //ORDERSTATUS
+    ORDER_STATUS_INVALID(404, "Không tìm thấy trạng thái đơn hàng"),
     ;
 
 

@@ -23,6 +23,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -69,8 +70,12 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
         UserEntity userEntity = userMapper.toUserEntity(request);
-        RoleEntity role = roleRepository.findById(request.getRole())
-                .orElse(null);
+
+        if (request.getRole() != null) {
+            RoleEntity role = roleRepository.findById(request.getRole())
+                    .orElse(null);
+            userEntity.setRole(role);
+        }
 
         encodePassword(userEntity);
 
@@ -99,7 +104,7 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         }
 
         //Xóa ảnh từ cloud khi xóa user
-        if(userEntity.getAvatar() != null) {
+        if (userEntity.getAvatar() != null) {
             try {
                 deleteImageFromCloudinary(userEntity.getAvatar());
             } catch (IOException e) {
@@ -111,7 +116,6 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         userRepository.delete(userEntity);
         return true;
 
-
     }
 
     @Override
@@ -121,14 +125,14 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
 
 
         userEntities.forEach(UserEntity -> {
-                    if (UserEntity.getAvatar() != null) {
-                        try {
-                            deleteImageFromCloudinary(UserEntity.getAvatar());
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                });
+            if (UserEntity.getAvatar() != null) {
+                try {
+                    deleteImageFromCloudinary(UserEntity.getAvatar());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
 
         return true;
     }
@@ -163,9 +167,10 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         return false;
     }
 
+
     @Override
     public UserResponseDTO showDetail(Long aLong) {
-        return userMapper.toUserResponseDTO(userRepository.findById(aLong).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND)));
+        return userMapper.toUserResponseDTO(userRepository.findById(aLong).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)));
     }
 
     @Override
@@ -249,7 +254,7 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         //Vì role có rằng buộc != null, = null là báo lỗi => xét điều kiện cho Role trước khi set vào userEntity
         // nếu trong update ko cập nhật role => set lại role cũ chứ không phải set role = null như lúc đầu mất 2 tiếng để fix
         // @BeanMapping lo việc set lại role cũ cho User
-        if(userRequestDTO.getRole() != null) {
+        if (userRequestDTO.getRole() != null) {
             RoleEntity role = roleRepository.findById(userRequestDTO.getRole())
                     .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
         }
@@ -424,5 +429,100 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         return uploadResult.get("secure_url").toString(); // Trả về URL của ảnh
     }
 
+    /* PHẦN CHO ACCOUNT CỦA DŨNG */
 
+    public List<UserResponseDTO> showAllAccountByRole() {
+        List<UserEntity> userEntities = new ArrayList<>();
+        for (UserEntity userEntity : userRepository.findAll()) {
+            if (userEntity.getRole() != null) {
+                userEntities.add(userEntity);
+            }
+        }
+        return userMapper.toUserResponseDTO(userEntities);
+    }
+
+    public UserResponseDTO showDetailByRole(Long id) {
+        UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+            if (userEntity.getRole() != null) {
+                return userMapper.toUserResponseDTO(userEntity);
+            } else {
+                throw new AppException(ErrorCode.THIS_USER_NOT_ALLOWED_TO_DELETE);
+            }
+    }
+
+    public boolean deleteAccount(Long id) {
+        UserEntity user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        if (user.getRole() != null) {
+            userRepository.delete(user);
+            return true;
+        } else {
+            throw new AppException(ErrorCode.THIS_USER_NOT_ALLOWED_TO_DELETE);
+        }
+    }
+
+    public UserResponseDTO updateAccount(Long id, UpdateUserRequest request) {
+        UserEntity userEntity = getUserEntityById(id);
+
+        if (userEntity.getRole() != null) {
+
+            // Cập nhật thông tin từ request (trừ password)
+            userMapper.updateUser(userEntity, request);
+
+            userEntity.setUsername(userEntity.getUsername());
+            if (userRepository.existsByEmail(request.getEmail())) {
+                log.info("Email exist");
+                throw new AppException(ErrorCode.EMAIL_EXISTED);
+            }
+
+            if (userEntity.getRole() != null) {
+                RoleEntity role = roleRepository.findById(request.getRole())
+                        .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+            }
+
+            return userMapper.toUserResponseDTO(userRepository.save(userEntity));
+
+        } else {
+            throw new AppException(ErrorCode.THIS_USER_NOT_ALLOWED_TO_DELETE);
+        }
+    }
+
+    public String updateMulti(List<Long> id, String status) {
+        Status statusEnum = getStatus(status);
+        List<UserEntity> userEntities = userRepository.findAllById(id);
+        for(UserEntity userEntity : userEntities) {
+            if(userEntity.getRole() != null) {
+                if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
+                    userEntity.setStatus(statusEnum);
+                    userRepository.save(userEntity);
+                } else if (statusEnum == Status.SOFT_DELETED) {
+                    userEntity.setDeleted(true);
+                    userRepository.save(userEntity);
+                } else if (statusEnum == Status.RESTORED) {
+                    userEntity.setDeleted(false);
+                    userRepository.save(userEntity);
+                }
+            }
+        }
+        return "Cập nhật Account thất bại";
+    }
+
+    public boolean deleteSelectedAccount(List<Long> id) {
+        List<UserEntity> userEntities = userRepository.findAllById(id);
+        for (UserEntity userEntity : userEntities) {
+            if (userEntity.getRole() != null) {
+                userRepository.delete(userEntity);
+                if (userEntity.getAvatar() != null) {
+                    try {
+                        deleteImageFromCloudinary(userEntity.getAvatar());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            } else {
+                throw new AppException(ErrorCode.THIS_USER_NOT_ALLOWED_TO_DELETE);
+            }
+        }
+    return true;
+    }
 }

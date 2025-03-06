@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.controller.admin;
+package com.kit.maximus.freshskinweb.controller.account;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
@@ -24,16 +24,17 @@ import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @Slf4j
-@RequestMapping("admin/users")
+@RequestMapping("admin/account")
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UserAdminController {
+public class AccountController {
 
     UserService userService;
 
     @PostMapping(value = "create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseAPI<UserResponseDTO> addUser(
+
+    public ResponseAPI<UserResponseDTO> addAccount(
             @RequestPart("request") String requestJson,  // Nhận JSON dưới dạng String
             @RequestPart(value = "avatar", required = false) MultipartFile image) { // Nhận hình ảnh
         log.info("requestJson:{}", requestJson);
@@ -66,50 +67,36 @@ public class UserAdminController {
         }
     }
 
-    @PostMapping("addO/{id}")
-    public ResponseAPI<UserResponseDTO> addOrder(@PathVariable("id") Long id, @RequestBody OrderRequest requestDTO) {
-        String message = "Create user successfully";
-        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(userService.addOrder(id, requestDTO)).build();
-    }
-
-    @GetMapping("show")
-    public ResponseAPI<List<UserResponseDTO>> getUsers() {
+    @GetMapping("")
+    public ResponseAPI<List<UserResponseDTO>> getAllAccountByRole() {
         String message = "Get all users successfully";
-        var result = userService.getAllUsers();
+        var result = userService.showAllAccountByRole();
         return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
-    @GetMapping("show/{id}")
-    public ResponseAPI<UserResponseDTO> showDetailUser(@PathVariable Long id) {
+    @GetMapping("{id}")
+    public ResponseAPI<UserResponseDTO> showDetailAccount(@PathVariable Long id) {
         String message = "Get user successfully";
-        var result = userService.showDetail(id);
+        var result = userService.showDetailByRole(id);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
-    @GetMapping("search")
-    public ResponseAPI<List<UserResponseDTO>> searchUser(@RequestParam("keyword") String name) {
-        String message = "Search user successfully";
-        var user = userService.getUserByUsername(name);
-//        return Collections.singletonList(userService.getUserByUsername(name));
-        return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(user).build();
-    }
-
     @PatchMapping("change-password/{id}")
-    public ResponseAPI<Boolean> updateUserPassword(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest request) {
+    public ResponseAPI<Boolean> updateAccountPassword(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest request) {
         String message = "Update user password successfully";
         userService.updatePassword(id, request);
         return ResponseAPI.<Boolean>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
     @PatchMapping("edit/{id}")
-    public ResponseAPI<UserResponseDTO> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest userRequestDTO) {
+    public ResponseAPI<UserResponseDTO> updateAccount(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest userRequestDTO) {
         String message = "Update user successfully";
-        var result = userService.update(id, userRequestDTO);
+        var result = userService.updateAccount(id, userRequestDTO);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
     @PatchMapping("change-multi")
-    public ResponseAPI<String> updataUser(@RequestBody Map<String, Object> request) {
+    public ResponseAPI<String> updataAccount(@RequestBody Map<String, Object> request) {
 
         if (!request.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
@@ -120,12 +107,13 @@ public class UserAdminController {
         List<Long> ids = (List<Long>) request.get("id");
         String status = request.get("status").toString();
 
-        var result = userService.update(ids, status);
-        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
+        var result = userService.updateMulti(ids, status);
+        String message = "Cập nhật Account thành công ";
+        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
     @DeleteMapping("delete")
-    public ResponseAPI<String> deleteSelectedUser(@RequestBody Map<String, Object> request) {
+    public ResponseAPI<String> deleteBySelectedAccount(@RequestBody Map<String, Object> request) {
 
         if (!request.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
@@ -136,7 +124,7 @@ public class UserAdminController {
 
         String message_succed = "delete User successfull";
         String message_failed = "delete User failed";
-        var result = userService.delete(ids);
+        var result = userService.deleteSelectedAccount(ids);
         if (result) {
             log.info("BlogCategory delete successfully");
             return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
@@ -145,39 +133,13 @@ public class UserAdminController {
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
-
     @DeleteMapping("delete/{id}")
     public ResponseAPI<UserResponseDTO> deleteUser(@PathVariable("id") Long id) {
         {
             String message = "Delete user successfully";
-            userService.delete(id);
+            userService.deleteAccount(id);
             log.info(message);
             return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
         }
-    }
-
-    @DeleteMapping("deleteAll")
-    public ResponseAPI<UserResponseDTO> deleteUser() {
-        {
-            String message = "Delete all users successfully";
-            userService.deleteAllUsers();
-            log.info(message);
-            return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
-        }
-    }
-
-    @PatchMapping("deleteT/{id}")
-    public ResponseAPI<UserResponseDTO> deleteUserT(@PathVariable("id") Long id) {
-        String message = "Delete user successfully";
-        userService.deleteTemporarily(id);
-        log.info(message);
-        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
-    }
-
-    @DeleteMapping("/deleteO/{useId}/{orderId}")
-    public ResponseAPI<UserResponseDTO> deleteOrder(@PathVariable Long useId, @PathVariable Long orderId) {
-        String message = "Delete order successfully";
-        userService.deleteOrder(useId, orderId);
-        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 }
