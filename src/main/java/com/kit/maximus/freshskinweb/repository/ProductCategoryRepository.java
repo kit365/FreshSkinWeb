@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,6 +19,9 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
 
     @Query("SELECT c FROM ProductCategoryEntity c WHERE c.parent.id IS NULL")
     List<ProductCategoryEntity> findAllParentCategories();
+
+    @Query("SELECT c FROM ProductCategoryEntity c WHERE c.slug = :slug")
+    ProductCategoryEntity findCategoryBySlug(@Param("slug") String slug);
 
 
     List<ProductCategoryEntity> findAllByParentIsNull();

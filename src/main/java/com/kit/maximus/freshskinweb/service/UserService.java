@@ -69,8 +69,9 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
         UserEntity userEntity = userMapper.toUserEntity(request);
-        RoleEntity role = roleRepository.findByTitle(request.getTitle())
-                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+        RoleEntity role = roleRepository.findById(request.getRole())
+                .orElse(null);
+
         encodePassword(userEntity);
 
         if (request.getAvatar() != null) {
@@ -248,8 +249,8 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         //Vì role có rằng buộc != null, = null là báo lỗi => xét điều kiện cho Role trước khi set vào userEntity
         // nếu trong update ko cập nhật role => set lại role cũ chứ không phải set role = null như lúc đầu mất 2 tiếng để fix
         // @BeanMapping lo việc set lại role cũ cho User
-        if(userRequestDTO.getTitle() != null) {
-            RoleEntity role = roleRepository.findByTitle(userRequestDTO.getTitle())
+        if(userRequestDTO.getRole() != null) {
+            RoleEntity role = roleRepository.findById(userRequestDTO.getRole())
                     .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
         }
 

@@ -539,6 +539,18 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         }
 
         result.forEach(productCategoryResponse -> productCategoryResponse.setDescription(null));
+        result.forEach(productCategoryResponse -> {
+            productCategoryResponse.getProducts().forEach(productResponseDTO -> {
+                productResponseDTO.setDescription(null);
+                productResponseDTO.setSkinTypes(null);
+                productResponseDTO.setIngredients(null);
+                productResponseDTO.setOrigin(null);
+                productResponseDTO.setSkinIssues(null);
+                productResponseDTO.setUsageInstructions(null);
+
+            });
+        });
+
 
         return result;
     }

@@ -54,7 +54,7 @@ public class HomeController {
     @GetMapping
     public Map<String, Object> getHomeData() {
 
-        List<String> freshSkinSloganList = Arrays.asList("Nước tẩy trang", "Nước tẩy trang", "Toner / Nước cân bằng da");
+        List<String> freshSkinSloganList = Arrays.asList("Nước tẩy trang", "Sữa rữa mặt", "Toner / Nước cân bằng da");
         List<String> topMoisturizingProductsList = Arrays.asList("Tẩy tế bào chết", "Chống nắng da mặt", "Serum / Tinh Chất");
         List<String> beautyTrendsList = Arrays.asList("Làm Sạch Da", "Đặc Trị", "Hỗ trợ trị mụn");
 
