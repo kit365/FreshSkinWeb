@@ -89,9 +89,15 @@ public class ProductSpecification {
             Join<ProductCategoryEntity, ProductCategoryEntity> parentCategory = productCategory.join("parent", JoinType.LEFT);
             Join<ProductCategoryEntity, ProductCategoryEntity> grandParentCategory = parentCategory.join("parent", JoinType.LEFT);
 
-            if (slug.equals("san-pham-moi")) {
+            if (slug.equals("san-pham-test")) {
                 query.orderBy(criteriaBuilder.desc(root.get("createdAt")));
                 return criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), LocalDateTime.now().minusWeeks(2));
+            } else if (slug.equals("san-pham-moi")) {
+                query.orderBy(criteriaBuilder.desc(root.get("createdAt")));
+                return criteriaBuilder.conjunction();
+            } else if (slug.equals("khuyen-mai-hot")) {
+                query.orderBy(criteriaBuilder.desc(root.get("discountPercent")));
+                return criteriaBuilder.conjunction();
             }
 
             return criteriaBuilder.or(
@@ -104,11 +110,11 @@ public class ProductSpecification {
 
 
     public static Specification<ProductEntity> findByBrandSlug(String slug) {
-        if(slug.isBlank()){
+        if (slug.isBlank()) {
             return null;
         }
 
-        if(slug.equals("thuong-hieu")) {
+        if (slug.equals("thuong-hieu")) {
             return (root, query, criteriaBuilder) -> {
                 return criteriaBuilder.conjunction();
             };
@@ -116,7 +122,7 @@ public class ProductSpecification {
 
 
         return (root, query, criteriaBuilder) -> {
-           return  criteriaBuilder.equal(root.get("brand").get("slug"), slug);
+            return criteriaBuilder.equal(root.get("brand").get("slug"), slug);
         };
     }
 
@@ -184,7 +190,6 @@ public class ProductSpecification {
             return criteriaBuilder.greaterThanOrEqualTo(minVariantPrice, minPrice);
         };
     }
-
 
 
     public static Specification<ProductEntity> sortByPrice(String sortDirection) {

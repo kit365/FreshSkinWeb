@@ -67,7 +67,8 @@ public class HomeController {
                 "Top_moisturizing_products",productCategoryService.getFilteredCategories(topMoisturizingProductsList,10),
                 "BeautyTrends",productCategoryService.getFilteredCategories(beautyTrendsList,5),
                 "Top3ProductFeature",productService.getProductsFeature(),
-                "AllBrand",productBrandService.getAll()
+                "AllBrand",productBrandService.getAll(),
+                "AllCategory",productCategoryService.showALL()
     );
     }
 

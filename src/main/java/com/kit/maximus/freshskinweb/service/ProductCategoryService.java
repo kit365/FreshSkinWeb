@@ -302,6 +302,20 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return productCategoryResponse;
     }
 
+
+    public List<ProductCategoryResponse> showALL() {
+        List<ProductCategoryEntity> list = productCategoryRepository.findAll();
+        List<ProductCategoryResponse> result = new ArrayList<>();
+        list.forEach(productCategoryEntity -> {
+            ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
+            productCategoryResponse.setId(productCategoryEntity.getId());
+            productCategoryResponse.setTitle(productCategoryEntity.getTitle());
+            productCategoryResponse.setSlug(productCategoryEntity.getSlug());
+            result.add(productCategoryResponse);
+        });
+        return result;
+    }
+
     public Map<String, Object> showDetaill(Long id) {
         //Khi trả th không trả Child mà chỉ trả parentID => PaerenTitle
         Map<String, Object> map = new HashMap<>();

@@ -19,11 +19,6 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<ProductEntity, Long>, JpaSpecificationExecutor<ProductEntity> {
 
-    List<ProductEntity> findAllByIdInAndStatus(List<Long> id, Status status);
-
-    Page<ProductEntity> findByTitleContainingIgnoreCaseAndDeleted(String keyword, boolean b, Pageable pageable);
-
-    Page<ProductEntity> findByTitleContainingIgnoreCaseAndStatusAndDeleted(String keyword, Status statusEnum, Pageable pageable, boolean b);
 
     Page<ProductEntity> findAllByDeleted(boolean b, Pageable pageable);
 
