@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,6 +88,11 @@ public class ProductSpecification {
             Join<ProductEntity, ProductCategoryEntity> productCategory = root.join("category", JoinType.LEFT);
             Join<ProductCategoryEntity, ProductCategoryEntity> parentCategory = productCategory.join("parent", JoinType.LEFT);
             Join<ProductCategoryEntity, ProductCategoryEntity> grandParentCategory = parentCategory.join("parent", JoinType.LEFT);
+
+            if (slug.equals("san-pham-moi")) {
+                query.orderBy(criteriaBuilder.desc(root.get("createdAt")));
+                return criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), LocalDateTime.now().minusWeeks(1));
+            }
 
             return criteriaBuilder.or(
                     criteriaBuilder.equal(productCategory.get("slug"), slug),

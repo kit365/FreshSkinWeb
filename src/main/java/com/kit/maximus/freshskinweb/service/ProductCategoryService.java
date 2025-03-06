@@ -539,7 +539,9 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         }
 
         result.forEach(productCategoryResponse -> productCategoryResponse.setDescription(null));
-
+        result.forEach(productCategoryResponse -> {
+            productCategoryResponse.getProducts().forEach(product -> product.setDescription(null));
+        });
         return result;
     }
 
@@ -662,6 +664,8 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
             productEntity.getVariants().forEach(productVariantEntity -> {
                 ProductVariantResponse productVariantResponse = new ProductVariantResponse();
                 productVariantResponse.setPrice(productVariantEntity.getPrice());
+                productVariantResponse.setVolume(productVariantEntity.getVolume());
+                productVariantResponse.setUnit(productVariantEntity.getUnit());
                 variantResponses.add(productVariantResponse);
             });
 

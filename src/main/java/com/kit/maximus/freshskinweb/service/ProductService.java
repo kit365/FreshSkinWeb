@@ -630,6 +630,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         List<ProductResponseDTO> productResponseDTO = mapProductResponsesDTO(productEntities);
         productResponseDTO.forEach(productResponseDTO1 -> {
             productResponseDTO1.setCategory(null);
+            productResponseDTO1.setDescription(null);
         });
         return productResponseDTO;
     }
@@ -746,14 +747,13 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         }
 
 
-//        //tìm id danh mục cha để xóa phần tử thừa
-//        ProductCategoryEntity parentCategory = productCategoryRepository.findBySlug(slug);
-
-
         int p = (page > 0) ? page - 1 : 0;
-        Pageable pageable = PageRequest.of(p, size);
-        Page<ProductEntity> productEntityPage = productRepository.findAll(specification, pageable);
 
+        Pageable pageable = PageRequest.of(p, size);
+
+
+        Page<ProductEntity> productEntityPage = productRepository.findAll(specification, pageable);
+        
         Map<String, Object> map = new HashMap<>();
 
         List<ProductCategoryResponse> categoryResponses = new ArrayList<>(productCategoryResponseMap.values());
@@ -780,8 +780,10 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             map.put("title", titleCate.getTitle());
         } else if (titleBrand != null) {
             map.put("title", titleBrand.getTitle());
-        } else if(slug.equals("thuong-hieu")) {
+        } else if (slug.equals("thuong-hieu")) {
             map.put("title", "Thương Hiệu");
+        } else if (slug.equals("san-pham-moi")) {
+            map.put("title", "Sản Phẩm Mới");
         }
 
         map.put("products", productResponseDTOs);
