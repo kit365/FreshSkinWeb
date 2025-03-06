@@ -631,6 +631,11 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         productResponseDTO.forEach(productResponseDTO1 -> {
             productResponseDTO1.setCategory(null);
             productResponseDTO1.setDescription(null);
+            productResponseDTO1.setSkinTypes(null);
+            productResponseDTO1.setIngredients(null);
+            productResponseDTO1.setOrigin(null);
+            productResponseDTO1.setSkinIssues(null);
+            productResponseDTO1.setUsageInstructions(null);
         });
         return productResponseDTO;
     }

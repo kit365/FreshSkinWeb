@@ -91,7 +91,7 @@ public class ProductSpecification {
 
             if (slug.equals("san-pham-moi")) {
                 query.orderBy(criteriaBuilder.desc(root.get("createdAt")));
-                return criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), LocalDateTime.now().minusWeeks(1));
+                return criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), LocalDateTime.now().minusWeeks(2));
             }
 
             return criteriaBuilder.or(
