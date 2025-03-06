@@ -752,13 +752,15 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             specification = specification.and(filterBySkinType(skinTypes));
         }
 
-        if (sortValue.equals("title")) {
-            specification = specification.and(sortByTitle(getSortDirection(sortDirection)));
-        } else if (sortValue.equals("price")) {
-            specification = specification.and(sortByPrice(getSortDirection(sortDirection)));
-        } else if (sortValue.equals("position")) {
-            specification = specification.and(sortByPosition(getSortDirection(sortDirection)));
+
+        if(sortValue != null) {
+            if (!sortValue.isEmpty() && sortValue.equals("title")) {
+                specification = specification.and(sortByTitle(getSortDirection(sortDirection)));
+            } else if (!sortValue.isEmpty() && sortValue.equals("price")) {
+                specification = specification.and(sortByPrice(getSortDirection(sortDirection)));
+            }
         }
+
 
         if (minPrice > 0 && maxPrice > 0) {
             specification = specification.and(filterByPrice(minPrice, maxPrice));
@@ -821,10 +823,10 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     public Map<String, Object> getProductByCategoryOrBrandSlug(int size, int page, String sortValue, String sortDirection, String slug, List<String> brand, List<String> category, List<String> skinTypes, double minPrice, double maxPrice) {
 
-        int maxSize = 20;
+        int maxSize = 36;
 
-        if (slug.equals("khuyem-mai-hot")) {
-            maxSize = 24;
+        if (slug.equals("khuyen-mai-hot")) {
+            maxSize = 30;
         }
 
 
