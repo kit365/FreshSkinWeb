@@ -648,9 +648,26 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         // Lấy sản phẩm theo slug
         ProductEntity productEntity = productRepository.findBySlug(slug);
+        List<ProductCategoryResponse> productCategoryResponses = new ArrayList<>();
+        productEntity.getCategory().forEach(productCategoryEntity -> {
+            ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
+            productCategoryResponse.setId(productCategoryEntity.getId());
+            productCategoryResponse.setTitle(productCategoryEntity.getTitle());
+            productCategoryResponse.setSlug(productCategoryEntity.getSlug());
+
+            if(productCategoryEntity.getParent() != null) {
+                ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
+                parentCategoryResponse.setId(productCategoryEntity.getParent().getId());
+                parentCategoryResponse.setTitle(productCategoryEntity.getParent().getTitle());
+                parentCategoryResponse.setSlug(productCategoryEntity.getParent().getSlug());
+                productCategoryResponse.setParent(parentCategoryResponse);
+            }
 
 
+            productCategoryResponses.add(productCategoryResponse);
+        });
         ProductResponseDTO response = mapProductResponseDTO(productEntity);
+        response.setCategory(productCategoryResponses);
 
         // Nhét sản phẩm chính vào map (bọc vào List)
         map.put("productDetail", response);
