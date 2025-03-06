@@ -29,9 +29,7 @@ public class NotificationResponse {
 
     boolean is_read;
 
-    boolean deleted;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
-    Date time;
-
     Status status;
+
+    boolean deleted;
 }

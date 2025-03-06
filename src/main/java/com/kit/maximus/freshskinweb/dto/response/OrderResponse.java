@@ -55,4 +55,6 @@ public class OrderResponse implements Serializable {
     Status Status;
 
     Boolean deleted;
+
+    String orderStatus;
 }

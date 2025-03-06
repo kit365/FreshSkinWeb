@@ -53,5 +53,5 @@ public class OrderRequest extends AbstractEntity implements Serializable {
     @NotNull(message = "PAYMENT_METHOD_NOT_NULL")
     PaymentMethod paymentMethod;
 
-
+    String orderStatus;
 }

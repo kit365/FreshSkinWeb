@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.*;
@@ -77,6 +78,7 @@ public class OrderEntity extends AbstractEntity {
     @CreationTimestamp
     Date orderDate;
 
-
-
+    @Enumerated(EnumType.STRING)
+    @Column(name = "OrderStatus") //Thông báo trạng thái cho đơn hàng
+    OrderStatus orderStatus = OrderStatus.PENDING;
 }
