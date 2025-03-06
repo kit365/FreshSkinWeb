@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.controller.home;
 
 import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
+import com.kit.maximus.freshskinweb.dto.response.OrderIdResponse;
 import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.service.OrderService;
@@ -29,11 +30,11 @@ public class OrderHomeController {
 
 
     @PostMapping("/create")
-    public ResponseAPI<OrderResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest) {
+    public ResponseAPI<OrderIdResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest) {
         String message = "Tạo đơn hàng thành công";
         var create = orderService.addOrder(orderRequest);
 
-        return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).data(create).build();
+        return ResponseAPI.<OrderIdResponse>builder().code(HttpStatus.OK.value()).message(message).data(create).build();
     }
 
     @GetMapping("/show")

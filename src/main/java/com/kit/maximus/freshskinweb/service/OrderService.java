@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.service;
 
 import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
+import com.kit.maximus.freshskinweb.dto.response.OrderIdResponse;
 import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -26,7 +27,7 @@ public class OrderService {
     UserService userService;
 
 
-    public OrderResponse addOrder(OrderRequest orderRequest) {
+    public OrderIdResponse addOrder(OrderRequest orderRequest) {
         var order = orderMapper.toOrderEntity(orderRequest);
 
         if (orderRequest.getUserId() != null) {
@@ -36,7 +37,7 @@ public class OrderService {
             order.setUser(null);
         }
 
-        return orderMapper.toOrderResponse(orderRepository.save(order));
+        return orderMapper.toOrderResponseCreate(orderRepository.save(order));
     }
 
 

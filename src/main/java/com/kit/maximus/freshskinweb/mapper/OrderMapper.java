@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.mapper;
 
 import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
+import com.kit.maximus.freshskinweb.dto.response.OrderIdResponse;
 import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
@@ -13,8 +14,13 @@ public interface OrderMapper {
 
     OrderEntity toOrderEntity(OrderRequest order);
 
+    @Named("toOrderResponse")
     @Mapping(target = "orderItems", source = "orderItems")
     OrderResponse toOrderResponse(OrderEntity order);
+
+    @Named("toOrderResponseCreate")
+    @Mapping(target = "orderId", source = "orderId")
+    OrderIdResponse toOrderResponseCreate(OrderEntity order);
 
     List<OrderResponse> toOrderResponseList(List<OrderEntity> orderEntities);
 
