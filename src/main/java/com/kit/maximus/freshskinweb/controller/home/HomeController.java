@@ -92,15 +92,15 @@ public class HomeController {
 
         try {
             return Map.of(
-                    "featuredProductCategory", featuredProductCategoryFutute.get(),
-                    "featuredBlogCategory",listBlogCategoryFeatureFuture.get() ,
-                    "Top7ProductFlashSale", Top7ProductFlashSaleFutute.get(),
+//                    "featuredProductCategory", featuredProductCategoryFutute.get(),
+//                    "featuredBlogCategory",listBlogCategoryFeatureFuture.get() ,
+//                    "Top7ProductFlashSale", Top7ProductFlashSaleFutute.get(),
                     "FreshSkinSlogan", freshSkinFuture.get(),
                     "Top_moisturizing_products", topMoisturizingFuture.get(),
-                    "BeautyTrends", beautyTrendsFuture.get(),
-                    "Top3ProductFeature", Top3ProductFeatureFutute.get(),
-                    "AllBrand", listBrandsFuture.get(),
-                    "AllCategory", listProductCategoryFutute.get()
+                    "BeautyTrends", beautyTrendsFuture.get()
+//                    "Top3ProductFeature", Top3ProductFeatureFutute.get(),
+//                    "AllBrand", listBrandsFuture.get(),
+//                    "AllCategory", listProductCategoryFutute.get()
             );
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi lấy danh mục", e);
