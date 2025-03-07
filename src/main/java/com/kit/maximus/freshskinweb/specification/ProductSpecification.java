@@ -93,12 +93,12 @@ public class ProductSpecification {
                 query.orderBy(criteriaBuilder.desc(root.get("createdAt")));
                 return criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), LocalDateTime.now().minusWeeks(2));
             } else if (slug.equals("san-pham-moi")) {
-                log.info("san-pham-moi");
                 query.orderBy(criteriaBuilder.desc(root.get("createdAt")));
                 return criteriaBuilder.conjunction();
             } else if (slug.equals("khuyen-mai-hot")) {
-                log.info("khuyen-mai-hot");
                 query.orderBy(criteriaBuilder.desc(root.get("discountPercent")));
+                return criteriaBuilder.conjunction();
+            } else if(slug.equals("tat-ca-san-pham")) {
                 return criteriaBuilder.conjunction();
             }
 

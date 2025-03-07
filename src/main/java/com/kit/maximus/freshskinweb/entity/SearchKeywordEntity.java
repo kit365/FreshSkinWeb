@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Entity
 @ToString
-@Table(name = "User")
+@Table(name = "SearchKeyword")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SearchKeywordEntity extends AbstractEntity {

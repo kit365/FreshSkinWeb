@@ -39,6 +39,9 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
     List<ProductEntity> findTop10ByCategory_IdIn(List<Long> ids);
 
 
+    List<ProductEntity> findTop5ByTitleContaining(String request);
+
+
 //    @Query("SELECT p FROM ProductEntity p " +
 //            "JOIN p.variants v " +
 //            "WHERE v.price = :price")
