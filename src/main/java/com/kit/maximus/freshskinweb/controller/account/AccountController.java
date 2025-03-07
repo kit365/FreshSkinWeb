@@ -14,8 +14,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -67,30 +71,39 @@ public class AccountController {
         }
     }
 
-    @GetMapping("")
-    public ResponseAPI<List<UserResponseDTO>> getAllAccountByRole() {
-        String message = "Get all users successfully";
-        var result = userService.showAllAccountByRole();
-        return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
-    }
-
     @GetMapping("{id}")
     public ResponseAPI<UserResponseDTO> showDetailAccount(@PathVariable Long id) {
-        String message = "Get user successfully";
+        String message = "Get account successfully";
         var result = userService.showDetailByRole(id);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
+    @GetMapping()
+    public ResponseAPI<Map<String, Object>> searchUsers(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        String message = "Tim thay List Account";
+        log.info("GET ALL ACCOUNTS");
+
+        Pageable pageable = PageRequest.of(page, size);
+        Map<String, Object> result = userService.getAll(status, keyword, pageable);
+
+        return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+    }
+
     @PatchMapping("change-password/{id}")
     public ResponseAPI<Boolean> updateAccountPassword(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest request) {
-        String message = "Update user password successfully";
+        String message = "Update account password successfully";
         userService.updatePassword(id, request);
         return ResponseAPI.<Boolean>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
     @PatchMapping("edit/{id}")
     public ResponseAPI<UserResponseDTO> updateAccount(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest userRequestDTO) {
-        String message = "Update user successfully";
+        String message = "Update account successfully";
         var result = userService.updateAccount(id, userRequestDTO);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }

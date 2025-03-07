@@ -16,6 +16,7 @@ import com.kit.maximus.freshskinweb.mapper.UserMapper;
 import com.kit.maximus.freshskinweb.repository.OrderRepository;
 import com.kit.maximus.freshskinweb.repository.RoleRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
+import com.kit.maximus.freshskinweb.specification.UserSpecification;
 import com.kit.maximus.freshskinweb.utils.Status;
 
 import jakarta.transaction.Transactional;
@@ -23,11 +24,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -115,14 +116,12 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         log.info("Delete user id:{}", userId);
         userRepository.delete(userEntity);
         return true;
-
     }
 
     @Override
     public boolean delete(List<Long> id) {
         userRepository.deleteAllById(id);
         List<UserEntity> userEntities = userRepository.findAllById(id);
-
 
         userEntities.forEach(UserEntity -> {
             if (UserEntity.getAvatar() != null) {
@@ -133,7 +132,6 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
                 }
             }
         });
-
         return true;
     }
 
@@ -145,25 +143,12 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
     //Method: Xóa tạm thời => deleted thành true
     @Override
     public boolean deleteTemporarily(Long id) {
-        UserEntity userEntity = getUserEntityById(id);
-
-        if (userEntity == null) {
-            log.info("User id not exist");
-            return false;
-        }
-
-        log.info("Delete user id:{}", id);
-        userEntity.setDeleted(true);
-        userRepository.save(userEntity);
         return true;
     }
 
 
     @Override
     public boolean restore(Long id) {
-        UserEntity userEntity = getUserEntityById(id);
-        userEntity.setDeleted(false);
-        userRepository.save(userEntity);
         return false;
     }
 
@@ -282,10 +267,6 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
             return "Phục hồi USER thành công";
         }
         return "Cập nhật USER thất bại";
-    }
-
-    public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
-        return null;
     }
 
 
@@ -429,17 +410,8 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         return uploadResult.get("secure_url").toString(); // Trả về URL của ảnh
     }
 
-    /* PHẦN CHO ACCOUNT CỦA DŨNG */
+                                /* PHẦN CHO ACCOUNT CỦA DŨNG */
 
-    public List<UserResponseDTO> showAllAccountByRole() {
-        List<UserEntity> userEntities = new ArrayList<>();
-        for (UserEntity userEntity : userRepository.findAll()) {
-            if (userEntity.getRole() != null) {
-                userEntities.add(userEntity);
-            }
-        }
-        return userMapper.toUserResponseDTO(userEntities);
-    }
 
     public UserResponseDTO showDetailByRole(Long id) {
         UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
@@ -450,6 +422,33 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
                 throw new AppException(ErrorCode.THIS_USER_NOT_ALLOWED_TO_DELETE);
             }
     }
+
+    //Lọc Account theo status hoặc theo tên, đồng thời có them rằng buộc chỉ show Account role != null
+    public Map<String, Object> getAll(String status, String keyword, Pageable pageable) {
+        Status statusEnum = getStatus(status);
+
+        // Tạo Specification, lọc luôn role != null
+        Specification<UserEntity> spec = Specification
+                .where(UserSpecification.filterUsers(statusEnum, keyword))
+                .and((root, query, criteriaBuilder) -> criteriaBuilder.isNotNull(root.get("role")));
+
+        // Thực hiện truy vấn
+        Page<UserEntity> userEntityPage = userRepository.findAll(spec, pageable);
+
+        // Chuyển đổi sang DTO
+        Page<UserResponseDTO> userDTOPage = userEntityPage.map(userMapper::toUserResponseDTO);
+
+        // Chuẩn bị response
+        Map<String, Object> response = new HashMap<>();
+        response.put("users", userDTOPage.getContent());
+        response.put("currentPage", userDTOPage.getNumber() + 1);
+        response.put("totalItems", userDTOPage.getTotalElements());
+        response.put("totalPages", userDTOPage.getTotalPages());
+        response.put("pageSize", userDTOPage.getSize());
+
+        return response;
+    }
+
 
     public boolean deleteAccount(Long id) {
         UserEntity user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
