@@ -46,6 +46,7 @@ public class ProductCategoryResponse implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<ProductCategoryResponse> child;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     ProductCategoryResponse parent;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

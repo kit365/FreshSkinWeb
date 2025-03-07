@@ -19,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,6 +30,9 @@ import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.kit.maximus.freshskinweb.specification.ProductCategorySpecification.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -302,6 +307,20 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return productCategoryResponse;
     }
 
+    @Transactional(readOnly = true)
+    public List<ProductCategoryResponse> showALL() {
+        List<ProductCategoryEntity> list = productCategoryRepository.findAll();
+        List<ProductCategoryResponse> result = new ArrayList<>();
+        list.forEach(productCategoryEntity -> {
+            ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
+            productCategoryResponse.setId(productCategoryEntity.getId());
+            productCategoryResponse.setTitle(productCategoryEntity.getTitle());
+            productCategoryResponse.setSlug(productCategoryEntity.getSlug());
+            result.add(productCategoryResponse);
+        });
+        return result;
+    }
+
     public Map<String, Object> showDetaill(Long id) {
         //Khi trả th không trả Child mà chỉ trả parentID => PaerenTitle
         Map<String, Object> map = new HashMap<>();
@@ -519,38 +538,42 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         productCategoryFeature.forEach(category ->
                 category.getProducts().forEach(product -> product.setDescription(null))
         );
-        return productCategoryFeature ;
+        return productCategoryFeature;
     }
 
+    @Transactional(readOnly = true)
     //Hàm này dùng để lấy ra n danh mục tùy chọn, số lượng n sản phẩm
     public List<ProductCategoryResponse> getFilteredCategories(List<String> titles, int limit) {
         List<ProductCategoryResponse> result = new ArrayList<>();
 
-        for (String title : titles) {
-            List<ProductCategoryEntity> categories = productCategoryRepository
-                    .findAllByStatusAndDeletedAndTitleContainingIgnoreCase(Status.ACTIVE, false, title);
+        Specification<ProductCategoryEntity> specification = findCategoryByTitle(titles)
+                .and(filterByStatus(Status.ACTIVE))
+                .and(isNotDeleted());
 
-            int count = 0;
-            for (ProductCategoryEntity category : categories) {
-                if (count >= limit) break;
-                result.add(mapToCategoryResponse(category));
-                count++;
-            }
-        }
+        List<ProductCategoryEntity> categories = productCategoryRepository.findAll(specification);
 
-        result.forEach(productCategoryResponse -> productCategoryResponse.setDescription(null));
-        result.forEach(productCategoryResponse -> {
-            productCategoryResponse.getProducts().forEach(productResponseDTO -> {
-                productResponseDTO.setDescription(null);
-                productResponseDTO.setSkinTypes(null);
-                productResponseDTO.setIngredients(null);
-                productResponseDTO.setOrigin(null);
-                productResponseDTO.setSkinIssues(null);
-                productResponseDTO.setUsageInstructions(null);
+        result = mapToCategoryResponse(categories);
 
+        result.forEach(category -> {
+            category.setDescription(null);
+
+            List<ProductResponseDTO> limitedProducts = category.getProducts()
+                    .stream()
+                    .sorted(Comparator.comparing(ProductResponseDTO::getPosition,
+                            Comparator.nullsLast(Comparator.reverseOrder()))) //nhung thang null se nam o cuoi
+                    .limit(limit)
+                    .collect(Collectors.toList());
+
+            category.setProducts(limitedProducts);
+            limitedProducts.forEach(product -> {
+                product.setDescription(null);
+                product.setSkinTypes(null);
+                product.setIngredients(null);
+                product.setOrigin(null);
+                product.setSkinIssues(null);
+                product.setUsageInstructions(null);
             });
         });
-
 
         return result;
     }

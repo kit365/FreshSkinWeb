@@ -39,16 +39,16 @@ public class ProductEntity extends AbstractEntity {
     )
     List<ProductCategoryEntity> category = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "brandID")
     @OnDelete(action = OnDeleteAction.SET_NULL)
     ProductBrandEntity brand;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @OrderBy("price ASC")
     List<ProductVariantEntity> variants = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "ProductSkinType",
             joinColumns = @JoinColumn(name = "product_id", nullable = true),
@@ -68,7 +68,7 @@ public class ProductEntity extends AbstractEntity {
 //    @ElementCollection // Lưu danh sách ảnh trong một bảng riêng
 //     List<String> thumbnail;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "Thumbnail")
     List<String> thumbnail;
 

@@ -37,11 +37,11 @@ public class ProductCategoryEntity extends AbstractEntity {
     boolean featured;
 
     @Column(name = "image")
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     List<String> image;
 
 
-    @ManyToMany(mappedBy = "category")
+    @ManyToMany(mappedBy = "category", fetch = FetchType.EAGER)
     List<ProductEntity> products = new ArrayList<>();
 
 

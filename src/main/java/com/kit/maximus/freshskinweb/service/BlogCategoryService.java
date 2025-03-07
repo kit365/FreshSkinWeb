@@ -6,11 +6,8 @@ import com.kit.maximus.freshskinweb.dto.request.blog_category.CreateBlogCategory
 import com.kit.maximus.freshskinweb.dto.request.blog_category.UpdateBlogCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
-import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
-import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
-import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.BlogCategoryMapper;
@@ -20,13 +17,18 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.text.Normalizer;
@@ -432,10 +434,45 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         return map;
     }
 
+    @Transactional(readOnly = true)
     public List<BlogCategoryResponse> getFeaturedBlogCategories() {
         List<BlogCategoryEntity> blogCategoryEntities = blogCategoryRepository.findTop4ByStatusAndDeletedAndFeatured(Status.ACTIVE, false, true, Sort.by(Sort.Direction.DESC, "position"));
-        return mapToCategoryResponse(blogCategoryEntities);
+        List<BlogCategoryResponse> blogCategoryResponses = mapToCategoryResponse(blogCategoryEntities);
+        blogCategoryResponses.forEach(blogCategoryResponse -> {
+            blogCategoryResponse.getBlogs().forEach(blogCategory -> {
+                blogCategory.setContent(generateSummary(blogCategory.getContent(), 2));
+            });
+        });
+        return blogCategoryResponses;
     }
+
+    public static String generateSummary(String content, int maxLines) {
+        if (content == null || maxLines <= 0) {
+            return "";
+        }
+
+        // Dùng Jsoup để parse HTML
+        Document doc = Jsoup.parse(content);
+        Element body = doc.body();
+
+        // Chọn tất cả thẻ con của <body> (thường là <p>, <div>, ...)
+        Elements elements = body.children();
+
+        StringBuilder summary = new StringBuilder();
+        int lines = 0;
+
+        for (Element element : elements) {
+            if (lines >= maxLines) {
+                break; // Dừng lại sau khi đủ số dòng
+            }
+            summary.append(element.outerHtml()).append("\n");
+            lines++;
+        }
+
+        return summary.toString();
+    }
+
+
 
     private List<BlogCategoryResponse> mapToCategoryResponse(List<BlogCategoryEntity> blogCategoryEntities) {
         List<BlogCategoryResponse> blogCategoryResponses = new ArrayList<>();
