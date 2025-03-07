@@ -239,9 +239,12 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         //Vì role có rằng buộc != null, = null là báo lỗi => xét điều kiện cho Role trước khi set vào userEntity
         // nếu trong update ko cập nhật role => set lại role cũ chứ không phải set role = null như lúc đầu mất 2 tiếng để fix
         // @BeanMapping lo việc set lại role cũ cho User
+        log.info(userRequestDTO.getRole().toString());
         if (userRequestDTO.getRole() != null) {
             RoleEntity role = roleRepository.findById(userRequestDTO.getRole())
                     .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+        } else {
+            userEntity.setRole(userEntity.getRole());
         }
 
         log.info("Cập nhật user id: {}", id);
@@ -425,12 +428,13 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
 
     //Lọc Account theo status hoặc theo tên, đồng thời có them rằng buộc chỉ show Account role != null
     public Map<String, Object> getAll(String status, String keyword, Pageable pageable) {
-        Status statusEnum = getStatus(status);
+        Specification<UserEntity> spec = (root, query, criteriaBuilder) -> criteriaBuilder.isNotNull(root.get("role"));
 
-        // Tạo Specification, lọc luôn role != null
-        Specification<UserEntity> spec = Specification
-                .where(UserSpecification.filterUsers(statusEnum, keyword))
-                .and((root, query, criteriaBuilder) -> criteriaBuilder.isNotNull(root.get("role")));
+        // Nếu status không null, thêm điều kiện lọc theo status
+        if (status != null) {
+            Status statusEnum = getStatus(status.toUpperCase());
+            spec = spec.and(UserSpecification.filterUsers(statusEnum, keyword));
+        }
 
         // Thực hiện truy vấn
         Page<UserEntity> userEntityPage = userRepository.findAll(spec, pageable);
@@ -448,6 +452,7 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
 
         return response;
     }
+
 
 
     public boolean deleteAccount(Long id) {
