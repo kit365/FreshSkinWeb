@@ -20,6 +20,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -940,6 +941,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             map.put("title", titleBrand.getTitle());
         } else if (slug.equals("thuong-hieu")) {
             map.put("title", "Thương Hiệu");
+        } else if(slug.equals("tat-ca-san-pham")){
+            map.put("title", "Tất cả sản phẩm");
         }
 
         map.put("products", productResponseDTOs);
@@ -970,7 +973,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         List<ProductEntity> filteredProducts = productRepository.findAll(filterSpec);
 
         if(filteredProducts.isEmpty()) {
-            map.put("messageNotFound", "Rất tiếc, không tìm thấy sản phẩm từ" + keyword);
+            map.put("messageNotFound", "Rất tiếc, không tìm thấy sản phẩm từ " + keyword);
             return map;
         }
 
@@ -998,6 +1001,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 });
             }
         });
+
+
 
 
         Specification<ProductEntity> specification = filterByKeyword(keyword)
@@ -1070,6 +1075,21 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         // Trả về kết quả
         return map;
     }
+
+    @Cacheable(value = "productSuggestions", key = "#request", condition = "#request != null and #request.length() > 2")
+    public List<ProductResponseDTO> suggestProduct(String request) {
+        List<ProductEntity> productEntity = productRepository.findTop5ByTitleContaining(request);
+        List<ProductResponseDTO> result = mapProductResponsesDTO(productEntity);
+        result.forEach(productResponseDTO -> {
+            clearUnnecessaryFields(productResponseDTO);
+            productResponseDTO.setVariants(null);
+            productResponseDTO.setBrand(null);
+            productResponseDTO.setCategory(null);
+            productResponseDTO.setSkinTypes(null);
+        });
+        return result;
+    }
+
 
 
     private void clearUnnecessaryFields(ProductResponseDTO productResponseDTO) {

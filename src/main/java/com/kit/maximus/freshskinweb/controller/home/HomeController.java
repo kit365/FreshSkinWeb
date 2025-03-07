@@ -12,11 +12,11 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClient;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -37,6 +37,7 @@ public class HomeController {
     ProductService productService;
 
     ProductBrandService productBrandService;
+    private final RestClient.Builder builder;
 
 
     @GetMapping("/routes")
@@ -88,12 +89,12 @@ public class HomeController {
 
         CompletableFuture<List<ProductResponseDTO>> Top3ProductFeatureFutute = CompletableFuture.supplyAsync(productService::getProductsFeature, executor);
         // Đợi tất cả hoàn thành
-        CompletableFuture.allOf(freshSkinFuture, topMoisturizingFuture, beautyTrendsFuture, listBrandsFuture, listProductCategoryFutute, listBlogCategoryFeatureFuture, featuredProductCategoryFutute, Top7ProductFlashSaleFutute,Top3ProductFeatureFutute).join();
+        CompletableFuture.allOf(freshSkinFuture, topMoisturizingFuture, beautyTrendsFuture, listBrandsFuture, listProductCategoryFutute, listBlogCategoryFeatureFuture, featuredProductCategoryFutute, Top7ProductFlashSaleFutute, Top3ProductFeatureFutute).join();
 
         try {
             return Map.of(
                     "featuredProductCategory", featuredProductCategoryFutute.get(),
-                    "featuredBlogCategory",listBlogCategoryFeatureFuture.get() ,
+                    "featuredBlogCategory", listBlogCategoryFeatureFuture.get(),
                     "Top7ProductFlashSale", Top7ProductFlashSaleFutute.get(),
                     "FreshSkinSlogan", freshSkinFuture.get(),
                     "Top_moisturizing_products", topMoisturizingFuture.get(),
@@ -149,4 +150,21 @@ public class HomeController {
                 .data(data)
                 .build();
     }
+
+    @PostMapping(value = "suggest", consumes = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseAPI<List<ProductResponseDTO>> getProductBySuggest(@RequestBody String keyword) {
+
+        if (keyword == null || keyword.isEmpty()) {
+
+            return null;
+        }
+
+        var result = productService.suggestProduct(keyword);
+
+        return ResponseAPI.<List<ProductResponseDTO>>builder()
+                .code(HttpStatus.OK.value())
+                .data(result)
+                .build();
+    }
+
 }
