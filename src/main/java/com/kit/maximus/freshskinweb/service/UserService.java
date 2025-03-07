@@ -239,12 +239,10 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         //Vì role có rằng buộc != null, = null là báo lỗi => xét điều kiện cho Role trước khi set vào userEntity
         // nếu trong update ko cập nhật role => set lại role cũ chứ không phải set role = null như lúc đầu mất 2 tiếng để fix
         // @BeanMapping lo việc set lại role cũ cho User
+        //CẬP NHẬT LẠI: Do User là cho Customer, nên không có role, nếu cố tình nhập role thì vẫn set là null
         log.info(userRequestDTO.getRole().toString());
         if (userRequestDTO.getRole() != null) {
-            RoleEntity role = roleRepository.findById(userRequestDTO.getRole())
-                    .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
-        } else {
-            userEntity.setRole(userEntity.getRole());
+            userEntity.setRole(null);
         }
 
         log.info("Cập nhật user id: {}", id);

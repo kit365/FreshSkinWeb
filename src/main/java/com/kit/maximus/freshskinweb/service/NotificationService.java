@@ -3,6 +3,7 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.notification.CreationNotificationRequest;
 import com.kit.maximus.freshskinweb.dto.request.notification.UpdationNotificationRequest;
 import com.kit.maximus.freshskinweb.dto.response.NotificationResponse;
+import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.NotificationEntity;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
@@ -22,6 +23,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.management.Notification;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -81,11 +83,21 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
         return notificationMapper.toNotificationResponse(notificationRepository.save(entity));
     }
 
+    // Hàm lấy thông báo có điều kiện (truyền status)
     public List<NotificationEntity> getSortedNotifications(OrderStatus status) {
         Specification<NotificationEntity> spec = Specification
-                .where(NotificationSpecification.sortByCreatedTime())  // Sắp xếp theo thời gian
-                .and(NotificationSpecification.filterByOrderStatus(status))  // Lọc theo trạng thái đơn hàng
-                .and(NotificationSpecification.sortByReadStatus()); // Sắp xếp thông báo đã đọc xuống cuối
+                .where(NotificationSpecification.sortByCreatedTime())
+                .and(NotificationSpecification.filterByOrderStatus(status))
+                .and(NotificationSpecification.sortByReadStatus());
+
+        return notificationRepository.findAll(spec);
+    }
+
+    // Hàm lấy toàn bộ thông báo, không truyền gì cả
+    public List<NotificationEntity> getAllNotifications() {
+        Specification<NotificationEntity> spec = Specification
+                .where(NotificationSpecification.sortByCreatedTime())
+                .and(NotificationSpecification.sortByReadStatus());
 
         return notificationRepository.findAll(spec);
     }
