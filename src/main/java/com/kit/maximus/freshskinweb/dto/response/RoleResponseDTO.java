@@ -22,7 +22,7 @@ public class RoleResponseDTO {
     Long roleId;
     String title;
     String description;
-    String permission;
+    List<String> permission;
 
     boolean deleted;
 

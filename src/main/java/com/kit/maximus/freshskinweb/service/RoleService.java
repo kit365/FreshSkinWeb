@@ -15,29 +15,71 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
-public class RoleService implements BaseService<RoleResponseDTO, CreateRoleRequest, UpdateRoleRequest, Long>{
+public class RoleService implements BaseService<RoleResponseDTO, CreateRoleRequest, UpdateRoleRequest, Long> {
 
     RoleRepository roleRepository;
     RoleMapper roleMapper;
 
     @Override
     public boolean add(CreateRoleRequest request) {
-        if(roleRepository.existsByTitle(request.getTitle())){
+        if (roleRepository.existsByTitle(request.getTitle())) {
             throw new AppException(ErrorCode.ROLE_EXISTED);
         }
         RoleEntity roleEntity = roleMapper.toRoleEntity(request);
         roleRepository.save(roleEntity);
         return true;
     }
+
+    //    public boolean addPermission(Long id, CreateRoleRequest request) {
+//        var role = roleRepository.findById(id)
+//                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+//        List<String> currentPermissions = role.getPermission();
+//        currentPermissions.addAll(request.getPermission());
+//        role.setPermission(currentPermissions);
+//
+//        roleRepository.save(role);
+//        System.out.println("Request permissions: " + request.getPermission());
+//        System.out.println("currentPermissions: " + currentPermissions);
+//        return true;
+//    }
+    public boolean addPermission(Long id, CreateRoleRequest request) {
+        var role = roleRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+
+        if (role.getPermission() == null) {
+            role.setPermission(new ArrayList<>()); // Khởi tạo nếu null
+        }
+
+        List<String> currentPermissions = role.getPermission();
+        currentPermissions.addAll(request.getPermission());
+        role.setPermission(currentPermissions);
+
+        roleRepository.save(role);
+
+        System.out.println("Request permissions: " + request.getPermission());
+        System.out.println("currentPermissions: " + currentPermissions);
+        System.out.println("After save: " + roleRepository.findById(id).get().getPermission());
+
+        return true;
+    }
+
+
+    public RoleResponseDTO getPermissionById(Long id) {
+        RoleEntity roleEntity = roleRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+        RoleResponseDTO response = roleMapper.toRoleResponseDTO(roleEntity);
+//        response.setPermission(roleEntity.getPermission());
+        return response;
+    }
+
 
     @Override
     public RoleResponseDTO update(Long id, UpdateRoleRequest request) {
@@ -64,14 +106,15 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
             throw new AppException(ErrorCode.STATUS_INVALID);
         }
     }
+
     @Override
     public boolean delete(Long id) {
         RoleEntity roleEntity = getRoleEntityById(id);
-        if(roleEntity == null){
+        if (roleEntity == null) {
             throw new AppException(ErrorCode.ROLE_NOT_FOUND);
         }
-        if(roleEntity != null){
-            log.info("Delete role id:{}",id);
+        if (roleEntity != null) {
+            log.info("Delete role id:{}", id);
             roleRepository.delete(roleEntity);
             return true;
         }
@@ -84,7 +127,9 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
     }
 
     @Override
-    public boolean deleteTemporarily(Long id) {return true;}
+    public boolean deleteTemporarily(Long id) {
+        return true;
+    }
 
     @Override
     public boolean restore(Long id) {

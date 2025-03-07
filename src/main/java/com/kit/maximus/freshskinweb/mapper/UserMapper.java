@@ -22,6 +22,11 @@ public interface UserMapper {
     @Mapping(target = "role", ignore = true)
     List<UserResponseDTO> toUserResponseDTO(List<UserEntity> userEntities);
 
+//    @Named("mapPermission")
+//    default String mapPermission(List<String> permission) {
+//        return permission != null ? String.join(", ", permission) : null;
+//    }
+
 //    @Mapping(target = "username", ignore = true)
 //    @Mapping(target = "password", ignore = true)
 //    void updateUser(@MappingTarget UserEntity user,  UserRequestDTO userDTO);

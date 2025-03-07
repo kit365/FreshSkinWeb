@@ -32,8 +32,11 @@ public class RoleEntity extends AbstractEntity {
 
     @Column(name = "Description", columnDefinition = "MEDIUMTEXT")
     String description;
+
+    @ElementCollection
+    @CollectionTable(name = "role_permission", joinColumns = @JoinColumn(name = "RoleId"))
     @Column(name = "Permission")
-    String permission;
+    List<String> permission = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "role", fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonManagedReference

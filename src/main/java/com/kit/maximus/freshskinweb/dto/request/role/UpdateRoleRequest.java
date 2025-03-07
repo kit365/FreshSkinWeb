@@ -4,6 +4,8 @@ import com.kit.maximus.freshskinweb.entity.AbstractEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Setter
 @Getter
 @NoArgsConstructor
@@ -14,7 +16,7 @@ public class UpdateRoleRequest  {
     Long roleId;
     String title;
     String description;
-    String permission;
+    List<String> permission;
     String status;
 
 }

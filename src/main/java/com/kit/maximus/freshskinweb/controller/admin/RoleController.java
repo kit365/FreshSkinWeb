@@ -35,6 +35,21 @@ public class RoleController {
         return ResponseAPI.<RoleResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
+    @PostMapping("add-permission/{id}")
+    public ResponseAPI<RoleResponseDTO> addPermission(@PathVariable Long id, @Valid @RequestBody CreateRoleRequest requestDTO) {
+        String message = "Thêm quyền thành công";
+        var res = roleService.addPermission(id, requestDTO);
+        return ResponseAPI.<RoleResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
+    }
+
+//    @GetMapping("permission/{id}")
+//    public ResponseAPI<RoleResponseDTO> getPermission(@PathVariable Long id) {
+//        String message = "Hiển thị quyền thành công";
+//        var res = roleService.getPermissionById(id);
+//        return ResponseAPI.<RoleResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(res).build();
+//    }
+
+
     @PatchMapping("edit/{id}")
     public ResponseAPI<RoleResponseDTO> updateRole(@PathVariable("id") Long id, @Valid @RequestBody UpdateRoleRequest roleRequestDTO){
         String message = "Update role successfully";
@@ -44,8 +59,9 @@ public class RoleController {
 
     @GetMapping("/{id}")
     public ResponseAPI<RoleResponseDTO> showDetail(@PathVariable("id") Long id){
+        String message = "Show role detail successfully";
         var result = roleService.showDetail(id);
-        return ResponseAPI.<RoleResponseDTO>builder().data(result).build();
+        return ResponseAPI.<RoleResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
     @GetMapping

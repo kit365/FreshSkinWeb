@@ -18,7 +18,10 @@ public interface RoleMapper {
     @Mapping(target = "permission", ignore = true)
     RoleEntity toRoleEntity(CreateRoleRequest role);
 
-    @Mapping(target = "permission", ignore = true)
+    @Mapping(target = "title", ignore = true)
+    @Mapping(target = "description", ignore = true)
+    RoleEntity toRole(CreateRoleRequest role);
+
     RoleResponseDTO toRoleResponseDTO(RoleEntity role);
 
     List<RoleResponseDTO> toRoleResponseDTO (List<RoleEntity> RoleEntities);
