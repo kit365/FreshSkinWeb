@@ -657,7 +657,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             productCategoryResponse.setTitle(productCategoryEntity.getTitle());
             productCategoryResponse.setSlug(productCategoryEntity.getSlug());
 
-            if(productCategoryEntity.getParent() != null) {
+            if (productCategoryEntity.getParent() != null) {
                 ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
                 parentCategoryResponse.setId(productCategoryEntity.getParent().getId());
                 parentCategoryResponse.setTitle(productCategoryEntity.getParent().getTitle());
@@ -755,7 +755,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         }
 
 
-        if(sortValue != null) {
+        if (sortValue != null) {
             if (!sortValue.isEmpty() && sortValue.equals("title")) {
                 specification = specification.and(sortByTitle(getSortDirection(sortDirection)));
             } else if (!sortValue.isEmpty() && sortValue.equals("price")) {
@@ -941,6 +941,125 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         } else if (slug.equals("thuong-hieu")) {
             map.put("title", "Thương Hiệu");
         }
+
+        map.put("products", productResponseDTOs);
+        map.put("categories", categoryResponses);
+        map.put("brands", brandResponses);
+        map.put("skinTypes", skinTypeResponses);
+        map.put("page", pageMap);
+
+        // Trả về kết quả
+        return map;
+    }
+
+    //hàm này dùng để search
+
+    public Map<String, Object> getProductsByKeyword(int size, int page, String sortValue, String sortDirection, String keyword, List<String> brand, List<String> category, List<String> skinTypes, double minPrice, double maxPrice) {
+
+        Map<String, Object> map = new HashMap<>();
+        // Lấy danh sách brand,category và skintype có trong product
+
+        Map<Long, ProductCategoryResponse> productCategoryResponseMap = new HashMap<>();
+        Map<Long, ProductBrandResponse> productBrandResponseMap = new HashMap<>();
+        Map<Long, SkinTypeResponse> skinTypeResponseMap = new HashMap<>();
+
+        Specification<ProductEntity> filterSpec = filterByKeyword(keyword)
+                .and(isNotDeleted())
+                .and(filterByStatus(Status.ACTIVE));
+
+        List<ProductEntity> filteredProducts = productRepository.findAll(filterSpec);
+
+        if(filteredProducts.isEmpty()) {
+            map.put("messageNotFound", "Rất tiếc, không tìm thấy sản phẩm từ" + keyword);
+            return map;
+        }
+
+        filteredProducts.forEach(productEntity -> {
+            if (productEntity.getCategory() != null) {
+                productEntity.getCategory().forEach(productCategory -> {
+                    ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
+                    productCategoryResponse.setTitle(productCategory.getTitle());
+                    productCategoryResponse.setId(productCategory.getId());
+                    productCategoryResponseMap.putIfAbsent(productCategory.getId(), productCategoryResponse);
+                });
+            }
+
+            if (productEntity.getBrand() != null) {
+                ProductBrandResponse productBrandResponse = new ProductBrandResponse();
+                productBrandResponse.setTitle(productEntity.getBrand().getTitle());
+                productBrandResponseMap.putIfAbsent(productEntity.getBrand().getId(), productBrandResponse);
+            }
+
+            if (productEntity.getSkinTypes() != null) {
+                productEntity.getSkinTypes().forEach(skinType -> {
+                    SkinTypeResponse skinTypeResponse = new SkinTypeResponse();
+                    skinTypeResponse.setType(skinType.getType());
+                    skinTypeResponseMap.putIfAbsent(skinType.getId(), skinTypeResponse);
+                });
+            }
+        });
+
+
+        Specification<ProductEntity> specification = filterByKeyword(keyword)
+                .and(isNotDeleted())
+                .and(filterByStatus(Status.ACTIVE));
+
+        if (brand != null) {
+            specification = specification.and(filterByBrand(brand));
+        }
+
+        if (category != null) {
+            specification = specification.and(filterByCategory(category));
+        }
+
+        if (skinTypes != null) {
+
+            specification = specification.and(filterBySkinType(skinTypes));
+        }
+
+        if (sortValue.equals("title")) {
+            specification = specification.and(sortByTitle(getSortDirection(sortDirection)));
+        } else if (sortValue.equals("price")) {
+            specification = specification.and(sortByPrice(getSortDirection(sortDirection)));
+        } else if (sortValue.equals("position")) {
+            specification = specification.and(sortByPosition(getSortDirection(sortDirection)));
+
+        }
+
+        if (minPrice > 0 && maxPrice > 0) {
+            specification = specification.and(filterByPrice(minPrice, maxPrice));
+        }
+
+
+        int p = (page > 0) ? page - 1 : 0;
+
+        Pageable pageable = PageRequest.of(p, size);
+
+
+        Page<ProductEntity> productEntityPage = productRepository.findAll(specification, pageable);
+
+
+
+        List<ProductCategoryResponse> categoryResponses = new ArrayList<>(productCategoryResponseMap.values());
+        List<ProductBrandResponse> brandResponses = new ArrayList<>(productBrandResponseMap.values());
+        List<SkinTypeResponse> skinTypeResponses = new ArrayList<>(skinTypeResponseMap.values());
+        List<ProductResponseDTO> productResponseDTOs = mapProductResponsesDTO(productEntityPage.getContent());
+
+        productResponseDTOs.forEach(productResponseDTO -> {
+            productResponseDTO.setCategory(null);
+            productResponseDTO.setSkinTypes(null);
+            clearUnnecessaryFields(productResponseDTO);
+        });
+
+
+        Map<String, Object> pageMap = new HashMap<>();
+        pageMap.put("page", productEntityPage.getNumber() + 1);
+        pageMap.put("totalItems", productEntityPage.getTotalElements());
+        pageMap.put("totalPages", productEntityPage.getTotalPages());
+        pageMap.put("pageSize", productEntityPage.getSize());
+
+        map.put("title", keyword);
+
 
         map.put("products", productResponseDTOs);
         map.put("categories", categoryResponses);
