@@ -27,7 +27,7 @@ public class ProductBrandEntity extends AbstractEntity {
     String slug;
 
     @Column(name = "image")
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     List<String> image;
 
     @Column(name = "Description", columnDefinition = "MEDIUMTEXT")

@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -77,6 +78,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         return true;
     }
 
+    @Transactional(readOnly = true)
     public List<ProductBrandResponse> getAll() {
         List<ProductBrandResponse> list =  productBrandMapper.toProductBrandsResponseDTO(productBrandRepository.findAll());
 

@@ -31,7 +31,7 @@ public class BlogEntity extends AbstractEntity {
     @Column(name = "content",columnDefinition = "MEDIUMTEXT")
     String content;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "thumbnail")
     List<String> thumbnail;
 

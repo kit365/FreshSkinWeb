@@ -35,7 +35,7 @@ public class BlogCategoryEntity extends AbstractEntity {
     @Column(name = "feature")
     boolean featured;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "image")
     List<String> image;
 

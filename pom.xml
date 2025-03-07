@@ -180,7 +180,15 @@
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
 
-<!--        cấu hình time refreshCache-->
+        <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.17.2</version>
+        </dependency>
+
+
+        <!--        cấu hình time refreshCache-->
         <!-- https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine -->
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis -->
 <!--        <dependency>-->

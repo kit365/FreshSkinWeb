@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -579,6 +580,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 /*
     Trang home
      */
+
 
     //## 7 sản phẩm có lượt mua cao nhất
     public List<ProductResponseDTO> findTop7FlashSale() {
