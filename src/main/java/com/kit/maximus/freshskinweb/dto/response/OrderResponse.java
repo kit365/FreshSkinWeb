@@ -27,10 +27,6 @@ import java.util.List;
 public class OrderResponse implements Serializable {
     Long orderId;
 
-    UserEntity user;
-
-    List<OrderItemEntity> orderItems;
-
     String username;
 
     String firstName;
@@ -48,6 +44,8 @@ public class OrderResponse implements Serializable {
     Double totalPrice;
 
     PaymentMethod paymentMethod;
+
+    List<OrderItemResponse> orderItems;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date orderDate;

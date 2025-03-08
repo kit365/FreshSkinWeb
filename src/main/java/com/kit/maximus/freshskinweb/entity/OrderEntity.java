@@ -37,7 +37,7 @@ public class OrderEntity extends AbstractEntity {
     UserEntity user;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "order")
-    List<OrderItemEntity> orderItems;
+    List<OrderItemEntity> orderItems = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "order", fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonManagedReference
@@ -81,4 +81,14 @@ public class OrderEntity extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "OrderStatus") //Thông báo trạng thái cho đơn hàng
     OrderStatus orderStatus = OrderStatus.PENDING;
+
+    public void addOrderItem(OrderItemEntity orderItem) {
+        orderItems.add(orderItem);
+        orderItem.setOrder(this);
+    }
+
+    public void removeOrderItem(OrderItemEntity orderItem) {
+        orderItems.remove(orderItem);
+        orderItem.setOrder(null);
+    }
 }
