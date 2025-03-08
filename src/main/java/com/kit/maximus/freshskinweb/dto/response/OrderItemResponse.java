@@ -20,9 +20,10 @@ import java.io.Serializable;
 public class OrderItemResponse implements Serializable {
     Long orderItemId;
 
+    @JsonIgnore //tạm thời ẩn bớt
     OrderEntity order;
 
-    ProductVariantEntity productVariant;
+    ProductVariantResponse productVariant;
 
     Integer quantity;
 

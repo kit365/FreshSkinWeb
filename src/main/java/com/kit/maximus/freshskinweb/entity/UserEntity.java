@@ -100,12 +100,26 @@ public class UserEntity extends AbstractEntity implements UserDetails {
         order.setUser(null);
     }
 
+
+    /* PHẦN NÀY TAO CHỈNH LẠI ĐỂ IN USER KHÔNG BỊ BÁO LỖI: KO THỂ TOSTRING ROLE DO ROLE == NULL */
+//    @Override
+//    public List<GrantedAuthority> getAuthorities() {
+//        List<GrantedAuthority> authorities = new ArrayList<>();
+//        authorities.add(new SimpleGrantedAuthority(this.role.toString()));
+//        return authorities;
+//    }
+
     @Override
     public List<GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(this.role.toString()));
+        if (this.role != null) {
+            authorities.add(new SimpleGrantedAuthority(this.role.toString()));
+        } else {
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER")); // hoặc giá trị mặc định phù hợp
+        }
         return authorities;
     }
+
 
 //    @Override
 //    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@class")

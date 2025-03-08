@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.dto.request.order;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.kit.maximus.freshskinweb.dto.request.orderItem.OrderItemRequest;
 import com.kit.maximus.freshskinweb.entity.AbstractEntity;
 import com.kit.maximus.freshskinweb.entity.OrderItemEntity;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
@@ -57,5 +58,5 @@ public class OrderRequest extends AbstractEntity implements Serializable {
 
     String orderStatus;
 
-    List<OrderItemEntity> orderItems;
+    List<OrderItemRequest> orderItems;
 }
