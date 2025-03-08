@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.service;
 
+import com.kit.maximus.freshskinweb.dto.request.role.AddPermissionRequest;
 import com.kit.maximus.freshskinweb.dto.request.role.CreateRoleRequest;
 import com.kit.maximus.freshskinweb.dto.request.role.UpdateRoleRequest;
 import com.kit.maximus.freshskinweb.dto.response.RoleResponseDTO;
@@ -51,26 +52,28 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
 //        System.out.println("currentPermissions: " + currentPermissions);
 //        return true;
 //    }
-    public boolean addPermission(Long id, CreateRoleRequest request) {
-        var role = roleRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+    public boolean addPermission(List<AddPermissionRequest> request) {
+        List<Long> id = request.stream()
+                .map(AddPermissionRequest::getRoleId)
+                .collect(Collectors.toList());
 
-        if (role.getPermission() == null) {
-            role.setPermission(new ArrayList<>()); // Khởi tạo nếu null
-        }
+        List<RoleEntity> roles = roleRepository.findAllById(id);
 
-        List<String> currentPermissions = role.getPermission();
-        currentPermissions.addAll(request.getPermission());
-        role.setPermission(currentPermissions);
+        roles.forEach(roleEntity -> {
+            request.stream()
+                    .filter(roleRequest -> roleRequest.getRoleId().equals(roleEntity.getRoleId())) // Chỉ lấy request đúng với role
+                    .findFirst()
+                    .ifPresent(roleRequest -> {
+                        List<String> currentPermissions = new ArrayList<>(roleEntity.getPermission()); // Tạo danh sách mới
+                        currentPermissions.addAll(roleRequest.getPermission());
+                        roleEntity.setPermission(currentPermissions);
+                    });
+        });
 
-        roleRepository.save(role);
-
-        System.out.println("Request permissions: " + request.getPermission());
-        System.out.println("currentPermissions: " + currentPermissions);
-        System.out.println("After save: " + roleRepository.findById(id).get().getPermission());
-
+        roleRepository.saveAll(roles);
         return true;
     }
+
 
 
     public RoleResponseDTO getPermissionById(Long id) {
