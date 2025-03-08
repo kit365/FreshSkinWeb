@@ -2,6 +2,7 @@ package com.kit.maximus.freshskinweb.dto.request.order;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kit.maximus.freshskinweb.entity.AbstractEntity;
+import com.kit.maximus.freshskinweb.entity.OrderItemEntity;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -10,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -54,4 +56,6 @@ public class OrderRequest extends AbstractEntity implements Serializable {
     PaymentMethod paymentMethod;
 
     String orderStatus;
+
+    List<OrderItemEntity> orderItems;
 }

@@ -12,6 +12,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
 
+    @Mapping(target = "orderItems", ignore = true)
     OrderEntity toOrderEntity(OrderRequest order);
 
     @Named("toOrderResponse")

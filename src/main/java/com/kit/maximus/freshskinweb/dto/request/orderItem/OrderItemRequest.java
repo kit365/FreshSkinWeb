@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.dto.request.orderItem;
 
+import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

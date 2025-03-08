@@ -31,6 +31,8 @@ public class OrderResponse implements Serializable {
 
     List<OrderItemEntity> orderItems;
 
+    List<OrderItemEntity> products;
+
     String username;
 
     String firstName;
