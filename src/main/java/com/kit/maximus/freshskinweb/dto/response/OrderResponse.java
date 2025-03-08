@@ -9,10 +9,7 @@ import com.kit.maximus.freshskinweb.utils.PaymentMethod;
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.*;
 import com.kit.maximus.freshskinweb.utils.Status;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
@@ -22,6 +19,7 @@ import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
+@Setter
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderResponse implements Serializable {

@@ -4,6 +4,7 @@ package com.kit.maximus.freshskinweb.repository;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
+import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import com.kit.maximus.freshskinweb.specification.ProductSpecification;
 import com.kit.maximus.freshskinweb.utils.Status;
 import org.springframework.data.domain.Page;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<ProductEntity, Long>, JpaSpecificationExecutor<ProductEntity> {
-
 
     Page<ProductEntity> findAllByDeleted(boolean b, Pageable pageable);
 
