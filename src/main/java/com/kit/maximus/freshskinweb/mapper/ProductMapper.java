@@ -24,11 +24,13 @@ public interface ProductMapper {
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "brand", ignore = true)
     @Mapping(target = "skinTypes", ignore = true)
+    @Mapping(target = "variants", ignore = true)
     ProductResponseDTO productToProductResponseDTO(ProductEntity product);
 
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "brand", ignore = true)
     @Mapping(target = "skinTypes", ignore = true)
+    @Mapping(target = "variants", ignore = true)
     List<ProductResponseDTO> productToProductResponsesDTO(List<ProductEntity> product);
 
 //    List<ProductResponseDTO> toUserResponseDTO(List<ProductEntity> productEntities);
