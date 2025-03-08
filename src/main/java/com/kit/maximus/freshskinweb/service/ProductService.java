@@ -226,7 +226,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         productMapper.updateProduct(listProduct, request);
 
-        ProductResponseDTO productResponseDTO =  productMapper.productToProductResponseDTO(productRepository.save(listProduct));
+        ProductResponseDTO productResponseDTO = productMapper.productToProductResponseDTO(productRepository.save(listProduct));
 
         if (productResponseDTO.getVariants() != null) {
             List<ProductVariantResponse> productVariantResponses = new ArrayList<>();
@@ -242,7 +242,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         }
 
 
-        return productResponseDTO ;
+        return productResponseDTO;
     }
 
     private Map<Integer, ProductVariantEntity> listProductVariantToMap(List<ProductVariantEntity> productEntity) {
@@ -487,7 +487,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         });
 
 
-
         map.put("products", list.getContent());
         map.put("currentPage", list.getNumber() + 1);
         map.put("totalItems", list.getTotalElements());
@@ -555,7 +554,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                         }
                     });
         });
-
 
 
         // Đóng gói kết quả vào map
@@ -734,15 +732,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         List<ProductCategoryResponse> productCategoryResponses = new ArrayList<>();
 
 
-        productEntity.getVariants().forEach(variant -> {
-            ProductVariantResponse variantResponse = new ProductVariantResponse();
-            variantResponse.setId(variant.getId());
-            variantResponse.setPrice(variant.getPrice());
-            variantResponse.setVolume(variant.getVolume());
-            variantResponse.setUnit(variant.getUnit());
-        });
-
-
         productEntity.getCategory().forEach(productCategoryEntity -> {
             ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
             productCategoryResponse.setId(productCategoryEntity.getId());
@@ -759,10 +748,21 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
 
             productCategoryResponses.add(productCategoryResponse);
+
+
         });
         ProductResponseDTO response = mapProductResponseDTO(productEntity);
         response.setCategory(productCategoryResponses);
-
+        List<ProductVariantResponse> productVariantResponses = new ArrayList<>();
+        productEntity.getVariants().forEach(variant -> {
+            ProductVariantResponse variantResponse = new ProductVariantResponse();
+            variantResponse.setId(variant.getId());
+            variantResponse.setPrice(variant.getPrice());
+            variantResponse.setVolume(variant.getVolume());
+            variantResponse.setUnit(variant.getUnit());
+            productVariantResponses.add(variantResponse);
+        });
+        response.setVariants(productVariantResponses);
         // Nhét sản phẩm chính vào map (bọc vào List)
         map.put("productDetail", response);
 
@@ -1032,7 +1032,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             map.put("title", titleBrand.getTitle());
         } else if (slug.equals("thuong-hieu")) {
             map.put("title", "Thương Hiệu");
-        } else if(slug.equals("tat-ca-san-pham")){
+        } else if (slug.equals("tat-ca-san-pham")) {
             map.put("title", "Tất cả sản phẩm");
         }
 
@@ -1063,7 +1063,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         List<ProductEntity> filteredProducts = productRepository.findAll(filterSpec);
 
-        if(filteredProducts.isEmpty()) {
+        if (filteredProducts.isEmpty()) {
             map.put("messageNotFound", "Rất tiếc, không tìm thấy sản phẩm từ " + keyword);
             return map;
         }
@@ -1092,8 +1092,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 });
             }
         });
-
-
 
 
         Specification<ProductEntity> specification = filterByKeyword(keyword)
@@ -1133,7 +1131,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
 
         Page<ProductEntity> productEntityPage = productRepository.findAll(specification, pageable);
-
 
 
         List<ProductCategoryResponse> categoryResponses = new ArrayList<>(productCategoryResponseMap.values());
@@ -1180,7 +1177,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         });
         return result;
     }
-
 
 
     private void clearUnnecessaryFields(ProductResponseDTO productResponseDTO) {
@@ -1323,7 +1319,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         return productResponseDTO;
     }
-
 
 
 }
