@@ -61,19 +61,18 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
 
         roles.forEach(roleEntity -> {
             request.stream()
-                    .filter(roleRequest -> roleRequest.getRoleId().equals(roleEntity.getRoleId())) // Chỉ lấy request đúng với role
+                    .filter(roleRequest -> roleRequest.getRoleId().equals(roleEntity.getRoleId()))
                     .findFirst()
                     .ifPresent(roleRequest -> {
-                        List<String> currentPermissions = new ArrayList<>(roleEntity.getPermission()); // Tạo danh sách mới
-                        currentPermissions.addAll(roleRequest.getPermission());
-                        roleEntity.setPermission(currentPermissions);
+                        List<String> newPermissions = new ArrayList<>(roleRequest.getPermission()); // Chỉ lấy quyền mới
+                        roleEntity.setPermission(newPermissions); // Ghi đè thay vì cộng dồn
                     });
         });
 
-        roleRepository.deleteAll();
-        roleRepository.saveAll(roles);
+        roleRepository.saveAll(roles); // Chỉ cập nhật role có trong request
         return true;
     }
+
 
 
 
