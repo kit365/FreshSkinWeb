@@ -62,7 +62,7 @@ public class HomeController {
 
         List<String> freshSkinSloganList = Arrays.asList("Nước tẩy trang", "Sữa rữa mặt", "Toner / Nước cân bằng da");
         List<String> topMoisturizingProductsList = Arrays.asList("Tẩy tế bào chết", "Chống nắng da mặt", "Serum / Tinh Chất");
-        List<String> beautyTrendsList = Arrays.asList("Làm Sạch Da", "Đặc Trị", "Hỗ trợ trị mụn");
+        List<String> beautyTrendsList = Arrays.asList("Dầu Gội", "Dầu Xả", "Xịt Dưỡng Tóc");
         ExecutorService executor = Executors.newFixedThreadPool(threadCount); // Tạo ThreadPool để quản lý luồng
 
         CompletableFuture<List<ProductCategoryResponse>> freshSkinFuture =
