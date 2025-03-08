@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.controller.admin;
 
+import com.kit.maximus.freshskinweb.dto.request.role.AddPermissionRequest;
 import com.kit.maximus.freshskinweb.dto.request.role.CreateRoleRequest;
 import com.kit.maximus.freshskinweb.dto.request.role.UpdateRoleRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
@@ -35,10 +36,14 @@ public class RoleController {
         return ResponseAPI.<RoleResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
-    @PostMapping("add-permission/{id}")
-    public ResponseAPI<RoleResponseDTO> addPermission(@PathVariable Long id, @Valid @RequestBody CreateRoleRequest requestDTO) {
+    @PatchMapping("add-permission")
+    public ResponseAPI<RoleResponseDTO> addPermission(@RequestBody List<AddPermissionRequest> request) {
+        request.forEach(addPermissionRequest -> {
+            System.out.println(addPermissionRequest.getRoleId());
+            System.out.println(addPermissionRequest.getPermission());
+        });
         String message = "Thêm quyền thành công";
-        var res = roleService.addPermission(id, requestDTO);
+        var res = roleService.addPermission(request);
         return ResponseAPI.<RoleResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
