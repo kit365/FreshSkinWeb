@@ -70,6 +70,7 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
                     });
         });
 
+        roleRepository.deleteAll();
         roleRepository.saveAll(roles);
         return true;
     }
