@@ -424,12 +424,12 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         Page<BlogCategoryEntity> blogCategoryEntities = blogCategoryRepository.findAllByStatusAndDeleted(Status.ACTIVE, false, pageable);
 
         List<BlogCategoryResponse> blogResponses = mapToCategoryResponse(blogCategoryEntities.getContent());
-        Map<String, Object> pageDetail = new HashMap<>();
-        pageDetail.put("currentPage", blogCategoryEntities.getNumber() + 1);
-        pageDetail.put("totalItems", blogCategoryEntities.getTotalElements());
-        pageDetail.put("totalPages", blogCategoryEntities.getTotalPages());
-        pageDetail.put("pageSize", blogCategoryEntities.getSize());
-        map.put("page", pageDetail);
+//        Map<String, Object> pageDetail = new HashMap<>();
+//        pageDetail.put("currentPage", blogCategoryEntities.getNumber() + 1);
+//        pageDetail.put("totalItems", blogCategoryEntities.getTotalElements());
+//        pageDetail.put("totalPages", blogCategoryEntities.getTotalPages());
+//        pageDetail.put("pageSize", blogCategoryEntities.getSize());
+//        map.put("page", pageDetail);
         map.put("blog_category", blogResponses);
         return map;
     }

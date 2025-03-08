@@ -37,7 +37,7 @@ public class OrderController {
         return ResponseAPI.<List<OrderResponse>>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
     }
 
-    @GetMapping("/search/{id}")
+    @GetMapping("/{id}")
     public ResponseAPI<OrderResponse> getOrderById(@PathVariable Long id) {
         String message = "Tạo đơn hàng thành công";
         var order = orderService.getOrderById(id);

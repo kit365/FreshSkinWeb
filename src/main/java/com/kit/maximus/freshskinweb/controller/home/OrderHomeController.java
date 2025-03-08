@@ -29,7 +29,6 @@ public class OrderHomeController {
     OrderService orderService;
 
 
-
     @PostMapping("/create")
     public ResponseAPI<OrderIdResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest) {
         String message = "Tạo đơn hàng thành công";
@@ -38,11 +37,20 @@ public class OrderHomeController {
         return ResponseAPI.<OrderIdResponse>builder().code(HttpStatus.OK.value()).message(message).data(create).build();
     }
 
-    @GetMapping("/show")
+    @GetMapping()
     public ResponseAPI<List<OrderResponse>> getAllOrder() {
         String message = "Hiện tất cả các đơn hàng thành công";
         List<OrderResponse> order = orderService.getAllOrder();
         return ResponseAPI.<List<OrderResponse>>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
+    }
+
+
+    @GetMapping("/{id}")
+    public ResponseAPI<OrderResponse> getOrderById(@PathVariable Long id) {
+        String message = "Tạo đơn hàng thành công";
+        var order = orderService.getOrderById(id);
+
+        return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
     }
 
 

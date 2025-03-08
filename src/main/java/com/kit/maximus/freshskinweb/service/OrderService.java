@@ -87,10 +87,49 @@ public class OrderService {
 
 
     public OrderResponse getOrderById(Long orderId) {
-        OrderEntity order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
-        return orderMapper.toOrderResponse(order);
+        OrderResponse orderResponse = orderMapper.toOrderResponse(order);
+
+        if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
+            List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+
+            for (OrderItemEntity orderItemEntity : order.getOrderItems()) {
+                OrderItemResponse orderItemResponse = new OrderItemResponse();
+                orderItemResponse.setOrderItemId(orderItemEntity.getOrderItemId());
+                orderItemResponse.setQuantity(orderItemEntity.getQuantity());
+                orderItemResponse.setSubtotal(orderItemEntity.getSubtotal());
+
+                if (orderItemEntity.getProductVariant() != null) {
+                    ProductVariantResponse productVariantResponse = new ProductVariantResponse();
+                    productVariantResponse.setId(orderItemEntity.getProductVariant().getId());
+                    productVariantResponse.setPrice(orderItemEntity.getProductVariant().getPrice());
+                    productVariantResponse.setUnit(orderItemEntity.getProductVariant().getUnit());
+                    productVariantResponse.setVolume(orderItemEntity.getProductVariant().getVolume());
+
+                    if (orderItemEntity.getProductVariant().getProduct() != null) {
+                        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+                        productResponseDTO.setTitle(orderItemEntity.getProductVariant().getProduct().getTitle());
+                        productResponseDTO.setThumbnail(orderItemEntity.getProductVariant().getProduct().getThumbnail());
+                        productResponseDTO.setDiscountPercent(orderItemEntity.getProductVariant().getProduct().getDiscountPercent());
+                        productResponseDTO.setSlug(orderItemEntity.getProductVariant().getProduct().getSlug());
+                        productResponseDTO.setId(orderItemEntity.getProductVariant().getProduct().getId());
+                        productVariantResponse.setProduct(productResponseDTO);
+                    }
+
+                    orderItemResponse.setProductVariant(productVariantResponse);
+                }
+
+                orderItemResponses.add(orderItemResponse);
+            }
+
+            orderResponse.setOrderItems(orderItemResponses);
+        }
+
+        return orderResponse;
     }
+
 
 //    public ProductResponseDTO getProductByVariant(Long id) {
 //        ProductVariantEntity varirant = productVariantRepository.findById(id).orElse(null);
