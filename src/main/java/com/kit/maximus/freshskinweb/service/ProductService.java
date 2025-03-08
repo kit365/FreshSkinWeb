@@ -724,11 +724,18 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     //Tìm chi tiết Product bằng Slug
     public List<Map<String, Object>> getProductBySlug(String slug) {
+
+
         List<Map<String, Object>> data = new ArrayList<>();
         Map<String, Object> map = new HashMap<>();
 
         // Lấy sản phẩm theo slug
         ProductEntity productEntity = productRepository.findBySlug(slug);
+
+        if (productEntity == null || productEntity.isDeleted() || productEntity.getStatus() != Status.ACTIVE) {
+                throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
         List<ProductCategoryResponse> productCategoryResponses = new ArrayList<>();
 
 

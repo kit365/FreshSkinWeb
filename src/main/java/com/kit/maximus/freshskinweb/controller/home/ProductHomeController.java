@@ -28,13 +28,13 @@ public class ProductHomeController {
     @GetMapping("{slug}")
     public ResponseAPI<List<Map<String, Object>>> getProductDetail(@PathVariable("slug") String slug) {
         String message_succed = "Thành công!!!";
-        String message_failed = "Thất bại!!!";
+        String message_failed = "SẢN PHẢM KHÔNG TÌM THẤY";
         try {
             var result = productService.getProductBySlug(slug);
             return ResponseAPI.<List<Map<String, Object>>> builder().code(HttpStatus.OK.value()).data(result).message(message_succed).build();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return ResponseAPI.<List<Map<String, Object>> >builder().code(HttpStatus.OK.value()).message(message_failed).build();
+            return ResponseAPI.<List<Map<String, Object>> >builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
         }
     }
 

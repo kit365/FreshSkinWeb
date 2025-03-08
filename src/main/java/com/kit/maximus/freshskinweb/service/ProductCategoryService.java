@@ -534,10 +534,31 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                 Status.ACTIVE, false, true, Sort.by(Sort.Direction.DESC, "position")
         );
 
+
+//        categories.forEach(productCategoryEntity -> {
+//            productCategoryEntity.getProducts().removeIf(productEntity ->
+//            {
+//                boolean b = productEntity.isDeleted() || productEntity.getStatus() != Status.ACTIVE;
+//                return b;
+//            });
+//        });
+
         List<ProductCategoryResponse> productCategoryFeature = mapToCategoryResponse(categories);
-        productCategoryFeature.forEach(category ->
-                category.getProducts().forEach(product -> product.setDescription(null))
-        );
+
+
+
+        productCategoryFeature.forEach(category -> {
+            if (category.getProducts() != null) {
+                category.getProducts().removeIf(product ->
+                        Boolean.TRUE.equals(product.isDeleted()) || getStatus(product.getStatus()) == Status.INACTIVE
+                );
+
+                category.getProducts().forEach(product -> product.setDescription(null));
+            }
+        });
+
+
+
         return productCategoryFeature;
     }
 
@@ -620,6 +641,9 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                 productResponseDTO.setThumbnail(productEntity.getThumbnail());
                 productResponseDTO.setDiscountPercent(productEntity.getDiscountPercent());
                 productResponseDTO.setFeatured(productEntity.isFeatured());
+                productResponseDTO.setStatus(String.valueOf(productEntity.getStatus()));
+                productResponseDTO.setDeleted(productEntity.isDeleted());
+
                 if (productEntity.getBrand() != null) {
                     ProductBrandResponse brandResponse = new ProductBrandResponse();
                     brandResponse.setId(productEntity.getBrand().getId());
