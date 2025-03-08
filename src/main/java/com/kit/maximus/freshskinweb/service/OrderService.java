@@ -92,15 +92,60 @@ public class OrderService {
         return orderMapper.toOrderResponse(order);
     }
 
-    public ProductResponseDTO getProductByVariant(Long id) {
-        ProductVariantEntity varirant = productVariantRepository.findById(id).orElse(null);
-        ProductEntity product = varirant.getProduct();
-        return productMapper.productToProductResponseDTO(product);
-    }
+//    public ProductResponseDTO getProductByVariant(Long id) {
+//        ProductVariantEntity varirant = productVariantRepository.findById(id).orElse(null);
+//        ProductEntity product = varirant.getProduct();
+//        return productMapper.productToProductResponseDTO(product);
+//    }
 
     public List<OrderResponse> getAllOrder() {
         List<OrderEntity> orders = orderRepository.findAll();
-        List<OrderResponse> orderResponses = new ArrayList<>();
+
+        List<OrderResponse> orderResponses = orderMapper.toOrderResponseList(orders);
+
+
+
+        for (OrderResponse orderResponse : orderResponses) {
+
+            orders.forEach(orderEntity -> {
+                if(orderEntity.getOrderItems() != null) {
+                    List<OrderItemResponse>  orderItemResponses = new ArrayList<>();
+                    orderEntity.getOrderItems().forEach(orderItemEntity -> {
+                        OrderItemResponse orderItemResponse = new OrderItemResponse();
+                        orderItemResponse.setOrderItemId(orderItemEntity.getOrderItemId());
+                        orderItemResponse.setQuantity(orderItemEntity.getQuantity());
+                        orderItemResponse.setSubtotal(orderItemEntity.getSubtotal());
+
+                        if(orderItemEntity.getProductVariant() != null) {
+                            ProductVariantResponse productVariantResponse = new ProductVariantResponse();
+                            productVariantResponse.setId(orderItemEntity.getProductVariant().getId());
+                            productVariantResponse.setPrice(orderItemEntity.getProductVariant().getPrice());
+                            productVariantResponse.setUnit(orderItemEntity.getProductVariant().getUnit());
+                            productVariantResponse.setVolume(orderItemEntity.getProductVariant().getVolume());
+
+                            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+                            productResponseDTO.setTitle(orderItemEntity.getProductVariant().getProduct().getTitle());
+                            productResponseDTO.setThumbnail(orderItemEntity.getProductVariant().getProduct().getThumbnail());
+                            productResponseDTO.setDiscountPercent(orderItemEntity.getProductVariant().getProduct().getDiscountPercent());
+                            productResponseDTO.setSlug(orderItemEntity.getProductVariant().getProduct().getSlug());
+                            productResponseDTO.setId(orderItemEntity.getProductVariant().getProduct().getId());
+                            productVariantResponse.setProduct(productResponseDTO);
+                            orderItemResponse.setProductVariant(productVariantResponse);
+                            orderItemResponses.add(orderItemResponse);
+                        }
+                        orderResponse.setOrderItems(orderItemResponses);
+                    });
+                }
+            });
+
+
+        }
+
+
+
+
+        //Truy xuat Product thông qua ProductVariantID
+
 
 //        if (orders != null && !orders.isEmpty()) {
 //            for (OrderEntity orderEntity : orders) {
@@ -135,9 +180,8 @@ public class OrderService {
 //            }
 //        }
 
-        return null;
+        return orderResponses;
     }
-
 
 
     public void deleteOrder(Long orderId) {

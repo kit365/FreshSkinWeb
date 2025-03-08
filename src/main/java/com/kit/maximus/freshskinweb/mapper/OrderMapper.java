@@ -15,14 +15,14 @@ public interface OrderMapper {
     @Mapping(target = "orderItems", ignore = true)
     OrderEntity toOrderEntity(OrderRequest order);
 
-    @Named("toOrderResponse")
-    @Mapping(target = "orderItems", source = "orderItems")
+    @Mapping(target = "orderItems", ignore = true)
     OrderResponse toOrderResponse(OrderEntity order);
 
     @Named("toOrderResponseCreate")
     @Mapping(target = "orderId", source = "orderId")
     OrderIdResponse toOrderResponseCreate(OrderEntity order);
 
+    @Mapping(target = "orderItems", ignore = true)
     List<OrderResponse> toOrderResponseList(List<OrderEntity> orderEntities);
 
 

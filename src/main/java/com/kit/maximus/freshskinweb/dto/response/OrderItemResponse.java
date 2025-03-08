@@ -6,16 +6,15 @@ import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 
 //@JsonInclude(JsonInclude.Include.NON_NULL)
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Builder
@@ -31,5 +30,6 @@ public class OrderItemResponse implements Serializable {
 
     Double subtotal;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     Status status;
 }
