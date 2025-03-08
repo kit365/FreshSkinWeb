@@ -27,4 +27,6 @@ public class ProductVariantResponse {
 
     @JsonProperty("product_ids")
     List<Long> productID;
+
+    ProductResponseDTO product;
 }

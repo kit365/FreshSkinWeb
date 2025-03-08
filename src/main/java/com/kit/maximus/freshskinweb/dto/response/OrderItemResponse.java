@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
@@ -16,6 +17,7 @@ import java.io.Serializable;
 //@JsonInclude(JsonInclude.Include.NON_NULL)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
+@Setter
 @Builder
 public class OrderItemResponse implements Serializable {
     Long orderItemId;
