@@ -28,9 +28,9 @@ import java.util.List;
 public class OrderEntity extends AbstractEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "OrderId")
-    Long orderId;
+    String orderId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UserId", nullable = true)

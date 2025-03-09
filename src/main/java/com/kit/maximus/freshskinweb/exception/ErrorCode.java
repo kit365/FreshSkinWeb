@@ -110,8 +110,12 @@ public enum ErrorCode {
 
     //NOTIFICATION
     NOTIFICATION_NOT_FOUND(404, "Không tìm thấy thông báo"),
+
     //ORDERSTATUS
     ORDER_STATUS_INVALID(404, "Không tìm thấy trạng thái đơn hàng"),
+
+    //DISCOUNT
+    DISCOUNT_NOT_FOUND(404, "Không tìm thấy mã giảm giá"),
     ;
 
 
