@@ -49,9 +49,6 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
 
     BlogCategoryMapper blogCategoryMapper;
 
-
-    BlogService blogService;
-
     Cloudinary cloudinary;
 
     @Override
