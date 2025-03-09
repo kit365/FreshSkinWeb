@@ -89,6 +89,7 @@ public class AuthenticationService implements UserDetailsService {
         var token = generateToken(authenticationRequest.getUsername());
 
         Cookie cookie = new Cookie("token", token);
+        cookie.setDomain("freshskinweb.onrender.com");
         cookie.setHttpOnly(true); // Ngăn JavaScript truy cập, tăng bảo mật
         cookie.setSecure(true); // Bật nếu dùng HTTPS
         cookie.setPath("/"); // Áp dụng cho toàn bộ domain

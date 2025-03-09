@@ -32,7 +32,7 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseAPI<AuthenticationResponseDTO> checkLogin(@RequestBody AuthenticationRequest request, HttpServletResponse response) {
-        String message = "Login success";
+        String message = "Đăng nhập thành công";
         AuthenticationResponseDTO result = authenticationService.authenticate(request, response);
 
         return ResponseAPI.<AuthenticationResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
@@ -40,7 +40,7 @@ public class AuthenticationController {
     }
     @PostMapping("/introspect")
     public ResponseAPI<IntrospectResponse> checkToken(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
-        String message = "Token check success";
+        String message = "Kiểm tra token thành công";
         IntrospectResponse result = authenticationService.introspect(request);
 
         return ResponseAPI.<IntrospectResponse>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
