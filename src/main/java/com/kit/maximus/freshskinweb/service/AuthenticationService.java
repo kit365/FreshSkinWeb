@@ -90,6 +90,7 @@ public class AuthenticationService implements UserDetailsService {
 
         Cookie cookie = new Cookie("token", token);
         cookie.setDomain("freshskinweb.onrender.com");
+//        cookie.setDomain("localhost");
         cookie.setHttpOnly(true); // Ngăn JavaScript truy cập, tăng bảo mật
         cookie.setSecure(true); // Bật nếu dùng HTTPS
         cookie.setPath("/"); // Áp dụng cho toàn bộ domain
@@ -99,6 +100,21 @@ public class AuthenticationService implements UserDetailsService {
         return AuthenticationResponseDTO.builder()
                 .token(cookie).authenticated(authenticated).build();
     }
+
+    public void logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("token", null);
+        cookie.setDomain("freshskinweb.onrender.com");
+//        cookie.setDomain("localhost");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // Xóa ngay lập tức
+//        cookie.setValue("");
+
+        response.addCookie(cookie);
+    }
+
+
 
     private String generateToken(String username) {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);

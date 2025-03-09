@@ -38,6 +38,16 @@ public class AuthenticationController {
         return ResponseAPI.<AuthenticationResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
 
     }
+
+    @PostMapping("/logout")
+    public ResponseAPI<String> logout(HttpServletResponse response) {
+        authenticationService.logout(response);
+        return ResponseAPI.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("Đăng xuất thành công")
+                .build();
+    }
+
     @PostMapping("/introspect")
     public ResponseAPI<IntrospectResponse> checkToken(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
         String message = "Kiểm tra token thành công";
