@@ -14,12 +14,14 @@ import com.kit.maximus.freshskinweb.repository.ProductBrandRepository;
 import com.kit.maximus.freshskinweb.repository.ProductCategoryRepository;
 import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.repository.SkinTypeRepository;
+import com.kit.maximus.freshskinweb.repository.search.ProductSearchRepository;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.opensearch.client.opensearch.OpenSearchClient;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -55,6 +57,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     Cloudinary cloudinary;
 
+    ProductSearchRepository productSearchRepository;
+
     @Override
     public boolean add(CreateProductRequest request) {
         List<ProductCategoryEntity> productCategoryEntity = productCategoryRepository.findAllById(request.getCategoryId());
@@ -79,7 +83,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         }
 
 
-        if (productCategoryEntity != null) {
+        if (productCategoryEntity.isEmpty()) {
             productEntity.setCategory(productCategoryEntity);
         }
 
@@ -99,8 +103,9 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         List<SkinTypeEntity> listSkinType = skinTypeRepository.findAllById(request.getSkinTypes());
         productEntity.setSkinTypes(listSkinType);
 
-        productRepository.save(productEntity);
+        ProductResponseDTO responseDTOS = mapProductResponseDTO(productRepository.save(productEntity));
 
+        productSearchRepository.indexProduct(responseDTOS);
         return true;
     }
 
@@ -284,7 +289,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     @Override
     public boolean delete(Long id) {
         ProductEntity productEntity = getProductEntityById(id);
-
+        productSearchRepository.deleteProduct(id);
         if (productEntity.getThumbnail() != null) {
             for (String deleteThumbnails : productEntity.getThumbnail()) {
                 try {
@@ -368,22 +373,20 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         productResponseDTO.setCategory(getProductCategoryResponses(productEntity));
         productResponseDTO.setSkinTypes(getSkinTypeResponses(productEntity));
 
-        if (productEntity.getVariants() != null) {
+        if (productResponseDTO.getVariants() != null) {
             List<ProductVariantResponse> productVariantResponses = new ArrayList<>();
-            for (ProductVariantResponse variant : productResponseDTO.getVariants()) {
+            productEntity.getVariants().forEach(productVariantEntity -> {
                 ProductVariantResponse newVariant = new ProductVariantResponse();
-                newVariant.setId(variant.getId());
-                newVariant.setUnit(variant.getUnit());
-                newVariant.setVolume(variant.getVolume());
-                newVariant.setPrice(variant.getPrice());
+                newVariant.setId(productVariantEntity.getId());
+                newVariant.setUnit(productVariantEntity.getUnit());
+                newVariant.setVolume(productVariantEntity.getVolume());
+                newVariant.setPrice(productVariantEntity.getPrice());
                 productVariantResponses.add(newVariant);
-            }
+            });
             productResponseDTO.setVariants(productVariantResponses);
         }
-
         return productResponseDTO;
     }
-
 
     //Ham nay de tu map ProductBrand
     private ProductBrandResponse getProductBrandResponse(ProductEntity productEntity) {
@@ -733,7 +736,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         ProductEntity productEntity = productRepository.findBySlug(slug);
 
         if (productEntity == null || productEntity.isDeleted() || productEntity.getStatus() != Status.ACTIVE) {
-                throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
         List<ProductCategoryResponse> productCategoryResponses = new ArrayList<>();
@@ -1171,10 +1174,9 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return map;
     }
 
-    @Cacheable(value = "productSuggestions", key = "#request", condition = "#request != null and #request.length() > 2")
+    //    @Cacheable(value = "productSuggestions", key = "#request", condition = "#request != null and #request.length() > 2")
     public List<ProductResponseDTO> suggestProduct(String request) {
-        List<ProductEntity> productEntity = productRepository.findTop5ByTitleContaining(request);
-        List<ProductResponseDTO> result = mapProductResponsesDTO(productEntity);
+        List<ProductResponseDTO> result = productSearchRepository.searchByTitle(request, 5);
         result.forEach(productResponseDTO -> {
             clearUnnecessaryFields(productResponseDTO);
             productResponseDTO.setVariants(null);
@@ -1327,5 +1329,16 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return productResponseDTO;
     }
 
+    public boolean indexProduct() {
+        List<ProductEntity> productEntities = productRepository.findAll();
+        List<ProductResponseDTO> responseDTOS = mapProductResponsesDTO(productEntities);
+
+        responseDTOS.forEach(productSearchRepository::indexProduct);
+
+        return false;
+    }
+
 
 }
+
+

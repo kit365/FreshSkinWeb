@@ -41,6 +41,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
 
     List<ProductEntity> findTop5ByTitleContaining(String request);
 
+    List<ProductEntity> findAllByIdIn(List<Long> results);
+
 
 //    @Query("SELECT p FROM ProductEntity p " +
 //            "JOIN p.variants v " +

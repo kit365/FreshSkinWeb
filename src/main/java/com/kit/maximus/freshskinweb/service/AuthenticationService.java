@@ -85,7 +85,6 @@ public class AuthenticationService implements UserDetailsService {
         var token = generateToken(authenticationRequest.getUsername());
         return AuthenticationResponseDTO.builder()
                 .token(token).authenticated(authenticated).build();
-
     }
     private String generateToken(String username) {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);

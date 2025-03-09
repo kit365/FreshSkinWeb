@@ -198,7 +198,28 @@
 <!--        </dependency>-->
 
 
+        <!-- https://mvnrepository.com/artifact/org.opensearch.client/opensearch-java -->
+        <dependency>
+            <groupId>org.opensearch.client</groupId>
+            <artifactId>opensearch-java</artifactId>
+            <version>2.19.0</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.opensearch.client</groupId>
+            <artifactId>opensearch-rest-client</artifactId>
+            <version>2.19.0</version>
+        </dependency>
+
+
+
+
+
+        <!--        <dependency>-->
+<!--            <groupId>org.apache.httpcomponents</groupId>-->
+<!--            <artifactId>httpclient</artifactId>-->
+<!--            <version>4.5.13</version>-->
+<!--        </dependency>-->
 
 
 

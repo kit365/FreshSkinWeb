@@ -31,6 +31,18 @@ public class ProductAdminController {
 
     ProductService productService;
 
+
+    @PostMapping("indexed")
+    public ResponseAPI<String> indexProduct() {
+        boolean result = productService.indexProduct();
+        String message = String.valueOf(result);
+        return ResponseAPI.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message(message)
+                .build();
+    }
+
+
     @PostMapping(value = "create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseAPI<ProductResponseDTO> createProduct(
             @RequestPart("request") String requestJson,  // Nhận JSON dưới dạng String
