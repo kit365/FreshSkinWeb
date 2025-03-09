@@ -13,9 +13,11 @@ import java.util.List;
 public interface OrderMapper {
 
     @Mapping(target = "orderItems", ignore = true)
+    @Mapping(target = "orderId", ignore = true)
     OrderEntity toOrderEntity(OrderRequest order);
 
     @Mapping(target = "orderItems", ignore = true)
+    @Mapping(target = "orderId", source = "orderId")
     OrderResponse toOrderResponse(OrderEntity order);
 
     @Named("toOrderResponseCreate")
@@ -23,6 +25,7 @@ public interface OrderMapper {
     OrderIdResponse toOrderResponseCreate(OrderEntity order);
 
     @Mapping(target = "orderItems", ignore = true)
+    @Mapping(target = "orderId", source = "orderId")
     List<OrderResponse> toOrderResponseList(List<OrderEntity> orderEntities);
 
 

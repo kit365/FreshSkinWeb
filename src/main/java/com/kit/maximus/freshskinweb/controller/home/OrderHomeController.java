@@ -46,7 +46,7 @@ public class OrderHomeController {
 
 
     @GetMapping("/{id}")
-    public ResponseAPI<OrderResponse> getOrderById(@PathVariable Long id) {
+    public ResponseAPI<OrderResponse> getOrderById(@PathVariable String id) {
         String message = "Tạo đơn hàng thành công";
         var order = orderService.getOrderById(id);
 

@@ -23,7 +23,8 @@ import java.util.List;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderResponse implements Serializable {
-    Long orderId;
+
+    String orderId;
 
     String username;
 

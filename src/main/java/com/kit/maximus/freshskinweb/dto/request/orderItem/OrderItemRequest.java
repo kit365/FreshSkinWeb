@@ -14,7 +14,8 @@ import java.io.Serializable;
 @ToString
 @Builder
 public class OrderItemRequest implements Serializable {
-    Long orderId;
+
+    String orderId;
     Long productVariantId;
     Integer quantity;
     Double subtotal;

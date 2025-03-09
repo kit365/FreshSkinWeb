@@ -16,6 +16,7 @@ public interface UserMapper {
     UserEntity toUserEntity(CreateUserRequest userRequestDTO);
 
     @Mapping(target = "orders", source = "orders")
+    @Mapping(target = "role", source = "role")
     UserResponseDTO toUserResponseDTO(UserEntity userEntity);
 
 

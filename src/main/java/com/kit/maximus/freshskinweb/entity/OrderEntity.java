@@ -22,13 +22,12 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "`Order`")
+@Table(name = "`order`")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "order"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderEntity extends AbstractEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "OrderId")
     String orderId;
 

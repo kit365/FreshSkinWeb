@@ -21,8 +21,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -39,8 +42,10 @@ public class OrderService {
 
     @Transactional
     public OrderIdResponse addOrder(OrderRequest orderRequest) {
-        System.out.println(orderRequest);
+
         OrderEntity order = orderMapper.toOrderEntity(orderRequest);
+
+        order.setOrderId(generateOrderCode());
 
         //Kêu Dũng có gửi UserID không => băắt Dũng phải gửi thêm id User nếu có sẵn
         if (orderRequest.getUserId() != null) {
@@ -50,13 +55,12 @@ public class OrderService {
             order.setUser(null);
         }
 
-        //No da gui Product variant ID va quantity
+        //Tạo order item thông qua order
+        // Dũng chỉ gửi ProductVariantID và số lượng để tạo Order Items
         // xai OrderitemRepo de tim ID roi set vao, set 2 chiều để tạo OrderItem trong Order
-        // Set object ProductVariant và số lượng
         if (orderRequest.getOrderItems() != null) {
 
             for (OrderItemRequest orderItem : orderRequest.getOrderItems()) {
-                System.out.println("in loop" + orderItem);
 
                 if (orderItem != null) {
 
@@ -68,8 +72,6 @@ public class OrderService {
 
                     if (productVariantEntity != null) {
                         orderItemEntity.setProductVariant(productVariantEntity);
-
-                        System.out.println("in conditions" + orderItem);
                     } else {
                         orderItemEntity.setProductVariant(null);
                     }
@@ -85,16 +87,34 @@ public class OrderService {
         return orderMapper.toOrderResponseCreate(orderRepository.save(order));
     }
 
+    // Tạo ID cho order
+    private String generateOrderCode() {
+        // Lấy ngày hiện tại
+        LocalDate today = LocalDate.now();
 
-    public OrderResponse getOrderById(Long orderId) {
-        OrderEntity order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        // Lấy 2 số cuối của năm
+        String year = String.valueOf(today.getYear()).substring(2);
+
+        // Lấy tháng và ngày (định dạng 4 số, ví dụ 0226)
+        String monthDay = today.format(DateTimeFormatter.ofPattern("MMdd"));
+
+        // Sinh ngẫu nhiên 5 số
+        String randomDigits = String.format("%05d", new Random().nextInt(100000));
+
+        // Tạo mã đơn hàng hoàn chỉnh
+        return  year + monthDay + randomDigits;
+    }
+
+
+    public OrderResponse getOrderById(String orderId) {
+        OrderEntity order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         OrderResponse orderResponse = orderMapper.toOrderResponse(order);
 
+        //Dựa vào ProductVariantID, show ra thêm các field phụ như ảnh, title, slug của Product (Mặc dù product và Order không đươc liên kết nhau )
         if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
             List<OrderItemResponse> orderItemResponses = new ArrayList<>();
-
+            
             for (OrderItemEntity orderItemEntity : order.getOrderItems()) {
                 OrderItemResponse orderItemResponse = new OrderItemResponse();
                 orderItemResponse.setOrderItemId(orderItemEntity.getOrderItemId());
@@ -223,14 +243,14 @@ public class OrderService {
     }
 
 
-    public void deleteOrder(Long orderId) {
+    public void deleteOrder(String orderId) {
         if (!orderRepository.existsById(orderId)) {
             throw new AppException(ErrorCode.ORDER_NOT_FOUND);
         }
         orderRepository.deleteById(orderId);
     }
 
-    public OrderResponse deleted(Long orderId) {
+    public OrderResponse deleted(String orderId) {
         OrderEntity orderEntity = orderRepository.findById(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 

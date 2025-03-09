@@ -5,17 +5,16 @@ import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
-    @Override
-    Optional<OrderEntity> findById(Long orderId);
+public interface OrderRepository extends JpaRepository<OrderEntity, String> {
+
+    Optional<OrderEntity> findById(String orderId);
 
     boolean existsByEmail(String email);
 
     boolean existsByPhoneNumber(String phoneNumber);
 
-    OrderResponse findById(long orderId);
+//    OrderResponse findById(String orderId);
 }
