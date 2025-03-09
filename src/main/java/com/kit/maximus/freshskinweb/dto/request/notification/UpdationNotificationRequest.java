@@ -13,7 +13,7 @@ public class UpdationNotificationRequest {
 
     Long id;
     Long userId;
-    Long orderId;
+    String orderId;
     String message;
     boolean isRead;
 

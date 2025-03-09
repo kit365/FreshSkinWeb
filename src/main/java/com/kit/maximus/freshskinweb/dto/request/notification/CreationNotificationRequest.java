@@ -14,7 +14,7 @@ import lombok.experimental.FieldDefaults;
 public class CreationNotificationRequest {
 
     Long userId;
-    Long orderId;
+    String orderId;
     String message;
     boolean isRead;
 

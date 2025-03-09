@@ -21,6 +21,5 @@ public class UpdationtionDiscountRequest {
 
     Integer UsageLimit;
 
-    Integer Used;
-
+    Boolean isGlobal;
 }
