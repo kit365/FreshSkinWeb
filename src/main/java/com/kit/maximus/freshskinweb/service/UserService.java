@@ -424,23 +424,37 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
             }
     }
 
-    //Lọc Account theo status hoặc theo tên, đồng thời có them rằng buộc chỉ show Account role != null
     public Map<String, Object> getAll(String status, String keyword, Pageable pageable) {
-        Specification<UserEntity> spec = (root, query, criteriaBuilder) -> criteriaBuilder.isNotNull(root.get("role"));
+        Specification<UserEntity> spec = UserSpecification.hasRole();
 
-        // Nếu status không null, thêm điều kiện lọc theo status
-        if (status != null) {
-            Status statusEnum = getStatus(status.toUpperCase());
-            spec = spec.and(UserSpecification.filterUsers(statusEnum, keyword));
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            Specification<UserEntity> keywordSpec = UserSpecification.filterUsers(keyword);
+            if (keywordSpec != null) {
+                spec = spec.and(keywordSpec);
+            }
         }
 
-        // Thực hiện truy vấn
+        if (status != null && !status.trim().isEmpty()) {
+            Status statusEnum = getStatus(status.toUpperCase());
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("status"), statusEnum)
+            );
+        }
+
         Page<UserEntity> userEntityPage = userRepository.findAll(spec, pageable);
 
-        // Chuyển đổi sang DTO
+        if (userEntityPage.isEmpty()) {
+            Map<String, Object> emptyResponse = new HashMap<>();
+            emptyResponse.put("users", Collections.emptyList());
+            emptyResponse.put("currentPage", 0);
+            emptyResponse.put("totalItems", 0);
+            emptyResponse.put("totalPages", 0);
+            emptyResponse.put("pageSize", pageable.getPageSize());
+            return emptyResponse;
+        }
+
         Page<UserResponseDTO> userDTOPage = userEntityPage.map(userMapper::toUserResponseDTO);
 
-        // Chuẩn bị response
         Map<String, Object> response = new HashMap<>();
         response.put("users", userDTOPage.getContent());
         response.put("currentPage", userDTOPage.getNumber() + 1);
@@ -450,8 +464,6 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
 
         return response;
     }
-
-
 
     public boolean deleteAccount(Long id) {
         UserEntity user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));

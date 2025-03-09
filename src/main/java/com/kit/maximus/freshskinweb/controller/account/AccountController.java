@@ -85,13 +85,26 @@ public class AccountController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        String message = "Tim thay List Account";
         log.info("GET ALL ACCOUNTS");
+        log.info("Received status: {}", status);  // ➤ Log kiểm tra giá trị status
+        log.info("Received keyword: {}", keyword);  // ➤ Log kiểm tra giá trị keyword
 
         Pageable pageable = PageRequest.of(page, size);
         Map<String, Object> result = userService.getAll(status, keyword, pageable);
 
-        return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+        if (result.get("users") instanceof List && ((List<?>) result.get("users")).isEmpty()) {
+            return ResponseAPI.<Map<String, Object>>builder()
+                    .code(HttpStatus.NOT_FOUND.value())
+                    .message("Không tìm thấy tài khoản phù hợp với từ khóa đã nhập.")
+                    .data(result)
+                    .build();
+        }
+
+        return ResponseAPI.<Map<String, Object>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Tìm thấy danh sách tài khoản.")
+                .data(result)
+                .build();
     }
 
     @PatchMapping("change-password/{id}")
