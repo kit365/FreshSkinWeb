@@ -155,7 +155,6 @@ public class HomeController {
     public ResponseAPI<List<ProductResponseDTO>> getProductBySuggest(@RequestBody String keyword) {
 
         if (keyword == null || keyword.isEmpty()) {
-
             return null;
         }
 
