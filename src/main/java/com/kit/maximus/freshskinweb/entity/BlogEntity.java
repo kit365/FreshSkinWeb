@@ -16,7 +16,10 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @ToString
-@Table(name = "Blog")
+@Table(name = "Blog", indexes = {
+        @Index(name = "idx_blog_title", columnList = "title"),
+        @Index(name = "idx_blog_slug", columnList = "slug")
+})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BlogEntity extends AbstractEntity {
 

@@ -13,7 +13,10 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @ToString
-@Table(name = "ProductBrand")
+@Table(name = "ProductBrand", indexes = {
+        @Index(name = "idx_product_brand_title", columnList = "title"),
+        @Index(name = "idx_product_brand_slug", columnList = "slug")
+})
 public class ProductBrandEntity extends AbstractEntity {
 
     @Id

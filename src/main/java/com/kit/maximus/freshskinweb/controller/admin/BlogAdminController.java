@@ -176,4 +176,14 @@ public class BlogAdminController {
         return ResponseAPI.<BlogResponse>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
+    @PostMapping("indexed")
+    public ResponseAPI<String> indexBlog() {
+        boolean result = blogService.indexBlogs();
+        String message = String.valueOf(result);
+        return ResponseAPI.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message(message)
+                .build();
+    }
+
 }

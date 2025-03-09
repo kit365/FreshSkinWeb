@@ -49,6 +49,9 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
 
     BlogCategoryMapper blogCategoryMapper;
 
+
+    BlogService blogService;
+
     Cloudinary cloudinary;
 
     @Override
@@ -413,26 +416,6 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
 
     User
      */
-
-    public Map<String, Object> getBlogCategories(int page, int size) {
-        int p = (page > 0) ? page - 1 : 0;
-
-        Map<String, Object> map = new HashMap<>();
-
-        Pageable pageable = PageRequest.of(p, size);
-
-        Page<BlogCategoryEntity> blogCategoryEntities = blogCategoryRepository.findAllByStatusAndDeleted(Status.ACTIVE, false, pageable);
-
-        List<BlogCategoryResponse> blogResponses = mapToCategoryResponse(blogCategoryEntities.getContent());
-//        Map<String, Object> pageDetail = new HashMap<>();
-//        pageDetail.put("currentPage", blogCategoryEntities.getNumber() + 1);
-//        pageDetail.put("totalItems", blogCategoryEntities.getTotalElements());
-//        pageDetail.put("totalPages", blogCategoryEntities.getTotalPages());
-//        pageDetail.put("pageSize", blogCategoryEntities.getSize());
-//        map.put("page", pageDetail);
-        map.put("blog_category", blogResponses);
-        return map;
-    }
 
     @Transactional(readOnly = true)
     public List<BlogCategoryResponse> getFeaturedBlogCategories() {

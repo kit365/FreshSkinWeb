@@ -14,7 +14,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "Category")
+@Table(name = "Category", indexes = {
+        @Index(name = "idx_category_title", columnList = "title"),
+        @Index(name = "idx_category_slug", columnList = "slug")
+})
 public class ProductCategoryEntity extends AbstractEntity {
 
     @Id
