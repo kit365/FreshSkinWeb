@@ -14,11 +14,12 @@ public enum ErrorCode {
     SKINTYPE_INVALID(400, "SkinType Invalid"),
 
     //User
-    USER_NOT_FOUND(404, "User Not Found"),
+    USER_NOT_FOUND(404, "Không tìm thấy tên người dùng"),
     USER_NOT_NULL(400, "User Not Null"),
-    USERNAME_NOT_NULL(400, "Tên người dùng không được để trống"),
+    USERNAME_NOT_NULL(400, "Tên đăng nhập không được để trống"),
     USERNAME_NOT_BLANK(400, "Tên đăng nhập không được để trống"),
     USERNAME_INVALID(400, "Tên đăng nhập phải từ 5 đến 20 ký tự"),
+    USERNAME_NOT_FOUND(400, "Không tìm thấy tên đăng nhập"),
     PASSWORD_NOT_NULL(400, "Password Not Null"),
     PASSWORD_NOT_BLANK(400, "Mật khẩu không được để trống"),
     PASSWORD_INVALID(400, "Mật khẩu phải từ 8 đến 20 ký tự"),
@@ -49,6 +50,8 @@ public enum ErrorCode {
 
     //Authentication
     UNAUTHENTICATED(401, "Chưa xác thực"),
+    PASSWORD_INCORRECT(400, "Mật khẩu không chính xác"),
+    ACCOUNT_LOCKED(400, "Tài khoản đã bị khóa"),
 
     //Product
     SORT_DIRECTION_INVALID(400, "Hướng sắp xếp không hợp lệ [ASC hoặc DESC]"),
