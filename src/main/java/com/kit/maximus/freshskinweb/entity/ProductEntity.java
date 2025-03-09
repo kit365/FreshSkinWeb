@@ -16,7 +16,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Product")
+@Table(name = "Products", indexes = {
+        @Index(name = "idx_title", columnList = "Title"),
+        @Index(name = "idx_slug", columnList = "Slug")
+})
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "category", "variants", "skinTypes", "reviews"})
 public class ProductEntity extends AbstractEntity {
 

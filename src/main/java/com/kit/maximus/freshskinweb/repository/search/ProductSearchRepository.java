@@ -12,6 +12,7 @@ import org.opensearch.client.opensearch._types.InlineGet;
 import org.opensearch.client.opensearch._types.query_dsl.MatchQuery;
 import org.opensearch.client.opensearch._types.query_dsl.Operator;
 import org.opensearch.client.opensearch._types.query_dsl.Query;
+import org.opensearch.client.opensearch._types.query_dsl.TermQuery;
 import org.opensearch.client.opensearch.core.*;
 import org.opensearch.client.opensearch.core.search.Hit;
 import org.springframework.stereotype.Repository;
@@ -152,5 +153,42 @@ public class ProductSearchRepository {
             return Collections.emptyList();
         }
     }
+
+    public ProductResponseDTO searchBySlug(String slug) {
+        try {
+            TermQuery termQuery = new TermQuery.Builder()
+                    .field("slug.keyword")  // Sử dụng .keyword để tìm kiếm chính xác
+                    .value(FieldValue.of(slug))
+                    .build();
+
+            Query searchQuery = new Query.Builder()
+                    .term(termQuery)
+                    .build();
+
+            // Tạo SearchRequest để thực hiện tìm kiếm
+            SearchRequest searchRequest = new SearchRequest.Builder()
+                    .index("products")
+                    .query(searchQuery)
+                    .size(1)
+                    .build();
+
+            // Gửi yêu cầu tìm kiếm
+            SearchResponse<ProductResponseDTO> response = openSearchClient.search(searchRequest, ProductResponseDTO.class);
+
+            // Kiểm tra kết quả và trả về sản phẩm tìm thấy
+            if (!response.hits().hits().isEmpty()) {
+                return response.hits().hits().getFirst().source();
+            } else {
+                return null; // Không tìm thấy sản phẩm
+            }
+
+        } catch (IOException e) {
+            log.error("Error while fetching product by slug", e);
+            return null; // Trả về null nếu gặp lỗi
+        }
+    }
+
+
+
 
 }

@@ -324,7 +324,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                     }
                 }
             }
-
+            productSearchRepository.deleteProduct(productEntity.getId());
         });
 
         productRepository.deleteAll(productEntities);
