@@ -91,21 +91,21 @@ public class AuthenticationService implements UserDetailsService {
         Cookie cookie = new Cookie("token", token);
         cookie.setDomain("freshskinweb.onrender.com");
 //        cookie.setDomain("localhost");
-        cookie.setHttpOnly(true); // Ngăn JavaScript truy cập, tăng bảo mật
+        cookie.setHttpOnly(false); // Ngăn JavaScript truy cập, tăng bảo mật
         cookie.setSecure(true); // Bật nếu dùng HTTPS
         cookie.setPath("/"); // Áp dụng cho toàn bộ domain
         cookie.setMaxAge(60 * 60 * 24); // Hết hạn sau 1 ngày
 
         response.addCookie(cookie);
         return AuthenticationResponseDTO.builder()
-                .token(cookie).authenticated(authenticated).build();
+                .token(token).authenticated(authenticated).build();
     }
 
     public void logout(HttpServletResponse response) {
         Cookie cookie = new Cookie("token", null);
         cookie.setDomain("freshskinweb.onrender.com");
 //        cookie.setDomain("localhost");
-        cookie.setHttpOnly(true);
+        cookie.setHttpOnly(false);
         cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setMaxAge(0); // Xóa ngay lập tức

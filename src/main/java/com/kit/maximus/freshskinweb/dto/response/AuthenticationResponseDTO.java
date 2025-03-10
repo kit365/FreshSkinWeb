@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AuthenticationResponseDTO implements Serializable {
-    Cookie token;
+    String token;
     boolean authenticated;
 
 }
