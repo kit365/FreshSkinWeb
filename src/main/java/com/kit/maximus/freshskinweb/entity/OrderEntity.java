@@ -6,12 +6,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
+import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,7 +23,12 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "`order`")
+@Table(name = "`order`", indexes = {
+        @Index(name = "idx_order_status", columnList = "OrderStatus"),
+        @Index(name = "idx_order_id", columnList = "OrderId"),
+        @Index(name = "idx_first_last_name", columnList = "FirstName,LastName"),
+        @Index(name = "idx_updated_at", columnList = "Update_at")
+})
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "order"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderEntity extends AbstractEntity {
@@ -80,6 +86,24 @@ public class OrderEntity extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "OrderStatus") //Thông báo trạng thái cho đơn hàng
     OrderStatus orderStatus = OrderStatus.PENDING;
+
+    @Column(name = "Created_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreationTimestamp
+    Date createdAt;
+
+    @Column(name = "Update_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    @UpdateTimestamp
+    Date updatedAt;
+
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Status")
+    Status status = Status.ACTIVE;
+
+    @Column(name = "Deleted")
+    boolean deleted;
 
     public void addOrderItem(OrderItemEntity orderItem) {
         orderItems.add(orderItem);

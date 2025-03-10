@@ -56,7 +56,7 @@ public class OrderController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        var result = orderService.getAllOrder(status, keyword, orderId, page, size);
+        var result = orderService.getAllOrders(status, keyword, orderId, page, size);
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 

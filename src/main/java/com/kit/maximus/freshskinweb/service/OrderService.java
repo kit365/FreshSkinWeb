@@ -257,66 +257,32 @@ public class OrderService {
 //    }
 
     /* PHẦN NÀY TÍCH HƠP THÊM BỘ LỌC THÔNG TIN THÔNG QUA Status và user */
-
-    public Map<String, Object> getAllOrder(OrderStatus status, String keyword, String orderId, int page, int size) {
+    /* TÍCH HỢP THÊM TÌM KIẾM INDEX CỦA DATABASE, GIÚP TÌM NHANH HƠN TRÁNH PHẢI CHẠY NHIỀU VÒNG FOR */
+    public Map<String, Object> getAllOrders(OrderStatus status, String keyword, String orderId, int page, int size) {
         Map<String, Object> map = new HashMap<>();
 
-        // Kiểm tra orderStatus không hợp lệ
-        if (status != null && !EnumSet.allOf(OrderStatus.class).contains(status)) {
-            map.put("products", Collections.emptyList());
-            map.put("currentPage", 0);
-            map.put("totalItems", 0L);
-            map.put("totalPages", 0);
-            map.put("pageSize", size);
-            return map;
-        }
-
-        // Xây dựng Specification
         Specification<OrderEntity> spec = Specification
                 .where(OrderSpecification.hasStatus(status))
                 .and(OrderSpecification.hasKeyword(keyword))
                 .and(OrderSpecification.hasOrderId(orderId));
 
-        // Tính toán số trang
-        int p = (page > 0) ? page - 1 : 0;
+        int p = Math.max(page - 1, 0);
         Pageable pageable = PageRequest.of(p, size, Sort.by("updatedAt").descending());
 
         Page<OrderEntity> ordersPage = orderRepository.findAll(spec, pageable);
 
-        List<OrderResponse> orderResponses = orderMapper.toOrderResponseList(ordersPage.getContent());
-
-        for (OrderResponse orderResponse : orderResponses) {
-            ordersPage.getContent().forEach(orderEntity -> {
-                if (orderEntity.getOrderItems() != null) {
-                    List<OrderItemResponse> orderItemResponses = new ArrayList<>();
-                    orderEntity.getOrderItems().forEach(orderItemEntity -> {
-                        OrderItemResponse orderItemResponse = new OrderItemResponse();
-                        orderItemResponse.setOrderItemId(orderItemEntity.getOrderItemId());
-                        orderItemResponse.setQuantity(orderItemEntity.getQuantity());
-                        orderItemResponse.setSubtotal(orderItemEntity.getSubtotal());
-
-                        if (orderItemEntity.getProductVariant() != null) {
-                            ProductVariantResponse productVariantResponse = new ProductVariantResponse();
-                            productVariantResponse.setId(orderItemEntity.getProductVariant().getId());
-                            productVariantResponse.setPrice(orderItemEntity.getProductVariant().getPrice());
-                            productVariantResponse.setUnit(orderItemEntity.getProductVariant().getUnit());
-                            productVariantResponse.setVolume(orderItemEntity.getProductVariant().getVolume());
-
-                            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-                            productResponseDTO.setTitle(orderItemEntity.getProductVariant().getProduct().getTitle());
-                            productResponseDTO.setThumbnail(orderItemEntity.getProductVariant().getProduct().getThumbnail());
-                            productResponseDTO.setDiscountPercent(orderItemEntity.getProductVariant().getProduct().getDiscountPercent());
-                            productResponseDTO.setSlug(orderItemEntity.getProductVariant().getProduct().getSlug());
-                            productResponseDTO.setId(orderItemEntity.getProductVariant().getProduct().getId());
-                            productVariantResponse.setProduct(productResponseDTO);
-                            orderItemResponse.setProductVariant(productVariantResponse);
-                            orderItemResponses.add(orderItemResponse);
-                        }
-                        orderResponse.setOrderItems(orderItemResponses);
-                    });
-                }
-            });
-        }
+        // Convert trực tiếp để tránh loop lồng nhau
+        List<OrderResponse> orderResponses = ordersPage.getContent().stream()
+                .map(orderEntity -> {
+                    OrderResponse response = orderMapper.toOrderResponse(orderEntity);
+                    if (orderEntity.getOrderItems() != null) {
+                        response.setOrderItems(orderEntity.getOrderItems().stream()
+                                .map(item -> createOrderItemResponse(item))
+                                .collect(Collectors.toList()));
+                    }
+                    return response;
+                })
+                .collect(Collectors.toList());
 
         map.put("orders", orderResponses);
         map.put("currentPage", ordersPage.getNumber() + 1);
@@ -325,6 +291,39 @@ public class OrderService {
         map.put("pageSize", ordersPage.getSize());
 
         return map;
+    }
+
+    //Tạo hàm để ấy thông tin từ OrderItemsEntity sang OrderItemsResponse
+    private OrderItemResponse createOrderItemResponse(OrderItemEntity item) {
+        OrderItemResponse response = new OrderItemResponse();
+        response.setOrderItemId(item.getOrderItemId());
+        response.setQuantity(item.getQuantity());
+        response.setSubtotal(item.getSubtotal());
+
+        if (item.getProductVariant() != null) {
+            response.setProductVariant(createProductVariantResponse(item.getProductVariant()));
+        }
+        return response;
+    }
+
+    //Tạo hàm để ấy thông tin từ ProductVariantEntity sang ProductVariantResponse
+    private ProductVariantResponse createProductVariantResponse(ProductVariantEntity variant) {
+        ProductVariantResponse response = new ProductVariantResponse();
+        response.setId(variant.getId());
+        response.setPrice(variant.getPrice());
+        response.setUnit(variant.getUnit());
+        response.setVolume(variant.getVolume());
+
+        if (variant.getProduct() != null) {
+            ProductResponseDTO productResponse = new ProductResponseDTO();
+            productResponse.setId(variant.getProduct().getId());
+            productResponse.setTitle(variant.getProduct().getTitle());
+            productResponse.setThumbnail(variant.getProduct().getThumbnail());
+            productResponse.setDiscountPercent(variant.getProduct().getDiscountPercent());
+            productResponse.setSlug(variant.getProduct().getSlug());
+            response.setProduct(productResponse);
+        }
+        return response;
     }
 
 //    Cập nhật trạng thái cho đơn hàng được chọn

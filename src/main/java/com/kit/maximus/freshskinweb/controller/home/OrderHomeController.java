@@ -65,7 +65,7 @@ public class OrderHomeController {
             @RequestParam(defaultValue = "1") int page,  // Giá trị mặc định là trang 1
             @RequestParam(defaultValue = "10") int size  // Giá trị mặc định là 10 item/trang
     ) {
-        var result = orderService.getAllOrder(status, keyword, orderId, page, size);
+        var result = orderService.getAllOrders(status, keyword, orderId, page, size);
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
