@@ -20,8 +20,6 @@ import java.util.List;
         @Index(name = "idx_title", columnList = "Title"),
         @Index(name = "idx_slug", columnList = "Slug"),
         @Index(name = "idx_brand", columnList = "brandID"),
-        @Index(name = "idx_product_category", columnList = "productID, categoryID"),
-        @Index(name = "idx_product_skin_type", columnList = "product_id, skin_type_id")
 })
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "category", "variants", "skinTypes", "reviews"})
 public class ProductEntity extends AbstractEntity {
