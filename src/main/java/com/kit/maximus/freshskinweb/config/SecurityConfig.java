@@ -73,8 +73,10 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOriginPatterns("https://project-swp391-n9j6.onrender.com", "http://localhost:8080") // Hỗ trợ nhiều origin
+                        .allowedOrigins("https://project-swp391-n9j6.onrender.com", "http://localhost:8080") // Hỗ trợ nhiều origin
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
+                        .allowedHeaders("*")
+                        .exposedHeaders("Set-Cookie")
                         .allowCredentials(true);
             }
         };

@@ -129,6 +129,7 @@ public class AuthenticationService implements UserDetailsService {
 
         // Tạo cookie chứa token
         Cookie cookie = new Cookie("token", token);
+        cookie.setDomain("project-swp391-n9j6.onrender.com");
         cookie.setPath("/"); // Áp dụng cho toàn bộ trang web
         cookie.setHttpOnly(true); // Chỉ backend truy cập, bảo mật hơn
         cookie.setSecure(true); // Chỉ hoạt động trên HTTPS
@@ -136,6 +137,9 @@ public class AuthenticationService implements UserDetailsService {
         cookie.setAttribute("SameSite", "None"); // Quan trọng khi frontend khác origin
 
         // Thêm cookie vào response
+        response.setHeader("Set-Cookie",
+                "token=" + token + "; Path=/; HttpOnly; Secure; SameSite=None; Domain=project-swp391-n9j6.onrender.com; Max-Age=86400");
+
         response.addCookie(cookie);
 
         return AuthenticationResponseDTO.builder()
