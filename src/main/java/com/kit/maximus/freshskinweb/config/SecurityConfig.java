@@ -67,18 +67,17 @@ public class SecurityConfig {
                 .macAlgorithm(MacAlgorithm.HS512).build();
     }
 
-//    @Bean
-//    public WebMvcConfigurer corsConfigurer() {
-//        return new WebMvcConfigurer() {
-//            @Override
-//            public void addCorsMappings(CorsRegistry registry) {
-//                registry.addMapping("/**")
-//                        .allowedOrigins("https://project-swp391-n9j6.onrender.com")
-//                        .allowedMethods("*")
-//                        .allowCredentials(true);
-//            }
-//        };
-//    }
-
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOriginPatterns("https://project-swp391-n9j6.onrender.com", "http://localhost:8080") // Hỗ trợ nhiều origin
+                        .allowedMethods("GET", "POST", "PUT", "DELETE")
+                        .allowCredentials(true);
+            }
+        };
+    }
 
 }

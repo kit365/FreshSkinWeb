@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RestController
