@@ -42,5 +42,6 @@ public class UserResponseDTO implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date updatedAt;
 
+    List<UserDiscountUsageResponse> userDiscountUsageResponses;
 
 }

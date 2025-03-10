@@ -5,14 +5,19 @@ import com.kit.maximus.freshskinweb.dto.response.OrderIdResponse;
 import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.service.OrderService;
+import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor
@@ -30,12 +35,39 @@ public class OrderController {
         return ResponseAPI.<OrderIdResponse>builder().code(HttpStatus.OK.value()).message(message).data(create).build();
     }
 
-    @GetMapping("/show")
-    public ResponseAPI<List<OrderResponse>> getAllOrder() {
-        String message = "Hiện tất cả các đơn hàng thành công";
-        List<OrderResponse> order = orderService.getAllOrder();
-        return ResponseAPI.<List<OrderResponse>>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
+//    @GetMapping("/show")
+//    public ResponseAPI<List<OrderResponse>> getAllOrder() {
+//        String message = "Hiện tất cả các đơn hàng thành công";
+//        List<OrderResponse> order = orderService.getAllOrder();
+//        return ResponseAPI.<List<OrderResponse>>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
+//    }
+
+//    @GetMapping
+//    public ResponseAPI<List<OrderResponse>> getAllOrder(
+//            @RequestParam(required = false) OrderStatus status,
+//            @RequestParam(required = false) String keyword,
+//            @RequestParam(required = false) String orderId
+//
+//    ) {
+//        var result = orderService.getAllOrder(status, keyword, orderId);
+//        return ResponseAPI.<List<OrderResponse>>builder().code(HttpStatus.OK.value()).data(result).build();
+//    }
+
+
+    @GetMapping
+    public ResponseAPI<Map<String, Object>> getAllOrder(
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String orderId,
+            @RequestParam(defaultValue = "1") int page,  // Giá trị mặc định là trang 1
+            @RequestParam(defaultValue = "10") int size  // Giá trị mặc định là 10 item/trang
+    ) {
+        var result = orderService.getAllOrder(status, keyword, orderId, page, size);
+        return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
+
+
+
 
     @GetMapping("/{id}")
     public ResponseAPI<OrderResponse> getOrderById(@PathVariable String id) {

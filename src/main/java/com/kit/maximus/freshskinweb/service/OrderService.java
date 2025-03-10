@@ -15,21 +15,26 @@ import com.kit.maximus.freshskinweb.repository.OrderRepository;
 import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.repository.ProductVariantRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
+import com.kit.maximus.freshskinweb.specification.OrderSpecification;
+import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
 
     UserRepository userRepository;
@@ -84,7 +89,17 @@ public class OrderService {
             }
         }
 
+
         return orderMapper.toOrderResponseCreate(orderRepository.save(order));
+    }
+
+    public OrderStatus getOrderStatus(String orderStatus) {
+        try {
+            return OrderStatus.valueOf((orderStatus.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid status provided: '{}'", orderStatus);
+            throw new AppException(ErrorCode.ORDER_STATUS_INVALID);
+        }
     }
 
     // Tạo ID cho order
@@ -157,48 +172,49 @@ public class OrderService {
 //        return productMapper.productToProductResponseDTO(product);
 //    }
 
-    public List<OrderResponse> getAllOrder() {
-        List<OrderEntity> orders = orderRepository.findAll();
-
-        List<OrderResponse> orderResponses = orderMapper.toOrderResponseList(orders);
-
-
-
-        for (OrderResponse orderResponse : orderResponses) {
-
-            orders.forEach(orderEntity -> {
-                if(orderEntity.getOrderItems() != null) {
-                    List<OrderItemResponse>  orderItemResponses = new ArrayList<>();
-                    orderEntity.getOrderItems().forEach(orderItemEntity -> {
-                        OrderItemResponse orderItemResponse = new OrderItemResponse();
-                        orderItemResponse.setOrderItemId(orderItemEntity.getOrderItemId());
-                        orderItemResponse.setQuantity(orderItemEntity.getQuantity());
-                        orderItemResponse.setSubtotal(orderItemEntity.getSubtotal());
-
-                        if(orderItemEntity.getProductVariant() != null) {
-                            ProductVariantResponse productVariantResponse = new ProductVariantResponse();
-                            productVariantResponse.setId(orderItemEntity.getProductVariant().getId());
-                            productVariantResponse.setPrice(orderItemEntity.getProductVariant().getPrice());
-                            productVariantResponse.setUnit(orderItemEntity.getProductVariant().getUnit());
-                            productVariantResponse.setVolume(orderItemEntity.getProductVariant().getVolume());
-
-                            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-                            productResponseDTO.setTitle(orderItemEntity.getProductVariant().getProduct().getTitle());
-                            productResponseDTO.setThumbnail(orderItemEntity.getProductVariant().getProduct().getThumbnail());
-                            productResponseDTO.setDiscountPercent(orderItemEntity.getProductVariant().getProduct().getDiscountPercent());
-                            productResponseDTO.setSlug(orderItemEntity.getProductVariant().getProduct().getSlug());
-                            productResponseDTO.setId(orderItemEntity.getProductVariant().getProduct().getId());
-                            productVariantResponse.setProduct(productResponseDTO);
-                            orderItemResponse.setProductVariant(productVariantResponse);
-                            orderItemResponses.add(orderItemResponse);
-                        }
-                        orderResponse.setOrderItems(orderItemResponses);
-                    });
-                }
-            });
-
-
-        }
+//    public List<OrderResponse> getAllOrder() {
+//        List<OrderEntity> orders = orderRepository.findAll();
+//
+//        List<OrderResponse> orderResponses = orderMapper.toOrderResponseList(orders);
+//
+//
+//
+//        for (OrderResponse orderResponse : orderResponses) {
+//
+//            orders.forEach(orderEntity -> {
+//                if(orderEntity.getOrderItems() != null) {
+//                    List<OrderItemResponse>  orderItemResponses = new ArrayList<>();
+//                    orderEntity.getOrderItems().forEach(orderItemEntity -> {
+//                        OrderItemResponse orderItemResponse = new OrderItemResponse();
+//                        orderItemResponse.setOrderItemId(orderItemEntity.getOrderItemId());
+//                        orderItemResponse.setQuantity(orderItemEntity.getQuantity());
+//                        orderItemResponse.setSubtotal(orderItemEntity.getSubtotal());
+//
+//                        if(orderItemEntity.getProductVariant() != null) {
+//                            ProductVariantResponse productVariantResponse = new ProductVariantResponse();
+//                            productVariantResponse.setId(orderItemEntity.getProductVariant().getId());
+//                            productVariantResponse.setPrice(orderItemEntity.getProductVariant().getPrice());
+//                            productVariantResponse.setUnit(orderItemEntity.getProductVariant().getUnit());
+//                            productVariantResponse.setVolume(orderItemEntity.getProductVariant().getVolume());
+//
+//                            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+//                            productResponseDTO.setTitle(orderItemEntity.getProductVariant().getProduct().getTitle());
+//                            productResponseDTO.setThumbnail(orderItemEntity.getProductVariant().getProduct().getThumbnail());
+//                            productResponseDTO.setDiscountPercent(orderItemEntity.getProductVariant().getProduct().getDiscountPercent());
+//                            productResponseDTO.setSlug(orderItemEntity.getProductVariant().getProduct().getSlug());
+//                            productResponseDTO.setId(orderItemEntity.getProductVariant().getProduct().getId());
+//                            productVariantResponse.setProduct(productResponseDTO);
+//                            orderItemResponse.setProductVariant(productVariantResponse);
+//                            orderItemResponses.add(orderItemResponse);
+//                        }
+//                        orderResponse.setOrderItems(orderItemResponses);
+//                    });
+//                }
+//            });
+//
+//
+//        }
+//        return orderResponses;
 
 
 
@@ -239,8 +255,80 @@ public class OrderService {
 //            }
 //        }
 
-        return orderResponses;
+
+//    }
+
+    /* PHẦN NÀY TÍCH HƠP THÊM BỘ LỌC THÔNG TIN THÔNG QUA Status và user */
+
+    public Map<String, Object> getAllOrder(OrderStatus status, String keyword, String orderId, int page, int size) {
+        Map<String, Object> map = new HashMap<>();
+
+        // Kiểm tra orderStatus không hợp lệ
+        if (status != null && !EnumSet.allOf(OrderStatus.class).contains(status)) {
+            map.put("products", Collections.emptyList());
+            map.put("currentPage", 0);
+            map.put("totalItems", 0L);
+            map.put("totalPages", 0);
+            map.put("pageSize", size);
+            return map;
+        }
+
+        // Xây dựng Specification
+        Specification<OrderEntity> spec = Specification
+                .where(OrderSpecification.hasStatus(status))
+                .and(OrderSpecification.hasKeyword(keyword))
+                .and(OrderSpecification.hasOrderId(orderId));
+
+        // Tính toán số trang
+        int p = (page > 0) ? page - 1 : 0;
+        Pageable pageable = PageRequest.of(p, size, Sort.by("updatedAt").descending());
+
+        Page<OrderEntity> ordersPage = orderRepository.findAll(spec, pageable);
+
+        List<OrderResponse> orderResponses = orderMapper.toOrderResponseList(ordersPage.getContent());
+
+        for (OrderResponse orderResponse : orderResponses) {
+            ordersPage.getContent().forEach(orderEntity -> {
+                if (orderEntity.getOrderItems() != null) {
+                    List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+                    orderEntity.getOrderItems().forEach(orderItemEntity -> {
+                        OrderItemResponse orderItemResponse = new OrderItemResponse();
+                        orderItemResponse.setOrderItemId(orderItemEntity.getOrderItemId());
+                        orderItemResponse.setQuantity(orderItemEntity.getQuantity());
+                        orderItemResponse.setSubtotal(orderItemEntity.getSubtotal());
+
+                        if (orderItemEntity.getProductVariant() != null) {
+                            ProductVariantResponse productVariantResponse = new ProductVariantResponse();
+                            productVariantResponse.setId(orderItemEntity.getProductVariant().getId());
+                            productVariantResponse.setPrice(orderItemEntity.getProductVariant().getPrice());
+                            productVariantResponse.setUnit(orderItemEntity.getProductVariant().getUnit());
+                            productVariantResponse.setVolume(orderItemEntity.getProductVariant().getVolume());
+
+                            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+                            productResponseDTO.setTitle(orderItemEntity.getProductVariant().getProduct().getTitle());
+                            productResponseDTO.setThumbnail(orderItemEntity.getProductVariant().getProduct().getThumbnail());
+                            productResponseDTO.setDiscountPercent(orderItemEntity.getProductVariant().getProduct().getDiscountPercent());
+                            productResponseDTO.setSlug(orderItemEntity.getProductVariant().getProduct().getSlug());
+                            productResponseDTO.setId(orderItemEntity.getProductVariant().getProduct().getId());
+                            productVariantResponse.setProduct(productResponseDTO);
+                            orderItemResponse.setProductVariant(productVariantResponse);
+                            orderItemResponses.add(orderItemResponse);
+                        }
+                        orderResponse.setOrderItems(orderItemResponses);
+                    });
+                }
+            });
+        }
+
+        map.put("products", orderResponses);
+        map.put("currentPage", ordersPage.getNumber() + 1);
+        map.put("totalItems", ordersPage.getTotalElements());
+        map.put("totalPages", ordersPage.getTotalPages());
+        map.put("pageSize", ordersPage.getSize());
+
+        return map;
     }
+
 
 
     public void deleteOrder(String orderId) {

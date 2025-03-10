@@ -18,6 +18,7 @@ public interface ProductMapper {
     @Mapping(target = "brand", ignore = true)
     @Mapping(target = "skinTypes", ignore = true)
     @Mapping(target = "thumbnail", ignore = true)
+    @Mapping(target = "discountEntity", ignore = true)
     ProductEntity productToProductEntity(CreateProductRequest productRequest);
 
 
@@ -25,12 +26,14 @@ public interface ProductMapper {
     @Mapping(target = "brand", ignore = true)
     @Mapping(target = "skinTypes", ignore = true)
     @Mapping(target = "variants", ignore = true)
+    @Mapping(target = "discountEntity", ignore = true)
     ProductResponseDTO productToProductResponseDTO(ProductEntity product);
 
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "brand", ignore = true)
     @Mapping(target = "skinTypes", ignore = true)
     @Mapping(target = "variants", ignore = true)
+    @Mapping(target = "discountEntity", ignore = true)
     List<ProductResponseDTO> productToProductResponsesDTO(List<ProductEntity> product);
 
 //    List<ProductResponseDTO> toUserResponseDTO(List<ProductEntity> productEntities);
@@ -41,6 +44,7 @@ public interface ProductMapper {
     @Mapping(target = "brand", ignore = true)
     @Mapping(target = "thumbnail", ignore = true)
     @Mapping(target = "skinTypes", ignore = true)
+    @Mapping(target = "discountEntity", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateProduct(@MappingTarget ProductEntity product, UpdateProductRequest productRequestDTO);
 

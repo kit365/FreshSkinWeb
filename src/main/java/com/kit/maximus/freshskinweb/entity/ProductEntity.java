@@ -103,20 +103,18 @@ public class ProductEntity extends AbstractEntity {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "product")
     List<ReviewEntity> reviews = new ArrayList<>();
 
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "PromoCode")
+    DiscountEntity discountEntity;
+
     public void createProductVariant(ProductVariantEntity productVariantEntity) {
         variants.add(productVariantEntity);
         productVariantEntity.setProduct(this);
     }
 
-
     public void removeProductVariant(ProductVariantEntity productVariantEntity) {
         variants.remove(productVariantEntity);
         productVariantEntity.setProduct(null);
-    }
-
-    public void removeSkinType(SkinTypeEntity skinTypeEntity) {
-        variants.remove(skinTypeEntity);
-        skinTypeEntity.setProducts(null);
     }
 
     @Override
@@ -136,6 +134,7 @@ public class ProductEntity extends AbstractEntity {
                 ", usageInstructions='" + usageInstructions + '\'' +
                 ", benefits='" + benefits + '\'' +
                 ", skinIssues='" + skinIssues + '\'' +
+                ", discountEntity='" + discountEntity + '\'' +
                 '}';
     }
 }

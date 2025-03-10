@@ -9,10 +9,16 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -38,7 +44,7 @@ public class DiscountController {
     }
 
     @GetMapping("{id}")
-    public ResponseAPI<DiscountResponse> getDiscount(@PathVariable Long id){
+    public ResponseAPI<DiscountResponse> getDiscount(@PathVariable String id){
         var result = discountService.getDiscount(id);
         String message = "Get discount success";
         if(result == null){
@@ -51,22 +57,45 @@ public class DiscountController {
                 .build();
     }
 
-    @GetMapping
-    public ResponseAPI<List<DiscountResponse>> getAllDiscounts(){
-        var result = discountService.getAllDiscounts();
-        String message = "Get discount success";
-        if(result == null){
-            message = "Create discount failed";
+    @GetMapping()
+    public ResponseAPI<Map<String, Object>> getAllDiscounts(
+            @RequestParam(required = false) String promoCode,
+            @RequestParam(required = false) String discountType,
+            @RequestParam(required = false) Boolean isGlobal,
+            @RequestParam(defaultValue = "false") Boolean sortByUsed,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        log.info("GET ALL DISCOUNTS");
+        log.info("Received promoCode: {}", promoCode);
+        log.info("Received discountType: {}", discountType);
+        log.info("Received isGlobal: {}", isGlobal);
+        log.info("Received sortByUsed: {}", sortByUsed);
+
+        Pageable pageable = PageRequest.of(page, size);
+        Map<String, Object> result = discountService.getAllDiscounts(
+                promoCode, discountType, isGlobal, sortByUsed, pageable
+        );
+
+        if (result.get("discounts") instanceof List && ((List<?>) result.get("discounts")).isEmpty()) {
+            return ResponseAPI.<Map<String, Object>>builder()
+                    .code(HttpStatus.NOT_FOUND.value())
+                    .message("Không tìm thấy mã giảm giá phù hợp với tiêu chí đã nhập.")
+                    .data(result)
+                    .build();
         }
-        return ResponseAPI.<List<DiscountResponse>>builder()
+
+        return ResponseAPI.<Map<String, Object>>builder()
                 .code(HttpStatus.OK.value())
-                .message(message)
+                .message("Tìm thấy danh sách mã giảm giá.")
                 .data(result)
                 .build();
     }
 
+
+
     @PutMapping("edit/{id}")
-    public ResponseAPI<DiscountResponse> updateDiscount(@PathVariable Long id, @RequestBody UpdationtionDiscountRequest request){
+    public ResponseAPI<DiscountResponse> updateDiscount(@PathVariable String id, @RequestBody UpdationtionDiscountRequest request){
         var result = discountService.updateDiscount(id, request);
         return ResponseAPI.<DiscountResponse>builder()
                 .code(HttpStatus.OK.value())
@@ -76,7 +105,7 @@ public class DiscountController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseAPI<Boolean> deleteDiscount(@PathVariable Long id){
+    public ResponseAPI<Boolean> deleteDiscount(@PathVariable String id){
         var result = discountService.deleteDiscount(id);
         return ResponseAPI.<Boolean>builder()
                 .code(HttpStatus.OK.value())

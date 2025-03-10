@@ -8,14 +8,19 @@ import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.DiscountMapper;
 import com.kit.maximus.freshskinweb.repository.DiscountRepository;
+import com.kit.maximus.freshskinweb.specification.DiscountSpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -28,32 +33,65 @@ public class DiscountService {
 
     public boolean addDiscount(CreationDiscountRequest request){
         if(request != null){
-            discountRepository.save(discountMapper.toDiscountEntity(request));
+            DiscountEntity entity = discountMapper.toDiscountEntity(request);
+
+            //Kiểm tra trong danh sách có tồn tại mã giảm giá trước đó không
+            List<DiscountEntity> discountEntities = discountRepository.findAll();
+            for(DiscountEntity discountEntity : discountEntities){
+                //Nếu có quăng lỗi đã tồn tại
+                if(request.getPromoCode().equals(discountEntity.getPromoCode())){
+                    throw new AppException(ErrorCode.DISCOUNT_IS_EXISTED);
+                }
+            }
+            entity.setPromoCode(request.getPromoCode());
+            discountRepository.save(entity);
             return true;
         }
         return false;
     }
 
-    public DiscountResponse getDiscount(Long id){
-        return discountRepository.findById(id).map(discountMapper::toDiscountResponse).orElse(null);
+    public Map<String, Object> getAllDiscounts(String promoCode, String discountType, Boolean isGlobal, Boolean sortByUsed, Pageable pageable) {
+
+        // Dùng Specification để tạo bộ lọc linh hoạt
+        Specification<DiscountEntity> spec = Specification
+                .where(DiscountSpecification.filterByPromoCode(promoCode))
+                .and(DiscountSpecification.filterByDiscountType(discountType))
+                .and(DiscountSpecification.filterByIsGlobal(isGlobal))
+                .and(DiscountSpecification.sortByUpdatedAtAndUsed(sortByUsed));
+
+        Page<DiscountEntity> discountPage = discountRepository.findAll(spec, pageable);
+
+        // Chuyển đổi sang DTO
+        List<DiscountResponse> discountResponses = discountMapper.toDiscountsResponse(discountPage.getContent());
+
+        // Chuẩn bị kết quả
+        Map<String, Object> response = new HashMap<>();
+        response.put("discounts", discountResponses);
+        response.put("currentPage", discountPage.getNumber());
+        response.put("totalItems", discountPage.getTotalElements());
+        response.put("totalPages", discountPage.getTotalPages());
+
+        return response;
     }
 
-    public List<DiscountResponse> getAllDiscounts(){
-        List<DiscountResponse> result = discountRepository.findAll().stream().map(discountMapper::toDiscountResponse).collect(Collectors.toList());
-        return result;
+    public DiscountResponse getDiscount(String id) {
+        return discountMapper.toDiscountResponse(
+                discountRepository.findById(id)
+                        .orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_NOT_FOUND))
+        );
     }
 
-    public DiscountResponse updateDiscount(Long id, UpdationtionDiscountRequest request){
-        DiscountEntity entity = discountRepository.findById(id).orElse(null);
-        if(entity != null){
-            discountMapper.updateDiscountEntity(entity, request);
+    public DiscountResponse updateDiscount(String id, UpdationtionDiscountRequest request) {
+        DiscountEntity entity = discountRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_NOT_FOUND));
+
+        discountMapper.updateDiscountEntity(entity, request);
+        discountRepository.save(entity);
+
         return discountMapper.toDiscountResponse(entity);
-        } else {
-            throw new AppException(ErrorCode.DISCOUNT_NOT_FOUND);
-        }
     }
 
-    public boolean deleteDiscount(Long id){
+    public boolean deleteDiscount(String id){
         DiscountEntity entity = discountRepository.findById(id).orElse(null);
         if(entity != null){
             discountRepository.delete(entity);

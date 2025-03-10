@@ -1,8 +1,12 @@
 package com.kit.maximus.freshskinweb.dto.request.discount;
 
+import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.*;
+
+import java.util.List;
 
 @Setter
 @Getter
@@ -10,6 +14,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class CreationDiscountRequest {
+
 
     String PromoCode;
 
@@ -22,4 +27,7 @@ public class CreationDiscountRequest {
     Double MaxDiscount;
 
     Integer UsageLimit;
+
+    Boolean isGlobal;
+
 }

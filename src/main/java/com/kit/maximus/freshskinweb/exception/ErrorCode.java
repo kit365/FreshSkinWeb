@@ -47,7 +47,6 @@ public enum ErrorCode {
     THIS_USER_NOT_ALLOWED_TO_UPDATE(400, "Đây là tài khoản của khách hàng, không được cập nhật"),
     THIS_ACCOUNT_CAN_NOT_SHOW(400, "Đây là tài khoản của khách hàng, không thể xem"),
 
-
     //Authentication
     UNAUTHENTICATED(401, "Chưa xác thực"),
     PASSWORD_INCORRECT(400, "Mật khẩu không chính xác"),
@@ -119,6 +118,9 @@ public enum ErrorCode {
 
     //DISCOUNT
     DISCOUNT_NOT_FOUND(404, "Không tìm thấy mã giảm giá"),
+    DISCOUNT_IS_EXISTED(404, "Mã giảm giá đã tồn tại trước đó"),
+    WRONG_DISCOUNT_TYPE(404, "Loại giảm giá không đúng"),
+    DISCOUNT_TYPE_NOT_BE_NULL(404, "Loại mã lỗi không được null"),
     ;
 
 

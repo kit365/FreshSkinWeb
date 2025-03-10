@@ -1,27 +1,43 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+
+import java.util.Date;
+import java.util.List;
 
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class DiscountResponse {
+@Builder
+public class DiscountResponse{
+    String promoCode;
 
-    Long id;
+    String description;
 
-    String PromoCode;
+    String discountType;
 
-    String Description;
+    Double discountValue;
 
-    String DiscountType;
+    Double maxDiscount;
 
-    Double DiscountValue;
+    Integer usageLimit;
 
-    Double MaxDiscount;
+    Boolean isGlobal;
 
-    Integer UsageLimit;
+    Integer used;
 
-    Integer Used;
+    Boolean active;
+
+    boolean deleted;
+
+    List<UserDiscountUsageResponse> userDiscountUsageResponses;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    Date createdAt;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    Date updatedAt;
 }

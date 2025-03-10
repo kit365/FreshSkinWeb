@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.dto.request.product;
 
+import com.kit.maximus.freshskinweb.entity.DiscountEntity;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
@@ -25,10 +26,8 @@ public class UpdateProductRequest implements Serializable {
     String description;
     List<MultipartFile> thumbnail;
     List<ProductVariantEntity> variants;
-
     List<Long> skinTypeId;
-
-
+    DiscountEntity discountEntity;
     int discountPercent;
     Integer position;
     /// ////////////////////////////////////////////

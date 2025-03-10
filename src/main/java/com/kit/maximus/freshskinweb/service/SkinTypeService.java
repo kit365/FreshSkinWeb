@@ -28,7 +28,6 @@ public class SkinTypeService {
     SkinTypeRepository skinTypeRepository;
 
     SkinTypeMapper skinTypeMapper;
-    BlogCategoryMapper mapper;
 
     public boolean add(CreateSkinTypeRequest request) {
         SkinTypeEntity skinTypeEntity = skinTypeMapper.toSkinTypeEntity(request);
