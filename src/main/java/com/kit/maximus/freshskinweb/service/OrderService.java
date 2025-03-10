@@ -3,10 +3,7 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.orderItem.OrderItemRequest;
 import com.kit.maximus.freshskinweb.dto.response.*;
-import com.kit.maximus.freshskinweb.entity.OrderEntity;
-import com.kit.maximus.freshskinweb.entity.OrderItemEntity;
-import com.kit.maximus.freshskinweb.entity.ProductEntity;
-import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
+import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.OrderMapper;
@@ -17,6 +14,7 @@ import com.kit.maximus.freshskinweb.repository.ProductVariantRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.specification.OrderSpecification;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
+import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -320,7 +318,7 @@ public class OrderService {
             });
         }
 
-        map.put("products", orderResponses);
+        map.put("orders", orderResponses);
         map.put("currentPage", ordersPage.getNumber() + 1);
         map.put("totalItems", ordersPage.getTotalElements());
         map.put("totalPages", ordersPage.getTotalPages());
@@ -328,6 +326,23 @@ public class OrderService {
 
         return map;
     }
+
+//    Cập nhật trạng thái đơn hàng
+public String update(List<String> id, String orderStatus) {
+    try {
+        OrderStatus orderStatusEnum = OrderStatus.valueOf(orderStatus);
+        List<OrderEntity> orderEntities = orderRepository.findAllById(id);
+
+        if (!orderEntities.isEmpty()) {
+            orderEntities.forEach(orderEntity -> orderEntity.setOrderStatus(orderStatusEnum));
+            orderRepository.saveAll(orderEntities);
+            return "Cập nhật trạng thái đơn hàng thành công";
+        }
+        return "Không tìm thấy đơn hàng nào để cập nhật";
+    } catch (IllegalArgumentException e) {
+        return e.getMessage(); // Hiển thị lỗi rõ ràng hơn
+    }
+}
 
 
 

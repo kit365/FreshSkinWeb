@@ -4,12 +4,15 @@ import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
 import com.kit.maximus.freshskinweb.dto.response.OrderIdResponse;
 import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
+import com.kit.maximus.freshskinweb.exception.AppException;
+import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.service.OrderService;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -24,6 +27,7 @@ import java.util.Map;
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/admin/orders")
+@Slf4j
 public class OrderController {
     OrderService orderService;
 
@@ -57,8 +61,6 @@ public class OrderController {
     }
 
 
-
-
     @GetMapping("/{id}")
     public ResponseAPI<OrderResponse> getOrderById(@PathVariable String id) {
         String message = "Tạo đơn hàng thành công";
@@ -66,7 +68,22 @@ public class OrderController {
 
         return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
     }
-//    @PatchMapping("/update/{orderId}")
+
+    @PatchMapping("change-multi")
+    public ResponseAPI<String> updateOrder(@RequestBody Map<String, Object> request) {
+        if (!request.containsKey("id")) {
+            log.warn("Request does not contain 'id' key");
+            throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
+        }
+
+        List<String> ids = (List<String>) request.get("id");
+        String status = request.get("orderStatus").toString(); // Đổi từ 'status' thành 'orderStatus'
+
+        var result = orderService.update(ids, status);
+        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
+    }
+
+    //    @PatchMapping("/update/{orderId}")
 //    public ResponseAPI<OrderResponse> updateOrder(@Valid @PathVariable Long orderId, @RequestBody UpdateOrderRequest updateOrderRequest) {
 //        String message = "Update Order Success";
 //        var create = orderService.updateOrder(orderId, updateOrderRequest);
