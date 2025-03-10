@@ -1215,7 +1215,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         List<ProductResponseDTO> result = productSearchRepository.searchByTitle(request, 5);
         result.forEach(productResponseDTO -> {
             clearUnnecessaryFields(productResponseDTO);
-            productResponseDTO.setVariants(null);
             productResponseDTO.setBrand(null);
             productResponseDTO.setCategory(null);
             productResponseDTO.setSkinTypes(null);
