@@ -89,7 +89,7 @@ public class AuthenticationService implements UserDetailsService {
         var token = generateToken(authenticationRequest.getUsername());
 
         Cookie cookie = new Cookie("token", token);
-        cookie.setDomain("freshskinweb.onrender.com");
+        cookie.setDomain("project-swp391-n9j6.onrender.com");
 //        cookie.setDomain("localhost");
         cookie.setHttpOnly(false); // Ngăn JavaScript truy cập, tăng bảo mật
         cookie.setSecure(true); // Bật nếu dùng HTTPS
@@ -103,7 +103,7 @@ public class AuthenticationService implements UserDetailsService {
 
     public void logout(HttpServletResponse response) {
         Cookie cookie = new Cookie("token", null);
-        cookie.setDomain("freshskinweb.onrender.com");
+        cookie.setDomain("project-swp391-n9j6.onrender.com");
 //        cookie.setDomain("localhost");
         cookie.setHttpOnly(false);
         cookie.setSecure(true);
