@@ -15,14 +15,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @ToString
-@Table(name = "UserDiscountUsageEntity")
+@Table(name = "UserDiscountUsage")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDiscountUsageEntity extends AbstractEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "UserID", insertable = false, updatable = false)
+    @Column(name = "UserDiscountUsageId", insertable = false, updatable = false)
     Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
