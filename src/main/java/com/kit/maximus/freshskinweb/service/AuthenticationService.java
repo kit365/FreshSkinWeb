@@ -74,11 +74,46 @@ public class AuthenticationService implements UserDetailsService {
         return IntrospectResponse.builder().valid(verify && expirationDate.after(new Date())).build();
     }
 
+//    public AuthenticationResponseDTO authenticate(AuthenticationRequest authenticationRequest, HttpServletResponse response) {
+//        UserEntity user = userRepository.findByUsername(authenticationRequest.getUsername())
+//                .orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_FOUND));
+//        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+//
+//
+//        boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
+//
+//        if (!authenticated) {
+//            throw new AppException(ErrorCode.PASSWORD_INCORRECT);
+//        }
+//        if (user.getStatus().equals(Status.INACTIVE)) {
+//            throw new AppException(ErrorCode.ACCOUNT_LOCKED);
+//        }
+//
+//        // Generate JWT Token
+//        String token = generateToken(authenticationRequest.getUsername());
+//
+//        // Tạo cookie chứa token
+//        Cookie cookie = new Cookie("token", token);
+//        cookie.setPath("/"); // Áp dụng cho toàn bộ trang web
+//        cookie.setHttpOnly(false); // Để hiển thị trong Application > Cookies
+//        cookie.setSecure(true); // Bắt buộc khi chạy trên HTTPS
+//        cookie.setDomain("project-swp391-n9j6.onrender.com"); // Đảm bảo đúng domain
+//        cookie.setMaxAge(60 * 60 * 24); // Hết hạn sau 1 ngày
+//        response.setHeader("Set-Cookie", "token=" + token + "; Path=/; Secure; HttpOnly; SameSite=None");
+//
+//        // Thêm cookie vào response
+//        response.addCookie(cookie);
+//
+//        return AuthenticationResponseDTO.builder()
+//                .token(token)
+//                .authenticated(authenticated)
+//                .build();
+//    }
+
     public AuthenticationResponseDTO authenticate(AuthenticationRequest authenticationRequest, HttpServletResponse response) {
         UserEntity user = userRepository.findByUsername(authenticationRequest.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_FOUND));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-
 
         boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
 
@@ -95,11 +130,10 @@ public class AuthenticationService implements UserDetailsService {
         // Tạo cookie chứa token
         Cookie cookie = new Cookie("token", token);
         cookie.setPath("/"); // Áp dụng cho toàn bộ trang web
-        cookie.setHttpOnly(false); // Để hiển thị trong Application > Cookies
-        cookie.setSecure(true); // Bắt buộc khi chạy trên HTTPS
-        cookie.setDomain("project-swp391-n9j6.onrender.com"); // Đảm bảo đúng domain
+        cookie.setHttpOnly(true); // Chỉ backend truy cập, bảo mật hơn
+        cookie.setSecure(true); // Chỉ hoạt động trên HTTPS
         cookie.setMaxAge(60 * 60 * 24); // Hết hạn sau 1 ngày
-        response.setHeader("Set-Cookie", "token=" + token + "; Path=/; Secure; HttpOnly; SameSite=None");
+        cookie.setAttribute("SameSite", "None"); // Quan trọng khi frontend khác origin
 
         // Thêm cookie vào response
         response.addCookie(cookie);
@@ -109,6 +143,7 @@ public class AuthenticationService implements UserDetailsService {
                 .authenticated(authenticated)
                 .build();
     }
+
 
     public void logout(HttpServletResponse response) {
         Cookie cookie = new Cookie("token", null);
