@@ -75,30 +75,39 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public AuthenticationResponseDTO authenticate(AuthenticationRequest authenticationRequest, HttpServletResponse response) {
-        UserEntity user = userRepository.findByUsername(authenticationRequest.getUsername()).orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_FOUND));
+        UserEntity user = userRepository.findByUsername(authenticationRequest.getUsername())
+                .orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_FOUND));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+
+
         boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
 
-        if(!authenticated) {
+        if (!authenticated) {
             throw new AppException(ErrorCode.PASSWORD_INCORRECT);
         }
-        if(user.getStatus().equals(Status.INACTIVE)) {
+        if (user.getStatus().equals(Status.INACTIVE)) {
             throw new AppException(ErrorCode.ACCOUNT_LOCKED);
         }
 
-        var token = generateToken(authenticationRequest.getUsername());
+        // Generate JWT Token
+        String token = generateToken(authenticationRequest.getUsername());
 
+        // Tạo cookie chứa token
         Cookie cookie = new Cookie("token", token);
-        cookie.setDomain("project-swp391-n9j6.onrender.com");
-//        cookie.setDomain("localhost");
-        cookie.setHttpOnly(false); // Ngăn JavaScript truy cập, tăng bảo mật
-        cookie.setSecure(true); // Bật nếu dùng HTTPS
-        cookie.setPath("/"); // Áp dụng cho toàn bộ domain
+        cookie.setPath("/"); // Áp dụng cho toàn bộ trang web
+        cookie.setHttpOnly(false); // Để hiển thị trong Application > Cookies
+        cookie.setSecure(true); // Bắt buộc khi chạy trên HTTPS
+        cookie.setDomain("project-swp391-n9j6.onrender.com"); // Đảm bảo đúng domain
         cookie.setMaxAge(60 * 60 * 24); // Hết hạn sau 1 ngày
+        response.setHeader("Set-Cookie", "token=" + token + "; Path=/; Secure; HttpOnly; SameSite=None");
 
+        // Thêm cookie vào response
         response.addCookie(cookie);
+
         return AuthenticationResponseDTO.builder()
-                .token(token).authenticated(authenticated).build();
+                .token(token)
+                .authenticated(authenticated)
+                .build();
     }
 
     public void logout(HttpServletResponse response) {
