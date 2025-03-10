@@ -28,7 +28,10 @@ public class SkinTestEntity extends AbstractEntity {
     @JsonBackReference
     UserEntity userEntity;
 
-    String questionGroup;
+    @ManyToOne(fetch = FetchType.LAZY)
+            @OnDelete(action = OnDeleteAction.SET_NULL)
+            @JoinColumn(name = "questionGroupID")
+    QuestionGroupEntity questionGroup;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)

@@ -48,13 +48,14 @@ public class SkinTestService implements BaseService<SkinTestResponse, CreationSk
         entity.setSkinType(skinTypeRepository.findById(request.getSkinType()).orElse(null));
 
         //Phải có bộ đề thì mới cho làm test được
-        if(skinQuestionsRepository.findByQuestionGroup(request.getQuestionGroup()) == null && skinQuestionsRepository.findByQuestionGroup(request.getQuestionGroup()).isEmpty()) {
-            throw new AppException(ErrorCode.QUESTION_GROUP_NOT_EXISTED);
-        } else {
-            entity.setQuestionGroup(request.getQuestionGroup());
-            skinTestRepository.save(entity);
-            return true;
-        }
+//        if(skinQuestionsRepository.findByQuestionGroup(request.getQuestionGroup()) == null && skinQuestionsRepository.findByQuestionGroup(request.getQuestionGroup()).isEmpty()) {
+//            throw new AppException(ErrorCode.QUESTION_GROUP_NOT_EXISTED);
+//        } else {
+//            entity.setQuestionGroup(request.getQuestionGroup());
+//            skinTestRepository.save(entity);
+//            return true;
+//        }
+        return false;
     }
 
     @Override
@@ -63,21 +64,21 @@ public class SkinTestService implements BaseService<SkinTestResponse, CreationSk
 
         skinTestMapper.updateSkinTestEntity(entity, request);
 
-        if(request.getQuestionGroup() != null) {
-            entity.setQuestionGroup(request.getQuestionGroup());
-        }
-
-        if (request.getUserEntity() != null) {
-            entity.setUserEntity(userRepository.findById(request.getUserEntity()).orElse(null));
-        } else {
-            entity.setUserEntity(entity.getUserEntity());
-        }
-
-        if(request.getSkinType() != null){
-            entity.setSkinType(skinTypeRepository.findById(request.getSkinType()).orElse(null));
-        } else{
-            entity.setSkinType(entity.getSkinType());
-        }
+//        if(request.getQuestionGroup() != null) {
+//            entity.setQuestionGroup(request.getQuestionGroup());
+//        }
+//
+//        if (request.getUserEntity() != null) {
+//            entity.setUserEntity(userRepository.findById(request.getUserEntity()).orElse(null));
+//        } else {
+//            entity.setUserEntity(entity.getUserEntity());
+//        }
+//
+//        if(request.getSkinType() != null){
+//            entity.setSkinType(skinTypeRepository.findById(request.getSkinType()).orElse(null));
+//        } else{
+//            entity.setSkinType(entity.getSkinType());
+//        }
 
         return skinTestMapper.toSkinTestResponse(skinTestRepository.save(entity));
     }
@@ -138,6 +139,7 @@ public class SkinTestService implements BaseService<SkinTestResponse, CreationSk
     public List<SkinTestResponse> showAll() {
     return skinTestRepository.findAll().stream().map(skinTestMapper::toSkinTestResponse).collect(Collectors.toList());
     }
+
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         return Map.of();
