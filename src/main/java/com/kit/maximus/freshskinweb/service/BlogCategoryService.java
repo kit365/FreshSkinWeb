@@ -166,7 +166,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
     @Override
     public boolean delete(Long id) {
         BlogCategoryEntity blogCategoryEntity = getBlogCategoryEntityById(id);
-        blogCategorySearchRepository.deleteBlogs(id);
+        blogCategorySearchRepository.deleteBlogCategory(id);
         if (blogCategoryEntity == null) {
             throw new AppException(ErrorCode.BLOG_CATEGORY_NOT_FOUND);
         }
@@ -201,7 +201,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
                     }
                 }
             }
-            blogCategorySearchRepository.deleteBlogs(blogCategoryEntity.getId());
+            blogCategorySearchRepository.deleteBlogCategory(blogCategoryEntity.getId());
         }
         blogCategoryRepository.deleteAll(blogCategoryEntities);
         return true;

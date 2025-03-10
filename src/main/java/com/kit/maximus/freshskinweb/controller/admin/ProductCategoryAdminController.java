@@ -51,6 +51,18 @@ public class ProductCategoryAdminController {
         }
     }
 
+
+    @PostMapping("indexed")
+    public ResponseAPI<String> indexProductCategory() {
+        boolean result = productCategoryService.indexProductCategory();
+        String message = String.valueOf(result);
+        return ResponseAPI.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message(message)
+                .build();
+    }
+
+
     @GetMapping()
     public ResponseAPI<Map<String, Object>> getAllProductCategory(@RequestParam(defaultValue = "1") int page,
                                                                   @RequestParam(defaultValue = "4") int size,

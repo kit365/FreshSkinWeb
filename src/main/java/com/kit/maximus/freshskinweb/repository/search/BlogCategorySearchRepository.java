@@ -62,7 +62,7 @@ public class BlogCategorySearchRepository {
     }
 
 
-    public boolean deleteBlogs(Long id) {
+    public boolean deleteBlogCategory(Long id) {
         try {
             DeleteRequest deleteRequest = new DeleteRequest.Builder()
                     .index("blogcategory")
@@ -74,15 +74,15 @@ public class BlogCategorySearchRepository {
 
 
             if ("deleted".equals(deleteResponse.result().toString())) {
-                log.info("Blogs with ID {} was deleted. Result: {}", id, deleteResponse.result());
+                log.info("BlogsCategory with ID {} was deleted. Result: {}", id, deleteResponse.result());
                 return true;
             } else {
-                log.warn("Failed to delete Blogs with ID {}. Result: {}", id, deleteResponse.result());
+                log.warn("Failed to delete BlogsCategory with ID {}. Result: {}", id, deleteResponse.result());
                 return false;
             }
         } catch (IOException e) {
             // Log lỗi khi gặp sự cố trong quá trình xóa
-            log.error("Error while deleting product with ID {}", id, e);
+            log.error("Error while deleting BlogsCategory with ID {}", id, e);
             return false;
         }
     }
