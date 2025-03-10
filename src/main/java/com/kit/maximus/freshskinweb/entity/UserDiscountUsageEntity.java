@@ -4,12 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Setter
 @Getter
@@ -17,7 +15,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity
 @ToString
-@Table(name = "UserDiscountUsageEntityr")
+@Table(name = "UserDiscountUsageEntity")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDiscountUsageEntity extends AbstractEntity {

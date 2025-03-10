@@ -42,16 +42,6 @@ public class OrderController {
 //        return ResponseAPI.<List<OrderResponse>>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
 //    }
 
-//    @GetMapping
-//    public ResponseAPI<List<OrderResponse>> getAllOrder(
-//            @RequestParam(required = false) OrderStatus status,
-//            @RequestParam(required = false) String keyword,
-//            @RequestParam(required = false) String orderId
-//
-//    ) {
-//        var result = orderService.getAllOrder(status, keyword, orderId);
-//        return ResponseAPI.<List<OrderResponse>>builder().code(HttpStatus.OK.value()).data(result).build();
-//    }
 
 
     @GetMapping
@@ -59,8 +49,8 @@ public class OrderController {
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String orderId,
-            @RequestParam(defaultValue = "1") int page,  // Giá trị mặc định là trang 1
-            @RequestParam(defaultValue = "10") int size  // Giá trị mặc định là 10 item/trang
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
         var result = orderService.getAllOrder(status, keyword, orderId, page, size);
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
