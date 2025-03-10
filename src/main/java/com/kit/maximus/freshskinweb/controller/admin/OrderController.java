@@ -83,6 +83,14 @@ public class OrderController {
         return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
+    @PatchMapping("edit/{orderId}")
+    public ResponseAPI<OrderResponse> updateOrder( @PathVariable String orderId, @RequestBody OrderRequest orderStatus) {
+        var create = orderService.update(orderId, orderStatus);
+
+        return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(create).build();
+    }
+
+
     //    @PatchMapping("/update/{orderId}")
 //    public ResponseAPI<OrderResponse> updateOrder(@Valid @PathVariable Long orderId, @RequestBody UpdateOrderRequest updateOrderRequest) {
 //        String message = "Update Order Success";

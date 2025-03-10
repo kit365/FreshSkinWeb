@@ -327,7 +327,7 @@ public class OrderService {
         return map;
     }
 
-//    Cập nhật trạng thái đơn hàng
+//    Cập nhật trạng thái cho đơn hàng được chọn
 public String update(List<String> id, String orderStatus) {
     try {
         OrderStatus orderStatusEnum = OrderStatus.valueOf(orderStatus);
@@ -344,7 +344,20 @@ public String update(List<String> id, String orderStatus) {
     }
 }
 
+//Cập nhật trạng thái cho 1 đơn hàng
+    public String update(String id, OrderRequest request) {
+        String orderStatus = request.getOrderStatus();
 
+            OrderStatus orderStatusEnum = getOrderStatus(orderStatus);
+            OrderEntity orderEntity = orderRepository.findById(id).orElse(null);
+
+            if (orderEntity != null) {
+                orderEntity.setOrderStatus(orderStatusEnum);
+                orderRepository.save(orderEntity);
+                return "Cập nhật trạng thái đơn hàng thành công";
+            }
+            return "Không tìm thấy đơn hàng để cập nhật";
+    }
 
     public void deleteOrder(String orderId) {
         if (!orderRepository.existsById(orderId)) {
