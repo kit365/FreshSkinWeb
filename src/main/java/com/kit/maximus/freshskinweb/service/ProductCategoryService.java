@@ -575,8 +575,16 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
         result = mapToCategoryResponse(categories);
 
+        result.removeIf(category ->
+                category.getProducts().stream()
+                        .anyMatch(product -> product.getStatus().equalsIgnoreCase("INACTIVE") || product.isDeleted())
+        );
+
         result.forEach(category -> {
             category.setDescription(null);
+
+
+
 
             List<ProductResponseDTO> limitedProducts = category.getProducts()
                     .stream()
