@@ -728,77 +728,113 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     //Tìm chi tiết Product bằng Slug
     public List<Map<String, Object>> getProductBySlug(String slug) {
 
-
         List<Map<String, Object>> data = new ArrayList<>();
         Map<String, Object> map = new HashMap<>();
 
         // Lấy sản phẩm theo slug
-        ProductEntity productEntity = productRepository.findBySlug(slug);
+        ProductResponseDTO productCategoryResponses = productSearchRepository.findBySlug(slug,"ACTIVE",false);
 
-        if (productEntity == null || productEntity.isDeleted() || productEntity.getStatus() != Status.ACTIVE) {
+        if (productCategoryResponses == null) {
             throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
-        List<ProductCategoryResponse> productCategoryResponses = new ArrayList<>();
+        map.put("productDetail", productCategoryResponses);
 
-
-        productEntity.getCategory().forEach(productCategoryEntity -> {
-            ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
-            productCategoryResponse.setId(productCategoryEntity.getId());
-            productCategoryResponse.setTitle(productCategoryEntity.getTitle());
-            productCategoryResponse.setSlug(productCategoryEntity.getSlug());
-
-            if (productCategoryEntity.getParent() != null) {
-                ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
-                parentCategoryResponse.setId(productCategoryEntity.getParent().getId());
-                parentCategoryResponse.setTitle(productCategoryEntity.getParent().getTitle());
-                parentCategoryResponse.setSlug(productCategoryEntity.getParent().getSlug());
-                productCategoryResponse.setParent(parentCategoryResponse);
-            }
-
-
-            productCategoryResponses.add(productCategoryResponse);
-
-
-        });
-        ProductResponseDTO response = mapProductResponseDTO(productEntity);
-        response.setCategory(productCategoryResponses);
-        List<ProductVariantResponse> productVariantResponses = new ArrayList<>();
-        productEntity.getVariants().forEach(variant -> {
-            ProductVariantResponse variantResponse = new ProductVariantResponse();
-            variantResponse.setId(variant.getId());
-            variantResponse.setPrice(variant.getPrice());
-            variantResponse.setVolume(variant.getVolume());
-            variantResponse.setUnit(variant.getUnit());
-            productVariantResponses.add(variantResponse);
-        });
-        response.setVariants(productVariantResponses);
-        // Nhét sản phẩm chính vào map (bọc vào List)
-        map.put("productDetail", response);
-
-        // Tìm id của các category
         List<Long> ids = new ArrayList<>();
 
-        productEntity.getCategory().forEach(productCategoryEntity -> ids.add(productCategoryEntity.getId()));
+        productCategoryResponses.getCategory().forEach(productCategoryEntity -> ids.add(productCategoryEntity.getId()));
 
 
-        List<ProductEntity> productEntities = productRepository.findTop10ByCategory_IdIn(ids);
+        List<ProductResponseDTO> productRelated = productSearchRepository.getProductByCategoryIDs(ids,"ACTIVE",false,7);
 
 
-        productEntities.removeIf(productEntity1 -> productEntity1.getId().equals(productEntity.getId()));
+        productRelated.removeIf(productRelaters -> productRelaters.getId().equals(productCategoryResponses.getId()));
 
-
-        List<ProductResponseDTO> productRelatedResponses = mapProductResponsesDTO(productEntities);
-        productRelatedResponses.forEach(productRelatedResponse -> {
+        productRelated.forEach(productRelatedResponse -> {
             productRelatedResponse.setCategory(null);
             productRelatedResponse.setSkinTypes(null);
             productRelatedResponse.setBrand(null);
             clearUnnecessaryFields(productRelatedResponse);
         });
-        map.put("productsRelated", productRelatedResponses);
+        map.put("productsRelated", productRelated);
         data.add(map);
         return data;
     }
+
+//    //Tìm chi tiết Product bằng Slug
+//    public List<Map<String, Object>> getProductBySlug(String slug) {
+//
+//
+//        List<Map<String, Object>> data = new ArrayList<>();
+//        Map<String, Object> map = new HashMap<>();
+//
+//        // Lấy sản phẩm theo slug
+//        ProductEntity productEntity = productRepository.findBySlug(slug);
+//
+//        if (productEntity == null || productEntity.isDeleted() || productEntity.getStatus() != Status.ACTIVE) {
+//            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+//        }
+//
+//        List<ProductCategoryResponse> productCategoryResponses = new ArrayList<>();
+//
+//
+//        productEntity.getCategory().forEach(productCategoryEntity -> {
+//            ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
+//            productCategoryResponse.setId(productCategoryEntity.getId());
+//            productCategoryResponse.setTitle(productCategoryEntity.getTitle());
+//            productCategoryResponse.setSlug(productCategoryEntity.getSlug());
+//
+//            if (productCategoryEntity.getParent() != null) {
+//                ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
+//                parentCategoryResponse.setId(productCategoryEntity.getParent().getId());
+//                parentCategoryResponse.setTitle(productCategoryEntity.getParent().getTitle());
+//                parentCategoryResponse.setSlug(productCategoryEntity.getParent().getSlug());
+//                productCategoryResponse.setParent(parentCategoryResponse);
+//            }
+//
+//
+//            productCategoryResponses.add(productCategoryResponse);
+//
+//
+//        });
+//        ProductResponseDTO response = mapProductResponseDTO(productEntity);
+//        response.setCategory(productCategoryResponses);
+//        List<ProductVariantResponse> productVariantResponses = new ArrayList<>();
+//        productEntity.getVariants().forEach(variant -> {
+//            ProductVariantResponse variantResponse = new ProductVariantResponse();
+//            variantResponse.setId(variant.getId());
+//            variantResponse.setPrice(variant.getPrice());
+//            variantResponse.setVolume(variant.getVolume());
+//            variantResponse.setUnit(variant.getUnit());
+//            productVariantResponses.add(variantResponse);
+//        });
+//        response.setVariants(productVariantResponses);
+//        // Nhét sản phẩm chính vào map (bọc vào List)
+//        map.put("productDetail", response);
+//
+//        // Tìm id của các category
+//        List<Long> ids = new ArrayList<>();
+//
+//        productEntity.getCategory().forEach(productCategoryEntity -> ids.add(productCategoryEntity.getId()));
+//
+//
+//        List<ProductEntity> productEntities = productRepository.findTop10ByCategory_IdIn(ids);
+//
+//
+//        productEntities.removeIf(productEntity1 -> productEntity1.getId().equals(productEntity.getId()));
+//
+//
+//        List<ProductResponseDTO> productRelatedResponses = mapProductResponsesDTO(productEntities);
+//        productRelatedResponses.forEach(productRelatedResponse -> {
+//            productRelatedResponse.setCategory(null);
+//            productRelatedResponse.setSkinTypes(null);
+//            productRelatedResponse.setBrand(null);
+//            clearUnnecessaryFields(productRelatedResponse);
+//        });
+//        map.put("productsRelated", productRelatedResponses);
+//        data.add(map);
+//        return data;
+//    }
 
     //hàm này là con của hàm getProductCategoryBySlug => có giới hạn sản phẩm được trả ra
     private Map<String, Object> getLimitProductByCategorySlug(int maxSize, int size, int page, String sortValue, String sortDirection, String slug, List<String> brand, List<String> category, List<String> skinTypes, double minPrice, double maxPrice) {
@@ -1329,9 +1365,82 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return productResponseDTO;
     }
 
+
+    //hàm nay để map riêng vào searchPublic
+
+    // Hàm Map danh sách ProductResponseDTO từ danh sách ProductEntity
+    private List<ProductResponseDTO> mapProductIndexResponsesDTO(List<ProductEntity> productEntities) {
+        List<ProductResponseDTO> productResponseDTOs = productMapper.productToProductResponsesDTO(productEntities);
+
+        for (int i = 0; i < productEntities.size(); i++) {
+            ProductEntity product = productEntities.get(i);
+            ProductResponseDTO dto = productResponseDTOs.get(i);
+
+            // Map thương hiệu của Product
+            if (product.getBrand() != null) {
+                ProductBrandResponse brandResponse = new ProductBrandResponse();
+                brandResponse.setTitle(product.getBrand().getTitle());
+                brandResponse.setSlug(product.getBrand().getSlug());
+                brandResponse.setId(product.getBrand().getId());
+                dto.setBrand(brandResponse);
+            }
+
+            // Map danh mục của Product
+            if (product.getCategory() != null) {
+                List<ProductCategoryResponse> categoryResponses = new ArrayList<>();
+                for (ProductCategoryEntity category : product.getCategory()) {
+                    ProductCategoryResponse categoryResponse = new ProductCategoryResponse();
+                    categoryResponse.setId(category.getId());
+                    categoryResponse.setTitle(category.getTitle());
+                    categoryResponse.setSlug(category.getSlug());
+
+                    // Map danh mục cha nếu có
+                    if (category.getParent() != null) {
+                        ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
+                        parentCategoryResponse.setId(category.getParent().getId());
+                        parentCategoryResponse.setTitle(category.getParent().getTitle());
+                        parentCategoryResponse.setSlug(category.getParent().getSlug());
+                        categoryResponse.setParent(parentCategoryResponse);
+                    }
+                    categoryResponses.add(categoryResponse);
+                }
+                dto.setCategory(categoryResponses);
+            }
+
+            // Map loại da của Product
+            if (product.getSkinTypes() != null) {
+                List<SkinTypeResponse> skinTypeResponses = new ArrayList<>();
+                for (SkinTypeEntity skinType : product.getSkinTypes()) {
+                    SkinTypeResponse skinTypeResponse = new SkinTypeResponse();
+                    skinTypeResponse.setType(skinType.getType());
+                    skinTypeResponse.setId(skinType.getId());
+                    skinTypeResponses.add(skinTypeResponse);
+                }
+                dto.setSkinTypes(skinTypeResponses);
+            }
+
+            // Map danh sách biến thể của Product
+            if (product.getVariants() != null) {
+                List<ProductVariantResponse> variantResponses = new ArrayList<>();
+                for (ProductVariantEntity variant : product.getVariants()) {
+                    ProductVariantResponse variantResponse = new ProductVariantResponse();
+                    variantResponse.setId(variant.getId());
+                    variantResponse.setPrice(variant.getPrice());
+                    variantResponse.setVolume(variant.getVolume());
+                    variantResponse.setUnit(variant.getUnit());
+                    variantResponses.add(variantResponse);
+                }
+                dto.setVariants(variantResponses);
+            }
+        }
+
+        return productResponseDTOs;
+    }
+
+
     public boolean indexProduct() {
         List<ProductEntity> productEntities = productRepository.findAll();
-        List<ProductResponseDTO> responseDTOS = mapProductResponsesDTO(productEntities);
+        List<ProductResponseDTO> responseDTOS = mapProductIndexResponsesDTO(productEntities);
 
         responseDTOS.forEach(productSearchRepository::indexProduct);
 

@@ -1,6 +1,8 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kit.maximus.freshskinweb.entity.DiscountEntity;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
@@ -36,6 +38,7 @@ public class ProductResponseDTO implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<SkinTypeResponse> skinTypes;
     @JsonInclude(JsonInclude.Include.NON_NULL)
+            @JsonIgnore
     DiscountResponse discountEntity;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     int discountPercent;
