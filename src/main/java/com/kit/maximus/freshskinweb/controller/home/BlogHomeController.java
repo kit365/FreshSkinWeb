@@ -22,16 +22,17 @@ import java.util.Map;
 public class BlogHomeController {
 
     BlogCategoryService blogCategoryService;
+
     BlogService blogService;
 
-    @GetMapping("")
+    @GetMapping()
     public ResponseAPI<Map<String, Object>> getBlogCategory(@RequestParam(defaultValue = "1") int page,
                                                             @RequestParam(defaultValue = "8") int size,
                                                             @RequestParam(value = "id", required = false) Long cateID) {
         String message_succed = "Thành công!!!";
         String message_failed = "Thất bại!!!";
         try {
-            Map<String, Object> result = blogService.getBlogCategories(page,size,cateID);
+            Map<String, Object> result = blogCategoryService.getBlogCategories(page,size,cateID);
             return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).message(message_succed).build();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
