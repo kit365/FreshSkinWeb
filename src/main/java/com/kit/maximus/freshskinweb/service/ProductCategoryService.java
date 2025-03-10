@@ -11,9 +11,8 @@ import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.ProductCategoryMapper;
 import com.kit.maximus.freshskinweb.repository.ProductCategoryRepository;
-import com.kit.maximus.freshskinweb.utils.SkinType;
+import com.kit.maximus.freshskinweb.repository.search.ProductCategorySearchRepository;
 import com.kit.maximus.freshskinweb.utils.Status;
-import jdk.jfr.Category;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -44,6 +43,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
     ProductCategoryMapper productCategoryMapper;
 
+    ProductCategorySearchRepository productCategorySearchRepository;
 
     Cloudinary cloudinary;
 
@@ -90,7 +90,8 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
             productCategory.setChild(children);
         }
 
-        productCategoryRepository.save(productCategory);
+        ProductCategoryResponse response = productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryRepository.save(productCategory));
+        productCategorySearchRepository.indexProductCategory(response);
         return true;
     }
 
@@ -118,6 +119,10 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     @Override
     public ProductCategoryResponse update(Long id, UpdateProductCategoryRequest request) {
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
+
+
+
+
 
 
         if (StringUtils.hasLength(request.getStatus())) {
@@ -188,7 +193,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     @Override
     public boolean delete(Long id) {
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
-
+            productCategorySearchRepository.delete(id);
         if (productCategoryEntity.getChild() != null) {
             productCategoryEntity.getChild().forEach(productCategoryEntity1 -> productCategoryEntity1.setParent(null));
             productCategoryRepository.saveAll(productCategoryEntity.getChild());
@@ -222,7 +227,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         List<ProductCategoryEntity> list = productCategoryRepository.findAllById(id);
 
         for (ProductCategoryEntity productCategoryEntity : list) {
-
+                productCategorySearchRepository.delete(productCategoryEntity.getId());
             if (productCategoryEntity.getChild() != null) {
                 productCategoryEntity.getChild().forEach(productCategoryEntity1 -> productCategoryEntity1.setParent(null));
             }
@@ -742,5 +747,12 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return response;
     }
 
+
+    public boolean indexProductCategory() {
+        List<ProductCategoryEntity> productCategoryEntities = productCategoryRepository.findAll();
+        List<ProductCategoryResponse> responseDTOS = productCategoryMapper.toProductCateroiesResponseDTO(productCategoryEntities);
+        responseDTOS.forEach(productCategorySearchRepository::indexProductCategory);
+        return false;
+    }
 
 }

@@ -14,6 +14,7 @@ import org.opensearch.client.opensearch._types.SortOrder;
 import org.opensearch.client.opensearch._types.query_dsl.*;
 import org.opensearch.client.opensearch.core.*;
 import org.opensearch.client.opensearch.core.search.Hit;
+import org.opensearch.client.opensearch.core.termvectors.Term;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -153,39 +154,83 @@ public class ProductSearchRepository {
         }
     }
 
-    public ProductResponseDTO searchBySlug(String slug) {
+    public List<ProductResponseDTO> findBySlugs(String slug, String status, boolean deleted) {
         try {
-            TermQuery termQuery = new TermQuery.Builder()
-                    .field("slug.keyword")  // Sử dụng .keyword để tìm kiếm chính xác
+            List<Query> queries = new ArrayList<>();
+
+            // Tìm kiếm theo slug (của category)
+            TermQuery termQuerySlug = new TermQuery.Builder()
+                    .field("category.slug.keyword")  // Đúng tên trường là "category.slug.keyword"
                     .value(FieldValue.of(slug))
                     .build();
 
-            Query searchQuery = new Query.Builder()
-                    .term(termQuery)
+            // Tìm kiếm theo slug của category cha
+            TermQuery termQueryCateParent = new TermQuery.Builder()
+                    .field("category.parent.slug.keyword")
+                    .value(FieldValue.of(slug))
                     .build();
 
-            // Tạo SearchRequest để thực hiện tìm kiếm
+            // Tìm kiếm theo slug của category ông nội
+            TermQuery termQueryGrandParent = new TermQuery.Builder()
+                    .field("category.parent.parent.slug.keyword")
+                    .value(FieldValue.of(slug))
+                    .build();
+
+            // Thêm điều kiện tìm theo status
+            TermQuery termQueryStatus = new TermQuery.Builder()
+                    .field("status.keyword")
+                    .value(FieldValue.of(status))
+                    .build();
+
+            // Thêm điều kiện tìm theo deleted
+            TermQuery termQueryDeleted = new TermQuery.Builder()
+                    .field("deleted")
+                    .value(FieldValue.of(deleted))
+                    .build();
+
+            // Thêm các query vào danh sách
+            queries.add(new Query.Builder().term(termQuerySlug).build());
+            queries.add(new Query.Builder().term(termQueryCateParent).build());
+            queries.add(new Query.Builder().term(termQueryGrandParent).build());
+            queries.add(new Query.Builder().term(termQueryStatus).build());
+            queries.add(new Query.Builder().term(termQueryDeleted).build());
+
+            // Sử dụng BoolQuery để kết hợp các điều kiện (OR)
+            BoolQuery boolQuery = new BoolQuery.Builder()
+                    .should(queries)  // Các điều kiện OR
+                    .minimumShouldMatch("1")  // Ít nhất một điều kiện phải khớp
+                    .build();
+
+            Query searchQuery = new Query.Builder().bool(boolQuery).build();
+
+
             SearchRequest searchRequest = new SearchRequest.Builder()
                     .index("products")
                     .query(searchQuery)
-                    .size(1)
+                    .size(500)
                     .build();
 
-            // Gửi yêu cầu tìm kiếm
+            // Thực hiện tìm kiếm
             SearchResponse<ProductResponseDTO> response = openSearchClient.search(searchRequest, ProductResponseDTO.class);
 
-            // Kiểm tra kết quả và trả về sản phẩm tìm thấy
+            // Kiểm tra và trả về kết quả
             if (!response.hits().hits().isEmpty()) {
-                return response.hits().hits().getFirst().source();
+                // Chuyển đổi kết quả từ hits thành danh sách ProductResponseDTO
+                return response.hits().hits().stream()
+                        .map(Hit::source)  // Chuyển đổi hit thành đối tượng ProductResponseDTO
+                        .collect(Collectors.toList());
             } else {
-                return null; // Không tìm thấy sản phẩm
+                return Collections.emptyList();
             }
 
-        } catch (IOException e) {
-            log.error("Error while fetching product by slug", e);
-            return null; // Trả về null nếu gặp lỗi
+        } catch (Exception ex) {
+            log.error("Error while fetching products by slug", ex);
+            return Collections.emptyList();
         }
     }
+
+
+
 
     public ProductResponseDTO findBySlug(String slug, String status, boolean deleted) {
         try {
