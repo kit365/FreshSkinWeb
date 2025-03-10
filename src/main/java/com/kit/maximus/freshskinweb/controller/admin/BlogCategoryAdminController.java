@@ -63,6 +63,16 @@ public class BlogCategoryAdminController {
         }
     }
 
+    @PostMapping("indexed")
+    public ResponseAPI<String> indexBlog() {
+        boolean result = blogCategoryService.indexBlogCategory();
+        String message = String.valueOf(result);
+        return ResponseAPI.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message(message)
+                .build();
+    }
+
 
     @PatchMapping("/edit/{id}")
     public ResponseAPI<BlogCategoryResponse> updateBlogCategory(@PathVariable Long id ,@RequestBody UpdateBlogCategoryRequest request){

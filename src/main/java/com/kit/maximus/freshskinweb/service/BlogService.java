@@ -7,7 +7,6 @@ import com.kit.maximus.freshskinweb.dto.request.blog.BlogCreationRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
-import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -43,7 +42,6 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     BlogCategoryRepository blogCategoryRepository;
     Cloudinary cloudinary;
     BlogSearchRepository blogSearchRepository;
-    private final BlogCategoryService blogCategoryService;
 
     @Override
     public boolean add(BlogCreationRequest request) {
@@ -88,6 +86,20 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     public List<BlogResponse> getAll() {
         return blogMapper.toBlogsResponseDTO(blogRepository.findAll());
     }
+
+    public List<BlogResponse> getBlogsByCategoryIDs(List<Long> cateID, String status, boolean deleted) {
+        return blogSearchRepository.getBlogsByCategoryIds(cateID, status, deleted);
+    }
+
+
+    public List<BlogResponse> getBlogsByCategoryID(Long id, String status, boolean deleted) {
+        return blogSearchRepository.getBlogsByCategoryId(id, status, deleted);
+    }
+
+    public List<BlogResponse> getBlogsByCategoryID(Long id, String status, boolean deleted, int page, int size) {
+        return blogSearchRepository.getBlogsByCategoryId(id, status, deleted, page, size);
+    }
+
 
     @Override
     public BlogResponse update(Long id, BlogUpdateRequest request) {
@@ -437,77 +449,6 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     /*
       Home
      */
-
-    public Map<String, Object> getBlogCategories(int page, int size, Long categoryId) {
-        int p = (page > 0) ? page - 1 : 0;  // Điều chỉnh trang
-        Pageable pageable = PageRequest.of(p, size);  // Khởi tạo phân trang cho blog
-        Map<String, Object> map = new HashMap<>();
-
-        // Lấy danh sách tất cả các blog
-        List<BlogResponse> blogResponses = blogSearchRepository.showAll();
-
-        // Tạo tập hợp các categoryId từ các blog
-        Set<Long> idCategory = new HashSet<>();
-        blogResponses.forEach(blogResponse -> {
-            if (blogResponse.getBlogCategory() != null) {
-                idCategory.add(blogResponse.getBlogCategory().getId());
-            }
-        });
-
-        // Tìm tất cả các danh mục từ các categoryId lấy được
-        List<BlogCategoryEntity> blogCategoryEntities = blogCategoryRepository.findAllById(idCategory);
-
-        // Lấy categoryId nếu không có (dùng categoryId từ blogResponse đầu tiên nếu categoryId null)
-        if (!blogResponses.isEmpty() && categoryId == null) {
-            categoryId = blogResponses.get(0).getBlogCategory().getId();
-        }
-
-        Long finalCategoryId = categoryId;
-
-        // Lọc các blog theo điều kiện: deleted, INACTIVE, và categoryId
-        blogResponses.removeIf(blogResponse ->
-                blogResponse.getDeleted() ||
-                        blogResponse.getStatus().equalsIgnoreCase("INACTIVE") ||
-                        (finalCategoryId != null && blogResponse.getBlogCategory() != null &&
-                                !blogResponse.getBlogCategory().getId().equals(finalCategoryId))
-        );
-
-        // Loại bỏ BlogCategory khỏi BlogResponse trước khi trả về
-        blogResponses.forEach(blogResponse -> {
-            if (blogResponse.getBlogCategory() != null) {
-                blogResponse.setBlogCategory(null);  // Xóa thông tin BlogCategory
-            }
-        });
-
-        // Tạo Map cho danh mục của blog (tất cả danh mục)
-        Map<Long, BlogCategoryResponse> blogCategoryResponse = new HashMap<>();
-        blogCategoryEntities.forEach(blogCategoryEntity -> {
-            BlogCategoryResponse blog = new BlogCategoryResponse();
-            blog.setId(blogCategoryEntity.getId());
-            blog.setTitle(blogCategoryEntity.getTitle());
-            blog.setSlug(blogCategoryEntity.getSlug());
-            blogCategoryResponse.put(blogCategoryEntity.getId(), blog);
-        });
-
-        // Lấy tất cả danh mục blog (không phân trang)
-        List<BlogCategoryResponse> blogCategoryResponses = new ArrayList<>(blogCategoryResponse.values());
-
-        // Tạo phân trang cho các blog
-        Page<BlogResponse> blogResponsePage = new PageImpl<>(blogResponses, pageable, blogResponses.size());
-
-        // Cập nhật các thông tin phân trang cho các blog
-        Map<String, Object> pageDetail = new HashMap<>();
-        map.put("blogs", blogResponsePage.getContent()); // Blog đã lọc và phân trang
-        map.put("blogsCategory", blogCategoryResponses); // Tất cả danh mục không phân trang
-        pageDetail.put("currentPage", blogResponsePage.getNumber() + 1);
-        pageDetail.put("totalItems", blogResponsePage.getTotalElements());
-        pageDetail.put("totalPages", blogResponsePage.getTotalPages());
-        pageDetail.put("pageSize", blogResponsePage.getSize());
-        map.put("page", pageDetail);
-
-        return map;
-    }
-
 
     //trả về chi tiết của blog
     public BlogResponse getBlogResponseBySlug(String slug) {

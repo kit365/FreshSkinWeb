@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.repository;
 
+import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
@@ -8,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -24,5 +27,8 @@ public interface BlogCategoryRepository extends JpaRepository<BlogCategoryEntity
 
     List<BlogCategoryEntity> findTop4ByStatusAndDeletedAndFeatured(Status status, boolean deleted, boolean featured, Sort position);
 
+
     BlogEntity findBlogBySlug(String slug);
+
+    List<BlogCategoryEntity> findAllByDeletedAndStatus(boolean deleted, Status status);
 }
