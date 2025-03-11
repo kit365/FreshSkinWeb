@@ -74,7 +74,7 @@ public class SecurityConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("https://project-swp391-n9j6.onrender.com", "http://localhost:8080") // Hỗ trợ nhiều origin
-                        .allowedMethods("GET", "POST", "PUT", "DELETE")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE","PATCH")
                         .allowedHeaders("*")
                         .exposedHeaders("Set-Cookie")
                         .allowCredentials(true);
