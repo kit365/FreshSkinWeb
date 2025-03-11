@@ -1212,7 +1212,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     //    @Cacheable(value = "productSuggestions", key = "#request", condition = "#request != null and #request.length() > 2")
     public List<ProductResponseDTO> suggestProduct(String request) {
-        List<ProductResponseDTO> result = productSearchRepository.searchByTitle(request, 5);
+        List<ProductResponseDTO> result = productSearchRepository.searchByTitle(request, 4);
         result.forEach(productResponseDTO -> {
             clearUnnecessaryFields(productResponseDTO);
             productResponseDTO.setBrand(null);
