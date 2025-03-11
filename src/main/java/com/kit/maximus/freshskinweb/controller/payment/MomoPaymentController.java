@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.controller.admin;
+package com.kit.maximus.freshskinweb.controller.payment;
 
 import com.kit.maximus.freshskinweb.constant.MomoParameter;
 import com.kit.maximus.freshskinweb.dto.response.CreateMomoResponse;
@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 
@@ -18,7 +17,7 @@ import java.util.Map;
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/api/momo")
-public class PaymentController {
+public class MomoPaymentController {
 
 
     MomoService momoService;
