@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.service;
 
+import com.kit.maximus.freshskinweb.config.MailConfig;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.entity.SettingEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
@@ -9,6 +10,7 @@ import com.kit.maximus.freshskinweb.repository.OrderRepository;
 import com.kit.maximus.freshskinweb.repository.SettingRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
+import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
@@ -41,11 +43,11 @@ public class EmailService {
     final SettingRepository settingRepository;
     final UserRepository userRepository;
 
-    @Value("${spring.mail.username}")
-    String sender;
+    MailConfig mailConfig;
 
-    @Value("${spring.mail.personal}")
-    String personal;
+    final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+    final String sender = dotenv.get("MAIL_USERNAME");
+    final String personal = dotenv.get("MAIL_PERSONAL");
 
     private Map<OrderStatus, String> getOrderStatusMap() {
         Map<OrderStatus, String> statusMap = new HashMap<>();
