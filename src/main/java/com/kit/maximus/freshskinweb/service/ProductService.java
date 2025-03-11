@@ -21,8 +21,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.opensearch.client.opensearch.OpenSearchClient;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -1087,24 +1085,31 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     //hàm này dùng để search
 
-    public Map<String, Object> getProductsByKeyword(String keyword,int size, int page) {
-
+    public Map<String, Object> getProductsByKeyword(String keyword, int size, int page) {
         Map<String, Object> map = new HashMap<>();
-        // Lấy danh sách brand,category và skintype có trong product
 
+        // Xử lý page
         int p = (page > 0) ? page - 1 : 0;
 
-        List<ProductResponseDTO> filteredProducts = productSearchRepository.searchByTitle(keyword,p,size);
+        //Tìm kiếm danh sách sản phẩm
+        CompletableFuture<List<ProductResponseDTO>> productsFuture = CompletableFuture.supplyAsync(() -> productSearchRepository.searchByTitle(keyword, p, size));
 
+        //Tìm kiếm tổng số sản phẩm
+        CompletableFuture<Integer> totalItemsFuture = CompletableFuture.supplyAsync(() -> productSearchRepository.searchByTitle(keyword, 0, 50).size());
+
+        CompletableFuture.allOf(productsFuture, totalItemsFuture).join();
+
+        List<ProductResponseDTO> filteredProducts = productsFuture.join();
+        int totalItem = totalItemsFuture.join();
+
+        // Nếu không tìm thấy sản phẩm, trả về thông báo
         if (filteredProducts.isEmpty()) {
             map.put("messageNotFound", "Rất tiếc, không tìm thấy sản phẩm từ " + keyword);
             return map;
         }
 
 
-        int totalItem = productSearchRepository.searchByTitle(keyword,100).size();
-
-        int totalPages = (int) Math.ceil((double) totalItem /size);
+        int totalPages = (int) Math.ceil((double) totalItem / size);
 
         filteredProducts.forEach(productResponseDTO -> {
             productResponseDTO.setCategory(null);
@@ -1119,12 +1124,12 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         pageMap.put("totalPages", totalPages);
         pageMap.put("pageSize", size);
 
-        map.put("title", keyword);
 
+        map.put("title", keyword);
         map.put("products", filteredProducts);
         map.put("page", pageMap);
 
-        // Trả về kết quả
+
         return map;
     }
 
