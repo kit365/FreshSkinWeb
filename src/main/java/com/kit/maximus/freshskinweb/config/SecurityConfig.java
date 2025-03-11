@@ -73,7 +73,7 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("https://project-swp391-n9j6.onrender.com", "http://localhost:8080", "http://localhost:3000") // Hỗ trợ nhiều origin
+                        .allowedOrigins("https://project-swp391-n9j6.onrender.com", "http://localhost:8080", "http://localhost:3000","https://freshskinweb.onrender.com/") // Hỗ trợ nhiều origin
                         .allowedMethods("GET", "POST", "PUT", "DELETE","PATCH")
                         .allowedHeaders("*")
                         .exposedHeaders("Set-Cookie")
