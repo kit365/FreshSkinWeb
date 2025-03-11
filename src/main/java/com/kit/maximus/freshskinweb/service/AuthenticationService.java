@@ -103,13 +103,25 @@ public class AuthenticationService implements UserDetailsService {
         cookie.setAttribute("SameSite", "None"); // Quan trọng khi frontend khác origin
 
         // Thêm cookie vào response
+//        if (request.getServerName().equals("localhost")) {
+//            response.setHeader("Set-Cookie",
+//                    "token=" + token + "; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400");
+//        } else {
+//            response.setHeader("Set-Cookie",
+//                    "token=" + token + "; Path=/; HttpOnly; Secure; SameSite=None; Domain=freshskinweb.onrender.com; Max-Age=86400");
+//        }
+
         if (request.getServerName().equals("localhost")) {
-            response.setHeader("Set-Cookie",
-                    "token=" + token + "; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400");
+            // Không set domain khi ở local
+            cookie.setDomain("localhost"); // Cấu hình domain cho localhost
+            response.addCookie(cookie); // Thêm cookie vào response
         } else {
+            // Cấu hình domain cho production (hoặc nếu đang ở server khác)
+            cookie.setDomain("freshskinweb.onrender.com");
             response.setHeader("Set-Cookie",
                     "token=" + token + "; Path=/; HttpOnly; Secure; SameSite=None; Domain=freshskinweb.onrender.com; Max-Age=86400");
         }
+
 
         response.addCookie(cookie);
 
