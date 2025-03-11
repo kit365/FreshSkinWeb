@@ -8,6 +8,5 @@ import java.util.List;
 
 @Repository
 public interface SkinQuestionsRepository extends JpaRepository<SkinQuestionsEntity, Long> {
-    List<SkinQuestionsEntity> findByQuestionGroup(String questionGroup);
 
 }

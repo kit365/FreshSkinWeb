@@ -35,6 +35,10 @@ public class SkinTypeEntity extends AbstractEntity {
     List<ProductEntity> Products = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "skinType")
-            @JsonManagedReference
+    @JsonManagedReference
     List<SkinTestEntity> skinTests = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "skinTypeEntity")
+    @JsonManagedReference
+    List<SkinCareRoutineEntity> skinCareRoutines = new ArrayList<>();
 }

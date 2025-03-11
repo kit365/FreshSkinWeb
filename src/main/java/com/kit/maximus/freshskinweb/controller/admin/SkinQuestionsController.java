@@ -50,12 +50,6 @@ public class SkinQuestionsController {
                 .build();
     }
 
-    @GetMapping("/group/{questionGroup}")
-    public ResponseAPI<List<SkinQuestionsResponse>> showQuestionGroup(@PathVariable("questionGroup") String questionGroup){
-        var result = skinQuestionService.showbyQuestionGroup(questionGroup);
-        return ResponseAPI.<List<SkinQuestionsResponse>>builder().data(result).build();
-    }
-
     @GetMapping
     public ResponseAPI<List<SkinQuestionsResponse>> showAll(){
         var result = skinQuestionService.showAll();

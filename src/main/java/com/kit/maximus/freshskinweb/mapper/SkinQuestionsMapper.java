@@ -12,12 +12,14 @@ import java.lang.annotation.Target;
 public interface SkinQuestionsMapper {
 
     @Mapping( target=  "skinAnswers", ignore = true)
+    @Mapping( target=  "questionGroup", ignore = true)
     SkinQuestionsEntity toSkinQuestionsEntity (CreateSkinQuestionsRequest request);
 
     SkinQuestionsResponse toSkinQuestionsResponse (SkinQuestionsEntity entity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping( target=  "skinAnswers", ignore = true)
+    @Mapping( target=  "questionGroup", ignore = true)
     void updateSkinQuestionsEntity (@MappingTarget SkinQuestionsEntity entity, UpdateSkinQuestionsRequest request);
 
 }

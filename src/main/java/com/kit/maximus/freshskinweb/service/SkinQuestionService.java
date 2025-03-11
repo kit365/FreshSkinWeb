@@ -160,27 +160,6 @@ public class SkinQuestionService implements BaseService<SkinQuestionsResponse, C
         return Map.of();
     }
 
-    //Khi chọn được bộ đề, cần sắp xếp theo thứ tự câu để trả về
-    public List<SkinQuestionsResponse> showbyQuestionGroup(String questionGroup){
-        if(questionGroup == null || questionGroup.isEmpty()){
-            throw new AppException(ErrorCode.QUESTION_GROUP_NOT_EXISTED);
-        }
-        List<SkinQuestionsEntity> entities = repository.findByQuestionGroup(questionGroup);
-
-        // Debug log để kiểm tra dữ liệu trước khi xử lý
-        entities.forEach(q -> System.out.println("Before Mapping: " + q.getQuestionNumber()));
-
-        // Dùng Stream API để trả về theo thứ tự câu ( questionNumber phải là kiểu Interger )
-        List<SkinQuestionsResponse> sortedList = entities.stream()
-                .map(mapper::toSkinQuestionsResponse)
-                .sorted(Comparator.comparing(SkinQuestionsResponse::getQuestionNumber))
-                .toList();
-
-        // Debug log để kiểm tra dữ liệu sau khi sắp xếp
-        sortedList.forEach(q -> System.out.println("After Sorting: " + q.getQuestionNumber()));
-
-        return sortedList;
-    }
 
     public List<SkinQuestionsResponse> showAll(){
         return repository.findAll().stream().map(mapper::toSkinQuestionsResponse).collect(Collectors.toList());

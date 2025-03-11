@@ -12,6 +12,7 @@ import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -107,25 +108,28 @@ public class EmailService {
     @Async
     public void sendOtpEmail(String to, String otp) {
         try {
-            log.info("Starting to send OTP email to: {}", to);
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom(sender, personal);
-            helper.setTo(to);
-            helper.setSubject("Mã xác thực khôi phục mật khẩu");
+            SettingEntity settingEntity = settingRepository.findById(1L)
+                    .orElseThrow(() -> new AppException(ErrorCode.SETTING_NOT_FOUND));
+
+            String websiteName = settingEntity.getWebsiteName();
 
             Context context = new Context();
             context.setVariable("otp", otp);
             context.setVariable("expireTime", "1 phút");
+            context.setVariable("websiteName", websiteName); // Thêm tên website
 
-            // Đổi đường dẫn template
-            String htmlContent = templateEngine.process("forgot-password", context);
-            helper.setText(htmlContent, true);
+            String content = templateEngine.process("forgot-password", context);
+
+            helper.setFrom(new InternetAddress(sender, personal));
+            helper.setTo(to);
+            helper.setSubject("Mã xác thực OTP");
+            helper.setText(content, true);
 
             mailSender.send(message);
-            log.info("Successfully sent OTP email to: {}", to);
-
+            log.info("Sent OTP email to: {}", to);
         } catch (Exception e) {
             log.error("Error sending OTP email: {}", e.getMessage());
             throw new AppException(ErrorCode.EMAIL_SEND_ERROR);

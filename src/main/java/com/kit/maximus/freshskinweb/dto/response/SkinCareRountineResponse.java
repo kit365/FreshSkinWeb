@@ -2,26 +2,24 @@ package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.kit.maximus.freshskinweb.entity.AbstractEntity;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
-@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
-@NoArgsConstructor
+@Setter
+@ToString
+@Builder
 @AllArgsConstructor
-public class SkinQuestionsResponse implements Serializable {
+@NoArgsConstructor
+public class SkinCareRountineResponse {
     Long id;
-
-    Integer questionNumber;
-    String questionText;
-    QuestionGroupResponse questionGroup;
+    SkinTypeResponse skinType;
+    String morningRoutine;
+    String mveningRoutine;
+    String mpecialCare;
 
     boolean deleted;
 
@@ -34,7 +32,4 @@ public class SkinQuestionsResponse implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date updatedAt;
-
-    List<SkinAnswerResponse> skinAnswers;
-
 }

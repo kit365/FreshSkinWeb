@@ -27,8 +27,10 @@ public class SkinQuestionsEntity extends AbstractEntity {
     @Column(name = "QuestionText")
     String questionText;
 
-    @Column(name = "QuestionGroup")
-    String questionGroup;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "QuestionGroupID", nullable = false)
+    @JsonBackReference
+    QuestionGroupEntity questionGroup;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "skinQuestionsEntity", orphanRemoval = true)
     @JsonManagedReference
