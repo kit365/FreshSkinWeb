@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xác nhận đơn hàng</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: #333333;
+      background: #ffffff;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: #ffffff;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .logo {
+      width: 120px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: #2E7D32;
+      font-weight: 500;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    h3 {
+      color: #2E7D32;
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+
+    .order-info {
+      background: #F1F8E9;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .order-id {
+      color: #2E7D32;
+      font-size: 15px;
+      margin-top: 8px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 1px solid #C8E6C9;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .section-title {
+      color: #2E7D32;
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #C8E6C9;
+    }
+
+    .info-grid {
+      display: table;
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 15px;
+    }
+
+    .info-item {
+      display: table-cell;
+      width: 50%;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    .info-label {
+      color: #666666;
+      margin-bottom: 4px;
+    }
+
+    .info-value {
+      color: #1B5E20;
+    }
+
+    .products-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      font-size: 14px;
+    }
+
+    .products-table th {
+      background: #F1F8E9;
+      color: #2E7D32;
+      padding: 12px;
+      text-align: left;
+      font-weight: 500;
+    }
+
+    .products-table td {
+      padding: 12px;
+      border-bottom: 1px solid #C8E6C9;
+    }
+
+    .product-image {
+      width: 50px;
+      height: 50px;
+      border-radius: 4px;
+    }
+
+    .total-section {
+      background: #F1F8E9;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .total-row {
+      display: table;
+      width: 100%;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+
+    .total-row span {
+      display: table-cell;
+    }
+
+    .total-row span:last-child {
+      text-align: right;
+    }
+
+    .total-row:last-child {
+      border-top: 1px solid #C8E6C9;
+      margin-top: 8px;
+      padding-top: 8px;
+      font-weight: 500;
+      color: #2E7D32;
+    }
+
+    .footer {
+      text-align: center;
+      color: #666666;
+      font-size: 14px;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #C8E6C9;
+    }
+
+    .contact-info {
+      margin: 15px 0;
+      text-align: center;
+    }
+
+    .contact-item {
+      display: inline-block;
+      color: #2E7D32;
+      margin: 5px 10px;
+    }
+
+    .social-links {
+      margin: 15px 0;
+      text-align: center;
+    }
+
+    .social-item {
+      display: inline-block;
+      padding: 8px 16px;
+      margin: 5px;
+      background: #ffffff;
+      border-radius: 20px;
+      text-decoration: none;
+      color: #2E7D32;
+      border: 1px solid #C8E6C9;
+    }
+
+    .copyright {
+      margin-top: 20px;
+      color: #666666;
+    }
+
+    .thank-you {
+      color: #2E7D32;
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+
+    @media screen and (max-width: 600px) {
+      .info-grid {
+        display: block;
+      }
+
+      .info-item {
+        display: block;
+        width: 100%;
+        margin-bottom: 15px;
+      }
+
+      .products-table {
+        font-size: 13px;
+      }
+
+      .product-image {
+        width: 40px;
+        height: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <img src="cid:logo" alt="FreshSkin Logo" class="logo">
+    <h2>Xác nhận đơn hàng</h2>
+  </div>
+
+  <div class="order-info">
+    <h3>Cảm ơn bạn đã đặt hàng!</h3>
+    <div class="order-id">Mã đơn hàng: <strong th:text="${order.getOrderId()}"></strong></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Thông tin đơn hàng</div>
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">Ngày đặt hàng</div>
+        <div class="info-value" th:text="${createdAtFormatted}"></div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Trạng thái</div>
+        <div class="info-value" th:text="${statusMap[order.getOrderStatus()]}"></div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Phương thức thanh toán</div>
+        <div class="info-value" th:text="${order.paymentMethod}"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Thông tin người nhận</div>
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">Họ tên</div>
+        <div class="info-value" th:text="${order.getFirstName() + ' ' + order.getLastName()}"></div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Email</div>
+        <div class="info-value" th:text="${order.email}"></div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Số điện thoại</div>
+        <div class="info-value" th:text="${order.getPhoneNumber()}"></div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Địa chỉ</div>
+        <div class="info-value" th:text="${order.getAddress()}"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Chi tiết đơn hàng</div>
+    <table class="products-table">
+      <thead>
+      <tr>
+        <th style="width: 80px;">Sản phẩm</th>
+        <th>Tên sản phẩm</th>
+        <th style="text-align: center;">Số lượng</th>
+        <th style="text-align: right;">Đơn giá</th>
+        <th style="text-align: right;">Thành tiền</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="item : ${order.orderItems}">
+        <td>
+          <img th:if="${!item.getProductVariant().getProduct().getThumbnail().isEmpty()}"
+               th:src="${item.getProductVariant().getProduct().getThumbnail().get(0)}"
+               alt="Product Image"
+               class="product-image">
+        </td>
+        <td>
+          <div th:text="${item.getProductVariant().getProduct().getTitle()}"
+               style="font-weight: 500;"></div>
+        </td>
+        <td style="text-align: center;" th:text="${item.getQuantity()}"></td>
+        <td style="text-align: right;"
+            th:text="${#numbers.formatDecimal(item.getSubtotal(), 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></td>
+        <td style="text-align: right;"
+            th:text="${#numbers.formatDecimal(item.getSubtotal() * item.getQuantity(), 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="total-section">
+      <div class="total-row">
+        <span>Tổng số lượng</span>
+        <span th:text="${order.getTotalAmount() + ' sản phẩm'}"></span>
+      </div>
+      <div class="total-row">
+        <span>Tổng thanh toán</span>
+        <span th:text="${#numbers.formatDecimal(order.getTotalPrice(), 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="thank-you">Cảm ơn quý khách đã tin tưởng <span th:text="${setting.getWebsiteName()}">!</span> ❤️</div>
+
+    <div class="contact-info">
+      <div class="contact-item" th:if="${setting.getEmail() != null and !setting.getEmail.isEmpty()}">
+        <span>📧</span>
+        <span th:text="${setting.getEmail}"></span>
+      </div>
+      <div class="contact-item" th:if="${setting.getPhone() != null and !setting.getPhone.isEmpty()}">
+        <span>☎️</span>
+        <span th:text="${setting.getPhone}"></span>
+      </div>
+      <div class="contact-item" th:if="${setting.getAddress() != null and !setting.getAddress.isEmpty()}">
+        <span>🏠</span>
+        <span th:text="${setting.getAddress}"></span>
+      </div>
+    </div>
+
+    <div class="social-links" th:if="${setting.getFacebook() != null or setting.getInstagram() != null or setting.getTwitter() != null or setting.getYoutube() != null}">
+      <a th:if="${setting.getFacebook() != null and !setting.getFacebook().isEmpty()}"
+         th:href="${setting.getFacebook()}"
+         class="social-item">
+        <span>Facebook</span>
+      </a>
+      <a th:if="${setting.getInstagram() != null and !setting.getInstagram().isEmpty()}"
+         th:href="${setting.getInstagram()}"
+         class="social-item">
+        <span>Instagram</span>
+      </a>
+      <a th:if="${setting.getTwitter() != null and !setting.getTwitter().isEmpty()}"
+         th:href="${setting.getTwitter()}"
+         class="social-item">
+        <span>Twitter</span>
+      </a>
+      <a th:if="${setting.getYoutube() != null and !setting.getYoutube().isEmpty()}"
+         th:href="${setting.getYoutube() }"
+         class="social-item">
+        <span>Youtube</span>
+      </a>
+    </div>
+
+    <p>Trân trọng,<br>Đội ngũ <span th:text="${setting.getWebsiteName()}"></span></p>
+
+    <div class="copyright" th:if="${setting.getCopyright() != null and !setting.getCopyright().isEmpty()}">
+      <p th:text="${setting.getCopyright()}"></p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

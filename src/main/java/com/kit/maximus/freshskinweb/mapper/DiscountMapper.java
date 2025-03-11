@@ -16,6 +16,7 @@ public interface DiscountMapper {
 
     @Mapping(target = "promoCode", ignore = true)
     @Mapping(target = "userDiscountUsageEntities", ignore = true)
+    @Mapping(target = "productEntities", ignore = true)
     DiscountEntity toDiscountEntity(CreationDiscountRequest request);
 
     DiscountResponse toDiscountResponse(DiscountEntity entity);
@@ -25,6 +26,7 @@ public interface DiscountMapper {
     @Mapping(target = "used", ignore = true)
     @Mapping(target = "promoCode", ignore = true)
     @Mapping(target = "userDiscountUsageEntities", ignore = true)
+    @Mapping(target = "productEntities", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = org.mapstruct.NullValuePropertyMappingStrategy.IGNORE)
     void updateDiscountEntity(@MappingTarget DiscountEntity entity, UpdationtionDiscountRequest request);
 }

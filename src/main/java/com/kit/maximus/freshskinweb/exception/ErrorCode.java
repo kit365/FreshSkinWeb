@@ -24,10 +24,12 @@ public enum ErrorCode {
     PASSWORD_NOT_BLANK(400, "Mật khẩu không được để trống"),
     PASSWORD_INVALID(400, "Mật khẩu phải từ 8 đến 20 ký tự"),
     PASSWORD_REGEXP_INVALID(400, "Mật khẩu phải chứa ít nhất một chữ cái và một số"),
-    USER_EXISTED(400, "User already existed"),
+    USER_EXISTED(400, "Người dùng này đã tồn tại"),
+    EMAIL_NOT_FOUND(400, "Không tìm thấy email"),
     EMAIL_EXISTED(400, "Email already existed"),
     EMAIL_NOT_BLANK(400, "Email không được để trống"),
     EMAIL_INVALID(400, "Email không hợp lệ"),
+    EMAIL_SEND_ERROR(400, "Lỗi gửi email"),
     PHONE_NUMBER_EXISTED(400, "Phone Number already existed"),
     PHONE_NUMBER_NOT_BLANK(400, "Số điện thoại không được để trống"),
     PHONE_NUMBER_INVALID(400, "Số điện thoại không hợp lệ"),
@@ -121,6 +123,13 @@ public enum ErrorCode {
     DISCOUNT_IS_EXISTED(404, "Mã giảm giá đã tồn tại trước đó"),
     WRONG_DISCOUNT_TYPE(404, "Loại giảm giá không đúng"),
     DISCOUNT_TYPE_NOT_BE_NULL(404, "Loại mã lỗi không được null"),
+
+    //IMAGE
+    IMAGE_PROCESSING_ERROR(400, "Lỗi xử lý ảnh"),
+    FILE_NOT_FOUND(400, "Không tìm thấy tệp"),
+
+    //SETTING
+    SETTING_NOT_FOUND(404, "Không tìm thấy cài đặt"),
     ;
 
 

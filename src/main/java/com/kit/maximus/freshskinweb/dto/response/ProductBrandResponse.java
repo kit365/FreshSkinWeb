@@ -33,7 +33,6 @@ public class ProductBrandResponse implements Serializable {
 
     List<String> image;
 
-
     @JsonProperty("product_ids")
     List<Long> productIDs;
 

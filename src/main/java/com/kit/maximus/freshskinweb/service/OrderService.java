@@ -14,7 +14,6 @@ import com.kit.maximus.freshskinweb.repository.ProductVariantRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.specification.OrderSpecification;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
-import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -38,18 +37,13 @@ public class OrderService {
     UserRepository userRepository;
     OrderRepository orderRepository;
     OrderMapper orderMapper;
-    UserService userService;
     ProductVariantRepository productVariantRepository;
-    ProductMapper productMapper;
-    ProductRepository productRepository;
+    EmailService emailService;
 
     @Transactional
     public OrderIdResponse addOrder(OrderRequest orderRequest) {
-
         OrderEntity order = orderMapper.toOrderEntity(orderRequest);
-
         order.setOrderId(generateOrderCode());
-
         //Kêu Dũng có gửi UserID không => băắt Dũng phải gửi thêm id User nếu có sẵn
         if (orderRequest.getUserId() != null) {
             var user = userRepository.findById(orderRequest.getUserId()).orElse(null);
@@ -66,7 +60,6 @@ public class OrderService {
             for (OrderItemRequest orderItem : orderRequest.getOrderItems()) {
 
                 if (orderItem != null) {
-
                     //Đóng vai trò làm phễu để lưu tạm thời, sau đó bỏ vào trong List OrderItems trong Order
                     //Mỗi lần lặp là 1 đối tượng mới để lưu vào trong list OrderItems của Order
                     OrderItemEntity orderItemEntity = new OrderItemEntity();
@@ -87,8 +80,16 @@ public class OrderService {
             }
         }
 
+        OrderEntity savedOrder = orderRepository.save(order);
 
-        return orderMapper.toOrderResponseCreate(orderRepository.save(order));
+        // Gửi email xác nhận
+        // Gửi email bằng orderId thay vì entity
+        try {
+            emailService.sendOrderConfirmationEmail(savedOrder.getOrderId());
+        } catch (Exception e) {
+            log.error("Không thể gửi email xác nhận: {}", e.getMessage());
+        }
+        return orderMapper.toOrderResponseCreate(savedOrder);
     }
 
     public OrderStatus getOrderStatus(String orderStatus) {
