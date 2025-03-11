@@ -130,6 +130,13 @@ public enum ErrorCode {
 
     //SETTING
     SETTING_NOT_FOUND(404, "Không tìm thấy cài đặt"),
+
+    //SERVER
+    INTERNAL_SERVER_ERROR(500, "Lỗi máy chủ"),
+
+    //OTP
+    OTP_EXPIRED(400, "OTP đã hết hạn"),
+    INVALID_OTP(400, "OTP không hợp lệ")
     ;
 
 

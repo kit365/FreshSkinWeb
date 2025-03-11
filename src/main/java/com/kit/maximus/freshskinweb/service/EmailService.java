@@ -7,39 +7,45 @@ import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.repository.OrderRepository;
 import com.kit.maximus.freshskinweb.repository.SettingRepository;
+import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.FileCopyUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Slf4j
 public class EmailService {
-    JavaMailSender mailSender;
-    TemplateEngine templateEngine;
-    OrderRepository orderRepository;
-    SettingRepository settingRepository;
+    final JavaMailSender mailSender;
+    final TemplateEngine templateEngine;
+    final OrderRepository orderRepository;
+    final SettingRepository settingRepository;
+    final UserRepository userRepository;
+
+    @Value("${spring.mail.username}")
+    String sender;
+
+    @Value("${spring.mail.personal}")
+    String personal;
 
     private Map<OrderStatus, String> getOrderStatusMap() {
         Map<OrderStatus, String> statusMap = new HashMap<>();
@@ -92,6 +98,34 @@ public class EmailService {
             helper.setText(content, true);
             mailSender.send(message);
         } catch (MessagingException e) {
+            throw new AppException(ErrorCode.EMAIL_SEND_ERROR);
+        }
+    }
+
+    @Async
+    public void sendOtpEmail(String to, String otp) {
+        try {
+            log.info("Starting to send OTP email to: {}", to);
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(sender, personal);
+            helper.setTo(to);
+            helper.setSubject("Mã xác thực khôi phục mật khẩu");
+
+            Context context = new Context();
+            context.setVariable("otp", otp);
+            context.setVariable("expireTime", "1 phút");
+
+            // Đổi đường dẫn template
+            String htmlContent = templateEngine.process("forgot-password", context);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            log.info("Successfully sent OTP email to: {}", to);
+
+        } catch (Exception e) {
+            log.error("Error sending OTP email: {}", e.getMessage());
             throw new AppException(ErrorCode.EMAIL_SEND_ERROR);
         }
     }
