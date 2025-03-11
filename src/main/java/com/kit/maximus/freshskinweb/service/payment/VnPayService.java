@@ -80,7 +80,7 @@ public class VnPayService implements PaymentService {
             String version = "2.1.0";
             String command = "pay";
             String otherType = "130000";
-            long amount = order.getTotalAmount() * 100; // Format tiền theo cent
+            double amount = order.getTotalPrice() * 100; // Format tiền theo cent
             String transactionReference = getRandomNumber(8);
             String clientIpAddress = getIpAddress(ipAddr);
 //            String clientIpAddress = "127.0.0.1"; //localhost
