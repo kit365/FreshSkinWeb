@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
+import com.kit.maximus.freshskinweb.utils.PaymentStatus;
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.*;
 import lombok.*;
@@ -87,23 +88,9 @@ public class OrderEntity extends AbstractEntity {
     @Column(name = "OrderStatus") //Thông báo trạng thái cho đơn hàng
     OrderStatus orderStatus = OrderStatus.PENDING;
 
-    @Column(name = "Created_at")
-    @Temporal(TemporalType.TIMESTAMP)
-    @CreationTimestamp
-    Date createdAt;
-
-    @Column(name = "Update_at")
-    @Temporal(TemporalType.TIMESTAMP)
-    @UpdateTimestamp
-    Date updatedAt;
-
-
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status")
-    Status status = Status.ACTIVE;
-
-    @Column(name = "Deleted")
-    boolean deleted;
+    @Column(name = "PaymentStatus")
+    PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
     public void addOrderItem(OrderItemEntity orderItem) {
         orderItems.add(orderItem);

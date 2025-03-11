@@ -376,4 +376,8 @@ public String update(List<String> id, String orderStatus) {
         return orderMapper.toOrderResponse(result);
     }
 
+    public OrderEntity getOrder(String orderId) {
+        return orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+    }
+
 }
