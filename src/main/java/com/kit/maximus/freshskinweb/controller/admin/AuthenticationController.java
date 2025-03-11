@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.text.ParseException;
 
 //@CrossOrigin(origins = "*")
@@ -45,11 +46,21 @@ public class AuthenticationController {
 
     @PostMapping("/logout")
     public ResponseAPI<String> logout(HttpServletResponse response) {
-        authenticationService.logout(response);
-        return ResponseAPI.<String>builder()
-                .code(HttpStatus.OK.value())
-                .message("Đăng xuất thành công")
-                .build();
+        String url_login_page = "https://project-swp391-n9j6.onrender.com/admin/auth/login";
+        try {
+            authenticationService.logout(response);
+            response.sendRedirect(url_login_page);
+            return ResponseAPI.<String>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Đăng xuất thành công")
+                    .build();
+        } catch (IOException e) {
+            return ResponseAPI.<String>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message("Đăng xuất thất bại")
+                    .build();
+        }
+
     }
 
     @PostMapping("/introspect")
