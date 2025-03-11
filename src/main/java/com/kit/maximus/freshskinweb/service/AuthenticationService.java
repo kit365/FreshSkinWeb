@@ -151,13 +151,11 @@ public class AuthenticationService implements UserDetailsService {
 
     public void logout(HttpServletResponse response) {
         Cookie cookie = new Cookie("token", null);
-        cookie.setDomain("project-swp391-n9j6.onrender.com");
-//        cookie.setDomain("localhost");
-        cookie.setHttpOnly(false);
+        cookie.setDomain("freshskinweb.onrender.com");
+        cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setPath("/");
-        cookie.setMaxAge(0); // Xóa ngay lập tức
-//        cookie.setValue("");
+        cookie.setMaxAge(0);
 
         response.addCookie(cookie);
     }
