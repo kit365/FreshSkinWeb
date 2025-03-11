@@ -135,16 +135,10 @@ public class HomeController {
     public ResponseAPI<Map<String, Object>> getProductBySearch(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "12") int size,
-            @RequestParam(defaultValue = "desc") String sortDirection,
-            @RequestParam(defaultValue = "position") String sortValue,
-            @RequestParam(value = "keyword") String keyword,
-            @RequestParam(value = "brand", required = false) List<String> brand,
-            @RequestParam(value = "category", required = false) List<String> category,
-            @RequestParam(value = "skinType", required = false) List<String> skinType,
-            @RequestParam(defaultValue = "0") double minPrice,
-            @RequestParam(defaultValue = "0") double maxPrice) {
+            @RequestParam(value = "keyword") String keyword)
+{
 
-        Map<String, Object> data = productService.getProductsByKeyword(size, page, sortValue, sortDirection, keyword, brand, category, skinType, minPrice, maxPrice);
+        Map<String, Object> data = productService.getProductsByKeyword(keyword,size, page);
         return ResponseAPI.<Map<String, Object>>builder()
                 .code(HttpStatus.OK.value())
                 .data(data)
