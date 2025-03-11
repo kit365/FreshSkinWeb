@@ -97,7 +97,7 @@ public class AuthenticationService implements UserDetailsService {
         cookie.setDomain("freshskinweb.onrender.com");
 //        cookie.setDomain("localhost");
         cookie.setPath("/"); // Áp dụng cho toàn bộ trang web
-        cookie.setHttpOnly(true); // Chỉ backend truy cập, bảo mật hơn
+        cookie.setHttpOnly(false);
         cookie.setSecure(true); // Chỉ hoạt động trên HTTPS
         cookie.setMaxAge(60 * 60 * 24); // Hết hạn sau 1 ngày
         cookie.setAttribute("SameSite", "None"); // Quan trọng khi frontend khác origin
