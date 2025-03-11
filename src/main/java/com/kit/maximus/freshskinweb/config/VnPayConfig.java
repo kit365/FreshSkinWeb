@@ -40,27 +40,7 @@ public class VnPayConfig {
 
     //nếu là localhost -> doc url tren properties, con la sever thi doc tu env(thong qua bien moi truong)
     public String getReturnUrl() {
-        String envReturnUrl = System.getenv("VNPAY_RETURN_URL"); // Lấy từ biến môi trường
-        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-        String dotenvReturnUrl = dotenv.get("VNPAY_RETURN_URL"); // Lấy từ file .env
-
-        // Nếu chạy local (có file application.properties) thì lấy từ đó
-        if (returnUrlFromProperties != null && !returnUrlFromProperties.isEmpty()) {
-            return returnUrlFromProperties;
-        }
-
-        // Nếu có ENV thì ưu tiên
-        if (envReturnUrl != null && !envReturnUrl.isEmpty()) {
-            return envReturnUrl;
-        }
-
-        // Nếu có trong .env thì lấy
-        if (dotenvReturnUrl != null && !dotenvReturnUrl.isEmpty()) {
-            return dotenvReturnUrl;
-        }
-
-        // Trả về mặc định nếu không có giá trị nào
-        return "http://localhost:8080/api/vnpay/payment-return";
+        return getEnvOrDefault("VNPAY_RETURN_URL", returnUrlFromProperties != null ? returnUrlFromProperties : "http://localhost:8080/api/vnpay/payment-return");
     }
 
     @PostConstruct
@@ -69,7 +49,7 @@ public class VnPayConfig {
         System.out.println("VNPAY_TMN_CODE: " + blurText(getTmnCode()));
         System.out.println("VNPAY_HASH_SECRET: " + (getHashSecret() != null ? "LOADED ✅" : "NOT FOUND ❌"));
         System.out.println("VNPAY_PAY_URL: " + blurText(getPayUrl()));
-        System.out.println("VNPAY_RETURN_URL: " + blurText(getReturnUrl()));
+        System.out.println("VNPAY_RETURN_URL: " + getReturnUrl());
     }
 
     private String blurText(String text) {
