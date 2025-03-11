@@ -43,7 +43,7 @@ public class VnPayService implements PaymentService {
     OrderService orderService;
 
 
-    public static String getRandomNumber(int len) {
+    private static String getRandomNumber(int len) {
         Random rnd = new Random();
         String chars = "0123456789";
         StringBuilder sb = new StringBuilder(len);
@@ -80,12 +80,12 @@ public class VnPayService implements PaymentService {
             String version = "2.1.0";
             String command = "pay";
             String otherType = "130000";
-            long amount = (long) (order.getTotalPrice() * 100);; // Format tiền theo cent
+            long amount = (long) (order.getTotalPrice() * 100);
+            ; // Format tiền theo cent
             String transactionReference = getRandomNumber(8);
             String clientIpAddress = getIpAddress(ipAddr);
 //            String clientIpAddress = "127.0.0.1"; //localhost
             String teminal = vnPayConfig.getTmnCode();
-            System.out.println(teminal);
             String return_url = vnPayConfig.getReturnUrl();
 
 
@@ -142,7 +142,7 @@ public class VnPayService implements PaymentService {
         }
     }
 
-    public static String hmacSHA512(String key, String data) {
+    private static String hmacSHA512(String key, String data) {
         try {
             SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
             Mac mac = Mac.getInstance("HmacSHA512");
@@ -175,7 +175,7 @@ public class VnPayService implements PaymentService {
 
 /// Kiểm tra mã giao dịch hợp lệ
         if ("00".equals(transactionStatus)) {
-          return null;
+            return orderId;
         } else {
             return null;
         }

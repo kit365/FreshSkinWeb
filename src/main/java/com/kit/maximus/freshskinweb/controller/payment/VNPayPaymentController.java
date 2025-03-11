@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
 import java.util.Map;
 
 //@CrossOrigin(origins = "*")
@@ -54,10 +55,13 @@ public class VNPayPaymentController {
     public ResponseEntity<String> vnpayReturn(
             @RequestParam Map<String, String> queryParams) {
 
+        String id = vnPayService.handleIPN(queryParams);
         // Kiểm tra mã giao dịch hợp lệ
         String transactionStatus = queryParams.get("vnp_TransactionStatus");
         if ("00".equals(transactionStatus)) {
-            return ResponseEntity.ok("Thanh toán thành công!");
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create("https://project-swp391-n9j6.onrender.com/order/success/"+id))
+                    .build();
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Thanh toán thất bại!");
         }
