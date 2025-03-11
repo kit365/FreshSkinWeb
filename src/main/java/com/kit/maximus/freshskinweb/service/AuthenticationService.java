@@ -1,7 +1,6 @@
 package com.kit.maximus.freshskinweb.service;
 
 
-
 import com.kit.maximus.freshskinweb.dto.request.authentication.AuthenticationRequest;
 import com.kit.maximus.freshskinweb.dto.request.authentication.IntrospectRequest;
 import com.kit.maximus.freshskinweb.dto.response.AuthenticationResponseDTO;
@@ -57,7 +56,7 @@ public class AuthenticationService implements UserDetailsService {
         SignedJWT signedJWT = SignedJWT.parse(token);
         Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
         var verify = signedJWT.verify(jwsVerifier);
-        if(verify && expirationDate.after(new Date())) {
+        if (verify && expirationDate.after(new Date())) {
             String username = signedJWT.getJWTClaimsSet().getSubject();
             UserEntity user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
             return userMapper.toUserResponseDTO(user);
@@ -74,11 +73,52 @@ public class AuthenticationService implements UserDetailsService {
         return IntrospectResponse.builder().valid(verify && expirationDate.after(new Date())).build();
     }
 
-    public AuthenticationResponseDTO authenticate(AuthenticationRequest authenticationRequest, HttpServletResponse response) {
+//    public AuthenticationResponseDTO authenticate(AuthenticationRequest authenticationRequest, HttpServletResponse response) {
+//        UserEntity user = userRepository.findByUsername(authenticationRequest.getUsername())
+//                .orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_FOUND));
+//        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+//
+//        boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
+//
+//        if (!authenticated) {
+//            throw new AppException(ErrorCode.PASSWORD_INCORRECT);
+//        }
+//        if (user.getStatus().equals(Status.INACTIVE)) {
+//            throw new AppException(ErrorCode.ACCOUNT_LOCKED);
+//        }
+//
+//        // Generate JWT Token
+//        String token = generateToken(authenticationRequest.getUsername());
+//
+//        // Tạo cookie chứa token
+//        Cookie cookie = new Cookie("token", token);
+//        cookie.setDomain("freshskinweb.onrender.com");
+////        cookie.setDomain("localhost");
+//        cookie.setPath("/"); // Áp dụng cho toàn bộ trang web
+//        cookie.setHttpOnly(true); // Chỉ backend truy cập, bảo mật hơn
+//        cookie.setSecure(true); // Chỉ hoạt động trên HTTPS
+//        cookie.setMaxAge(60 * 60 * 24); // Hết hạn sau 1 ngày
+//        cookie.setAttribute("SameSite", "None"); // Quan trọng khi frontend khác origin
+//
+//        // Thêm cookie vào response
+//        response.setHeader("Set-Cookie",
+//                "token=" + token + "; Path=/; HttpOnly; Secure; SameSite=None; Domain=freshskinweb.onrender.com; Max-Age=86400");
+//
+
+    /// /        response.addCookie(cookie);
+//
+//        return AuthenticationResponseDTO.builder()
+//                .token(token)
+//                .authenticated(authenticated)
+//                .build();
+//    }
+    public AuthenticationResponseDTO authenticate(AuthenticationRequest authenticationRequest,
+                                                  HttpServletResponse response,
+                                                  String origin) {
         UserEntity user = userRepository.findByUsername(authenticationRequest.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_FOUND));
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
 
         if (!authenticated) {
@@ -91,20 +131,22 @@ public class AuthenticationService implements UserDetailsService {
         // Generate JWT Token
         String token = generateToken(authenticationRequest.getUsername());
 
+        // Xác định domain dựa trên Origin
+        String domain = "freshskinweb.onrender.com"; // Mặc định là server
+        if (origin != null && origin.contains("localhost")) {
+            domain = "localhost"; // Khi test local
+        }
+
         // Tạo cookie chứa token
         Cookie cookie = new Cookie("token", token);
-        cookie.setDomain("freshskinweb.onrender.com");
-//        cookie.setDomain("localhost");
+        cookie.setDomain(domain);
         cookie.setPath("/"); // Áp dụng cho toàn bộ trang web
-        cookie.setHttpOnly(true); // Chỉ backend truy cập, bảo mật hơn
-        cookie.setSecure(true); // Chỉ hoạt động trên HTTPS
+        cookie.setHttpOnly(true); // Bảo mật, chỉ BE truy cập được
+        cookie.setSecure(!domain.equals("localhost")); // Chỉ bật Secure nếu không phải localhost
         cookie.setMaxAge(60 * 60 * 24); // Hết hạn sau 1 ngày
-        cookie.setAttribute("SameSite", "None"); // Quan trọng khi frontend khác origin
+        cookie.setAttribute("SameSite", "None"); // Cho phép FE đọc cookie từ domain khác
 
         // Thêm cookie vào response
-        response.setHeader("Set-Cookie",
-                "token=" + token + "; Path=/; HttpOnly; Secure; SameSite=None; Domain=freshskinweb.onrender.com; Max-Age=86400");
-
         response.addCookie(cookie);
 
         return AuthenticationResponseDTO.builder()
@@ -126,7 +168,6 @@ public class AuthenticationService implements UserDetailsService {
 
         response.addCookie(cookie);
     }
-
 
 
     private String generateToken(String username) {
