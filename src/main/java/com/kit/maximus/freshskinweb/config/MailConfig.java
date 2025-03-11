@@ -17,15 +17,18 @@ import java.util.Properties;
 @Getter
 @Setter
 public class MailConfig {
-    
+
+    private final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+
+    private final String mailUsername = dotenv.get("MAIL_USERNAME");
+    private final String mailPersonal = dotenv.get("MAIL_PERSONAL");
+
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-
         mailSender.setHost(dotenv.get("MAIL_HOST"));
         mailSender.setPort(Integer.parseInt(dotenv.get("MAIL_PORT")));
-        mailSender.setUsername(dotenv.get("MAIL_USERNAME"));
+        mailSender.setUsername(mailUsername);
         mailSender.setPassword(dotenv.get("MAIL_PASSWORD"));
 
         Properties props = mailSender.getJavaMailProperties();
@@ -35,18 +38,4 @@ public class MailConfig {
 
         return mailSender;
     }
-
-//    @PostConstruct
-//    public void logMailConfig() {
-//        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-//        System.out.println("=== Mail Configuration ===");
-//        System.out.println("Host: " + dotenv.get("MAIL_HOST"));
-//        System.out.println("Port: " + dotenv.get("MAIL_PORT"));
-//        System.out.println("Username: " + dotenv.get("MAIL_USERNAME"));
-//        System.out.println("Password length: " + (dotenv.get("MAIL_PASSWORD") != null ? dotenv.get("MAIL_PASSWORD").length() : 0));
-//        System.out.println("Personal: " + dotenv.get("MAIL_PERSONAL"));
-//        System.out.println("SMTP Auth: " + dotenv.get("MAIL_SMTP_AUTH"));
-//        System.out.println("SMTP StartTLS: " + dotenv.get("MAIL_SMTP_STARTTLS"));
-//        System.out.println("=======================");
-//    }
 }

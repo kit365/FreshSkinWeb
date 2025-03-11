@@ -22,6 +22,14 @@ public interface OrderRepository extends JpaRepository<OrderEntity, String>, Jpa
 
     boolean existsByPhoneNumber(String phoneNumber);
 
+//    @Query("SELECT o FROM OrderEntity o " +
+//            "LEFT JOIN FETCH o.orderItems items " +
+//            "LEFT JOIN FETCH o.user u " +
+//            "LEFT JOIN FETCH items.productVariant variant " +
+//            "LEFT JOIN FETCH variant.product " +
+//            "WHERE o.orderId = :orderId")
+//    Optional<OrderEntity> findByOrderIdWithDetails(@Param("orderId") String orderId);
+
     @Query("SELECT o FROM OrderEntity o " +
             "LEFT JOIN FETCH o.orderItems items " +
             "LEFT JOIN FETCH o.user u " +

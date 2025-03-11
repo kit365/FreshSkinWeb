@@ -3,6 +3,7 @@ package com.kit.maximus.freshskinweb.controller.payment;
 
 import com.kit.maximus.freshskinweb.dto.response.CreateMomoResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
+import com.kit.maximus.freshskinweb.service.OrderService;
 import com.kit.maximus.freshskinweb.service.payment.VnPayService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -26,6 +27,8 @@ import java.util.Map;
 public class VNPayPaymentController {
 
     VnPayService vnPayService;
+
+    OrderService orderService;
 
 //    @GetMapping("/create")
 //    public ResponseAPI<String> createPayment(@RequestParam String orderId) {
@@ -59,6 +62,7 @@ public class VNPayPaymentController {
         // Kiểm tra mã giao dịch hợp lệ
         String transactionStatus = queryParams.get("vnp_TransactionStatus");
         if ("00".equals(transactionStatus)) {
+            orderService.processOrder(id);
             return ResponseEntity.status(HttpStatus.FOUND)
                     .location(URI.create("https://project-swp391-n9j6.onrender.com/order/success/"+id))
                     .build();

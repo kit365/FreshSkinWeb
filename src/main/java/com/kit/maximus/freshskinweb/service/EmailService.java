@@ -10,7 +10,6 @@ import com.kit.maximus.freshskinweb.repository.OrderRepository;
 import com.kit.maximus.freshskinweb.repository.SettingRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
-import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
@@ -18,8 +17,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -27,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -43,12 +39,7 @@ public class EmailService {
     final OrderRepository orderRepository;
     final SettingRepository settingRepository;
     final UserRepository userRepository;
-
-    MailConfig mailConfig;
-
-    final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-    final String sender = dotenv.get("MAIL_USERNAME");
-    final String personal = dotenv.get("MAIL_PERSONAL");
+    final MailConfig mailConfig;
 
     private Map<OrderStatus, String> getOrderStatusMap() {
         Map<OrderStatus, String> statusMap = new HashMap<>();
@@ -59,7 +50,6 @@ public class EmailService {
     }
 
     @Async
-    @Transactional(readOnly = true)
     public void sendOrderConfirmationEmail(String orderId) {
         try {
             OrderEntity order = orderRepository.findByOrderIdWithDetails(orderId)
@@ -68,9 +58,9 @@ public class EmailService {
             SettingEntity setting = settingRepository.findById(1L)
                     .orElseThrow(() -> new AppException(ErrorCode.SETTING_NOT_FOUND));
 
-
             UserEntity user = order.getUser();
-            if (user == null || user.getEmail() == null || order.getEmail() == null) {
+
+            if ((user == null || user.getEmail() == null) && order.getEmail() == null) {
                 throw new AppException(ErrorCode.EMAIL_NOT_FOUND);
             }
 
@@ -80,16 +70,11 @@ public class EmailService {
             helper.setTo(order.getEmail());
             helper.setSubject("Xác nhận đơn hàng #" + order.getOrderId());
 
-            // Add logo as inline image
-            ClassPathResource logoResource = new ClassPathResource("static/images/img.png");
-            helper.addInline("logo", logoResource);
-
             Context context = new Context();
             context.setVariable("order", order);
             context.setVariable("setting", setting);
             context.setVariable("statusMap", getOrderStatusMap());
 
-            // Convert Timestamp to formatted String
             String formattedDate = "";
             if (order.getCreatedAt() != null) {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -119,14 +104,12 @@ public class EmailService {
             Context context = new Context();
             context.setVariable("otp", otp);
             context.setVariable("expireTime", "1 phút");
-            context.setVariable("websiteName", websiteName); // Thêm tên website
+            context.setVariable("websiteName", websiteName);
 
-            String content = templateEngine.process("forgot-password", context);
-
-            helper.setFrom(new InternetAddress(sender, personal));
+            helper.setFrom(new InternetAddress(mailConfig.getMailUsername(), mailConfig.getMailPersonal()));
             helper.setTo(to);
             helper.setSubject("Mã xác thực OTP");
-            helper.setText(content, true);
+            helper.setText(templateEngine.process("forgot-password", context), true);
 
             mailSender.send(message);
             log.info("Sent OTP email to: {}", to);
