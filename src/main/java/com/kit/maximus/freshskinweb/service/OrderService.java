@@ -81,16 +81,23 @@ public class OrderService {
         }
 
         OrderEntity savedOrder = orderRepository.save(order);
-
-        // Gửi email xác nhận
-        // Gửi email bằng orderId thay vì entity
-        try {
-            emailService.sendOrderConfirmationEmail(savedOrder.getOrderId());
-        } catch (Exception e) {
-            log.error("Không thể gửi email xác nhận: {}", e.getMessage());
-        }
+//
+//        // Gửi email xác nhận
+//        // Gửi email bằng orderId thay vì entity
+//        try {
+//            emailService.sendOrderConfirmationEmail(savedOrder.getOrderId());
+//        } catch (Exception e) {
+//            log.error("Không thể gửi email xác nhận: {}", e.getMessage());
+//        }
         return orderMapper.toOrderResponseCreate(savedOrder);
     }
+
+    public void processOrder(String orderId) {
+        emailService.sendOrderConfirmationEmail(orderId); // Gọi từ bên ngoài
+    }
+
+
+
 
     public OrderStatus getOrderStatus(String orderStatus) {
         try {
