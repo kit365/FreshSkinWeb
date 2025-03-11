@@ -19,6 +19,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -74,7 +75,7 @@ public class AuthenticationService implements UserDetailsService {
         return IntrospectResponse.builder().valid(verify && expirationDate.after(new Date())).build();
     }
 
-    public AuthenticationResponseDTO authenticate(AuthenticationRequest authenticationRequest, HttpServletResponse response) {
+    public AuthenticationResponseDTO authenticate(AuthenticationRequest authenticationRequest, HttpServletResponse response, HttpServletRequest request) {
         UserEntity user = userRepository.findByUsername(authenticationRequest.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_FOUND));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
@@ -102,8 +103,13 @@ public class AuthenticationService implements UserDetailsService {
         cookie.setAttribute("SameSite", "None"); // Quan trọng khi frontend khác origin
 
         // Thêm cookie vào response
-        response.setHeader("Set-Cookie",
-                "token=" + token + "; Path=/; HttpOnly; Secure; SameSite=None; Domain=freshskinweb.onrender.com; Max-Age=86400");
+        if (request.getServerName().equals("localhost")) {
+            response.setHeader("Set-Cookie",
+                    "token=" + token + "; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400");
+        } else {
+            response.setHeader("Set-Cookie",
+                    "token=" + token + "; Path=/; HttpOnly; Secure; SameSite=None; Domain=freshskinweb.onrender.com; Max-Age=86400");
+        }
 
         response.addCookie(cookie);
 
