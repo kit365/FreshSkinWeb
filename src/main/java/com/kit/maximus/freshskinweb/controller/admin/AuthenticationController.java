@@ -31,17 +31,12 @@ public class AuthenticationController {
     AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    public ResponseAPI<AuthenticationResponseDTO> checkLogin(@RequestBody AuthenticationRequest request,
-                                                             HttpServletResponse response,
-                                                             @RequestHeader(value = "Origin", required = false) String origin) {
+    public ResponseAPI<AuthenticationResponseDTO> checkLogin(@RequestBody AuthenticationRequest request, HttpServletResponse response) {
         String message = "Đăng nhập thành công";
-        AuthenticationResponseDTO result = authenticationService.authenticate(request, response, origin);
+        AuthenticationResponseDTO result = authenticationService.authenticate(request, response);
 
-        return ResponseAPI.<AuthenticationResponseDTO>builder()
-                .code(HttpStatus.OK.value())
-                .message(message)
-                .data(result)
-                .build();
+        return ResponseAPI.<AuthenticationResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+
     }
 
     @PostMapping("/logout")
