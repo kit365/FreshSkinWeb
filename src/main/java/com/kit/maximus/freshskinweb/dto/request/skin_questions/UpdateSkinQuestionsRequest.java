@@ -13,7 +13,6 @@ import java.util.List;
 @ToString
 public class UpdateSkinQuestionsRequest implements Serializable {
 
-    Integer questionNumber;
     String questionText;
     String questionGroup;
 

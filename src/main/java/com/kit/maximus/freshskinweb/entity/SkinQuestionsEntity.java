@@ -21,9 +21,6 @@ public class SkinQuestionsEntity extends AbstractEntity {
     @Column(name = "SkinQuestionID")
     Long id;
 
-    @Column (name = "QuestionNumber")
-    Integer questionNumber;
-
     @Column(name = "QuestionText")
     String questionText;
 
