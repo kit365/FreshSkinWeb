@@ -90,19 +90,6 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @JsonManagedReference
     List<SkinTestEntity> skinTests = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "userEntity")
-    @JsonManagedReference
-    List<UserDiscountUsageEntity> userDiscountUsageEntities = new ArrayList<>();
-
-    public void createUserDiscountUsageEntity(UserDiscountUsageEntity userDiscountUsageEntity) {
-        userDiscountUsageEntities.add(userDiscountUsageEntity);
-        userDiscountUsageEntity.setUserEntity(this);
-    }
-
-    public void removeUserDiscountUsageEntity(UserDiscountUsageEntity userDiscountUsageEntity) {
-        userDiscountUsageEntities.remove(userDiscountUsageEntity);
-        userDiscountUsageEntity.setUserEntity(null);
-    }
 
     public void createOrder(OrderEntity order) {
             orders.add(order);

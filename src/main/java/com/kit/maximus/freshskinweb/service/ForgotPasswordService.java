@@ -5,7 +5,6 @@ import com.kit.maximus.freshskinweb.entity.ForgotPasswordEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
-import com.kit.maximus.freshskinweb.mapper.ForgotPasswordMapper;
 import com.kit.maximus.freshskinweb.repository.ForgotPasswordRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.utils.Status;

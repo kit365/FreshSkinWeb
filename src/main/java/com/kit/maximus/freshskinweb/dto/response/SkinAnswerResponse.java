@@ -20,8 +20,10 @@ public class SkinAnswerResponse implements Serializable {
 
     Long id;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String skinOption;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     Long answerScore;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

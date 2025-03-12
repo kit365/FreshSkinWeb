@@ -13,7 +13,6 @@ public interface UserMapper {
     
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "avatar", ignore = true)
-    @Mapping(target = "userDiscountUsageEntities", ignore = true)
     UserEntity toUserEntity(CreateUserRequest userRequestDTO);
 
     @Mapping(target = "orders", source = "orders")
@@ -40,7 +39,6 @@ public interface UserMapper {
     @Mapping(target = "reviews", ignore = true)
     @Mapping(target = "skinTests", ignore = true)
     @Mapping(target = "orders", ignore = true)
-    @Mapping(target = "userDiscountUsageEntities", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUser(@MappingTarget UserEntity user,  UpdateUserRequest userDTO);
 

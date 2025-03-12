@@ -35,9 +35,6 @@ public class SkinQuestionService implements BaseService<SkinQuestionsResponse, C
 
     @Override
     public boolean add(CreateSkinQuestionsRequest request) {
-        SkinQuestionsEntity entity = mapper.toSkinQuestionsEntity(request);
-        request.getSkinAnswers().forEach(entity :: addSkinAnswerEntity);
-        repository.save(entity);
         return true;
     }
 

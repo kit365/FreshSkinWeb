@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.dto.request.skin_questions;
 
+import com.kit.maximus.freshskinweb.dto.request.skin_answer.CreationSkinAnswerRequest;
 import com.kit.maximus.freshskinweb.entity.SkinAnswerEntity;
 import lombok.*;
 
@@ -16,5 +17,5 @@ public class CreateSkinQuestionsRequest implements Serializable {
     String questionText;
     String questionGroup;
 
-    List<SkinAnswerEntity> skinAnswers;
+    List<CreationSkinAnswerRequest> skinAnswers;
 }
