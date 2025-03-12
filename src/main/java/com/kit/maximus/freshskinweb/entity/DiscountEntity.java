@@ -1,13 +1,13 @@
 package com.kit.maximus.freshskinweb.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.kit.maximus.freshskinweb.utils.DiscountType;
+import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
-import org.jetbrains.annotations.NotNull;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Setter
@@ -16,60 +16,59 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @ToString
-@Table(name = "Discount")
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class DiscountEntity extends AbstractEntity {
+@Table(name = "Discounts")
+public class DiscountEntity extends AbstractEntity{
 
     @Id
-    @Column(name = "PromoCode",unique = true)
-    String promoCode;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "DiscountId")
+    private String discountId;
 
-    @Column(name = "description", columnDefinition = "MEDIUMTEXT")
-    String description;
+    @Column(name = "Name",nullable = false)
+    private String name; // Tên chương trình giảm giá
 
-    @Column(name = "DiscountType")
-    String discountType;
-
-    @Column(name = "discountValue")
-    Double discountValue;
-
+    @Column(name = "DiscountPercentage",nullable = false)
+    private BigDecimal discountPercentage; // Giảm giá theo %
+    @Column(name = "DiscountAmount",nullable = false)
+    private BigDecimal discountAmount; // Giảm giá số tiền cố định
     @Column(name = "MaxDiscount")
-    Double maxDiscount;
+    private BigDecimal maxDiscount; // Giảm tối đa (nếu có)
+
+    @Column(name = "StartDate",nullable = false)
+    private Date startDate;
+
+    @Column(name = "EndDate", nullable = false)
+    private Date endDate;
 
     @Column(name = "UsageLimit")
-    Integer usageLimit;
-
-    @Column(name = "isGlobal")
-    Boolean isGlobal;
-
+    private Integer usageLimit; // Số lần tối đa được sử dụng
     @Column(name = "Used")
-    Integer used;
+    private Integer used = 0; // Số lần đã dùng
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "discountEntity")
-    @JsonManagedReference
-    List<ProductEntity> productEntities = new ArrayList<>();
+    @Column(name = "IsGlobal")
+    private Boolean isGlobal = false; // Giảm giá áp dụng toàn bộ hay chỉ một số sản phẩm
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "discountEntity")
-    @JsonManagedReference
-    List<UserDiscountUsageEntity> userDiscountUsageEntities = new ArrayList<>();
+    @Enumerated(EnumType.STRING)
+    @Column(name = "DiscountType")
+    private DiscountType discountType; // Kiểu giảm giá (PERCENTAGE / FIXED)
 
-    public void addUserDiscountUsageEntity(UserDiscountUsageEntity userDiscountUsageEntity) {
-        userDiscountUsageEntities.add(userDiscountUsageEntity);
-        userDiscountUsageEntity.setDiscountEntity(this);
+
+
+    @OneToMany(mappedBy = "discount", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductEntity> products = new ArrayList<>();
+
+    public boolean isValid() {
+        Date now = new Date();
+        return this.getStatus() == Status.ACTIVE && now.after(startDate) && now.before(endDate);
     }
 
-    public void removeUserDiscountUsageEntity(UserDiscountUsageEntity userDiscountUsageEntity) {
-        userDiscountUsageEntities.remove(userDiscountUsageEntity);
-        userDiscountUsageEntity.setDiscountEntity(null);
+    public void applyDiscount(ProductEntity productEntity) {
+        products.add(productEntity);
+        productEntity.setDiscount(this);
     }
 
-    public void addProduct(@NotNull ProductEntity productEntity){
-        productEntities.add(productEntity);
-        productEntity.setDiscountEntity(this);
-    }
-
-    public void removeProduct(@NotNull ProductEntity productEntity){
-        productEntities.remove(productEntity);
-        productEntity.setDiscountEntity(null);
+    public void removeDiscount(ProductEntity productEntity) {
+        products.remove(productEntity);
+        productEntity.setDiscount(null);
     }
 }

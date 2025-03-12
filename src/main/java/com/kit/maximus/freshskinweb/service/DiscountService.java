@@ -39,11 +39,10 @@ public class DiscountService {
             List<DiscountEntity> discountEntities = discountRepository.findAll();
             for(DiscountEntity discountEntity : discountEntities){
                 //Nếu có quăng lỗi đã tồn tại
-                if(request.getPromoCode().equals(discountEntity.getPromoCode())){
+                if(request.getPromoCode().equals(discountEntity.getDiscountId())){
                     throw new AppException(ErrorCode.DISCOUNT_IS_EXISTED);
                 }
             }
-            entity.setPromoCode(request.getPromoCode());
             discountRepository.save(entity);
             return true;
         }

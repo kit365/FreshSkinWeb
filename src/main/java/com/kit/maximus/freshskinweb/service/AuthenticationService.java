@@ -93,39 +93,6 @@ public class AuthenticationService implements UserDetailsService {
         // Generate JWT Token
         String token = generateToken(authenticationRequest.getUsername());
 
-        // Tạo cookie chứa token
-        Cookie cookie = new Cookie("token", token);
-        cookie.setDomain("freshskinweb.onrender.com");
-//        cookie.setDomain("localhost");
-        cookie.setPath("/"); // Áp dụng cho toàn bộ trang web
-        cookie.setHttpOnly(true); // Chỉ backend truy cập, bảo mật hơn
-        cookie.setSecure(true); // Chỉ hoạt động trên HTTPS
-        cookie.setMaxAge(60 * 60 * 24); // Hết hạn sau 1 ngày
-        cookie.setAttribute("SameSite", "None"); // Quan trọng khi frontend khác origin
-
-        // Thêm cookie vào response
-//        if (request.getServerName().equals("localhost")) {
-//            response.setHeader("Set-Cookie",
-//                    "token=" + token + "; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400");
-//        } else {
-//            response.setHeader("Set-Cookie",
-//                    "token=" + token + "; Path=/; HttpOnly; Secure; SameSite=None; Domain=freshskinweb.onrender.com; Max-Age=86400");
-//        }
-
-        if (request.getServerName().equals("localhost")) {
-            // Không set domain khi ở local
-            cookie.setDomain("localhost"); // Cấu hình domain cho localhost
-            response.addCookie(cookie); // Thêm cookie vào response
-        } else {
-            // Cấu hình domain cho production (hoặc nếu đang ở server khác)
-            cookie.setDomain("freshskinweb.onrender.com");
-            response.setHeader("Set-Cookie",
-                    "token=" + token + "; Path=/; HttpOnly; Secure; SameSite=None; Domain=freshskinweb.onrender.com; Max-Age=86400");
-        }
-
-
-        response.addCookie(cookie);
-
         return AuthenticationResponseDTO.builder()
                 .token(token)
                 .authenticated(authenticated)
@@ -133,18 +100,18 @@ public class AuthenticationService implements UserDetailsService {
     }
 
 
-    public void logout(HttpServletResponse response) {
-        // Tạo cookie để xóa token
-        String url_login_page = "https://project-swp391-n9j6.onrender.com/admin/auth/login";
-        Cookie cookie = new Cookie("token", null);
-        cookie.setDomain("freshskinweb.onrender.com"); // Cần đảm bảo đúng domain
-        cookie.setPath("/"); // Cookie sẽ áp dụng cho toàn bộ trang web
-        cookie.setHttpOnly(true); // Chỉ có thể truy cập cookie từ server
-        cookie.setSecure(true); // Chỉ hoạt động trên HTTPS
-        cookie.setMaxAge(0); // Set Max-Age = 0 để xóa cookie ngay lập tức
-        cookie.setAttribute("SameSite", "None"); // Cần thiết nếu frontend khác origin
-        response.addCookie(cookie);
-    }
+//    public void logout(HttpServletResponse response) {
+//        // Tạo cookie để xóa token
+//        String url_login_page = "https://project-swp391-n9j6.onrender.com/admin/auth/login";
+//        Cookie cookie = new Cookie("token", null);
+//        cookie.setDomain("freshskinweb.onrender.com"); // Cần đảm bảo đúng domain
+//        cookie.setPath("/"); // Cookie sẽ áp dụng cho toàn bộ trang web
+//        cookie.setHttpOnly(true); // Chỉ có thể truy cập cookie từ server
+//        cookie.setSecure(true); // Chỉ hoạt động trên HTTPS
+//        cookie.setMaxAge(0); // Set Max-Age = 0 để xóa cookie ngay lập tức
+//        cookie.setAttribute("SameSite", "None"); // Cần thiết nếu frontend khác origin
+//        response.addCookie(cookie);
+//    }
 
 
 

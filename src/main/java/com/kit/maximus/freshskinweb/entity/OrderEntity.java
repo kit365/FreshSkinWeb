@@ -49,6 +49,10 @@ public class OrderEntity extends AbstractEntity {
     @JsonManagedReference
     List<NotificationEntity> notifications = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "voucherId")
+    VoucherEntity voucher;
+
     @Column(name = "FirstName")
     @JsonIgnore
     String firstName;

@@ -105,8 +105,8 @@ public class ProductEntity extends AbstractEntity {
     List<ReviewEntity> reviews = new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "PromoCode")
-    DiscountEntity discountEntity;
+    @JoinColumn(name = "discountId")
+    DiscountEntity discount;
 
     public void createProductVariant(ProductVariantEntity productVariantEntity) {
         variants.add(productVariantEntity);
@@ -135,7 +135,7 @@ public class ProductEntity extends AbstractEntity {
                 ", usageInstructions='" + usageInstructions + '\'' +
                 ", benefits='" + benefits + '\'' +
                 ", skinIssues='" + skinIssues + '\'' +
-                ", discountEntity='" + discountEntity + '\'' +
+                ", discountEntity='" + discount + '\'' +
                 '}';
     }
 }
