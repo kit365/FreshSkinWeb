@@ -116,13 +116,28 @@ public enum ErrorCode {
     NOTIFICATION_NOT_FOUND(404, "Không tìm thấy thông báo"),
 
     //ORDERSTATUS
-    ORDER_STATUS_INVALID(404, "Không tìm thấy trạng thái đơn hàng"),
+    ORDER_STATUS_INVALID(400, "Không tìm thấy trạng thái đơn hàng"),
 
     //DISCOUNT
     DISCOUNT_NOT_FOUND(404, "Không tìm thấy mã giảm giá"),
-    DISCOUNT_IS_EXISTED(404, "Mã giảm giá đã tồn tại trước đó"),
-    WRONG_DISCOUNT_TYPE(404, "Loại giảm giá không đúng"),
-    DISCOUNT_TYPE_NOT_BE_NULL(404, "Loại mã lỗi không được null"),
+    DISCOUNT_IS_EXISTED(404, "Mã giảm giá đã tồn tại trong hệ thống"),
+    WRONG_DISCOUNT_TYPE(400, "Loại giảm giá không đúng"),
+    DISCOUNT_TYPE_NOT_BE_NULL(400, "Loại mã lỗi không được null"),
+    DISCOUNT_NOT_NULL(400, "Mã giảm giá không được để trống"),
+    NAME_INVALID(400, "Tên mã giảm giá không được vượt quá 255 ký tự"),
+    DISCOUNT_PERCENTAGE_INVALID_MIN(400, "Phần trăm giảm giá phải lớn hơn 0"),
+    DISCOUNT_PERCENTAGE_INVALID_MAX(400, "Phần trăm giảm giá không được vượt quá 100%"),
+    DISCOUNT_AMOUNT_INVALID(400, "Số tiền giảm giá phải lớn hơn 0"),
+    MAX_DISCOUNT_INVALID(400, "Giảm giá tối đa không được nhỏ hơn 0"),
+    START_DATE_INVALID(400, "Ngày bắt đầu phải từ hiện tại trở đi"),
+    END_DATE_INVALID(400, "Ngày kết thúc phải ở tương lai"),
+    USAGE_LIMIT_INVALID(400, "Số lần sử dụng tối thiểu là 1"),
+
+
+
+
+
+
 
     //IMAGE
     IMAGE_PROCESSING_ERROR(400, "Lỗi xử lý ảnh"),

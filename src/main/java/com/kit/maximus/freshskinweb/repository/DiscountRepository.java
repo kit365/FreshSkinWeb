@@ -12,4 +12,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DiscountRepository extends JpaRepository<DiscountEntity, String>, JpaSpecificationExecutor<DiscountEntity> {
     Page<DiscountEntity> findAll(Specification<DiscountEntity> spec, Pageable pageable);
+
+    boolean existsByDiscountId(String discountId);
 }

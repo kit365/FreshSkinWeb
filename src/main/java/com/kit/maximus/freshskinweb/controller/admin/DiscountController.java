@@ -1,7 +1,6 @@
 package com.kit.maximus.freshskinweb.controller.admin;
 
-import com.kit.maximus.freshskinweb.dto.request.discount.CreationDiscountRequest;
-import com.kit.maximus.freshskinweb.dto.request.discount.UpdationtionDiscountRequest;
+import com.kit.maximus.freshskinweb.dto.request.discount.DiscountRequest;
 import com.kit.maximus.freshskinweb.dto.response.DiscountResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.service.DiscountService;
@@ -9,14 +8,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +27,7 @@ public class DiscountController {
     DiscountService discountService;
 
     @PostMapping("create")
-    public ResponseAPI<Boolean> create(@RequestBody CreationDiscountRequest request){
+    public ResponseAPI<Boolean> create(@RequestBody DiscountRequest request){
         String message = "Create discount success";
        var result =  discountService.addDiscount(request);
        if(!result){
@@ -95,7 +91,7 @@ public class DiscountController {
 
 
     @PutMapping("edit/{id}")
-    public ResponseAPI<DiscountResponse> updateDiscount(@PathVariable String id, @RequestBody UpdationtionDiscountRequest request){
+    public ResponseAPI<DiscountResponse> updateDiscount(@PathVariable String id, @RequestBody DiscountRequest request){
         var result = discountService.updateDiscount(id, request);
         return ResponseAPI.<DiscountResponse>builder()
                 .code(HttpStatus.OK.value())

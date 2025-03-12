@@ -11,10 +11,10 @@ import java.util.List;
 
 public class DiscountSpecification {
 
-    public static Specification<DiscountEntity> filterByPromoCode(String promoCode) {
+    public static Specification<DiscountEntity> filterByName(String name) {
         return (root, query, criteriaBuilder) ->
-                StringUtils.hasText(promoCode) ?
-                        criteriaBuilder.like(root.get("PromoCode"), "%" + promoCode + "%") : null;
+                StringUtils.hasText(name) ?
+                        criteriaBuilder.like(root.get("Name"), "%" + name + "%") : null;
     }
 
     public static Specification<DiscountEntity> filterByDiscountType(String discountType) {
@@ -33,7 +33,7 @@ public class DiscountSpecification {
 
     public static Specification<DiscountEntity> filterByIsGlobal(Boolean isGlobal) {
         return (root, query, criteriaBuilder) ->
-                isGlobal != null ? criteriaBuilder.equal(root.get("isGlobal"), isGlobal) : null;
+                isGlobal != null ? criteriaBuilder.equal(root.get("IsGlobal"), isGlobal) : null;
     }
 
     public static Specification<DiscountEntity> sortByUpdatedAtAndUsed(Boolean sortByUsed) {
@@ -41,10 +41,10 @@ public class DiscountSpecification {
             if (sortByUsed) {
                 query.orderBy(
                         criteriaBuilder.desc(root.get("Used")),
-                        criteriaBuilder.desc(root.get("updatedAt"))
+                        criteriaBuilder.desc(root.get("Update_at"))
                 );
             } else {
-                query.orderBy(criteriaBuilder.desc(root.get("updatedAt")));
+                query.orderBy(criteriaBuilder.desc(root.get("Update_at")));
             }
             return null; // Specification yêu cầu trả về Predicate, nhưng chỉ cần thêm sort thì có thể để null
         };

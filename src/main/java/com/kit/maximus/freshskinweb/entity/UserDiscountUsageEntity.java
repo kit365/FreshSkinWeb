@@ -35,6 +35,8 @@ public class UserDiscountUsageEntity extends AbstractEntity {
     @JoinColumn(name = "PromoCodeID")
     DiscountEntity discountEntity;
 
+//    OrderEntity orderEntity;
+
     @Column(name = "used_at")
     @Temporal(TemporalType.TIMESTAMP)
     LocalDateTime UsedAt;
