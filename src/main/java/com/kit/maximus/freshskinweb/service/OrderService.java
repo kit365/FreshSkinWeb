@@ -97,79 +97,81 @@ public class OrderService {
     }
 
 
+    public void saveOrder(OrderEntity order) {
+        orderRepository.save(order);
+    }
 
-
-    public OrderStatus getOrderStatus(String orderStatus) {
-        try {
-            return OrderStatus.valueOf((orderStatus.toUpperCase()));
-        } catch (IllegalArgumentException e) {
-            log.warn("Invalid status provided: '{}'", orderStatus);
-            throw new AppException(ErrorCode.ORDER_STATUS_INVALID);
+        public OrderStatus getOrderStatus (String orderStatus){
+            try {
+                return OrderStatus.valueOf((orderStatus.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid status provided: '{}'", orderStatus);
+                throw new AppException(ErrorCode.ORDER_STATUS_INVALID);
+            }
         }
-    }
 
-    // Tạo ID cho order
-    private String generateOrderCode() {
-        // Lấy ngày hiện tại
-        LocalDate today = LocalDate.now();
+        // Tạo ID cho order
+        private String generateOrderCode () {
+            // Lấy ngày hiện tại
+            LocalDate today = LocalDate.now();
 
-        // Lấy 2 số cuối của năm
-        String year = String.valueOf(today.getYear()).substring(2);
+            // Lấy 2 số cuối của năm
+            String year = String.valueOf(today.getYear()).substring(2);
 
-        // Lấy tháng và ngày (định dạng 4 số, ví dụ 0226)
-        String monthDay = today.format(DateTimeFormatter.ofPattern("MMdd"));
+            // Lấy tháng và ngày (định dạng 4 số, ví dụ 0226)
+            String monthDay = today.format(DateTimeFormatter.ofPattern("MMdd"));
 
-        // Sinh ngẫu nhiên 5 số
-        String randomDigits = String.format("%05d", new Random().nextInt(100000));
+            // Sinh ngẫu nhiên 5 số
+            String randomDigits = String.format("%05d", new Random().nextInt(100000));
 
-        // Tạo mã đơn hàng hoàn chỉnh
-        return  year + monthDay + randomDigits;
-    }
+            // Tạo mã đơn hàng hoàn chỉnh
+            return year + monthDay + randomDigits;
+        }
 
 
-    public OrderResponse getOrderById(String orderId) {
-        OrderEntity order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        public OrderResponse getOrderById (String orderId){
+            OrderEntity order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
-        OrderResponse orderResponse = orderMapper.toOrderResponse(order);
+            OrderResponse orderResponse = orderMapper.toOrderResponse(order);
 
-        //Dựa vào ProductVariantID, show ra thêm các field phụ như ảnh, title, slug của Product (Mặc dù product và Order không đươc liên kết nhau )
-        if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
-            List<OrderItemResponse> orderItemResponses = new ArrayList<>();
-            
-            for (OrderItemEntity orderItemEntity : order.getOrderItems()) {
-                OrderItemResponse orderItemResponse = new OrderItemResponse();
-                orderItemResponse.setOrderItemId(orderItemEntity.getOrderItemId());
-                orderItemResponse.setQuantity(orderItemEntity.getQuantity());
-                orderItemResponse.setSubtotal(orderItemEntity.getSubtotal());
+            //Dựa vào ProductVariantID, show ra thêm các field phụ như ảnh, title, slug của Product (Mặc dù product và Order không đươc liên kết nhau )
+            if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
+                List<OrderItemResponse> orderItemResponses = new ArrayList<>();
 
-                if (orderItemEntity.getProductVariant() != null) {
-                    ProductVariantResponse productVariantResponse = new ProductVariantResponse();
-                    productVariantResponse.setId(orderItemEntity.getProductVariant().getId());
-                    productVariantResponse.setPrice(orderItemEntity.getProductVariant().getPrice());
-                    productVariantResponse.setUnit(orderItemEntity.getProductVariant().getUnit());
-                    productVariantResponse.setVolume(orderItemEntity.getProductVariant().getVolume());
+                for (OrderItemEntity orderItemEntity : order.getOrderItems()) {
+                    OrderItemResponse orderItemResponse = new OrderItemResponse();
+                    orderItemResponse.setOrderItemId(orderItemEntity.getOrderItemId());
+                    orderItemResponse.setQuantity(orderItemEntity.getQuantity());
+                    orderItemResponse.setSubtotal(orderItemEntity.getSubtotal());
 
-                    if (orderItemEntity.getProductVariant().getProduct() != null) {
-                        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-                        productResponseDTO.setTitle(orderItemEntity.getProductVariant().getProduct().getTitle());
-                        productResponseDTO.setThumbnail(orderItemEntity.getProductVariant().getProduct().getThumbnail());
-                        productResponseDTO.setDiscountPercent(orderItemEntity.getProductVariant().getProduct().getDiscountPercent());
-                        productResponseDTO.setSlug(orderItemEntity.getProductVariant().getProduct().getSlug());
-                        productResponseDTO.setId(orderItemEntity.getProductVariant().getProduct().getId());
-                        productVariantResponse.setProduct(productResponseDTO);
+                    if (orderItemEntity.getProductVariant() != null) {
+                        ProductVariantResponse productVariantResponse = new ProductVariantResponse();
+                        productVariantResponse.setId(orderItemEntity.getProductVariant().getId());
+                        productVariantResponse.setPrice(orderItemEntity.getProductVariant().getPrice());
+                        productVariantResponse.setUnit(orderItemEntity.getProductVariant().getUnit());
+                        productVariantResponse.setVolume(orderItemEntity.getProductVariant().getVolume());
+
+                        if (orderItemEntity.getProductVariant().getProduct() != null) {
+                            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+                            productResponseDTO.setTitle(orderItemEntity.getProductVariant().getProduct().getTitle());
+                            productResponseDTO.setThumbnail(orderItemEntity.getProductVariant().getProduct().getThumbnail());
+                            productResponseDTO.setDiscountPercent(orderItemEntity.getProductVariant().getProduct().getDiscountPercent());
+                            productResponseDTO.setSlug(orderItemEntity.getProductVariant().getProduct().getSlug());
+                            productResponseDTO.setId(orderItemEntity.getProductVariant().getProduct().getId());
+                            productVariantResponse.setProduct(productResponseDTO);
+                        }
+
+                        orderItemResponse.setProductVariant(productVariantResponse);
                     }
 
-                    orderItemResponse.setProductVariant(productVariantResponse);
+                    orderItemResponses.add(orderItemResponse);
                 }
 
-                orderItemResponses.add(orderItemResponse);
+                orderResponse.setOrderItems(orderItemResponses);
             }
 
-            orderResponse.setOrderItems(orderItemResponses);
+            return orderResponse;
         }
-
-        return orderResponse;
-    }
 
 
 //    public ProductResponseDTO getProductByVariant(Long id) {
@@ -223,8 +225,6 @@ public class OrderService {
 //        return orderResponses;
 
 
-
-
         //Truy xuat Product thông qua ProductVariantID
 
 
@@ -264,96 +264,96 @@ public class OrderService {
 
 //    }
 
-    /* PHẦN NÀY TÍCH HƠP THÊM BỘ LỌC THÔNG TIN THÔNG QUA Status và user */
-    /* TÍCH HỢP THÊM TÌM KIẾM INDEX CỦA DATABASE, GIÚP TÌM NHANH HƠN TRÁNH PHẢI CHẠY NHIỀU VÒNG FOR */
-    public Map<String, Object> getAllOrders(OrderStatus status, String keyword, String orderId, int page, int size) {
-        Map<String, Object> map = new HashMap<>();
+        /* PHẦN NÀY TÍCH HƠP THÊM BỘ LỌC THÔNG TIN THÔNG QUA Status và user */
+        /* TÍCH HỢP THÊM TÌM KIẾM INDEX CỦA DATABASE, GIÚP TÌM NHANH HƠN TRÁNH PHẢI CHẠY NHIỀU VÒNG FOR */
+        public Map<String, Object> getAllOrders (OrderStatus status, String keyword, String orderId,int page, int size){
+            Map<String, Object> map = new HashMap<>();
 
-        Specification<OrderEntity> spec = Specification
-                .where(OrderSpecification.hasStatus(status))
-                .and(OrderSpecification.hasKeyword(keyword))
-                .and(OrderSpecification.hasOrderId(orderId));
+            Specification<OrderEntity> spec = Specification
+                    .where(OrderSpecification.hasStatus(status))
+                    .and(OrderSpecification.hasKeyword(keyword))
+                    .and(OrderSpecification.hasOrderId(orderId));
 
-        int p = Math.max(page - 1, 0);
-        Pageable pageable = PageRequest.of(p, size, Sort.by("updatedAt").descending());
+            int p = Math.max(page - 1, 0);
+            Pageable pageable = PageRequest.of(p, size, Sort.by("updatedAt").descending());
 
-        Page<OrderEntity> ordersPage = orderRepository.findAll(spec, pageable);
+            Page<OrderEntity> ordersPage = orderRepository.findAll(spec, pageable);
 
-        // Convert trực tiếp để tránh loop lồng nhau
-        List<OrderResponse> orderResponses = ordersPage.getContent().stream()
-                .map(orderEntity -> {
-                    OrderResponse response = orderMapper.toOrderResponse(orderEntity);
-                    if (orderEntity.getOrderItems() != null) {
-                        response.setOrderItems(orderEntity.getOrderItems().stream()
-                                .map(item -> createOrderItemResponse(item))
-                                .collect(Collectors.toList()));
-                    }
-                    return response;
-                })
-                .collect(Collectors.toList());
+            // Convert trực tiếp để tránh loop lồng nhau
+            List<OrderResponse> orderResponses = ordersPage.getContent().stream()
+                    .map(orderEntity -> {
+                        OrderResponse response = orderMapper.toOrderResponse(orderEntity);
+                        if (orderEntity.getOrderItems() != null) {
+                            response.setOrderItems(orderEntity.getOrderItems().stream()
+                                    .map(item -> createOrderItemResponse(item))
+                                    .collect(Collectors.toList()));
+                        }
+                        return response;
+                    })
+                    .collect(Collectors.toList());
 
-        map.put("orders", orderResponses);
-        map.put("currentPage", ordersPage.getNumber() + 1);
-        map.put("totalItems", ordersPage.getTotalElements());
-        map.put("totalPages", ordersPage.getTotalPages());
-        map.put("pageSize", ordersPage.getSize());
+            map.put("orders", orderResponses);
+            map.put("currentPage", ordersPage.getNumber() + 1);
+            map.put("totalItems", ordersPage.getTotalElements());
+            map.put("totalPages", ordersPage.getTotalPages());
+            map.put("pageSize", ordersPage.getSize());
 
-        return map;
-    }
-
-    //Tạo hàm để ấy thông tin từ OrderItemsEntity sang OrderItemsResponse
-    private OrderItemResponse createOrderItemResponse(OrderItemEntity item) {
-        OrderItemResponse response = new OrderItemResponse();
-        response.setOrderItemId(item.getOrderItemId());
-        response.setQuantity(item.getQuantity());
-        response.setSubtotal(item.getSubtotal());
-
-        if (item.getProductVariant() != null) {
-            response.setProductVariant(createProductVariantResponse(item.getProductVariant()));
+            return map;
         }
-        return response;
-    }
 
-    //Tạo hàm để ấy thông tin từ ProductVariantEntity sang ProductVariantResponse
-    private ProductVariantResponse createProductVariantResponse(ProductVariantEntity variant) {
-        ProductVariantResponse response = new ProductVariantResponse();
-        response.setId(variant.getId());
-        response.setPrice(variant.getPrice());
-        response.setUnit(variant.getUnit());
-        response.setVolume(variant.getVolume());
+        //Tạo hàm để ấy thông tin từ OrderItemsEntity sang OrderItemsResponse
+        private OrderItemResponse createOrderItemResponse (OrderItemEntity item){
+            OrderItemResponse response = new OrderItemResponse();
+            response.setOrderItemId(item.getOrderItemId());
+            response.setQuantity(item.getQuantity());
+            response.setSubtotal(item.getSubtotal());
 
-        if (variant.getProduct() != null) {
-            ProductResponseDTO productResponse = new ProductResponseDTO();
-            productResponse.setId(variant.getProduct().getId());
-            productResponse.setTitle(variant.getProduct().getTitle());
-            productResponse.setThumbnail(variant.getProduct().getThumbnail());
-            productResponse.setDiscountPercent(variant.getProduct().getDiscountPercent());
-            productResponse.setSlug(variant.getProduct().getSlug());
-            response.setProduct(productResponse);
+            if (item.getProductVariant() != null) {
+                response.setProductVariant(createProductVariantResponse(item.getProductVariant()));
+            }
+            return response;
         }
-        return response;
-    }
+
+        //Tạo hàm để ấy thông tin từ ProductVariantEntity sang ProductVariantResponse
+        private ProductVariantResponse createProductVariantResponse (ProductVariantEntity variant){
+            ProductVariantResponse response = new ProductVariantResponse();
+            response.setId(variant.getId());
+            response.setPrice(variant.getPrice());
+            response.setUnit(variant.getUnit());
+            response.setVolume(variant.getVolume());
+
+            if (variant.getProduct() != null) {
+                ProductResponseDTO productResponse = new ProductResponseDTO();
+                productResponse.setId(variant.getProduct().getId());
+                productResponse.setTitle(variant.getProduct().getTitle());
+                productResponse.setThumbnail(variant.getProduct().getThumbnail());
+                productResponse.setDiscountPercent(variant.getProduct().getDiscountPercent());
+                productResponse.setSlug(variant.getProduct().getSlug());
+                response.setProduct(productResponse);
+            }
+            return response;
+        }
 
 //    Cập nhật trạng thái cho đơn hàng được chọn
-public String update(List<String> id, String orderStatus) {
-    try {
-        OrderStatus orderStatusEnum = OrderStatus.valueOf(orderStatus);
-        List<OrderEntity> orderEntities = orderRepository.findAllById(id);
+        public String update (List < String > id, String orderStatus){
+            try {
+                OrderStatus orderStatusEnum = OrderStatus.valueOf(orderStatus);
+                List<OrderEntity> orderEntities = orderRepository.findAllById(id);
 
-        if (!orderEntities.isEmpty()) {
-            orderEntities.forEach(orderEntity -> orderEntity.setOrderStatus(orderStatusEnum));
-            orderRepository.saveAll(orderEntities);
-            return "Cập nhật trạng thái đơn hàng thành công";
+                if (!orderEntities.isEmpty()) {
+                    orderEntities.forEach(orderEntity -> orderEntity.setOrderStatus(orderStatusEnum));
+                    orderRepository.saveAll(orderEntities);
+                    return "Cập nhật trạng thái đơn hàng thành công";
+                }
+                return "Không tìm thấy đơn hàng nào để cập nhật";
+            } catch (IllegalArgumentException e) {
+                return e.getMessage(); // Hiển thị lỗi rõ ràng hơn
+            }
         }
-        return "Không tìm thấy đơn hàng nào để cập nhật";
-    } catch (IllegalArgumentException e) {
-        return e.getMessage(); // Hiển thị lỗi rõ ràng hơn
-    }
-}
 
 //Cập nhật trạng thái cho 1 đơn hàng
-    public String update(String id, OrderRequest request) {
-        String orderStatus = request.getOrderStatus();
+        public String update (String id, OrderRequest request){
+            String orderStatus = request.getOrderStatus();
 
             OrderStatus orderStatusEnum = getOrderStatus(orderStatus);
             OrderEntity orderEntity = orderRepository.findById(id).orElse(null);
@@ -364,27 +364,27 @@ public String update(List<String> id, String orderStatus) {
                 return "Cập nhật trạng thái đơn hàng thành công";
             }
             return "Không tìm thấy đơn hàng để cập nhật";
-    }
-
-    public void deleteOrder(String orderId) {
-        if (!orderRepository.existsById(orderId)) {
-            throw new AppException(ErrorCode.ORDER_NOT_FOUND);
         }
-        orderRepository.deleteById(orderId);
+
+        public void deleteOrder (String orderId){
+            if (!orderRepository.existsById(orderId)) {
+                throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+            }
+            orderRepository.deleteById(orderId);
+        }
+
+        public OrderResponse deleted (String orderId){
+            OrderEntity orderEntity = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+            orderEntity.setDeleted(true);
+            OrderEntity result = orderRepository.save(orderEntity);
+
+            return orderMapper.toOrderResponse(result);
+        }
+
+        public OrderEntity getOrder (String orderId){
+            return orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        }
+
     }
-
-    public OrderResponse deleted(String orderId) {
-        OrderEntity orderEntity = orderRepository.findById(orderId)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-
-        orderEntity.setDeleted(true);
-        OrderEntity result = orderRepository.save(orderEntity);
-
-        return orderMapper.toOrderResponse(result);
-    }
-
-    public OrderEntity getOrder(String orderId) {
-        return orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-    }
-
-}
