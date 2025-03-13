@@ -27,8 +27,7 @@ public class SkinQuestionsEntity extends AbstractEntity {
     String questionText;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "QuestionGroupId", nullable = false)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @JoinColumn(name = "QuestionGroupId", nullable = true)
     @JsonBackReference
     QuestionGroupEntity questionGroup;
 

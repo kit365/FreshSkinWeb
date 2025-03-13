@@ -6,9 +6,9 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class QuestionGroupSpecification {
 
-    public static Specification<QuestionGroupEntity> hasGroupName(String keyword) {
+    public static Specification<QuestionGroupEntity> hasTitle(String keyword) {
         return (root, query, criteriaBuilder) ->
-                criteriaBuilder.like(root.get("groupName"), "%" + keyword + "%");
+                criteriaBuilder.like(root.get("title"), "%" + keyword + "%");
     }
 
     public static Specification<QuestionGroupEntity> hasStatus(Status status) {

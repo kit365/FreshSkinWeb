@@ -16,6 +16,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 public class SkinAnswerResponse implements Serializable {
 
     Long id;
@@ -25,8 +26,5 @@ public class SkinAnswerResponse implements Serializable {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Long score;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    SkinQuestionsResponse skinQuestionsEntity;
 
 }

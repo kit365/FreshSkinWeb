@@ -80,7 +80,7 @@ public class QuestionGroupService {
         Specification<QuestionGroupEntity> spec = Specification.where(null);
 
         if (keyword != null && !keyword.isEmpty()) {
-            spec = spec.and(QuestionGroupSpecification.hasGroupName(keyword));
+            spec = spec.and(QuestionGroupSpecification.hasTitle(keyword));
         }
         if (status != null && !status.isEmpty()) {
             Status statusEnum = getStatus(status);
