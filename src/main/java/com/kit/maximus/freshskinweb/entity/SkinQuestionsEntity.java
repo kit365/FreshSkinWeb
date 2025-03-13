@@ -27,22 +27,22 @@ public class SkinQuestionsEntity extends AbstractEntity {
     String questionText;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "QuestionGroupID", nullable = false)
+    @JoinColumn(name = "QuestionGroupId", nullable = false)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JsonBackReference
     QuestionGroupEntity questionGroup;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "skinQuestionsEntity", orphanRemoval = true)
     @JsonManagedReference
-    List<SkinAnswerEntity> skinAnswers = new ArrayList<>();
+    List<SkinAnswerEntity> answers = new ArrayList<>();
 
     public void addSkinAnswerEntity(SkinAnswerEntity skinAnswerEntity) {
-        skinAnswers.add(skinAnswerEntity);
+        answers.add(skinAnswerEntity);
         skinAnswerEntity.setSkinQuestionsEntity(this);
     }
 
     public void removeSkinAnswerEntity(SkinAnswerEntity skinAnswerEntity) {
-        skinAnswers.remove(skinAnswerEntity);
+        answers.remove(skinAnswerEntity);
         skinAnswerEntity.setSkinQuestionsEntity(null);
     }
 }

@@ -21,12 +21,12 @@ public class SkinAnswerResponse implements Serializable {
     Long id;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    String skinOption;
+    String option;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    Long answerScore;
+    Long score;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    SkinQuestionsResponse skinQuestionsResponse;
+    SkinQuestionsResponse skinQuestionsEntity;
 
 }

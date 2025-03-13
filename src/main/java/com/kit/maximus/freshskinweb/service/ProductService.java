@@ -64,7 +64,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         ProductBrandEntity productBrandEntity = productBrandRepository.findById(request.getBrandId()).orElse(null);
         ProductEntity productEntity = productMapper.productToProductEntity(request);
 
-
         if (request.getThumbnail() != null) {
             int count = 0;
             List<String> thumbnails = new ArrayList<>();
@@ -89,6 +88,10 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         if (productBrandEntity != null) {
             productEntity.setBrand(productBrandEntity);
         }
+
+//        if(discountEntity != null){
+//            productEntity.setDiscountEntity(discountEntity);
+//        }
 
         if (request.getPosition() == null || request.getPosition() <= 0) {
             Integer size = productRepository.findAll().size();
@@ -201,7 +204,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             List<SkinTypeEntity> skinTypeEntities = skinTypeRepository.findAllById(request.getSkinTypeId());
             listProduct.setSkinTypes(skinTypeEntities);
         }
-
 
         if (request.getVariants() != null && !request.getVariants().isEmpty()) {
             Map<Integer, ProductVariantEntity> requestList = listProductVariantToMap(request.getVariants());

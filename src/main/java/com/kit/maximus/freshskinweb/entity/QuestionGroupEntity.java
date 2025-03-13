@@ -20,27 +20,27 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class QuestionGroupEntity extends AbstractEntity{
     @Id
-    @Column(name = "QuestionGroupID", nullable = false, updatable = false)
+    @Column(name = "QuestionGroupId", nullable = false, updatable = false)
             @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
     @Column(name = "GroupName")
-    String groupName;
+    String title;
 
     @Column(name = "Description")
     String description;
 
     @OneToMany(mappedBy = "questionGroup", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    List<SkinQuestionsEntity> skinQuestionsEntities = new ArrayList<>();
+    List<SkinQuestionsEntity> questions = new ArrayList<>();
 
     public void addSkinQuestionsEntity(SkinQuestionsEntity skinQuestionsEntity) {
-        skinQuestionsEntities.add(skinQuestionsEntity);
+        questions.add(skinQuestionsEntity);
         skinQuestionsEntity.setQuestionGroup(this);
     }
 
     public void removeSkinQuestionsEntity(SkinQuestionsEntity skinQuestionsEntity) {
-        skinQuestionsEntities.remove(skinQuestionsEntity);
+        questions.remove(skinQuestionsEntity);
         skinQuestionsEntity.setQuestionGroup(null);
     }
 
