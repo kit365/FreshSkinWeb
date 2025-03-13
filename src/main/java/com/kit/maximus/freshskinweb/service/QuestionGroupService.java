@@ -79,21 +79,36 @@ public class QuestionGroupService {
         Pageable pageable = PageRequest.of(page, size);
         Specification<QuestionGroupEntity> spec = Specification.where(null);
 
-        if (keyword != null && !keyword.isEmpty()) {
-            spec = spec.and(QuestionGroupSpecification.hasTitle(keyword));
-        }
-        if (status != null && !status.isEmpty()) {
-            Status statusEnum = getStatus(status);
-            spec = spec.and(QuestionGroupSpecification.hasStatus(statusEnum));
+        // Xử lý keyword
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) -> {
+                String likePattern = "%" + keyword.trim().toLowerCase() + "%";
+                return cb.or(
+                        cb.like(cb.lower(root.get("title")), likePattern),
+                        cb.like(cb.lower(root.get("description")), likePattern)
+                );
+            });
         }
 
-        Page<QuestionGroupEntity> result = questionGroupRepository.findAll(spec, pageable);
+        // Xử lý status
+        if (status != null && !status.trim().isEmpty()) {
+            try {
+                Status statusEnum = Status.valueOf(status.toUpperCase());
+                spec = spec.and((root, query, cb) ->
+                        cb.equal(root.get("status"), statusEnum)
+                );
+            } catch (IllegalArgumentException e) {
+                log.error("Invalid status value: {}", status);
+                return Page.empty(pageable);
+            }
+        }
 
-        if (keyword != null && !keyword.isEmpty() && result.isEmpty()) {
+        try {
+            return questionGroupRepository.findAll(spec, pageable);
+        } catch (Exception e) {
+            log.error("Error while fetching question groups: {}", e.getMessage());
             return Page.empty(pageable);
         }
-
-        return result;
     }
 
     public Status getStatus(String status) {
