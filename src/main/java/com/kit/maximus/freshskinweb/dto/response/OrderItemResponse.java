@@ -10,6 +10,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 //@JsonInclude(JsonInclude.Include.NON_NULL)
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -32,4 +33,6 @@ public class OrderItemResponse implements Serializable {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Status status;
+
+    Double discountPrice;
 }

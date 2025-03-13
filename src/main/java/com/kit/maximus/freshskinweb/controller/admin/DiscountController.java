@@ -3,6 +3,8 @@ package com.kit.maximus.freshskinweb.controller.admin;
 import com.kit.maximus.freshskinweb.dto.request.discount.DiscountRequest;
 import com.kit.maximus.freshskinweb.dto.response.DiscountResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
+import com.kit.maximus.freshskinweb.entity.DiscountEntity;
+import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.service.DiscountService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +30,10 @@ public class DiscountController {
 
     @PostMapping("create")
     public ResponseAPI<Boolean> create(@RequestBody DiscountRequest request){
-        String message = "Create discount success";
+        String message = "Tạo mã giảm giá thành công";
        var result =  discountService.addDiscount(request);
        if(!result){
-           message = "Create discount failed";
+           message = "Tạo mã giảm giá thất bại";
        }
     return ResponseAPI.<Boolean>builder()
             .code(HttpStatus.OK.value())
@@ -39,12 +41,12 @@ public class DiscountController {
             .build();
     }
 
-    @GetMapping("{id}")
-    public ResponseAPI<DiscountResponse> getDiscount(@PathVariable String id){
+    @GetMapping("/search/{id}")
+    public ResponseAPI<DiscountResponse> getDiscount(@PathVariable String id) {
         var result = discountService.getDiscount(id);
-        String message = "Get discount success";
-        if(result == null){
-            message = "Create discount failed";
+        String message = "Lấy thông tin mã giảm giá thành công";
+        if (result == null) {
+            message = "Lấy thông tin mã giảm giá thất bại";
         }
         return ResponseAPI.<DiscountResponse>builder()
                 .code(HttpStatus.OK.value())
@@ -53,9 +55,10 @@ public class DiscountController {
                 .build();
     }
 
-    @GetMapping()
+
+    @GetMapping("/show")
     public ResponseAPI<Map<String, Object>> getAllDiscounts(
-            @RequestParam(required = false) String promoCode,
+            @RequestParam(required = false) String name,
             @RequestParam(required = false) String discountType,
             @RequestParam(required = false) Boolean isGlobal,
             @RequestParam(defaultValue = "false") Boolean sortByUsed,
@@ -63,14 +66,14 @@ public class DiscountController {
             @RequestParam(defaultValue = "10") int size) {
 
         log.info("GET ALL DISCOUNTS");
-        log.info("Received promoCode: {}", promoCode);
+        log.info("Received name: {}", name);
         log.info("Received discountType: {}", discountType);
         log.info("Received isGlobal: {}", isGlobal);
         log.info("Received sortByUsed: {}", sortByUsed);
 
         Pageable pageable = PageRequest.of(page, size);
         Map<String, Object> result = discountService.getAllDiscounts(
-                promoCode, discountType, isGlobal, sortByUsed, pageable
+                name, discountType, isGlobal, sortByUsed, pageable
         );
 
         if (result.get("discounts") instanceof List && ((List<?>) result.get("discounts")).isEmpty()) {
@@ -95,28 +98,49 @@ public class DiscountController {
         var result = discountService.updateDiscount(id, request);
         return ResponseAPI.<DiscountResponse>builder()
                 .code(HttpStatus.OK.value())
-                .message("Update discount success")
+                .message("Chỉnh sửa mã giảm giá thành công")
                 .data(result)
                 .build();
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseAPI<Boolean> deleteDiscount(@PathVariable String id){
         var result = discountService.deleteDiscount(id);
         return ResponseAPI.<Boolean>builder()
                 .code(HttpStatus.OK.value())
-                .message("Delete discount success")
+                .message("Xóa mã giảm giá thành công")
                 .data(result)
                 .build();
     }
 
-    @DeleteMapping
+    @DeleteMapping("/delete")
     public ResponseAPI<Boolean> deleteDiscounts(){
         var result = discountService.deleteDiscount();
         return ResponseAPI.<Boolean>builder()
                 .code(HttpStatus.OK.value())
-                .message("Delete discount success")
+                .message("Xóa tất cả mã giảm giá thành công")
                 .data(result)
                 .build();
     }
+
+    @PostMapping("/add/{id}")
+    public ResponseAPI<Boolean> addProduct(@PathVariable String id, @RequestBody List<Long> productIds){
+        Boolean result = discountService.applyDiscountToProducts(id, productIds);
+        return ResponseAPI.<Boolean>builder()
+                .code(HttpStatus.OK.value())
+                .message("Áp dụng mã giảm giá thành công")
+                .data(result)
+                .build();
+    }
+
+    @PostMapping("/remove/{id}")
+    public ResponseAPI<Boolean> removeProduct(@PathVariable String id, @RequestBody List<Long> productIds){
+        var result = discountService.removeDiscountFromProducts(id, productIds);
+        return ResponseAPI.<Boolean>builder()
+                .code(HttpStatus.OK.value())
+                .message("xóa mã giảm giá thành công")
+                .data(result)
+                .build();
+    }
+
 }

@@ -77,7 +77,7 @@ public class ProductEntity extends AbstractEntity {
     List<String> thumbnail;
 
     @Column(name = "DiscountPercentage")
-    int discountPercent;
+    double discountPercent;
 
     @Column(name = "Position")
     Integer position;

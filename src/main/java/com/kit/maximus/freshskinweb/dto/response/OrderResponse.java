@@ -1,20 +1,14 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.kit.maximus.freshskinweb.entity.OrderItemEntity;
-import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
-import com.kit.maximus.freshskinweb.utils.Status;
-import jakarta.persistence.*;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -50,11 +44,15 @@ public class OrderResponse implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date orderDate;
 
-    Status Status;
+    Status status;
 
     Boolean deleted;
 
     String orderStatus;
 
     String paymentStatus;
+
+    String voucherId; // Mã giảm giá nếu có
+
+    Double discountAmount; // Số tiền giảm giá
 }

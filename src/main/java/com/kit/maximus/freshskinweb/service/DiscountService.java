@@ -3,10 +3,13 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.discount.DiscountRequest;
 import com.kit.maximus.freshskinweb.dto.response.DiscountResponse;
 import com.kit.maximus.freshskinweb.entity.DiscountEntity;
+import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.DiscountMapper;
+import com.kit.maximus.freshskinweb.mapper.ProductMapper;
 import com.kit.maximus.freshskinweb.repository.DiscountRepository;
+import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.specification.DiscountSpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,8 @@ public class DiscountService {
 
     DiscountRepository discountRepository;
     DiscountMapper discountMapper;
+    ProductRepository productRepository;
+    ProductMapper productMapper;
 
     public boolean addDiscount(DiscountRequest request) {
         if (request == null) {
@@ -36,7 +41,7 @@ public class DiscountService {
         }
 
         // Kiểm tra xem mã giảm giá đã tồn tại chưa
-        boolean exists = discountRepository.existsByDiscountId((request.getDiscountId()));
+        boolean exists = discountRepository.existsByName(request.getName());
         if (exists) {
             throw new AppException(ErrorCode.DISCOUNT_IS_EXISTED);
         }
@@ -103,6 +108,53 @@ public class DiscountService {
 
     public boolean deleteDiscount(){
         discountRepository.deleteAll();
+        return true;
+    }
+
+//    public boolean addProduct(String discountId, List<Long> productIds) {
+//        DiscountEntity discount = discountRepository.findById(discountId)
+//                .orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_NOT_FOUND));
+//
+//        List<ProductEntity> products = productRepository.findAllById(productIds);
+//        discount.getProducts().addAll(products);
+//        discountRepository.save(discount);  // Lưu thay đổi vào DB
+//
+//        return true;
+//    }
+
+    public boolean applyDiscountToProducts(String id, List<Long> productIds) {
+        var discount = discountRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_NOT_FOUND));
+
+        List<ProductEntity> products = productRepository.findAllById(productIds);
+        if (products.isEmpty()) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        for (ProductEntity product : products) {
+            product.setDiscount(discount); // Gán discount cho từng product
+            product.setDiscountPercent(discount.getDiscountPercentage());
+        }
+
+        productRepository.saveAll(products); // Lưu danh sách product sau khi cập nhật
+        return true;
+    }
+
+    public boolean removeDiscountFromProducts(String id, List<Long> productIds) {
+        var discount = discountRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_NOT_FOUND));
+
+        List<ProductEntity> products = productRepository.findAllById(productIds);
+        if (products.isEmpty()) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        for (ProductEntity product : products) {
+            if (product.getDiscount() != null && product.getDiscount().equals(discount)) {
+                product.setDiscount(null); // Xóa discount khỏi product
+            }
+        }
+
+        productRepository.saveAll(products);
         return true;
     }
 }

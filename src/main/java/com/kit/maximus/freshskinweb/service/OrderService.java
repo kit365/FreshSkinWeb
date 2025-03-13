@@ -6,6 +6,7 @@ import com.kit.maximus.freshskinweb.dto.response.*;
 import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
+import com.kit.maximus.freshskinweb.mapper.OrderItemMapper;
 import com.kit.maximus.freshskinweb.mapper.OrderMapper;
 import com.kit.maximus.freshskinweb.mapper.ProductMapper;
 import com.kit.maximus.freshskinweb.repository.OrderRepository;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -39,6 +41,7 @@ public class OrderService {
     OrderMapper orderMapper;
     ProductVariantRepository productVariantRepository;
     EmailService emailService;
+    OrderItemMapper orderItemMapper;
 
     @Transactional
     public OrderIdResponse addOrder(OrderRequest orderRequest) {
@@ -73,23 +76,28 @@ public class OrderService {
                     }
 
                     orderItemEntity.setQuantity(orderItem.getQuantity());
-                    Double subtotal = productVariantEntity.getPrice() * orderItem.getQuantity();
-                    orderItemEntity.setSubtotal(subtotal);
+//                    Double subtotal = productVariantEntity.getPrice() * orderItem.getQuantity();
+//                    orderItemEntity.setSubtotal(subtotal);
+//                    orderItemEntity.calculateSubtotal();
+                    assert productVariantEntity != null;
+                    double discountPercent = (productVariantEntity.getProduct().getDiscount() != null
+                            && productVariantEntity.getProduct().getDiscount().getDiscountPercentage() != 0.0)
+                            ? productVariantEntity.getProduct().getDiscount().getDiscountPercentage() / 100.0
+                            : 0.0;
+                    orderItemEntity.setDiscountPrice(orderItemEntity.getSubtotal() * (1 - discountPercent));
                     order.addOrderItem(orderItemEntity);
                 }
             }
         }
+        double totalPrice = order.getOrderItems().stream()
+                .mapToDouble(item -> item.getDiscountPrice() != 0 ? item.getDiscountPrice() : item.getSubtotal())
+                .sum();
+        order.setTotalPrice(totalPrice);
 
         OrderEntity savedOrder = orderRepository.save(order);
-//
-//        // Gửi email xác nhận
-//        // Gửi email bằng orderId thay vì entity
-//        try {
-//            emailService.sendOrderConfirmationEmail(savedOrder.getOrderId());
-//        } catch (Exception e) {
-//            log.error("Không thể gửi email xác nhận: {}", e.getMessage());
-//        }
+
         return orderMapper.toOrderResponseCreate(savedOrder);
+
     }
 
     public void processOrder(String orderId) {
@@ -143,6 +151,8 @@ public class OrderService {
                     orderItemResponse.setOrderItemId(orderItemEntity.getOrderItemId());
                     orderItemResponse.setQuantity(orderItemEntity.getQuantity());
                     orderItemResponse.setSubtotal(orderItemEntity.getSubtotal());
+                    orderItemResponse.setDiscountPrice(orderItemEntity.getDiscountPrice());
+
 
                     if (orderItemEntity.getProductVariant() != null) {
                         ProductVariantResponse productVariantResponse = new ProductVariantResponse();
@@ -307,6 +317,7 @@ public class OrderService {
             response.setOrderItemId(item.getOrderItemId());
             response.setQuantity(item.getQuantity());
             response.setSubtotal(item.getSubtotal());
+            response.setDiscountPrice(item.getDiscountPrice());
 
             if (item.getProductVariant() != null) {
                 response.setProductVariant(createProductVariantResponse(item.getProductVariant()));

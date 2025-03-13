@@ -45,9 +45,6 @@ public class OrderRequest extends AbstractEntity implements Serializable {
     @Min(value = 1, message = "TOTAL_AMOUNT_INVALID")
     Long totalAmount;
 
-    @NotNull(message = "TOTAL_PRICE_NOT_NULL")
-    @DecimalMin(value = "0.0", inclusive = false, message = "TOTAL_PRICE_INVALID")
-    Double totalPrice;
 
     @NotNull(message = "PAYMENT_METHOD_NOT_NULL")
     PaymentMethod paymentMethod;
@@ -57,4 +54,7 @@ public class OrderRequest extends AbstractEntity implements Serializable {
     String paymentStatus;
 
     List<OrderItemRequest> orderItems;
+
+
+    String voucherId;
 }

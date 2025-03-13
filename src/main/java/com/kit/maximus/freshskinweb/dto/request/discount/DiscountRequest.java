@@ -7,6 +7,7 @@ import lombok.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,8 +15,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class DiscountRequest implements Serializable {
 
-    @NotBlank(message = "DISCOUNT_NOT_NULL")
-    String discountId;
+//    @NotBlank(message = "DISCOUNT_NOT_NULL")
+//    String discountId;
 
     @Size(max = 255, message = "NAME_INVALID")
     String name;
@@ -42,4 +43,7 @@ public class DiscountRequest implements Serializable {
     Boolean isGlobal = false;
 
     DiscountType discountType;
+
+    List<Long> productIds;
+
 }
