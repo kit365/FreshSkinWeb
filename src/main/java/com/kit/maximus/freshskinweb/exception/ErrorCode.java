@@ -105,6 +105,14 @@ public enum ErrorCode {
     REVIEW_NOT_FOUND(404, "Không tìm thấy đánh giá"),
 
 
+    //STATUS
+    STATUS_NOT_FOUND(404, "Không tìm thấy trạng thái"),
+    INVALID_STATUS(400, "Trạng thái không hợp lệ"),
+
+    //TYPE USER
+    TYPE_USER_NOT_FOUND(404, "Không tìm thấy loại người dùng"),
+    INVALID_TYPE_USER(400, "Loại người dùng không hợp lệ"),
+
     //SKIN QUESTIONS
     SKIN_QUESTIONS_NOT_FOUND(404, "Không tìm thấy câu hỏi"),
     QUESTION_GROUP_NOT_EXISTED(404, "Không tìm thấy nhóm câu hỏi nào"),
