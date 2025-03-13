@@ -1,8 +1,9 @@
 package com.kit.maximus.freshskinweb.controller.admin;
 
-import com.kit.maximus.freshskinweb.dto.request.review.ReviewRequest;
+import com.kit.maximus.freshskinweb.dto.request.review.ReviewCreateRequest;
+import com.kit.maximus.freshskinweb.dto.request.review.ReviewUpdateRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
-import com.kit.maximus.freshskinweb.dto.response.ReviewResponse;
+import com.kit.maximus.freshskinweb.dto.response.review.ReviewResponse;
 import com.kit.maximus.freshskinweb.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -23,9 +24,9 @@ public class ReviewController {
     ReviewService reviewService;
 
     @PostMapping("/create")
-    public ResponseAPI<ReviewResponse> createReview(@Valid @RequestBody ReviewRequest reviewRequest) {
+    public ResponseAPI<ReviewResponse> createReview(@Valid @RequestBody ReviewCreateRequest reviewCreateRequest) {
         String message = "Tạo đánh giá thành công";
-        reviewService.addReview(reviewRequest);
+        reviewService.addReview(reviewCreateRequest);
         return ResponseAPI.<ReviewResponse>builder()
                 .code(HttpStatus.OK.value())
                 .message(message)
@@ -43,9 +44,9 @@ public class ReviewController {
     }
 
     @PatchMapping("/update/{id}")
-    public ResponseAPI<ReviewResponse> updateReview(@PathVariable("id") Long id, @RequestBody @Valid  ReviewRequest reviewRequest) {
+    public ResponseAPI<ReviewResponse> updateReview(@PathVariable("id") Long id, @RequestBody @Valid ReviewUpdateRequest request) {
         String message = "Thay đổi đánh giá thành công";
-        var review = reviewService.updateReview(id, reviewRequest);
+        var review = reviewService.updateReview(id, request);
         return ResponseAPI.<ReviewResponse>builder()
                 .code(HttpStatus.OK.value())
                 .message(message)
