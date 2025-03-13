@@ -66,8 +66,8 @@ public class QuestionGroupController {
                 .build();
     }
 
-    @GetMapping("{id}")
-    public ResponseAPI<QuestionGroupResponse> showByID(@RequestParam Long id){
+    @GetMapping("/{id}")
+    public ResponseAPI<QuestionGroupResponse> showByID(@PathVariable Long id){
         log.info("Show question group with id: " + id);
         QuestionGroupResponse result = questionGroupService.getQuestionGroupById(id);
         return ResponseAPI.<QuestionGroupResponse>builder()
@@ -76,7 +76,7 @@ public class QuestionGroupController {
                 .build();
     }
 
-    @PostMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseAPI<Boolean> delete(@PathVariable Long id) {
         log.info("Delete question group with id: " + id);
         String message = "Xóa bộ câu hỏi thành công";

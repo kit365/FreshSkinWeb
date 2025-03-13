@@ -19,7 +19,6 @@ import java.util.List;
 public class SkinQuestionsResponse implements Serializable {
     Long id;
 
-    Integer questionNumber;
     String questionText;
     QuestionGroupResponse questionGroup;
 

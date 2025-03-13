@@ -117,6 +117,8 @@ public class QuestionGroupService {
     }
 
     public boolean update(Long id, CreationQuestionGroupRequest request) {
+        System.out.println(request);
+
         // Find the current QuestionGroup
         QuestionGroupEntity questionGroupEntity = questionGroupRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.QUESTION_GROUP_NOT_FOUND));
@@ -133,6 +135,13 @@ public class QuestionGroupService {
             questionGroupEntity.setDescription(request.getDescription());
         } else {
             questionGroupEntity.setDescription(questionGroupEntity.getDescription());
+        }
+
+        Status Status = getStatus(request.getStatus());
+        if(Status == null){
+            throw new AppException(ErrorCode.STATUS_INVALID);
+        } else {
+            questionGroupEntity.setStatus(Status);
         }
 
         // Handle SkinQuestions update

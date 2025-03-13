@@ -31,7 +31,7 @@ public class QuestionGroupEntity extends AbstractEntity{
     String description;
 
     @OneToMany(mappedBy = "questionGroup", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-            @JsonManagedReference
+    @JsonManagedReference
     List<SkinQuestionsEntity> skinQuestionsEntities = new ArrayList<>();
 
     public void addSkinQuestionsEntity(SkinQuestionsEntity skinQuestionsEntity) {

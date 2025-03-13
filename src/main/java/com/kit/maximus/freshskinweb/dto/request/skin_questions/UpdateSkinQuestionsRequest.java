@@ -15,6 +15,5 @@ public class UpdateSkinQuestionsRequest implements Serializable {
 
     String questionText;
     String questionGroup;
-
     List<SkinAnswerEntity> skinAnswers;
 }
