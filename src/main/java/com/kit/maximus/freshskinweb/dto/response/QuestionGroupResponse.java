@@ -19,7 +19,7 @@ import java.util.List;
 public class QuestionGroupResponse {
     Long id;
 
-    String groupName;
+    String title;
 
     String description;
 

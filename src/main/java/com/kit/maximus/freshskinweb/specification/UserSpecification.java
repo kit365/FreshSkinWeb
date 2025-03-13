@@ -1,29 +1,36 @@
 package com.kit.maximus.freshskinweb.specification;
 
 import com.kit.maximus.freshskinweb.entity.UserEntity;
+import com.kit.maximus.freshskinweb.utils.Status;
+import com.kit.maximus.freshskinweb.utils.TypeUser;
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
 
 
 public class UserSpecification {
-
-    public static Specification<UserEntity> filterUsers(String keyword) {
-        return (root, query, criteriaBuilder) -> {
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                String likePattern = "%" + keyword.trim() + "%";
-                Predicate firstNamePredicate = criteriaBuilder.like(root.get("firstName"), likePattern);
-                Predicate lastNamePredicate = criteriaBuilder.like(root.get("lastName"), likePattern);
-                Predicate usernamePredicate = criteriaBuilder.like(root.get("username"), likePattern);
-
-                // Thêm điều kiện tìm kiếm theo `username`
-                return criteriaBuilder.or(firstNamePredicate, lastNamePredicate, usernamePredicate);
-            }
-            return criteriaBuilder.conjunction();
-        };
+    public static Specification<UserEntity> hasRoleZero() {
+        return (root, query, builder) ->
+                builder.equal(root.get("role").get("id"), 0L);
     }
 
-    public static Specification<UserEntity> hasRole() {
-        return (root, query, criteriaBuilder) ->
-                criteriaBuilder.isNotNull(root.get("role"));
+    public static Specification<UserEntity> filterByStatus(Status status) {
+        return (root, query, builder) ->
+                builder.equal(root.get("status"), status);
+    }
+
+    public static Specification<UserEntity> filterByType(TypeUser type) {
+        return (root, query, builder) ->
+                builder.equal(root.get("type"), type);
+    }
+
+    public static Specification<UserEntity> searchByKeyword(String keyword) {
+        return (root, query, builder) -> {
+            String likePattern = "%" + keyword.toLowerCase() + "%";
+            return builder.or(
+                    builder.like(builder.lower(root.get("firstName")), likePattern),
+                    builder.like(builder.lower(root.get("lastName")), likePattern),
+                    builder.like(root.get("phone"), likePattern)
+            );
+        };
     }
 }

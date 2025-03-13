@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.kit.maximus.freshskinweb.dto.response.review.ReviewResponse;
 import com.kit.maximus.freshskinweb.entity.DiscountEntity;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
 import lombok.*;
@@ -68,6 +69,7 @@ public class ProductResponseDTO implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date updatedAt;
 
+    List<ReviewResponse> reviews;
     boolean deleted;
 
 

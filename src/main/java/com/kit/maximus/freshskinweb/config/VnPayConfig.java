@@ -43,17 +43,5 @@ public class VnPayConfig {
         return getEnvOrDefault("VNPAY_RETURN_URL", returnUrlFromProperties != null ? returnUrlFromProperties : "http://localhost:8080/api/vnpay/payment-return");
     }
 
-    @PostConstruct
-    public void printConfig() {
-        System.out.println("🔍 VNPay Config:");
-        System.out.println("VNPAY_TMN_CODE: " + blurText(getTmnCode()));
-        System.out.println("VNPAY_HASH_SECRET: " + (getHashSecret() != null ? "LOADED ✅" : "NOT FOUND ❌"));
-        System.out.println("VNPAY_PAY_URL: " + blurText(getPayUrl()));
-        System.out.println("VNPAY_RETURN_URL: " + getReturnUrl());
-    }
 
-    private String blurText(String text) {
-        if (text == null || text.length() < 6) return "******"; // Nếu quá ngắn, che hết luôn
-        return text.substring(0, 3) + "*****" + text.substring(text.length() - 3);
-    }
 }

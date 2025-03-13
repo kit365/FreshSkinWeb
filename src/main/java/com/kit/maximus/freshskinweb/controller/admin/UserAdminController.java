@@ -72,14 +72,62 @@ public class UserAdminController {
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(userService.addOrder(id, requestDTO)).build();
     }
 
-    @GetMapping("show")
-    public ResponseAPI<List<UserResponseDTO>> getUsers() {
-        String message = "Get all users successfully";
-        var result = userService.getAllUsers();
-        return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+    @GetMapping()
+    public ResponseAPI<Map<String, Object>> getUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "updatedAt") String sortKey,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String keyword) {
+
+        log.info("GET ALL USERS");
+        log.info("Page: {}, Size: {}", page, size);
+        log.info("Sort: {} {}", sortKey, sortDirection);
+        log.info("Filters - Status: {}, Type: {}, Keyword: {}", status, type, keyword);
+
+        try {
+            Map<String, Object> result = userService.getAll(
+                    page,
+                    size,
+                    sortKey,
+                    sortDirection,
+                    status,
+                    type,
+                    keyword
+            );
+
+            if (result.get("users") instanceof List && ((List<?>) result.get("users")).isEmpty()) {
+                return ResponseAPI.<Map<String, Object>>builder()
+                        .code(HttpStatus.NOT_FOUND.value())
+                        .message("Không tìm thấy người dùng phù hợp.")
+                        .data(result)
+                        .build();
+            }
+
+            return ResponseAPI.<Map<String, Object>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy danh sách người dùng thành công.")
+                    .data(result)
+                    .build();
+
+        } catch (AppException e) {
+            log.error("Error getting users: {}", e.getMessage());
+            return ResponseAPI.<Map<String, Object>>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message(e.getMessage())
+                    .build();
+        } catch (Exception e) {
+            log.error("Unexpected error getting users", e);
+            return ResponseAPI.<Map<String, Object>>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Có lỗi xảy ra khi lấy danh sách người dùng.")
+                    .build();
+        }
     }
 
-    @GetMapping("show/{id}")
+    @GetMapping("/{id}")
     public ResponseAPI<UserResponseDTO> showDetailUser(@PathVariable Long id) {
         String message = "Get user successfully";
         var result = userService.showDetail(id);

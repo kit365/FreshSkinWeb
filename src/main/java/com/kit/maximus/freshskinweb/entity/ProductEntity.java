@@ -2,7 +2,7 @@ package com.kit.maximus.freshskinweb.entity;
 
 
 import com.fasterxml.jackson.annotation.*;
-import com.kit.maximus.freshskinweb.utils.SkinType;
+import com.kit.maximus.freshskinweb.entity.review.ReviewEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;

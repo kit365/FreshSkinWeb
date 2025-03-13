@@ -20,11 +20,11 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class QuestionGroupEntity extends AbstractEntity{
     @Id
-    @Column(name = "QuestionGroupId", nullable = false, updatable = false)
+    @Column(name = "question_group_id", nullable = false, updatable = false)
             @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(name = "GroupName")
+    @Column(name = "title")
     String title;
 
     @Column(name = "Description")

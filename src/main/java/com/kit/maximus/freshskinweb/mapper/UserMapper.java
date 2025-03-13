@@ -13,6 +13,8 @@ public interface UserMapper {
     
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "avatar", ignore = true)
+    @Mapping(target = "email", ignore = true)
+    @Mapping(target = "address", ignore = true)
     UserEntity toUserEntity(CreateUserRequest userRequestDTO);
 
     @Mapping(target = "orders", source = "orders")

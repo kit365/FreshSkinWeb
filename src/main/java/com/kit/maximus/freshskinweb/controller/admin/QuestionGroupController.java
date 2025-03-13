@@ -53,7 +53,7 @@ public class QuestionGroupController {
         Page<QuestionGroupEntity> result = questionGroupService.getPagedAndFilteredQuestionGroups(keyword, status, page, size);
 
         Map<String, Object> response = Map.of(
-                "QuestionGroup:", result.getContent(),
+                "QuestionGroup", result.getContent(),
                 "totalElements", result.getTotalElements(),
                 "totalPages", result.getTotalPages(),
                 "size", result.getSize(),
