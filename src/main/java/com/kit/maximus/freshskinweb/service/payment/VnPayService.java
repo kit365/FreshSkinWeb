@@ -13,6 +13,7 @@ import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.service.OrderService;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import com.kit.maximus.freshskinweb.utils.PaymentStatus;
+import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -135,7 +136,8 @@ public class VnPayService implements PaymentService {
             // Tạo vnp_SecureHash
             String secureHash = hmacSHA512(vnPayConfig.getHashSecret(), hashData.toString());
             queryData.append("&vnp_SecureHash=").append(secureHash);
-
+            order.setPaymentStatus(PaymentStatus.PENDING);
+            orderService.saveOrder(order);
             return vnPayConfig.getPayUrl() + "?" + queryData.toString();
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi tạo URL thanh toán VNPay", e);
@@ -175,8 +177,14 @@ public class VnPayService implements PaymentService {
 
 /// Kiểm tra mã giao dịch hợp lệ
         if ("00".equals(transactionStatus)) {
+            //thanh toán thành công -> chuyên status
+            orderOpt.setPaymentStatus(PaymentStatus.PAID);
+            orderService.saveOrder(orderOpt);
             return orderId;
         } else {
+            orderOpt.setPaymentStatus(PaymentStatus.FAILED);
+            orderOpt.setOrderStatus(OrderStatus.CANCELED);
+            orderService.saveOrder(orderOpt);
             return null;
         }
     }

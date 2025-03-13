@@ -151,7 +151,11 @@ public enum ErrorCode {
 
     //OTP
     OTP_EXPIRED(400, "OTP đã hết hạn"),
-    INVALID_OTP(400, "OTP không hợp lệ")
+    INVALID_OTP(400, "OTP không hợp lệ"),
+
+    //QUESTION_GROUP
+    QUESTION_GROUP_NOT_FOUND(404, "Không tìm thấy nhóm câu hỏi"),
+    QUESTION_GROUP_INVALID(400, "Nhóm câu hỏi không hợp lệ"),
     ;
 
 

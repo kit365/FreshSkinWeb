@@ -39,15 +39,6 @@ public class OrderController {
         return ResponseAPI.<OrderIdResponse>builder().code(HttpStatus.OK.value()).message(message).data(create).build();
     }
 
-//    @GetMapping("/show")
-//    public ResponseAPI<List<OrderResponse>> getAllOrder() {
-//        String message = "Hiện tất cả các đơn hàng thành công";
-//        List<OrderResponse> order = orderService.getAllOrder();
-//        return ResponseAPI.<List<OrderResponse>>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
-//    }
-
-
-
     @GetMapping
     public ResponseAPI<Map<String, Object>> getAllOrder(
             @RequestParam(required = false) OrderStatus status,

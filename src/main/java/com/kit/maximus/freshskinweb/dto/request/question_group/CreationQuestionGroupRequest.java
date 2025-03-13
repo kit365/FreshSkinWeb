@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.dto.request.question_group;
 
+import com.kit.maximus.freshskinweb.dto.request.skin_questions.CreateSkinQuestionsRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_test.CreationSkinTestRequest;
 import com.kit.maximus.freshskinweb.entity.SkinQuestionsEntity;
 import jakarta.persistence.Column;
@@ -21,5 +22,5 @@ public class CreationQuestionGroupRequest {
 
     String description;
 
-    List<SkinQuestionsEntity> skinQuestionsEntities;
+    List<CreateSkinQuestionsRequest> skinQuestionsEntities;
 }
