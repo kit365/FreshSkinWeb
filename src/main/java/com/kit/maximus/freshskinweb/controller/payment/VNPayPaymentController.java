@@ -10,11 +10,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.Map;
@@ -70,6 +68,22 @@ public class VNPayPaymentController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Thanh toán thất bại!");
         }
     }
+
+
+    @GetMapping("/generate-qr/{orderId}")
+    public ResponseEntity<byte[]> generatePaymentQR(@PathVariable String orderId, HttpServletRequest request) {
+        try {
+            byte[] qrCode = vnPayService.generatePaymentQRCode(orderId, request);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(qrCode);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
+
 }
 
 

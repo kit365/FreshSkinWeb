@@ -144,6 +144,11 @@ public class VnPayService implements PaymentService {
         }
     }
 
+    public byte[] generatePaymentQRCode(String orderId, HttpServletRequest ipAddr) throws Exception {
+        String paymentUrl = createPayment(orderId, ipAddr);
+        return generateQRCodeImage(paymentUrl);
+    }
+
     private static String hmacSHA512(String key, String data) {
         try {
             SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA512");

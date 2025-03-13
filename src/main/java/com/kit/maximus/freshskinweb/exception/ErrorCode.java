@@ -2,6 +2,8 @@ package com.kit.maximus.freshskinweb.exception;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.apache.http.HttpStatus;
+import org.opensearch.client.opensearch.nodes.Http;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Getter
@@ -149,6 +151,14 @@ public enum ErrorCode {
     //QUESTION_GROUP
     QUESTION_GROUP_NOT_FOUND(404, "Không tìm thấy nhóm câu hỏi"),
     QUESTION_GROUP_INVALID(400, "Nhóm câu hỏi không hợp lệ"),
+
+    //Review
+    //ReviewVote
+    CANNOT_VOTE_OWN_REVIEW(400, "Không thể tự vote cho chính mình"),
+    ALREADY_VOTED(400, "Đã vote!"),
+    VOTE_NOT_FOUND(400, "Lượt vote không tồn tại"),
+    VOTE_STATUS_INVALID(404, "Lượt vote không hợp lệ[-1(dislike),0(unvote),1(like)]"),PARENT_REVIEW_NOT_FOUND(404, "Bình luận không tìm thấy, không thể trả lời.")
+
     ;
 
 
