@@ -14,8 +14,8 @@ import java.util.List;
 @ToString
 public class CreateSkinQuestionsRequest implements Serializable {
 
+    Long id;
     String questionText;
     String questionGroup;
-
     List<CreationSkinAnswerRequest> skinAnswers;
 }

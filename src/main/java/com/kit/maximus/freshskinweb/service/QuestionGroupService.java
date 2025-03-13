@@ -27,6 +27,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -39,6 +41,9 @@ public class QuestionGroupService {
 
     public boolean add(CreationQuestionGroupRequest request) {
         QuestionGroupEntity questionGroupEntity = new QuestionGroupEntity();
+        if (request.getGroupName() == null || request.getDescription() == null) {
+            throw new AppException(ErrorCode.QUESTION_GROUP_INVALID);
+        }
         questionGroupEntity.setGroupName(request.getGroupName());
         questionGroupEntity.setDescription(request.getDescription());
 
@@ -91,11 +96,117 @@ public class QuestionGroupService {
         return result;
     }
 
-    public Status getStatus(String status){
-        if (status != null){
+    public Status getStatus(String status) {
+        if (status != null) {
             return Status.valueOf(status.toUpperCase());
         } else {
             throw new AppException(ErrorCode.STATUS_INVALID);
         }
+    }
+
+    public QuestionGroupEntity getQuestionGroupById(Long id) {
+        return questionGroupRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.QUESTION_GROUP_NOT_FOUND));
+    }
+
+    public boolean delete(Long id) {
+        QuestionGroupEntity questionGroupEntity = questionGroupRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.QUESTION_GROUP_NOT_FOUND));
+        questionGroupRepository.delete(questionGroupEntity);
+        return true;
+    }
+
+    public boolean delete(List<Long> ids) {
+        List<QuestionGroupEntity> questionGroupEntities = questionGroupRepository.findAllById(ids);
+        questionGroupRepository.deleteAll(questionGroupEntities);
+        return true;
+    }
+
+    public boolean update(Long id, CreationQuestionGroupRequest request) {
+        // Find the current QuestionGroup
+        QuestionGroupEntity questionGroupEntity = questionGroupRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.QUESTION_GROUP_NOT_FOUND));
+
+        // Update basic QuestionGroup fields
+        if(request.getDescription() != null){
+            questionGroupEntity.setGroupName(request.getGroupName());
+
+        } else {
+            questionGroupEntity.setGroupName(questionGroupEntity.getGroupName());
+        }
+
+        if(request.getDescription() != null){
+            questionGroupEntity.setDescription(request.getDescription());
+        } else {
+            questionGroupEntity.setDescription(questionGroupEntity.getDescription());
+        }
+
+        // Handle SkinQuestions update
+        if (request.getSkinQuestionsEntities() != null) {
+            List<SkinQuestionsEntity> currentQuestions = questionGroupEntity.getSkinQuestionsEntities();
+            List<Long> requestQuestionIds = request.getSkinQuestionsEntities().stream()
+                    .map(CreateSkinQuestionsRequest::getId)
+                    .filter(questionId -> questionId != null)
+                    .collect(Collectors.toList());
+
+            // Remove questions that are not in the request
+            currentQuestions.removeIf(question -> !requestQuestionIds.contains(question.getId()));
+
+            // Update existing questions and add new ones
+            List<SkinQuestionsEntity> updatedQuestions = request.getSkinQuestionsEntities().stream()
+                    .map(questionRequest -> {
+                        SkinQuestionsEntity questionEntity;
+
+                        if (questionRequest.getId() != null) {
+                            // Update existing question
+                            questionEntity = currentQuestions.stream()
+                                    .filter(q -> q.getId().equals(questionRequest.getId()))
+                                    .findFirst()
+                                    .orElseGet(SkinQuestionsEntity::new);
+                        } else {
+                            // Create new question
+                            questionEntity = new SkinQuestionsEntity();
+                        }
+
+                        // Update question fields
+                        questionEntity.setQuestionText(questionRequest.getQuestionText());
+                        questionEntity.setQuestionGroup(questionGroupEntity);
+
+                        // Handle answers
+                        List<SkinAnswerEntity> currentAnswers = questionEntity.getSkinAnswers();
+                        if (currentAnswers == null) {
+                            currentAnswers = new ArrayList<>();
+                            questionEntity.setSkinAnswers(currentAnswers);
+                        } else {
+                            currentAnswers.clear();
+                        }
+
+                        // Add new answers from request
+                        if (questionRequest.getSkinAnswers() != null) {
+                            List<SkinAnswerEntity> newAnswers = questionRequest.getSkinAnswers().stream()
+                                    .map(answerRequest -> {
+                                        SkinAnswerEntity answer = new SkinAnswerEntity();
+                                        answer.setSkinOption(answerRequest.getSkinOption());
+                                        answer.setAnswerScore(answerRequest.getAnswerScore());
+                                        answer.setSkinQuestionsEntity(questionEntity);
+                                        return answer;
+                                    })
+                                    .collect(Collectors.toList());
+                            currentAnswers.addAll(newAnswers);
+                        }
+
+                        return questionEntity;
+                    })
+                    .collect(Collectors.toList());
+
+            // Clear and set new questions
+            currentQuestions.clear();
+            currentQuestions.addAll(updatedQuestions);
+        } else {
+            // If no questions in request, clear all existing questions
+            questionGroupEntity.getSkinQuestionsEntities().clear();
+        }
+
+        // Save all changes
+        questionGroupRepository.save(questionGroupEntity);
+        return true;
     }
 }

@@ -157,12 +157,18 @@ public class SkinQuestionService implements BaseService<SkinQuestionsResponse, C
         return Map.of();
     }
 
-
-    public List<SkinQuestionsResponse> showAll(){
-        return repository.findAll().stream().map(mapper::toSkinQuestionsResponse).collect(Collectors.toList());
+    public List<SkinQuestionsResponse> showAll() {
+        return repository.findAll().stream()
+                .map(mapper::toSkinQuestionsResponse)
+                .collect(Collectors.toList());
     }
 
     public SkinQuestionsEntity getSkinQuestions(Long aLong) {
         return repository.findById(aLong).orElseThrow(()-> new AppException(ErrorCode.SKIN_QUESTIONS_NOT_FOUND));
+    }
+
+    public boolean deleteSelectedQuestions(List<Long> ids) {
+        repository.deleteAll(repository.findAllById(ids));
+        return true;
     }
 }

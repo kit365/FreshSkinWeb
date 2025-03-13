@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 //@CrossOrigin(origins = "*")
@@ -62,6 +63,57 @@ public class QuestionGroupController {
                 .code(HttpStatus.OK.value())
                 .message("Query successful")
                 .data(response)
+                .build();
+    }
+
+    @PostMapping("/delete/{id}")
+    public ResponseAPI<Boolean> delete(@PathVariable Long id) {
+        log.info("Delete question group with id: " + id);
+        String message = "Xóa bộ câu hỏi thành công";
+        boolean result = questionGroupService.delete(id);
+
+        if (!result) {
+            message = "Xóa bộ câu hỏi thất bại";
+        }
+        return ResponseAPI.<Boolean>builder()
+                .code(HttpStatus.OK.value())
+                .message(message)
+                .data(result)
+                .build();
+    }
+
+    @PostMapping("/edit/{id}")
+    public ResponseAPI<Boolean> update(@PathVariable Long id, @RequestBody CreationQuestionGroupRequest request) {
+        log.info("Update question group with id: " + id);
+        String message = "Cập nhật bộ câu hỏi thành công";
+        boolean result = questionGroupService.update(id, request);
+
+        if (!result) {
+            message = "Cập nhật bộ câu hỏi thất bại";
+        }
+        return ResponseAPI.<Boolean>builder()
+                .code(HttpStatus.OK.value())
+                .message(message)
+                .data(result)
+                .build();
+    }
+
+    @PostMapping("/delete/select/question")
+    public ResponseAPI<Boolean> delete(@RequestBody Map<Long, Object> request
+    ) {
+        log.info("Delete question groups with ids: " + request);
+        String message = "Xóa các bộ câu hỏi thành công";
+
+        List<Long> ids = (List<Long>) request.get("id");
+        boolean result = questionGroupService.delete(ids);
+
+        if (!result) {
+            message = "Xóa các bộ câu hỏi thất bại";
+        }
+        return ResponseAPI.<Boolean>builder()
+                .code(HttpStatus.OK.value())
+                .message(message)
+                .data(result)
                 .build();
     }
 }
