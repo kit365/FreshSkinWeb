@@ -6,6 +6,8 @@ import com.kit.maximus.freshskinweb.dto.response.QuestionGroupResponse;
 import com.kit.maximus.freshskinweb.entity.QuestionGroupEntity;
 import org.mapstruct.*;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface QuestionGroupMapper {
 
@@ -13,6 +15,8 @@ public interface QuestionGroupMapper {
     QuestionGroupEntity toEntity(CreationQuestionGroupRequest request);
 
     QuestionGroupResponse toResponse(QuestionGroupEntity questionGroupEntity);
+
+    List<QuestionGroupResponse> toResponse(List<QuestionGroupEntity> questionGroupEntity);
 
     @Mapping(target = "skinQuestionsEntities", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

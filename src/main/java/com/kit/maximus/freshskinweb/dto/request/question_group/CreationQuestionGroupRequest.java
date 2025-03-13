@@ -23,4 +23,7 @@ public class CreationQuestionGroupRequest {
     String description;
 
     List<CreateSkinQuestionsRequest> skinQuestionsEntities;
+
+    String status;
+
 }

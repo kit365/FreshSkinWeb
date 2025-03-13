@@ -4,10 +4,10 @@ import com.kit.maximus.freshskinweb.dto.request.question_group.CreationQuestionG
 import com.kit.maximus.freshskinweb.dto.request.skin_answer.CreationSkinAnswerRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_questions.CreateSkinQuestionsRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_test.CreationSkinTestRequest;
-import com.kit.maximus.freshskinweb.entity.QuestionGroupEntity;
-import com.kit.maximus.freshskinweb.entity.SkinAnswerEntity;
-import com.kit.maximus.freshskinweb.entity.SkinQuestionsEntity;
-import com.kit.maximus.freshskinweb.entity.SkinTestEntity;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
+import com.kit.maximus.freshskinweb.dto.response.QuestionGroupResponse;
+import com.kit.maximus.freshskinweb.dto.response.SkinQuestionsResponse;
+import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.QuestionGroupMapper;
@@ -104,19 +104,15 @@ public class QuestionGroupService {
         }
     }
 
-    public QuestionGroupEntity getQuestionGroupById(Long id) {
-        return questionGroupRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.QUESTION_GROUP_NOT_FOUND));
+    public QuestionGroupResponse getQuestionGroupById(Long id) {
+        return questionGroupRepository.findById(id)
+                .map(questionGroupMapper::toResponse)
+                .orElseThrow(() -> new AppException(ErrorCode.QUESTION_GROUP_NOT_FOUND));
     }
 
     public boolean delete(Long id) {
         QuestionGroupEntity questionGroupEntity = questionGroupRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.QUESTION_GROUP_NOT_FOUND));
         questionGroupRepository.delete(questionGroupEntity);
-        return true;
-    }
-
-    public boolean delete(List<Long> ids) {
-        List<QuestionGroupEntity> questionGroupEntities = questionGroupRepository.findAllById(ids);
-        questionGroupRepository.deleteAll(questionGroupEntities);
         return true;
     }
 
@@ -209,4 +205,5 @@ public class QuestionGroupService {
         questionGroupRepository.save(questionGroupEntity);
         return true;
     }
+
 }
