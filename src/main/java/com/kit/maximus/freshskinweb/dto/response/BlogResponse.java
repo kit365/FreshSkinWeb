@@ -24,6 +24,8 @@ public class BlogResponse implements Serializable {
     Long id;
     String title;
     String content;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    UserResponseDTO user;
     List<String> thumbnail;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Integer position;

@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.kit.maximus.freshskinweb.dto.request.question_group.CreationQuestionGroupRequest;
+import com.kit.maximus.freshskinweb.dto.response.QuestionGroupResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.entity.QuestionGroupEntity;
 import com.kit.maximus.freshskinweb.service.QuestionGroupService;
@@ -52,7 +53,7 @@ public class QuestionGroupController {
         Page<QuestionGroupEntity> result = questionGroupService.getPagedAndFilteredQuestionGroups(keyword, status, page, size);
 
         Map<String, Object> response = Map.of(
-                "content", result.getContent(),
+                "QuestionGroup:", result.getContent(),
                 "totalElements", result.getTotalElements(),
                 "totalPages", result.getTotalPages(),
                 "size", result.getSize(),
@@ -61,12 +62,21 @@ public class QuestionGroupController {
 
         return ResponseAPI.<Map<String, Object>>builder()
                 .code(HttpStatus.OK.value())
-                .message("Query successful")
                 .data(response)
                 .build();
     }
 
-    @PostMapping("/delete/{id}")
+    @GetMapping("/{id}")
+    public ResponseAPI<QuestionGroupResponse> showByID(@PathVariable Long id){
+        log.info("Show question group with id: " + id);
+        QuestionGroupResponse result = questionGroupService.getQuestionGroupById(id);
+        return ResponseAPI.<QuestionGroupResponse>builder()
+                .code(HttpStatus.OK.value())
+                .data(result)
+                .build();
+    }
+
+    @DeleteMapping("/delete/{id}")
     public ResponseAPI<Boolean> delete(@PathVariable Long id) {
         log.info("Delete question group with id: " + id);
         String message = "Xóa bộ câu hỏi thành công";
@@ -82,7 +92,7 @@ public class QuestionGroupController {
                 .build();
     }
 
-    @PostMapping("/edit/{id}")
+    @PatchMapping("/edit/{id}")
     public ResponseAPI<Boolean> update(@PathVariable Long id, @RequestBody CreationQuestionGroupRequest request) {
         log.info("Update question group with id: " + id);
         String message = "Cập nhật bộ câu hỏi thành công";
@@ -98,22 +108,4 @@ public class QuestionGroupController {
                 .build();
     }
 
-    @PostMapping("/delete/select/question")
-    public ResponseAPI<Boolean> delete(@RequestBody Map<Long, Object> request
-    ) {
-        log.info("Delete question groups with ids: " + request);
-        String message = "Xóa các bộ câu hỏi thành công";
-
-        List<Long> ids = (List<Long>) request.get("id");
-        boolean result = questionGroupService.delete(ids);
-
-        if (!result) {
-            message = "Xóa các bộ câu hỏi thất bại";
-        }
-        return ResponseAPI.<Boolean>builder()
-                .code(HttpStatus.OK.value())
-                .message(message)
-                .data(result)
-                .build();
-    }
 }

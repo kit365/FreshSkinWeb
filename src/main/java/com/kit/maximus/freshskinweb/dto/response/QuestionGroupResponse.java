@@ -23,7 +23,7 @@ public class QuestionGroupResponse {
 
     String description;
 
-    List<SkinQuestionsResponse> skinQuestionsEntities;
+    List<SkinQuestionsResponse> questions;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String status;

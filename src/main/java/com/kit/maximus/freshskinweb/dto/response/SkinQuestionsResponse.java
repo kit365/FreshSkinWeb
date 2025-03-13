@@ -19,7 +19,6 @@ import java.util.List;
 public class SkinQuestionsResponse implements Serializable {
     Long id;
 
-    Integer questionNumber;
     String questionText;
     QuestionGroupResponse questionGroup;
 
@@ -35,6 +34,6 @@ public class SkinQuestionsResponse implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date updatedAt;
 
-    List<SkinAnswerResponse> skinAnswers;
+    List<SkinAnswerResponse> answers;
 
 }

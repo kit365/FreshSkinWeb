@@ -12,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 public class UpdationQuestionGroupRequest {
 
-    String groupName;
+    String title;
 
     String description;
 }

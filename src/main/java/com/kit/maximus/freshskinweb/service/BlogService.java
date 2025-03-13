@@ -7,6 +7,7 @@ import com.kit.maximus.freshskinweb.dto.request.blog.BlogCreationRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
+import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -14,6 +15,7 @@ import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.BlogMapper;
 import com.kit.maximus.freshskinweb.repository.BlogCategoryRepository;
 import com.kit.maximus.freshskinweb.repository.BlogRepository;
+import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.repository.search.BlogSearchRepository;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
@@ -42,6 +44,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     BlogCategoryRepository blogCategoryRepository;
     Cloudinary cloudinary;
     BlogSearchRepository blogSearchRepository;
+    UserRepository userRepository;
 
     @Override
     public boolean add(BlogCreationRequest request) {
@@ -52,6 +55,12 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
             blogEntity.setBlogCategory(blogCategoryEntity);
         } else {
             blogEntity.setBlogCategory(null);
+        }
+
+        if(request.getUser() != null){
+            blogEntity.setUser(userRepository.findById(request.getUser()).orElse(null));
+        } else {
+            blogEntity.setUser(null);
         }
 
         if (request.getPosition() == null || request.getPosition() <= 0) {
@@ -118,6 +127,12 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
             blogEntity.setBlogCategory(null);
         }
 
+        if(request.getUser() != null){
+            blogEntity.setUser(userRepository.findById(request.getUser()).orElse(null));
+        } else {
+            blogEntity.setUser(null);
+        }
+
         if (StringUtils.hasLength(request.getTitle())) {
             blogEntity.setSlug(getSlug(request.getTitle()));
         }
@@ -159,6 +174,15 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
             blogCategoryResponse.setId(blogEntity.getBlogCategory().getId());
             blogCategoryResponse.setTitle(blogEntity.getBlogCategory().getTitle());
             blogResponse.setBlogCategory(blogCategoryResponse);
+        }
+
+        //Chỉ trả về 2 fields là ID và First và Last Name của thằng con, không trả hết
+        UserResponseDTO userResponseDTO = new UserResponseDTO();
+        if(blogEntity.getUser() != null){
+            userResponseDTO.setUserID(blogEntity.getUser().getUserID());
+            userResponseDTO.setFirstName(blogEntity.getUser().getFirstName());
+            userResponseDTO.setLastName(blogEntity.getUser().getLastName());
+            blogResponse.setUser(userResponseDTO);
         }
         return blogResponse;
     }

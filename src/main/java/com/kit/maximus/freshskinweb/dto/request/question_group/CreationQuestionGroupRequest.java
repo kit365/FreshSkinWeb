@@ -18,9 +18,12 @@ import java.util.List;
 @Builder
 public class CreationQuestionGroupRequest {
 
-    String groupName;
+    String title;
 
     String description;
 
-    List<CreateSkinQuestionsRequest> skinQuestionsEntities;
+    List<CreateSkinQuestionsRequest> questions;
+
+    String status;
+
 }

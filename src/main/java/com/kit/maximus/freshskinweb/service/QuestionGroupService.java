@@ -4,10 +4,10 @@ import com.kit.maximus.freshskinweb.dto.request.question_group.CreationQuestionG
 import com.kit.maximus.freshskinweb.dto.request.skin_answer.CreationSkinAnswerRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_questions.CreateSkinQuestionsRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_test.CreationSkinTestRequest;
-import com.kit.maximus.freshskinweb.entity.QuestionGroupEntity;
-import com.kit.maximus.freshskinweb.entity.SkinAnswerEntity;
-import com.kit.maximus.freshskinweb.entity.SkinQuestionsEntity;
-import com.kit.maximus.freshskinweb.entity.SkinTestEntity;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
+import com.kit.maximus.freshskinweb.dto.response.QuestionGroupResponse;
+import com.kit.maximus.freshskinweb.dto.response.SkinQuestionsResponse;
+import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.QuestionGroupMapper;
@@ -41,34 +41,34 @@ public class QuestionGroupService {
 
     public boolean add(CreationQuestionGroupRequest request) {
         QuestionGroupEntity questionGroupEntity = new QuestionGroupEntity();
-        if (request.getGroupName() == null || request.getDescription() == null) {
+        if (request.getTitle() == null || request.getDescription() == null) {
             throw new AppException(ErrorCode.QUESTION_GROUP_INVALID);
         }
-        questionGroupEntity.setGroupName(request.getGroupName());
+        questionGroupEntity.setTitle(request.getTitle());
         questionGroupEntity.setDescription(request.getDescription());
 
         List<SkinQuestionsEntity> skinQuestionsEntities = new ArrayList<>();
-        if (request.getSkinQuestionsEntities() != null) {
-            for (CreateSkinQuestionsRequest createSkinQuestionsRequest : request.getSkinQuestionsEntities()) {
+        if (request.getQuestions() != null) {
+            for (CreateSkinQuestionsRequest createSkinQuestionsRequest : request.getQuestions()) {
                 SkinQuestionsEntity skinQuestionsEntity = new SkinQuestionsEntity();
                 skinQuestionsEntity.setQuestionText(createSkinQuestionsRequest.getQuestionText());
 
                 List<SkinAnswerEntity> skinAnswers = new ArrayList<>();
-                if (createSkinQuestionsRequest.getSkinAnswers() != null) {
-                    for (CreationSkinAnswerRequest creationSkinAnswerRequest : createSkinQuestionsRequest.getSkinAnswers()) {
+                if (createSkinQuestionsRequest.getAnswers() != null) {
+                    for (CreationSkinAnswerRequest creationSkinAnswerRequest : createSkinQuestionsRequest.getAnswers()) {
                         SkinAnswerEntity skinAnswerEntity = new SkinAnswerEntity();
-                        skinAnswerEntity.setSkinOption(creationSkinAnswerRequest.getSkinOption());
-                        skinAnswerEntity.setAnswerScore(creationSkinAnswerRequest.getAnswerScore());
+                        skinAnswerEntity.setOption(creationSkinAnswerRequest.getOption());
+                        skinAnswerEntity.setScore(creationSkinAnswerRequest.getScore());
                         skinAnswerEntity.setSkinQuestionsEntity(skinQuestionsEntity);
                         skinAnswers.add(skinAnswerEntity);
                     }
                 }
-                skinQuestionsEntity.setSkinAnswers(skinAnswers);
+                skinQuestionsEntity.setAnswers(skinAnswers);
                 skinQuestionsEntity.setQuestionGroup(questionGroupEntity);
                 skinQuestionsEntities.add(skinQuestionsEntity);
             }
         }
-        questionGroupEntity.setSkinQuestionsEntities(skinQuestionsEntities);
+        questionGroupEntity.setQuestions(skinQuestionsEntities);
 
         questionGroupRepository.save(questionGroupEntity);
 
@@ -104,8 +104,10 @@ public class QuestionGroupService {
         }
     }
 
-    public QuestionGroupEntity getQuestionGroupById(Long id) {
-        return questionGroupRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.QUESTION_GROUP_NOT_FOUND));
+    public QuestionGroupResponse getQuestionGroupById(Long id) {
+        return questionGroupRepository.findById(id)
+                .map(questionGroupMapper::toResponse)
+                .orElseThrow(() -> new AppException(ErrorCode.QUESTION_GROUP_NOT_FOUND));
     }
 
     public boolean delete(Long id) {
@@ -114,23 +116,19 @@ public class QuestionGroupService {
         return true;
     }
 
-    public boolean delete(List<Long> ids) {
-        List<QuestionGroupEntity> questionGroupEntities = questionGroupRepository.findAllById(ids);
-        questionGroupRepository.deleteAll(questionGroupEntities);
-        return true;
-    }
-
     public boolean update(Long id, CreationQuestionGroupRequest request) {
+        System.out.println(request);
+
         // Find the current QuestionGroup
         QuestionGroupEntity questionGroupEntity = questionGroupRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.QUESTION_GROUP_NOT_FOUND));
 
         // Update basic QuestionGroup fields
         if(request.getDescription() != null){
-            questionGroupEntity.setGroupName(request.getGroupName());
+            questionGroupEntity.setTitle(request.getTitle());
 
         } else {
-            questionGroupEntity.setGroupName(questionGroupEntity.getGroupName());
+            questionGroupEntity.setTitle(questionGroupEntity.getTitle());
         }
 
         if(request.getDescription() != null){
@@ -139,10 +137,17 @@ public class QuestionGroupService {
             questionGroupEntity.setDescription(questionGroupEntity.getDescription());
         }
 
+        Status Status = getStatus(request.getStatus());
+        if(Status == null){
+            questionGroupEntity.setStatus(questionGroupEntity.getStatus());
+        } else {
+            questionGroupEntity.setStatus(Status);
+        }
+
         // Handle SkinQuestions update
-        if (request.getSkinQuestionsEntities() != null) {
-            List<SkinQuestionsEntity> currentQuestions = questionGroupEntity.getSkinQuestionsEntities();
-            List<Long> requestQuestionIds = request.getSkinQuestionsEntities().stream()
+        if (request.getQuestions() != null) {
+            List<SkinQuestionsEntity> currentQuestions = questionGroupEntity.getQuestions();
+            List<Long> requestQuestionIds = request.getQuestions().stream()
                     .map(CreateSkinQuestionsRequest::getId)
                     .filter(questionId -> questionId != null)
                     .collect(Collectors.toList());
@@ -151,7 +156,7 @@ public class QuestionGroupService {
             currentQuestions.removeIf(question -> !requestQuestionIds.contains(question.getId()));
 
             // Update existing questions and add new ones
-            List<SkinQuestionsEntity> updatedQuestions = request.getSkinQuestionsEntities().stream()
+            List<SkinQuestionsEntity> updatedQuestions = request.getQuestions().stream()
                     .map(questionRequest -> {
                         SkinQuestionsEntity questionEntity;
 
@@ -171,21 +176,21 @@ public class QuestionGroupService {
                         questionEntity.setQuestionGroup(questionGroupEntity);
 
                         // Handle answers
-                        List<SkinAnswerEntity> currentAnswers = questionEntity.getSkinAnswers();
+                        List<SkinAnswerEntity> currentAnswers = questionEntity.getAnswers();
                         if (currentAnswers == null) {
                             currentAnswers = new ArrayList<>();
-                            questionEntity.setSkinAnswers(currentAnswers);
+                            questionEntity.setAnswers(currentAnswers);
                         } else {
                             currentAnswers.clear();
                         }
 
                         // Add new answers from request
-                        if (questionRequest.getSkinAnswers() != null) {
-                            List<SkinAnswerEntity> newAnswers = questionRequest.getSkinAnswers().stream()
+                        if (questionRequest.getAnswers() != null) {
+                            List<SkinAnswerEntity> newAnswers = questionRequest.getAnswers().stream()
                                     .map(answerRequest -> {
                                         SkinAnswerEntity answer = new SkinAnswerEntity();
-                                        answer.setSkinOption(answerRequest.getSkinOption());
-                                        answer.setAnswerScore(answerRequest.getAnswerScore());
+                                        answer.setOption(answerRequest.getOption());
+                                        answer.setScore(answerRequest.getScore());
                                         answer.setSkinQuestionsEntity(questionEntity);
                                         return answer;
                                     })
@@ -202,11 +207,12 @@ public class QuestionGroupService {
             currentQuestions.addAll(updatedQuestions);
         } else {
             // If no questions in request, clear all existing questions
-            questionGroupEntity.getSkinQuestionsEntities().clear();
+            questionGroupEntity.getQuestions().clear();
         }
 
         // Save all changes
         questionGroupRepository.save(questionGroupEntity);
         return true;
     }
+
 }

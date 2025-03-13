@@ -31,6 +31,12 @@ public class BlogEntity extends AbstractEntity {
     @Column(name = "Title")
     String title;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @JoinColumn(name = "UserID", nullable = true)
+    @JsonBackReference
+    UserEntity user;
+
     @Column(name = "content",columnDefinition = "MEDIUMTEXT")
     String content;
 

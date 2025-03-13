@@ -18,6 +18,7 @@ import java.util.List;
 public class BlogCreationRequest implements Serializable {
     String title;
     String content;
+    Long user;
     List<MultipartFile> thumbnail;
     Integer position;
     boolean featured;

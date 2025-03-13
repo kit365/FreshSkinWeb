@@ -21,10 +21,10 @@ public class SkinAnswerEntity extends AbstractEntity {
     Long id;
 
     @Column(name = "SkinOption")
-    String skinOption;
+    String option;
 
     @Column(name = "AnswerScore")
-    Long answerScore;
+    Long score;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)

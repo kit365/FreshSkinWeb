@@ -10,7 +10,7 @@ import lombok.*;
 public class CreationSkinAnswerRequest {
 
     Long id;
-    String skinOption;
-    Long answerScore;
+    String option;
+    Long score;
 
 }
