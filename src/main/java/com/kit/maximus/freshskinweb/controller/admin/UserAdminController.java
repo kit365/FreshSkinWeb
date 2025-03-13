@@ -127,7 +127,7 @@ public class UserAdminController {
         }
     }
 
-    @GetMapping("show/{id}")
+    @GetMapping("/{id}")
     public ResponseAPI<UserResponseDTO> showDetailUser(@PathVariable Long id) {
         String message = "Get user successfully";
         var result = userService.showDetail(id);
