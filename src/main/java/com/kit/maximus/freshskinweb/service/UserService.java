@@ -64,18 +64,28 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
 
     @Override
     public boolean add(CreateUserRequest request) {
+        UserEntity userEntity = userMapper.toUserEntity(request);
+
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new AppException(ErrorCode.USER_EXISTED);
+        } else {
+            userEntity.setUsername(request.getUsername());
         }
-        if (userRepository.existsByEmail(request.getEmail())) {
+
+        if(request.getEmail() == null) {
+            userEntity.setEmail(request.getEmail());
+        } else if(userRepository.existsByEmail(request.getEmail())){
             throw new AppException(ErrorCode.EMAIL_EXISTED);
+        } else if(request.getEmail() != null && !userRepository.existsByEmail(request.getEmail())) {
+            userEntity.setEmail(request.getEmail());
         }
-        UserEntity userEntity = userMapper.toUserEntity(request);
 
         if (request.getRole() != null) {
             RoleEntity role = roleRepository.findById(request.getRole())
                     .orElse(null);
             userEntity.setRole(role);
+        } else {
+            userEntity.setRole(null);
         }
 
         encodePassword(userEntity);
@@ -230,9 +240,13 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         userMapper.updateUser(userEntity, userRequestDTO);
 
         userEntity.setUsername(userEntity.getUsername());
-        if (userRepository.existsByEmail(userRequestDTO.getEmail())) {
-            log.info("Email exist");
+
+        if(userRequestDTO.getEmail() == null) {
+            userEntity.setEmail(userRequestDTO.getEmail());
+        } else if(userRepository.existsByEmail(userRequestDTO.getEmail())){
             throw new AppException(ErrorCode.EMAIL_EXISTED);
+        } else if(userRequestDTO.getEmail() != null && !userRepository.existsByEmail(userRequestDTO.getEmail())) {
+            userEntity.setEmail(userRequestDTO.getEmail());
         }
 
         // Cập nhật Role
@@ -240,8 +254,11 @@ public class UserService implements BaseService<UserResponseDTO, CreateUserReque
         // nếu trong update ko cập nhật role => set lại role cũ chứ không phải set role = null như lúc đầu mất 2 tiếng để fix
         // @BeanMapping lo việc set lại role cũ cho User
         //CẬP NHẬT LẠI: Do User là cho Customer, nên không có role, nếu cố tình nhập role thì vẫn set là null
-        log.info(userRequestDTO.getRole().toString());
         if (userRequestDTO.getRole() != null) {
+            RoleEntity role = roleRepository.findById(userRequestDTO.getRole())
+                    .orElse(null);
+            userEntity.setRole(role);
+        } else {
             userEntity.setRole(null);
         }
 
