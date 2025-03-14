@@ -5,8 +5,10 @@ import com.cloudinary.utils.ObjectUtils;
 import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
+import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.RoleEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -18,6 +20,7 @@ import com.kit.maximus.freshskinweb.repository.RoleRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.specification.AccountSpecification;
 import com.kit.maximus.freshskinweb.specification.UserSpecification;
+import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import com.kit.maximus.freshskinweb.utils.Status;
 
 import com.kit.maximus.freshskinweb.utils.TypeUser;
@@ -379,11 +382,6 @@ public class UserService  {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
     }
 
-
-    public List<UserResponseDTO> getUserByUsername(String username) {
-        return userMapper.toUserResponseDTO(userRepository.searchByKeyword(username));
-    }
-
     public UserEntity getUserEntityById(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
@@ -574,24 +572,37 @@ public class UserService  {
     }
 
     public String updateMulti(List<Long> id, String status) {
-        Status statusEnum = getStatus(status);
-        List<UserEntity> userEntities = userRepository.findAllById(id);
-        for(UserEntity userEntity : userEntities) {
-            if(userEntity.getRole() != null) {
-                if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
-                    userEntity.setStatus(statusEnum);
-                    userRepository.save(userEntity);
-                } else if (statusEnum == Status.SOFT_DELETED) {
-                    userEntity.setDeleted(true);
-                    userRepository.save(userEntity);
-                } else if (statusEnum == Status.RESTORED) {
-                    userEntity.setDeleted(false);
-                    userRepository.save(userEntity);
+        try {
+            if (userRepository.findAllById(id) == null) {
+                return "Không tìm thấy người dùng nào để cập nhật";
+            }
+                Status statusEnum = Status.valueOf(status);
+                if (statusEnum == null) {
+                    return "Trạng thái không hợp lệ";
                 }
+
+                List<UserEntity> userEntities = userRepository.findAllById(id);
+
+                if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
+                    userEntities.forEach(userEntity -> userEntity.setStatus(statusEnum));
+                    userRepository.saveAll(userEntities);
+                    return "Cập nhật trạng thái người dùng thành công";
+                }
+                if (statusEnum == Status.SOFT_DELETED) {
+                    userEntities.forEach(userEntity -> userEntity.setDeleted(true));
+                    userRepository.saveAll(userEntities);
+                    return "Cập nhật trạng thái người dùng thành công";
+                }
+                if (statusEnum == Status.RESTORED) {
+                    userEntities.forEach(userEntity -> userEntity.setDeleted(false));
+                    userRepository.saveAll(userEntities);
+                    return "Cập nhật trạng thái người dùng thành công";
+                }
+                return "Không tìm thấy người dùng nào để cập nhật";
+            } catch(IllegalArgumentException e){
+                return e.getMessage(); // Hiển thị lỗi rõ ràng hơn
             }
         }
-        return "Cập nhật Account thất bại";
-    }
 
     public boolean deleteSelectedAccount(List<Long> id) {
         List<UserEntity> userEntities = userRepository.findAllById(id);

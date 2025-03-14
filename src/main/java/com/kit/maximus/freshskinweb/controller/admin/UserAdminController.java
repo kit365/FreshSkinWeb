@@ -134,14 +134,6 @@ public class UserAdminController {
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
-    @GetMapping("search")
-    public ResponseAPI<List<UserResponseDTO>> searchUser(@RequestParam("keyword") String name) {
-        String message = "Search user successfully";
-        var user = userService.getUserByUsername(name);
-//        return Collections.singletonList(userService.getUserByUsername(name));
-        return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(user).build();
-    }
-
     @PatchMapping("change-password/{id}")
     public ResponseAPI<Boolean> updateUserPassword(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest request) {
         String message = "Update user password successfully";
@@ -168,7 +160,7 @@ public class UserAdminController {
         List<Long> ids = (List<Long>) request.get("id");
         String status = request.get("status").toString();
 
-        var result = userService.update(ids, status);
+        var result = userService.updateMulti(ids, status);
         return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
