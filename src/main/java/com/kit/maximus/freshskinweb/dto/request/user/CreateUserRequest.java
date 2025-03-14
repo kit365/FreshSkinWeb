@@ -67,7 +67,6 @@ public class CreateUserRequest implements Serializable {
 
     String username;
 
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@#$%^&+=!]*$", message = "PASSWORD_REGEXP_INVALID")
     String password;
 
     Long role;
