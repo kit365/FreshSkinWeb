@@ -315,19 +315,19 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status.equalsIgnoreCase("ALL")) {
                 // Tìm kiếm theo tên sản phẩm, không lọc theo status
-                blogCategoryEntities = blogCategoryRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, false, pageable);
+                blogCategoryEntities = blogCategoryRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, true, pageable);
             } else {
                 // Tìm kiếm theo tên sản phẩm và status
                 Status statusEnum = getStatus(status);
-                blogCategoryEntities = blogCategoryRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, false);
+                blogCategoryEntities = blogCategoryRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, true);
             }
         } else {
             // Nếu không có keyword, chỉ lọc theo status
             if (status == null || status.equalsIgnoreCase("ALL")) {
-                blogCategoryEntities = blogCategoryRepository.findAllByDeleted(false, pageable);
+                blogCategoryEntities = blogCategoryRepository.findAllByDeleted(true, pageable);
             } else {
                 Status statusEnum = getStatus(status);
-                blogCategoryEntities = blogCategoryRepository.findAllByStatusAndDeleted(statusEnum, false, pageable);
+                blogCategoryEntities = blogCategoryRepository.findAllByStatusAndDeleted(statusEnum, true, pageable);
             }
         }
 
