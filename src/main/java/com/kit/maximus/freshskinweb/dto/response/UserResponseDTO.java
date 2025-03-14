@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
+import com.kit.maximus.freshskinweb.utils.SkinType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -47,6 +48,8 @@ public class UserResponseDTO implements Serializable {
     String status;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String typeUser;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    String skinType;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Boolean deleted;
     @JsonFormat(pattern = "yyyy-MM-dd")

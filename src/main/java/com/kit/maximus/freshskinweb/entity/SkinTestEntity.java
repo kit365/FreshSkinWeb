@@ -42,4 +42,7 @@ public class SkinTestEntity extends AbstractEntity {
     @Column(name = "notes", columnDefinition = "MEDIUMTEXT")
     String notes;
 
+    @Column(name = "total_score")
+    Long totalScore;
+
 }

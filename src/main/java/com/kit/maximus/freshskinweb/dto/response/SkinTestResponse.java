@@ -20,11 +20,13 @@ public class SkinTestResponse {
 
     String notes;
 
-    UserResponseDTO user;
+    String user;
 
-    SkinTypeResponse skinType;
+    String skinType;
 
-    QuestionGroupResponse questionGroup;
+    String questionGroup;
+
+    Long totalScore;
 
     boolean deleted;
 

@@ -2,6 +2,7 @@ package com.kit.maximus.freshskinweb.entity;
 
 import com.fasterxml.jackson.annotation.*;
 import com.kit.maximus.freshskinweb.entity.review.ReviewEntity;
+import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.TypeUser;
 import jakarta.persistence.*;
 import lombok.*;
@@ -70,6 +71,9 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(name = "Type_user")
     TypeUser typeUser = TypeUser.NORMAL;
+
+    @Column(name = "skin_type")
+    String skinType = SkinType.NORMAL.getVNESEname();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonManagedReference
