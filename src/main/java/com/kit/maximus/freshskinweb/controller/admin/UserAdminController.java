@@ -149,7 +149,7 @@ public class UserAdminController {
     }
 
     @PatchMapping("change-multi")
-    public ResponseAPI<String> updataUser(@RequestBody Map<String, Object> request) {
+    public ResponseAPI<String> updateUser(@RequestBody Map<String, Object> request) {
 
         if (!request.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
@@ -162,33 +162,6 @@ public class UserAdminController {
 
         var result = userService.updateMulti(ids, status);
         return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
-    }
-
-    @PatchMapping("restore/{id}")
-    public ResponseAPI<String> restoreUser(@PathVariable("id") Long id) {
-        String message_succed = "restore User successfull";
-        String message_failed = "restore User failed";
-        boolean result = userService.restore(id);
-        if (result) {
-            log.info("User restore successfully");
-            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
-        }
-        log.info("User restore failed");
-        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
-    }
-
-
-    @PatchMapping("deleteT/{id}")
-    public ResponseAPI<String> deleteTemporarily(@PathVariable("id") Long id) {
-        String message_succed = "Delete temporary user successfull";
-        String message_failed = "Delete temporary user failed";
-        boolean result = userService.deleteTemporarily(id);
-        if (result) {
-            log.info("User deleted successfully");
-            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
-        }
-        log.info("User delete failed");
-        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
     @DeleteMapping("delete")
@@ -231,6 +204,22 @@ public class UserAdminController {
             log.info(message);
             return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
         }
+    }
+
+    @PatchMapping("deleteT/{id}")
+    public ResponseAPI<UserResponseDTO> deleteUserT(@PathVariable("id") Long id) {
+        String message = "Delete user successfully";
+        userService.deleteTemporarily(id);
+        log.info(message);
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
+    }
+
+    @PatchMapping("restore/{id}")
+    public ResponseAPI<UserResponseDTO> restoreUser(@PathVariable("id") Long id) {
+        String message = "Phục hồi tài khoản thành công";
+        userService.restore(id);
+        log.info(message);
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
     @DeleteMapping("/deleteO/{useId}/{orderId}")
