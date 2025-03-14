@@ -65,44 +65,27 @@ import java.util.List;
 @NoArgsConstructor
 public class CreateUserRequest implements Serializable {
 
-    @NotBlank(message = "USERNAME_NOT_BLANK")
-    @Size(min = 5, max = 20, message = "USERNAME_INVALID")
     String username;
 
-    @NotBlank(message = "PASSWORD_NOT_BLANK")
-    @Size(min = 8, max = 20, message = "PASSWORD_INVALID")
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@#$%^&+=!]*$", message = "PASSWORD_REGEXP_INVALID")
     String password;
 
     Long role;
 
-    @NotBlank(message = "FIRSTNAME_NOT_BLANK")
-    @Size(min = 2, max = 50, message = "FIRSTNAME_INVALID")
     String firstName;
 
-    @NotBlank(message = "LASTNAME_NOT_BLANK")
-    @Size(min = 2, max = 50, message = "LASTNAME_INVALID")
     String lastName;
 
-    @Email(message = "EMAIL_INVALID")
     String email;
 
-    @NotBlank(message = "PHONE_NUMBER_NOT_BLANK")
-    @Pattern(regexp = "^\\d{10}$", message = "PHONE_NUMBER_INVALID")
     String phone;
 
-    @NotBlank(message = "AVATAR_NOT_BLANK")
     MultipartFile avatar;
 
-    @Size(min = 5, max = 255, message = "ADDRESS_INVALID")
     String address;
 
-    @NotBlank(message = "STATUS_NOT_BLANK")
-    @Pattern(regexp = "ACTIVE|INACTIVE", message = "STATUS_INVALID")
     String status;
 
-    @NotBlank(message = "TYPE_USER_NOT_BLANK")
-    @Pattern(regexp = "NORMAL|VIP", message = "TYPE_USER_INVALID")
     String typeUser;
 
 }
