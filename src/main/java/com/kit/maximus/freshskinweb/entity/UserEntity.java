@@ -59,6 +59,13 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @Column(name = "Address")
     String address;
 
+//    2 field này được lưu khi user đăng nhập bằng google
+    @Column(name = "provider")
+    private String provider; // GOOGLE, LOCAL, etc.
+
+    @Column(name = "provider_id")
+    private String providerId; // Google user ID
+
     //    TypeUser VARCHAR(10) DEFAULT 'Normal' CHECK (TypeUser IN ('Normal', 'VIP')),
     @Enumerated(EnumType.STRING)
     @Column(name = "Type_user")
@@ -72,6 +79,8 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "roleId", nullable = true)
     RoleEntity role;
+
+
 
 //    @JsonBackReference
 //    @ManyToMany
