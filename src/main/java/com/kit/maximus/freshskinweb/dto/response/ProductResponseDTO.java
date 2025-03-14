@@ -69,7 +69,6 @@ public class ProductResponseDTO implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date updatedAt;
 
-    List<ReviewResponse> reviews;
     boolean deleted;
 
 

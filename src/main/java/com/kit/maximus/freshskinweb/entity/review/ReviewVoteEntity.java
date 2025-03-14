@@ -27,10 +27,8 @@ public class ReviewVoteEntity extends AbstractEntity {
     @JsonBackReference
     private ReviewEntity review;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    @JsonManagedReference
-    private UserEntity user;
+    @Column(name = "user_id", nullable = false)
+     Long userId;
 
     @Column(name = "vote_type", nullable = false)
     int voteType; // 1 = Like, -1 = Dislike, 0 = Hủy vote

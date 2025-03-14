@@ -23,8 +23,6 @@ public class ReviewCreateRequest implements Serializable {
     @NotNull(message = "Product ID is required")
     Long productId;
 
-    ReviewVoteRequest votes;
-
     @Min(value = 1, message = "Đánh giá thấp nhất là 1 sao")
     @Max(value = 5, message = "Đánh giá cao nhất là 5 sao")
     Integer rating;

@@ -2,6 +2,7 @@ package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.kit.maximus.freshskinweb.dto.request.review.ReviewCreateRequest;
 import com.kit.maximus.freshskinweb.dto.request.review.ReviewUpdateRequest;
+import com.kit.maximus.freshskinweb.dto.request.review.ReviewVoteRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.review.ReviewResponse;
 import com.kit.maximus.freshskinweb.service.ReviewService;
@@ -32,6 +33,18 @@ public class ReviewController {
                 .message(message)
                 .build();
     }
+
+    @PostMapping("/vote")
+    public ResponseAPI<ReviewResponse> voteReview(@Valid @RequestBody ReviewVoteRequest request) {
+        String message = "Vote thành công";
+        reviewService.addVote(request);
+        return ResponseAPI.<ReviewResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message(message)
+                .build();
+    }
+
+
 
     @GetMapping("/show")
     public ResponseAPI<List<ReviewResponse>> showReview() {

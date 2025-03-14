@@ -2,6 +2,7 @@ package com.kit.maximus.freshskinweb.repository.search;
 
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
+import com.kit.maximus.freshskinweb.dto.response.review.ReviewResponse;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -116,6 +117,47 @@ public class ProductSearchRepository {
     }
 
 
+//    public boolean updateProductWithNewReview(ReviewResponse newReview) {
+//        int retries = 3;
+//        while (retries > 0) {
+//            try {
+//
+//                Long productId = newReview.getProductId();
+//                System.out.println(productId);
+//
+//                Map<String, Object> updateFields = new HashMap<>();
+//                updateFields.put("reviews", newReview);
+//
+//
+//                UpdateRequest<ProductResponseDTO, Map<String, Object>> updateRequest = new UpdateRequest.Builder<ProductResponseDTO, Map<String, Object>>()
+//                        .index("products")
+//                        .id(String.valueOf(productId))
+//                        .doc(updateFields)
+//                        .build();
+//
+//
+//                UpdateResponse<ProductResponseDTO> updateResponse = openSearchClient.update(updateRequest, ProductResponseDTO.class);
+//
+//
+//                InlineGet<ProductResponseDTO> get = updateResponse.get();
+//
+//
+//                return get != null && get.source() != null;
+//            } catch (IOException e) {
+//                retries--;
+//                log.error("Error while updating product with new review, retrying...", e);
+//                if (retries == 0) {
+//                    return false;
+//                }
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException ie) {
+//                    Thread.currentThread().interrupt();
+//                }
+//            }
+//        }
+//        return false;  // Nếu không thành công sau nhiều lần thử
+//    }
 
 
 //    public List<ProductResponseDTO> searchByTitle(String title, int size) {
@@ -225,7 +267,7 @@ public class ProductSearchRepository {
             SearchRequest searchRequest = new SearchRequest.Builder()
                     .index("products")
                     .query(query)
-                    .from(page*size)
+                    .from(page * size)
                     .size(size)
                     .build();
 
@@ -320,8 +362,6 @@ public class ProductSearchRepository {
             return Collections.emptyList();
         }
     }
-
-
 
 
     public ProductResponseDTO findBySlug(String slug, String status, boolean deleted) {
@@ -424,7 +464,6 @@ public class ProductSearchRepository {
             return Collections.emptyList();
         }
     }
-
 
 
 }

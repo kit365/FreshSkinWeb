@@ -10,6 +10,7 @@ import com.kit.maximus.freshskinweb.utils.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -17,12 +18,16 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<ProductEntity, Long>, JpaSpecificationExecutor<ProductEntity> {
 
     Page<ProductEntity> findAllByDeleted(boolean b, Pageable pageable);
 
     Page<ProductEntity> findAllByStatusAndDeleted(Status statusEnum, boolean b, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"reviews"}) // Chỉ fetch các quan hệ cần thiết
+    Optional<ProductEntity> findWithReviewsById(Long id);
 
     List<ProductEntity> findTop7ByStatusAndDeleted(Status status, boolean b, Sort discountPercent);
 

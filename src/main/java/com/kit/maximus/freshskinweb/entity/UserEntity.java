@@ -68,7 +68,7 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @JsonManagedReference
     List<OrderEntity> orders  = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "roleId", nullable = true)
     RoleEntity role;
