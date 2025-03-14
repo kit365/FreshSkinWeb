@@ -15,7 +15,8 @@ public class CreationNotificationRequest {
 
     Long userId;
     String orderId;
+    Long review;
     String message;
-    boolean isRead;
+    Boolean isRead;
 
 }
