@@ -14,12 +14,14 @@ import java.util.Date;
 @ToString
 public class UpdationSkinTestRequest {
 
-    Long userEntity;
+    Long user;
 
     Long skinType;
 
-    String questionGroup;
+    Long questionGroup;
 
     String notes;
+
+    String status;
 
 }

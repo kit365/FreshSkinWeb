@@ -9,17 +9,17 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface SkinTestMapper  {
-    @Mapping(target = "userEntity", ignore = true)
+    @Mapping(target = "user", ignore = true)
     @Mapping(target = "skinType", ignore = true)
     @Mapping(target = "questionGroup", ignore = true)
     SkinTestEntity toSkinTestEntity(CreationSkinTestRequest request);
 
-    @Mapping(target = "userEntity", ignore = true)
     SkinTestResponse toSkinTestResponse(SkinTestEntity skinTestEntity);
 
-    @Mapping(target = "userEntity", ignore = true)
+    @Mapping(target = "user", ignore = true)
     @Mapping(target = "skinType", ignore = true)
     @Mapping(target = "questionGroup", ignore = true)
+    @Mapping(target = "status", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateSkinTestEntity(@MappingTarget SkinTestEntity skinTestEntity, UpdationSkinTestRequest request);
 

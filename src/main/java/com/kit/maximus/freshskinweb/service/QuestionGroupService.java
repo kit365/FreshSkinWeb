@@ -3,22 +3,17 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.question_group.CreationQuestionGroupRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_answer.CreationSkinAnswerRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_questions.CreateSkinQuestionsRequest;
-import com.kit.maximus.freshskinweb.dto.request.skin_test.CreationSkinTestRequest;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.QuestionGroupResponse;
-import com.kit.maximus.freshskinweb.dto.response.SkinQuestionsResponse;
 import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.QuestionGroupMapper;
 import com.kit.maximus.freshskinweb.repository.QuestionGroupRepository;
-import com.kit.maximus.freshskinweb.specification.QuestionGroupSpecification;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.patterns.TypePatternQuestions;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
