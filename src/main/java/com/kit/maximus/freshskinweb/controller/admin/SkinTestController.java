@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 //@CrossOrigin(origins = "*")
 @Slf4j
-@RequestMapping("admin/skintest")
+@RequestMapping("admin/skin/result")
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
