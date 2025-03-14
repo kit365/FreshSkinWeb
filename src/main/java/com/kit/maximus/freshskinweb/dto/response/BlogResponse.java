@@ -1,16 +1,19 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kit.maximus.freshskinweb.entity.AbstractEntity;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 @Setter
 @Getter
@@ -25,7 +28,6 @@ public class BlogResponse implements Serializable {
     String title;
     String content;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    UserResponseDTO user;
     List<String> thumbnail;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Integer position;
@@ -38,13 +40,12 @@ public class BlogResponse implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Boolean deleted;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date createdAt;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+
     Date updatedAt;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     BlogCategoryResponse blogCategory;
+
 
 }
