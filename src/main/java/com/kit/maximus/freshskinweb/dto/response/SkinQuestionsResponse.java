@@ -3,10 +3,7 @@ package com.kit.maximus.freshskinweb.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kit.maximus.freshskinweb.entity.AbstractEntity;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,11 +13,11 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class SkinQuestionsResponse implements Serializable {
     Long id;
 
     String questionText;
-    QuestionGroupResponse questionGroup;
 
     boolean deleted;
 

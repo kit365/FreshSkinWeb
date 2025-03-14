@@ -3,22 +3,17 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.request.question_group.CreationQuestionGroupRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_answer.CreationSkinAnswerRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_questions.CreateSkinQuestionsRequest;
-import com.kit.maximus.freshskinweb.dto.request.skin_test.CreationSkinTestRequest;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.QuestionGroupResponse;
-import com.kit.maximus.freshskinweb.dto.response.SkinQuestionsResponse;
 import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.QuestionGroupMapper;
 import com.kit.maximus.freshskinweb.repository.QuestionGroupRepository;
-import com.kit.maximus.freshskinweb.specification.QuestionGroupSpecification;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.patterns.TypePatternQuestions;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,21 +73,36 @@ public class QuestionGroupService {
         Pageable pageable = PageRequest.of(page, size);
         Specification<QuestionGroupEntity> spec = Specification.where(null);
 
-        if (keyword != null && !keyword.isEmpty()) {
-            spec = spec.and(QuestionGroupSpecification.hasGroupName(keyword));
-        }
-        if (status != null && !status.isEmpty()) {
-            Status statusEnum = getStatus(status);
-            spec = spec.and(QuestionGroupSpecification.hasStatus(statusEnum));
+        // Xử lý keyword
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) -> {
+                String likePattern = "%" + keyword.trim().toLowerCase() + "%";
+                return cb.or(
+                        cb.like(cb.lower(root.get("title")), likePattern),
+                        cb.like(cb.lower(root.get("description")), likePattern)
+                );
+            });
         }
 
-        Page<QuestionGroupEntity> result = questionGroupRepository.findAll(spec, pageable);
+        // Xử lý status
+        if (status != null && !status.trim().isEmpty()) {
+            try {
+                Status statusEnum = Status.valueOf(status.toUpperCase());
+                spec = spec.and((root, query, cb) ->
+                        cb.equal(root.get("status"), statusEnum)
+                );
+            } catch (IllegalArgumentException e) {
+                log.error("Invalid status value: {}", status);
+                return Page.empty(pageable);
+            }
+        }
 
-        if (keyword != null && !keyword.isEmpty() && result.isEmpty()) {
+        try {
+            return questionGroupRepository.findAll(spec, pageable);
+        } catch (Exception e) {
+            log.error("Error while fetching question groups: {}", e.getMessage());
             return Page.empty(pageable);
         }
-
-        return result;
     }
 
     public Status getStatus(String status) {
@@ -117,7 +126,6 @@ public class QuestionGroupService {
     }
 
     public boolean update(Long id, CreationQuestionGroupRequest request) {
-        System.out.println(request);
 
         // Find the current QuestionGroup
         QuestionGroupEntity questionGroupEntity = questionGroupRepository.findById(id)
@@ -137,11 +145,11 @@ public class QuestionGroupService {
             questionGroupEntity.setDescription(questionGroupEntity.getDescription());
         }
 
-        Status Status = getStatus(request.getStatus());
-        if(Status == null){
-            questionGroupEntity.setStatus(questionGroupEntity.getStatus());
-        } else {
+        if(request.getStatus() != null){
+            Status Status = getStatus(request.getStatus());
             questionGroupEntity.setStatus(Status);
+        } else {
+            questionGroupEntity.setStatus(questionGroupEntity.getStatus());
         }
 
         // Handle SkinQuestions update

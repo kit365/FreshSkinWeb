@@ -28,11 +28,11 @@ public class DiscountEntity extends AbstractEntity{
     private String name; // Tên chương trình giảm giá
 
     @Column(name = "DiscountPercentage",nullable = false)
-    private BigDecimal discountPercentage; // Giảm giá theo %
+    private Double discountPercentage; // Giảm giá theo %
     @Column(name = "DiscountAmount",nullable = false)
-    private BigDecimal discountAmount; // Giảm giá số tiền cố định
+    private Double discountAmount; // Giảm giá số tiền cố định
     @Column(name = "MaxDiscount")
-    private BigDecimal maxDiscount; // Giảm tối đa (nếu có)
+    private Double maxDiscount; // Giảm tối đa (nếu có)
 
     @Column(name = "StartDate",nullable = false)
     private Date startDate;
@@ -54,7 +54,7 @@ public class DiscountEntity extends AbstractEntity{
 
 
 
-    @OneToMany(mappedBy = "discount", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "discount", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductEntity> products = new ArrayList<>();
 
     public boolean isValid() {
@@ -62,13 +62,4 @@ public class DiscountEntity extends AbstractEntity{
         return this.getStatus() == Status.ACTIVE && now.after(startDate) && now.before(endDate);
     }
 
-    public void applyDiscount(ProductEntity productEntity) {
-        products.add(productEntity);
-        productEntity.setDiscount(this);
-    }
-
-    public void removeDiscount(ProductEntity productEntity) {
-        products.remove(productEntity);
-        productEntity.setDiscount(null);
-    }
 }

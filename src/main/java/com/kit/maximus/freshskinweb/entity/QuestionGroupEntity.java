@@ -24,7 +24,7 @@ public class QuestionGroupEntity extends AbstractEntity{
             @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(name = "GroupName")
+    @Column(name = "title")
     String title;
 
     @Column(name = "Description")

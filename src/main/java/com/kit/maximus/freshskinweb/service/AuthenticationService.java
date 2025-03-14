@@ -100,18 +100,7 @@ public class AuthenticationService implements UserDetailsService {
     }
 
 
-//    public void logout(HttpServletResponse response) {
-//        // Tạo cookie để xóa token
-//        String url_login_page = "https://project-swp391-n9j6.onrender.com/admin/auth/login";
-//        Cookie cookie = new Cookie("token", null);
-//        cookie.setDomain("freshskinweb.onrender.com"); // Cần đảm bảo đúng domain
-//        cookie.setPath("/"); // Cookie sẽ áp dụng cho toàn bộ trang web
-//        cookie.setHttpOnly(true); // Chỉ có thể truy cập cookie từ server
-//        cookie.setSecure(true); // Chỉ hoạt động trên HTTPS
-//        cookie.setMaxAge(0); // Set Max-Age = 0 để xóa cookie ngay lập tức
-//        cookie.setAttribute("SameSite", "None"); // Cần thiết nếu frontend khác origin
-//        response.addCookie(cookie);
-//    }
+
 
 
 

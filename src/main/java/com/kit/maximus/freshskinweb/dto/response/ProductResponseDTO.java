@@ -39,10 +39,10 @@ public class ProductResponseDTO implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<SkinTypeResponse> skinTypes;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-            @JsonIgnore
+    @JsonIgnore
     DiscountResponse discountEntity;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    int discountPercent;
+    Double discountPercent;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Integer position;
     /// ////////////////////////////////////////////

@@ -96,6 +96,12 @@ public class OrderEntity extends AbstractEntity {
     @Column(name = "PaymentStatus")
     PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
+    public void calculateTotalPrice() {
+        this.totalPrice = orderItems.stream()
+                .mapToDouble(OrderItemEntity::getSubtotal) // Giả sử OrderItemEntity có phương thức getTotalPrice()
+                .sum();
+    }
+
     public void addOrderItem(OrderItemEntity orderItem) {
         orderItems.add(orderItem);
         orderItem.setOrder(this);

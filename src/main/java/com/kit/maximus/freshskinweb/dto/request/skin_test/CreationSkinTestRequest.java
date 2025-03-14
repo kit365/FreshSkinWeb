@@ -10,11 +10,11 @@ import lombok.*;
 @ToString
 public class CreationSkinTestRequest {
 
-    Long userEntity;
+    Long user;
 
     Long skinType;
 
-    String questionGroup;
+    Long questionGroup;
 
     String notes;
 

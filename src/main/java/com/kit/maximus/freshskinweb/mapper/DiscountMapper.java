@@ -1,7 +1,6 @@
 package com.kit.maximus.freshskinweb.mapper;
 
-import com.kit.maximus.freshskinweb.dto.request.discount.CreationDiscountRequest;
-import com.kit.maximus.freshskinweb.dto.request.discount.UpdationtionDiscountRequest;
+import com.kit.maximus.freshskinweb.dto.request.discount.DiscountRequest;
 import com.kit.maximus.freshskinweb.dto.response.DiscountResponse;
 import com.kit.maximus.freshskinweb.entity.DiscountEntity;
 import org.mapstruct.BeanMapping;
@@ -17,7 +16,7 @@ public interface DiscountMapper {
 //    @Mapping(target = "promoCode", ignore = true)
 //    @Mapping(target = "userDiscountUsageEntities", ignore = true)
 //    @Mapping(target = "productEntities", ignore = true)
-    DiscountEntity toDiscountEntity(CreationDiscountRequest request);
+    DiscountEntity toDiscountEntity(DiscountRequest request);
 
     DiscountResponse toDiscountResponse(DiscountEntity entity);
 
@@ -28,5 +27,5 @@ public interface DiscountMapper {
 //    @Mapping(target = "userDiscountUsageEntities", ignore = true)
 //    @Mapping(target = "productEntities", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = org.mapstruct.NullValuePropertyMappingStrategy.IGNORE)
-    void updateDiscountEntity(@MappingTarget DiscountEntity entity, UpdationtionDiscountRequest request);
+    void updateDiscountEntity(@MappingTarget DiscountEntity entity, DiscountRequest request);
 }

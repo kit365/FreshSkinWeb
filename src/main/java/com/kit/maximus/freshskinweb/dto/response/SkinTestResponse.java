@@ -20,11 +20,11 @@ public class SkinTestResponse {
 
     String notes;
 
-    UserResponseDTO userEntity;
+    UserResponseDTO user;
 
     SkinTypeResponse skinType;
 
-    QuestionGroupEntity questionGroup;
+    QuestionGroupResponse questionGroup;
 
     boolean deleted;
 
