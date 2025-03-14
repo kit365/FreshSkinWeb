@@ -1321,6 +1321,11 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 dto.setBrand(brandResponse);
             }
 
+//            if(product.getDiscount() != null) {
+//                DiscountResponse discountResponse = new DiscountResponse();
+//                discountResponse.getDiscountType();
+//            }
+
 //            if (product.getReviews() != null) {
 //                List<ReviewResponse> reviewResponses = product.getReviews().stream()
 //                        .filter(review -> review.getParent() == null) // Chỉ lấy root reviews
@@ -1345,6 +1350,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                         parentCategoryResponse.setSlug(category.getParent().getSlug());
                         categoryResponse.setParent(parentCategoryResponse);
                     }
+
+
 
                     return categoryResponse;
                 }).collect(Collectors.toList()));

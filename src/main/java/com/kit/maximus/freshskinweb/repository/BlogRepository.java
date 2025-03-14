@@ -18,4 +18,6 @@ public interface BlogRepository extends JpaRepository<BlogEntity, Long> {
     Page<BlogEntity> findAllByStatusAndDeleted(Status statusEnum, boolean b, Pageable pageable);
 
     BlogEntity findBlogBySlug(String slug);
+
+    BlogEntity searchBySlug(String slug);
 }

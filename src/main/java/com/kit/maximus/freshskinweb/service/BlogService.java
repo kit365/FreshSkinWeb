@@ -10,6 +10,7 @@ import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.BlogEntity;
+import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.BlogMapper;
@@ -32,6 +33,7 @@ import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Service
@@ -57,10 +59,8 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
             blogEntity.setBlogCategory(null);
         }
 
-        if(request.getUser() != null){
-            blogEntity.setUser(userRepository.findById(request.getUser()).orElse(null));
-        } else {
-            blogEntity.setUser(null);
+        if (request.getUser() != null) {
+            blogEntity.setUser(userRepository.findById(request.getUser()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)));
         }
 
         if (request.getPosition() == null || request.getPosition() <= 0) {
@@ -96,18 +96,6 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         return blogMapper.toBlogsResponseDTO(blogRepository.findAll());
     }
 
-    public List<BlogResponse> getBlogsByCategoryIDs(List<Long> cateID, String status, boolean deleted) {
-        return blogSearchRepository.getBlogsByCategoryIds(cateID, status, deleted);
-    }
-
-
-    public List<BlogResponse> getBlogsByCategoryID(Long id, String status, boolean deleted) {
-        return blogSearchRepository.getBlogsByCategoryId(id, status, deleted);
-    }
-
-    public List<BlogResponse> getBlogsByCategoryID(Long id, String status, boolean deleted, int page, int size) {
-        return blogSearchRepository.getBlogsByCategoryId(id, status, deleted, page, size);
-    }
 
 
     @Override
@@ -127,10 +115,8 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
             blogEntity.setBlogCategory(null);
         }
 
-        if(request.getUser() != null){
-            blogEntity.setUser(userRepository.findById(request.getUser()).orElse(null));
-        } else {
-            blogEntity.setUser(null);
+        if (request.getUser() != null) {
+            blogEntity.setUser(userRepository.findById(request.getUser()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)));
         }
 
         if (StringUtils.hasLength(request.getTitle())) {
@@ -178,11 +164,11 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
         //Chỉ trả về 2 fields là ID và First và Last Name của thằng con, không trả hết
         UserResponseDTO userResponseDTO = new UserResponseDTO();
-        if(blogEntity.getUser() != null){
+        if (blogEntity.getUser() != null) {
             userResponseDTO.setUserID(blogEntity.getUser().getUserID());
             userResponseDTO.setFirstName(blogEntity.getUser().getFirstName());
             userResponseDTO.setLastName(blogEntity.getUser().getLastName());
-            blogResponse.setUser(userResponseDTO);
+//            blogResponse.setUser(userResponseDTO);
         }
         return blogResponse;
     }
@@ -474,24 +460,121 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
       Home
      */
 
-    //trả về chi tiết của blog
     public BlogResponse getBlogResponseBySlug(String slug) {
+
+        // Lấy BlogResponse từ OpenSearch
         BlogResponse blogResponse = blogSearchRepository.searchBySlug(slug);
 
+        // Lấy BlogEntity từ cơ sở dữ liệu
+        BlogEntity blogEntity = blogRepository.searchBySlug(slug);
+
+        // Nếu BlogEntity và UserEntity không null, thiết lập tác giả cho BlogResponse
+        if (blogEntity != null) {
+            if (blogEntity.getUser() != null) {
+                blogResponse.setAuthor(blogEntity.getUser().getUsername());
+            }
+
+            // Thiết lập ngày tạo và ngày cập nhật
+//            if (blogEntity.getCreatedAt() != null) {
+//                blogResponse.setCreatedAt(blogEntity.getCreatedAt());
+//            }
+//            if (blogEntity.getUpdatedAt() != null) {
+//                blogResponse.setUpdatedAt(blogEntity.getUpdatedAt());
+//            }
+        }
+
+        // Xóa các trường không cần thiết trong BlogResponse
         blogResponse.setBlogCategory(null);
         blogResponse.setDeleted(null);
         blogResponse.setStatus(null);
         blogResponse.setPosition(null);
-        blogResponse.setUpdatedAt(null);
-        blogResponse.setFeatured(null);
+
         return blogResponse;
     }
 
-    public boolean indexBlogs() {
-        List<BlogEntity> blogEntities = blogRepository.findAll();
-        List<BlogResponse> responseDTOS = blogMapper.toBlogsResponseDTO(blogEntities);
-        responseDTOS.forEach(blogSearchRepository::indexBlog);
-        return false;
+    public List<BlogResponse> getBlogsByCategorySlug(String slug, String status, boolean deleted, int page, int size) {
+        return blogSearchRepository.getBlogsByCategorySlug(slug, status, deleted, page, size);
     }
+
+    public List<BlogResponse> getBlogsByCategorySlug(String slug, String status, boolean deleted) {
+        return blogSearchRepository.getBlogsByCategorySlug(slug, status, deleted);
+    }
+
+
+    public Map<String, Object> getBlogCategories(int page, int size, String slug) {
+        int p = (page > 0) ? page - 1 : 0;
+
+        Map<String, Object> map = new HashMap<>();
+
+        // Lấy danh sách blog từ OpenSearch hoặc cơ sở dữ liệu
+        List<BlogResponse> blogResponsesPage = getBlogsByCategorySlug(slug, "ACTIVE", false, p, size);
+
+        blogResponsesPage.forEach(blogResponse -> {
+            // Xóa các trường không cần thiết
+            blogResponse.setBlogCategory(null);
+
+//            // Thêm ngày tạo và ngày cập nhật
+//            BlogEntity blogEntity = blogRepository.searchBySlug(blogResponse.getSlug()); // Lấy thông tin blog từ DB
+//            if (blogEntity != null) {
+//                blogResponse.setCreatedAt(blogEntity.getCreatedAt());
+//            }
+        });
+
+        List<BlogResponse> blogResponseList = getBlogsByCategorySlug(slug, "ACTIVE", false);
+
+        int totalItem = blogResponseList.size();
+        int totalPages = (int) Math.ceil((double) totalItem / size);
+        Map<String, Object> pageDetail = new HashMap<>();
+
+        pageDetail.put("page", p + 1);
+        pageDetail.put("totalItems", totalItem);
+        pageDetail.put("totalPages", totalPages);
+        pageDetail.put("pageSize", size);
+
+        map.put("blogs", blogResponsesPage);
+        map.put("pageDetail", pageDetail);
+        return map;
+    }
+
+
+
+
+
+
+
+
+    public boolean indexBlogs() {
+        // Lấy tất cả các BlogEntity từ cơ sở dữ liệu
+        List<BlogEntity> blogEntities = blogRepository.findAll();
+
+        // Chuyển đổi BlogEntity thành BlogResponse
+        List<BlogResponse> responseDTOS = blogMapper.toBlogsResponseDTO(blogEntities);
+
+        // Thiết lập tác giả và ngày tạo/ cập nhật cho mỗi BlogResponse nếu có UserEntity và BlogEntity
+        IntStream.range(0, Math.min(blogEntities.size(), responseDTOS.size()))
+                .forEach(i -> {
+                    BlogEntity blogEntity = blogEntities.get(i);
+                    BlogResponse blogResponse = responseDTOS.get(i);
+
+                    // Thiết lập tác giả
+                    UserEntity user = blogEntity.getUser();
+                    if (user != null) {
+                        blogResponse.setAuthor(user.getUsername());
+                    }
+
+                    // Thiết lập ngày tạo và ngày cập nhật (nếu có)
+//                    if (blogEntity.getCreatedAt() != null) {
+//                        blogResponse.setCreatedAt(blogEntity.getCreatedAt());
+//                    }
+//                    if (blogEntity.getUpdatedAt() != null) {
+//                        blogResponse.setUpdatedAt(blogEntity.getUpdatedAt());
+//                    }
+                });
+
+        // Index tất cả blog responses vào Elasticsearch hoặc hệ thống tìm kiếm của bạn
+        responseDTOS.forEach(blogSearchRepository::indexBlog);
+        return true;
+    }
+
 
 }
