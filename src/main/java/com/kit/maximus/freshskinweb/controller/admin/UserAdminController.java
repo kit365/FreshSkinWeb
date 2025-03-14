@@ -22,7 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @Slf4j
 @RequestMapping("admin/users")
 @RestController
@@ -72,44 +72,84 @@ public class UserAdminController {
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(userService.addOrder(id, requestDTO)).build();
     }
 
-    @GetMapping("show")
-    public ResponseAPI<List<UserResponseDTO>> getUsers() {
-        String message = "Get all users successfully";
-        var result = userService.getAllUsers();
-        return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+    @GetMapping()
+    public ResponseAPI<Map<String, Object>> getUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "updatedAt") String sortKey,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String keyword) {
+
+        log.info("GET ALL USERS");
+        log.info("Page: {}, Size: {}", page, size);
+        log.info("Sort: {} {}", sortKey, sortDirection);
+        log.info("Filters - Status: {}, Type: {}, Keyword: {}", status, type, keyword);
+
+        try {
+            Map<String, Object> result = userService.getAllUser(
+                    page,
+                    size,
+                    sortKey,
+                    sortDirection,
+                    status,
+                    type,
+                    keyword
+            );
+
+            if (result.get("users") instanceof List && ((List<?>) result.get("users")).isEmpty()) {
+                return ResponseAPI.<Map<String, Object>>builder()
+                        .code(HttpStatus.NOT_FOUND.value())
+                        .message("Không tìm thấy người dùng phù hợp.")
+                        .data(result)
+                        .build();
+            }
+
+            return ResponseAPI.<Map<String, Object>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy danh sách người dùng thành công.")
+                    .data(result)
+                    .build();
+
+        } catch (AppException e) {
+            log.error("Error getting users: {}", e.getMessage());
+            return ResponseAPI.<Map<String, Object>>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message(e.getMessage())
+                    .build();
+        } catch (Exception e) {
+            log.error("Unexpected error getting users", e);
+            return ResponseAPI.<Map<String, Object>>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Có lỗi xảy ra khi lấy danh sách người dùng.")
+                    .build();
+        }
     }
 
-    @GetMapping("show/{id}")
+    @GetMapping("/{id}")
     public ResponseAPI<UserResponseDTO> showDetailUser(@PathVariable Long id) {
-        String message = "Get user successfully";
+        String message = "Lấy dữ liệu thành công";
         var result = userService.showDetail(id);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
-    @GetMapping("search")
-    public ResponseAPI<List<UserResponseDTO>> searchUser(@RequestParam("keyword") String name) {
-        String message = "Search user successfully";
-        var user = userService.getUserByUsername(name);
-//        return Collections.singletonList(userService.getUserByUsername(name));
-        return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(user).build();
-    }
-
     @PatchMapping("change-password/{id}")
     public ResponseAPI<Boolean> updateUserPassword(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest request) {
-        String message = "Update user password successfully";
+        String message = "Cập nhật mật khẩu thành công";
         userService.updatePassword(id, request);
         return ResponseAPI.<Boolean>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
     @PatchMapping("edit/{id}")
     public ResponseAPI<UserResponseDTO> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest userRequestDTO) {
-        String message = "Update user successfully";
+        String message = "Cập nhật tài khoản thành công";
         var result = userService.update(id, userRequestDTO);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
     @PatchMapping("change-multi")
-    public ResponseAPI<String> updataUser(@RequestBody Map<String, Object> request) {
+    public ResponseAPI<String> updateUser(@RequestBody Map<String, Object> request) {
 
         if (!request.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
@@ -120,7 +160,7 @@ public class UserAdminController {
         List<Long> ids = (List<Long>) request.get("id");
         String status = request.get("status").toString();
 
-        var result = userService.update(ids, status);
+        var result = userService.updateMulti(ids, status);
         return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
@@ -149,7 +189,7 @@ public class UserAdminController {
     @DeleteMapping("delete/{id}")
     public ResponseAPI<UserResponseDTO> deleteUser(@PathVariable("id") Long id) {
         {
-            String message = "Delete user successfully";
+            String message = "Xóa vĩnh viễn tài khoản thành công";
             userService.delete(id);
             log.info(message);
             return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
@@ -159,7 +199,7 @@ public class UserAdminController {
     @DeleteMapping("deleteAll")
     public ResponseAPI<UserResponseDTO> deleteUser() {
         {
-            String message = "Delete all users successfully";
+            String message = "Tất cả tài khoản đã bị xóa";
             userService.deleteAllUsers();
             log.info(message);
             return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
@@ -168,8 +208,16 @@ public class UserAdminController {
 
     @PatchMapping("deleteT/{id}")
     public ResponseAPI<UserResponseDTO> deleteUserT(@PathVariable("id") Long id) {
-        String message = "Delete user successfully";
+        String message = "Xóa tài khoản thành công";
         userService.deleteTemporarily(id);
+        log.info(message);
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
+    }
+
+    @PatchMapping("restore/{id}")
+    public ResponseAPI<UserResponseDTO> restoreUser(@PathVariable("id") Long id) {
+        String message = "Phục hồi tài khoản thành công";
+        userService.restore(id);
         log.info(message);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }

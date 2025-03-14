@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,26 +23,25 @@ public class SkinQuestionsEntity extends AbstractEntity {
     @Column(name = "SkinQuestionID")
     Long id;
 
-    @Column (name = "QuestionNumber")
-    Integer questionNumber;
-
     @Column(name = "QuestionText")
     String questionText;
 
-    @Column(name = "QuestionGroup")
-    String questionGroup;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "QuestionGroupId", nullable = true)
+    @JsonBackReference
+    QuestionGroupEntity questionGroup;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "skinQuestionsEntity", orphanRemoval = true)
     @JsonManagedReference
-    List<SkinAnswerEntity> skinAnswers = new ArrayList<>();
+    List<SkinAnswerEntity> answers = new ArrayList<>();
 
     public void addSkinAnswerEntity(SkinAnswerEntity skinAnswerEntity) {
-        skinAnswers.add(skinAnswerEntity);
+        answers.add(skinAnswerEntity);
         skinAnswerEntity.setSkinQuestionsEntity(this);
     }
 
     public void removeSkinAnswerEntity(SkinAnswerEntity skinAnswerEntity) {
-        skinAnswers.remove(skinAnswerEntity);
+        answers.remove(skinAnswerEntity);
         skinAnswerEntity.setSkinQuestionsEntity(null);
     }
 }

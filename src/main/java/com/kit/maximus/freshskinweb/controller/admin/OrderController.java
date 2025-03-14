@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -39,15 +39,6 @@ public class OrderController {
         return ResponseAPI.<OrderIdResponse>builder().code(HttpStatus.OK.value()).message(message).data(create).build();
     }
 
-//    @GetMapping("/show")
-//    public ResponseAPI<List<OrderResponse>> getAllOrder() {
-//        String message = "Hiện tất cả các đơn hàng thành công";
-//        List<OrderResponse> order = orderService.getAllOrder();
-//        return ResponseAPI.<List<OrderResponse>>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
-//    }
-
-
-
     @GetMapping
     public ResponseAPI<Map<String, Object>> getAllOrder(
             @RequestParam(required = false) OrderStatus status,
@@ -56,7 +47,7 @@ public class OrderController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        var result = orderService.getAllOrder(status, keyword, orderId, page, size);
+        var result = orderService.getAllOrders(status, keyword, orderId, page, size);
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
@@ -82,6 +73,14 @@ public class OrderController {
         var result = orderService.update(ids, status);
         return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
+
+    @PatchMapping("edit/{orderId}")
+    public ResponseAPI<OrderResponse> updateOrder( @PathVariable String orderId, @RequestBody OrderRequest orderStatus) {
+        var create = orderService.update(orderId, orderStatus);
+
+        return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(create).build();
+    }
+
 
     //    @PatchMapping("/update/{orderId}")
 //    public ResponseAPI<OrderResponse> updateOrder(@Valid @PathVariable Long orderId, @RequestBody UpdateOrderRequest updateOrderRequest) {

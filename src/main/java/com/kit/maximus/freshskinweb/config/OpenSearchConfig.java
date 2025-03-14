@@ -41,9 +41,17 @@ public class OpenSearchConfig {
         credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
 
         // Tạo RestClient với Basic Auth
+//        RestClient restClient = RestClient.builder(httpHost)
+//                .setHttpClientConfigCallback(httpClientBuilder ->
+//                        httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider))
+//                .build();
+
         RestClient restClient = RestClient.builder(httpHost)
-                .setHttpClientConfigCallback(httpClientBuilder ->
-                        httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider))
+                .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
+                        .setDefaultCredentialsProvider(credentialsProvider)
+                        .setMaxConnTotal(50) // Tối đa 50 kết nối
+                        .setMaxConnPerRoute(20) // Mỗi route tối đa 20 kết nối
+                )
                 .build();
 
         // Tạo OpenSearchTransport

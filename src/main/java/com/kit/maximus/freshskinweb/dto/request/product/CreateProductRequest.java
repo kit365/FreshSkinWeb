@@ -31,7 +31,7 @@ public class CreateProductRequest implements Serializable {
     List<ProductVariantEntity> variants;
 
     List<Long> skinTypes;
-    DiscountEntity discountEntity;
+//    DiscountEntity discountEntity;
     int discountPercent;
     Integer position;
     /// ////////////////////////////////////////////

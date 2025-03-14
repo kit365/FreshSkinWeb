@@ -84,7 +84,6 @@ public class CreateUserRequest implements Serializable {
     @Size(min = 2, max = 50, message = "LASTNAME_INVALID")
     String lastName;
 
-    @NotBlank(message = "EMAIL_NOT_BLANK")
     @Email(message = "EMAIL_INVALID")
     String email;
 
@@ -92,11 +91,9 @@ public class CreateUserRequest implements Serializable {
     @Pattern(regexp = "^\\d{10}$", message = "PHONE_NUMBER_INVALID")
     String phone;
 
-    @NotNull(message = "AVATAR_NOT_NULL")
     @NotBlank(message = "AVATAR_NOT_BLANK")
     MultipartFile avatar;
 
-    @NotBlank(message = "ADDRESS_NOT_BLANK")
     @Size(min = 5, max = 255, message = "ADDRESS_INVALID")
     String address;
 

@@ -1,9 +1,7 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;

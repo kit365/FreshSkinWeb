@@ -1,19 +1,15 @@
 package com.kit.maximus.freshskinweb.service;
 
-import com.kit.maximus.freshskinweb.dto.request.skin_test.CreationSkinTestRequest;
-import com.kit.maximus.freshskinweb.dto.request.skin_test.UpdationSkinTestRequest;
+import com.kit.maximus.freshskinweb.dto.request.skin_test.SkinTestRequest;
+//import com.kit.maximus.freshskinweb.dto.request.skin_test.SkinResultSearchRequest;
 import com.kit.maximus.freshskinweb.dto.response.SkinTestResponse;
-import com.kit.maximus.freshskinweb.entity.SkinQuestionsEntity;
-import com.kit.maximus.freshskinweb.entity.SkinTestEntity;
+import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.SkinTestMapper;
-import com.kit.maximus.freshskinweb.mapper.SkinTypeMapper;
-import com.kit.maximus.freshskinweb.mapper.UserMapper;
-import com.kit.maximus.freshskinweb.repository.SkinQuestionsRepository;
-import com.kit.maximus.freshskinweb.repository.SkinTestRepository;
-import com.kit.maximus.freshskinweb.repository.SkinTypeRepository;
-import com.kit.maximus.freshskinweb.repository.UserRepository;
+import com.kit.maximus.freshskinweb.repository.*;
+//import com.kit.maximus.freshskinweb.specification.SkinTestSpecification;
+import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -21,139 +17,121 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @Service
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-public class SkinTestService implements BaseService<SkinTestResponse, CreationSkinTestRequest, UpdationSkinTestRequest, Long> {
+public class SkinTestService {
 
     SkinTestRepository skinTestRepository;
     SkinTestMapper skinTestMapper;
     UserRepository userRepository;
     SkinTypeRepository skinTypeRepository;
     SkinQuestionsRepository skinQuestionsRepository;
+    QuestionGroupRepository questionGroupRepository;
 
-    @Override
-    public boolean add(CreationSkinTestRequest request) {
-        System.out.println(request);
-        SkinTestEntity entity = skinTestMapper.toSkinTestEntity(request);
-
-        entity.setUserEntity(userRepository.findById(request.getUserEntity()).orElse(null));
-
-        //Nhớ code thêm ràng buộc, phải làm skin test xong thì mới được set skin type
-        entity.setSkinType(skinTypeRepository.findById(request.getSkinType()).orElse(null));
-
-        //Phải có bộ đề thì mới cho làm test được
-        if(skinQuestionsRepository.findByQuestionGroup(request.getQuestionGroup()) == null && skinQuestionsRepository.findByQuestionGroup(request.getQuestionGroup()).isEmpty()) {
-            throw new AppException(ErrorCode.QUESTION_GROUP_NOT_EXISTED);
+    private String determineSkinType(Long totalScore) {
+        if (totalScore >= 0 && totalScore <= 7) {
+            return "Da thường";
+        } else if (totalScore >= 8 && totalScore <= 14) {
+            return "DRY";
+        } else if (totalScore >= 15 && totalScore <= 21) {
+            return "COMBINATION";
+        } else if (totalScore >= 22 && totalScore <= 28) {
+            return "OILY";
+        } else if (totalScore >= 29 && totalScore <= 36) {
+            return "SENSITIVE";
         } else {
-            entity.setQuestionGroup(request.getQuestionGroup());
-            skinTestRepository.save(entity);
-            return true;
+            throw new AppException(ErrorCode.INVALID_SCORE_RANGE);
         }
     }
 
-    @Override
-    public SkinTestResponse update(Long aLong, UpdationSkinTestRequest request) {
-        SkinTestEntity entity = skinTestRepository.findById(aLong).orElseThrow(()-> new AppException(ErrorCode.SKIN_TEST_NOT_FOUND));
+    public boolean add(SkinTestRequest request) {
+        // Validate input
+        UserEntity user = userRepository.findById(request.getUser())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        skinTestMapper.updateSkinTestEntity(entity, request);
+        QuestionGroupEntity questionGroup = questionGroupRepository.findById(request.getQuestionGroup())
+                .orElseThrow(() -> new AppException(ErrorCode.QUESTION_GROUP_NOT_FOUND));
 
-        if(request.getQuestionGroup() != null) {
-            entity.setQuestionGroup(request.getQuestionGroup());
+        // Xóa kết quả test cũ nếu có
+        SkinTestEntity existingTest = skinTestRepository.findByUser(user);
+        if (existingTest != null) {
+            skinTestRepository.delete(existingTest);
         }
 
-        if (request.getUserEntity() != null) {
-            entity.setUserEntity(userRepository.findById(request.getUserEntity()).orElse(null));
-        } else {
-            entity.setUserEntity(entity.getUserEntity());
-        }
+        // Tạo entity mới
+        SkinTestEntity skinTest = new SkinTestEntity();
+        skinTest.setUser(user);
+        skinTest.setQuestionGroup(questionGroup);
+        skinTest.setTotalScore(request.getTotalScore());
 
-        if(request.getSkinType() != null){
-            entity.setSkinType(skinTypeRepository.findById(request.getSkinType()).orElse(null));
-        } else{
-            entity.setSkinType(entity.getSkinType());
-        }
-
-        return skinTestMapper.toSkinTestResponse(skinTestRepository.save(entity));
-    }
-
-    @Override
-    public String update(List<Long> id, String status) {
-        Status statusEnum = getStatus(status.toUpperCase());
-        List<SkinTestEntity> entities = skinTestRepository.findAllById(id);
-        for(SkinTestEntity entity : entities) {
-            if (statusEnum.equals(Status.ACTIVE) || statusEnum.equals(Status.INACTIVE)) {
-                entity.setStatus(statusEnum);
-                skinTestRepository.save(entity);
-            }
-            if (statusEnum.equals(Status.SOFT_DELETED)) {
-                entity.setDeleted(true);
-                skinTestRepository.save(entity);
-            }
-            if (statusEnum.equals(Status.RESTORED)) {
-                entity.setDeleted(false);
-                skinTestRepository.save(entity);
-            }
-
-            return "Cập nhật trạng thái bài đánh giá loại da thành công";
-        }
-        return "Cập nhật trạng thái đánh giá loại da thất bại";
-    }
-
-
-    @Override
-    public boolean delete(Long aLong) {
-        skinTestRepository.findById(aLong).orElseThrow(()-> new AppException(ErrorCode.SKIN_TEST_NOT_FOUND));
-        skinTestRepository.deleteById(aLong);
-        return true;
-    }
-
-    @Override
-    public boolean delete(List<Long> longs) {
-        skinTestRepository.deleteAll(skinTestRepository.findAllById(longs));
-        return true;
-    }
-
-    @Override
-    public boolean deleteTemporarily(Long aLong) {
-        return false;
-    }
-
-    @Override
-    public boolean restore(Long aLong) {
-        return false;
-    }
-
-    @Override
-    public SkinTestResponse showDetail(Long aLong) {
-        SkinTestEntity entity = skinTestRepository.findById(aLong).orElseThrow(()-> new AppException(ErrorCode.SKIN_TEST_NOT_FOUND));
-        return skinTestMapper.toSkinTestResponse(entity);
-    }
-
-    public List<SkinTestResponse> showAll() {
-    return skinTestRepository.findAll().stream().map(skinTestMapper::toSkinTestResponse).collect(Collectors.toList());
-    }
-    @Override
-    public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
-        return Map.of();
-    }
-
-    @Override
-    public Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
-        return Map.of();
-    }
-
-    public Status getStatus(String status){
+        // Xác định loại da dựa trên điểm số
         try {
-            return Status.valueOf(status.toUpperCase());
-        }catch (IllegalStateException e){
-            log.error(e.getMessage());
-            throw new AppException(ErrorCode.STATUS_INVALID);
+            String skinTypeStr = determineSkinType(request.getTotalScore());
+            SkinType skinType = SkinType.valueOf(skinTypeStr);
+            String getVNname = skinType.getVNESEname();
+            log.info("getVNname:{}", getVNname);
+
+            // Log để debug
+            log.info("Điểm số: {}, Loại da xác định: {}", request.getTotalScore(), skinTypeStr);
+
+            // Tìm entity loại da tương ứng
+            SkinTypeEntity skinTypeEntity = skinTypeRepository.findByType(getVNname);
+            log.info(" lấy skin type theo trong repo: {}", skinTypeEntity);
+            if (skinTypeEntity == null) {
+                log.error("Không tìm thấy loại da {} trong database", skinTypeStr);
+                throw new AppException(ErrorCode.SKIN_TYPE_NOT_FOUND);
+            }
+
+            // Cập nhật thông tin
+            skinTest.setSkinType(skinTypeEntity);
+            skinTest.setNotes(skinType.getMessage());
+
+            // Cập nhật loại da cho user
+            user.setSkinType(skinType.getVNESEname());
+            userRepository.save(user);
+
+            // Lưu kết quả test
+            skinTestRepository.save(skinTest);
+
+            return true;
+
+        } catch (IllegalArgumentException e) {
+            log.error("Lỗi xác định loại da: {}", e.getMessage());
+            throw new AppException(ErrorCode.INVALID_SKIN_TYPE);
         }
     }
+
+    public SkinTestResponse getDetail(Long id){
+        SkinTestEntity skinTestEntity = skinTestRepository.findById(id).orElse(null);
+        SkinTestResponse skinTestResponse = skinTestMapper.toSkinTestResponse(skinTestEntity);
+        skinTestResponse.setId(skinTestEntity.getId());
+        skinTestResponse.setSkinType(skinTestEntity.getSkinType().getType());
+        skinTestResponse.setTotalScore(skinTestEntity.getTotalScore());
+        skinTestResponse.setNotes(skinTestEntity.getNotes());
+        skinTestResponse.setUser(skinTestEntity.getUser().getUsername());
+        skinTestResponse.setQuestionGroup(skinTestEntity.getQuestionGroup().getTitle());
+        return skinTestResponse;
+    }
+
+//    public Page<SkinTestResponse> getAll(SkinResultSearchRequest request) {
+//        int page = request.getPage() != null ? request.getPage() : 0;
+//        int size = request.getSize() != null ? request.getSize() : 10;
+//        String sortDir = request.getSortDirection() != null ? request.getSortDirection() : "desc";
+//
+//        // Tạo Pageable với sắp xếp theo updatedAt
+//        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), "updatedAt");
+//        PageRequest pageRequest = PageRequest.of(page, size, sort);
+//
+//        // Thực hiện truy vấn với Specification
+//        Page<SkinTestEntity> skinTests = skinTestRepository.findAll(
+//                SkinTestSpecification.withFilters(request),
+//                pageRequest
+//        );
+//
+//        // Chuyển đổi kết quả sang DTO
+//        return skinTests.map(skinTestMapper::toSkinTestResponse);
+//    }
+
 }

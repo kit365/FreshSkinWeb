@@ -166,7 +166,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
     @Override
     public boolean delete(Long id) {
         BlogCategoryEntity blogCategoryEntity = getBlogCategoryEntityById(id);
-        blogCategorySearchRepository.deleteBlogs(id);
+        blogCategorySearchRepository.deleteBlogCategory(id);
         if (blogCategoryEntity == null) {
             throw new AppException(ErrorCode.BLOG_CATEGORY_NOT_FOUND);
         }
@@ -201,7 +201,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
                     }
                 }
             }
-            blogCategorySearchRepository.deleteBlogs(blogCategoryEntity.getId());
+            blogCategorySearchRepository.deleteBlogCategory(blogCategoryEntity.getId());
         }
         blogCategoryRepository.deleteAll(blogCategoryEntities);
         return true;
@@ -315,19 +315,19 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status.equalsIgnoreCase("ALL")) {
                 // Tìm kiếm theo tên sản phẩm, không lọc theo status
-                blogCategoryEntities = blogCategoryRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, false, pageable);
+                blogCategoryEntities = blogCategoryRepository.findByTitleContainingIgnoreCaseAndDeleted(keyword, true, pageable);
             } else {
                 // Tìm kiếm theo tên sản phẩm và status
                 Status statusEnum = getStatus(status);
-                blogCategoryEntities = blogCategoryRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, false);
+                blogCategoryEntities = blogCategoryRepository.findByTitleContainingIgnoreCaseAndStatusAndDeleted(keyword, statusEnum, pageable, true);
             }
         } else {
             // Nếu không có keyword, chỉ lọc theo status
             if (status == null || status.equalsIgnoreCase("ALL")) {
-                blogCategoryEntities = blogCategoryRepository.findAllByDeleted(false, pageable);
+                blogCategoryEntities = blogCategoryRepository.findAllByDeleted(true, pageable);
             } else {
                 Status statusEnum = getStatus(status);
-                blogCategoryEntities = blogCategoryRepository.findAllByStatusAndDeleted(statusEnum, false, pageable);
+                blogCategoryEntities = blogCategoryRepository.findAllByStatusAndDeleted(statusEnum, true, pageable);
             }
         }
 
@@ -489,56 +489,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         return blogCategoryResponses;
     }
 
-    public Map<String, Object> getBlogCategories(int page, int size, Long blogCategoryID) {
-        int p = (page > 0) ? page - 1 : 0;
 
-        Map<String, Object> map = new HashMap<>();
-
-        Pageable pageable = PageRequest.of(p, size);
-
-        List<BlogCategoryResponse> blogCategoryEntities = blogCategorySearchRepository.showAll("ACTIVE", false);
-
-        List<Long> cateIDS = blogCategorySearchRepository.getBlogCategoryIds("ACTIVE", false);
-
-        if (blogCategoryID == null) {
-            blogCategoryID = cateIDS.getFirst();
-        }
-
-        List<BlogResponse> blogResponsesPage = blogService.getBlogsByCategoryID(blogCategoryID, "ACTIVE", false, p, size);
-
-        List<BlogResponse> blogResponseList = blogService.getBlogsByCategoryID(blogCategoryID, "ACTIVE", false);
-
-        int totalItem = blogResponseList.size();
-        int totalPages = (int) Math.ceil((double) totalItem / size);
-        Map<String, Object> pageDetail = new HashMap<>();
-
-        pageDetail.put("currentPage", p + 1);
-        pageDetail.put("totalItems", totalItem);
-        pageDetail.put("totalPages", (totalPages));
-        pageDetail.put("pageSize", size);
-
-        for (BlogCategoryResponse blogCategoryResponse : blogCategoryEntities) {
-            blogCategoryResponse.setFeatured(null);
-            blogCategoryResponse.setDescription(null);
-            blogCategoryResponse.setPosition(null);
-
-            List<BlogResponse> newBlogs = new ArrayList<>();
-            for (BlogResponse blogResponse : blogResponsesPage) {
-                if (blogResponse.getBlogCategory() != null &&
-                        blogResponse.getBlogCategory().getId().equals(blogCategoryResponse.getId())) {
-                    blogResponse.setContent(generateSummary(blogResponse.getContent(), 1));
-                    blogResponse.setBlogCategory(null);
-                    newBlogs.add(blogResponse);
-                }
-            }
-            blogCategoryResponse.setBlogs(newBlogs);
-        }
-
-//        map.put("blog_category", blogCategoryEntities);
-        map.put("blog_category", blogCategoryEntities);
-        map.put("page", pageDetail);
-        return map;
-    }
 
 
     public boolean indexBlogCategory() {

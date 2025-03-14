@@ -19,6 +19,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -74,45 +76,31 @@ public class AuthenticationService implements UserDetailsService {
         return IntrospectResponse.builder().valid(verify && expirationDate.after(new Date())).build();
     }
 
-    public AuthenticationResponseDTO authenticate(AuthenticationRequest authenticationRequest, HttpServletResponse response) {
-        UserEntity user = userRepository.findByUsername(authenticationRequest.getUsername()).orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_FOUND));
+    public AuthenticationResponseDTO authenticate(AuthenticationRequest authenticationRequest, HttpServletResponse response, HttpServletRequest request) {
+        UserEntity user = userRepository.findByUsername(authenticationRequest.getUsername())
+                .orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_FOUND));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+
         boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
 
-        if(!authenticated) {
+        if (!authenticated) {
             throw new AppException(ErrorCode.PASSWORD_INCORRECT);
         }
-        if(user.getStatus().equals(Status.INACTIVE)) {
+        if (user.getStatus().equals(Status.INACTIVE)) {
             throw new AppException(ErrorCode.ACCOUNT_LOCKED);
         }
 
-        var token = generateToken(authenticationRequest.getUsername());
+        // Generate JWT Token
+        String token = generateToken(authenticationRequest.getUsername());
 
-        Cookie cookie = new Cookie("token", token);
-        cookie.setDomain("project-swp391-n9j6.onrender.com");
-//        cookie.setDomain("localhost");
-        cookie.setHttpOnly(false); // Ngăn JavaScript truy cập, tăng bảo mật
-        cookie.setSecure(true); // Bật nếu dùng HTTPS
-        cookie.setPath("/"); // Áp dụng cho toàn bộ domain
-        cookie.setMaxAge(60 * 60 * 24); // Hết hạn sau 1 ngày
-
-        response.addCookie(cookie);
         return AuthenticationResponseDTO.builder()
-                .token(token).authenticated(authenticated).build();
+                .token(token)
+                .authenticated(authenticated)
+                .build();
     }
 
-    public void logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("token", null);
-        cookie.setDomain("project-swp391-n9j6.onrender.com");
-//        cookie.setDomain("localhost");
-        cookie.setHttpOnly(false);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0); // Xóa ngay lập tức
-//        cookie.setValue("");
 
-        response.addCookie(cookie);
-    }
+
 
 
 

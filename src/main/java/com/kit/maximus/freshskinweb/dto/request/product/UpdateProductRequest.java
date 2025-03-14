@@ -27,7 +27,7 @@ public class UpdateProductRequest implements Serializable {
     List<MultipartFile> thumbnail;
     List<ProductVariantEntity> variants;
     List<Long> skinTypeId;
-    DiscountEntity discountEntity;
+//    DiscountEntity discountEntity;
     int discountPercent;
     Integer position;
     /// ////////////////////////////////////////////

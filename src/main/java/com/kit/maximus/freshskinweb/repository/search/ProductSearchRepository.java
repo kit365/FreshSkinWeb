@@ -1,6 +1,8 @@
 package com.kit.maximus.freshskinweb.repository.search;
 
+import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
+import com.kit.maximus.freshskinweb.dto.response.review.ReviewResponse;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -9,12 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.opensearch._types.FieldValue;
 import org.opensearch.client.opensearch._types.InlineGet;
-import org.opensearch.client.opensearch._types.query_dsl.MatchQuery;
-import org.opensearch.client.opensearch._types.query_dsl.Operator;
-import org.opensearch.client.opensearch._types.query_dsl.Query;
-import org.opensearch.client.opensearch._types.query_dsl.TermQuery;
+import org.opensearch.client.opensearch._types.SortOrder;
+import org.opensearch.client.opensearch._types.query_dsl.*;
 import org.opensearch.client.opensearch.core.*;
 import org.opensearch.client.opensearch.core.search.Hit;
+import org.opensearch.client.opensearch.core.termvectors.Term;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -116,79 +117,353 @@ public class ProductSearchRepository {
     }
 
 
+//    public boolean updateProductWithNewReview(ReviewResponse newReview) {
+//        int retries = 3;
+//        while (retries > 0) {
+//            try {
+//
+//                Long productId = newReview.getProductId();
+//                System.out.println(productId);
+//
+//                Map<String, Object> updateFields = new HashMap<>();
+//                updateFields.put("reviews", newReview);
+//
+//
+//                UpdateRequest<ProductResponseDTO, Map<String, Object>> updateRequest = new UpdateRequest.Builder<ProductResponseDTO, Map<String, Object>>()
+//                        .index("products")
+//                        .id(String.valueOf(productId))
+//                        .doc(updateFields)
+//                        .build();
+//
+//
+//                UpdateResponse<ProductResponseDTO> updateResponse = openSearchClient.update(updateRequest, ProductResponseDTO.class);
+//
+//
+//                InlineGet<ProductResponseDTO> get = updateResponse.get();
+//
+//
+//                return get != null && get.source() != null;
+//            } catch (IOException e) {
+//                retries--;
+//                log.error("Error while updating product with new review, retrying...", e);
+//                if (retries == 0) {
+//                    return false;
+//                }
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException ie) {
+//                    Thread.currentThread().interrupt();
+//                }
+//            }
+//        }
+//        return false;  // Nếu không thành công sau nhiều lần thử
+//    }
 
+
+//    public List<ProductResponseDTO> searchByTitle(String title, int size) {
+//        try {
+//            // Tạo truy vấn match với fuzziness, prefix_length và operator
+//            MatchQuery matchQuery = new MatchQuery.Builder()
+//                    .field("title") // Chỉ định trường "title"
+//                    .query(FieldValue.of(title)) // Dữ liệu truy vấn là "title"
+//                    .fuzziness("auto") // Fuzziness tự động
+//                    .operator(Operator.And) // Cấu hình để tất cả các từ đều phải xuất hiện
+//                    .build();
+//
+//            // Xây dựng truy vấn với MatchQuery
+//            Query searchQuery = new Query.Builder()
+//                    .match(matchQuery)
+//                    .build();
+//
+//            // Tạo SearchRequest, chỉ lấy số lượng kết quả tối đa là "size"
+//            SearchRequest searchRequest = new SearchRequest.Builder()
+//                    .index("products") // Chỉ định index
+//                    .query(searchQuery) // Thêm truy vấn vào request
+//                    .size(size) // Số lượng kết quả trả về
+//                    .build();
+//
+//            // Gửi yêu cầu tìm kiếm
+//            SearchResponse<ProductResponseDTO> response = openSearchClient.search(searchRequest, ProductResponseDTO.class);
+//
+//            // Trích xuất danh sách các đối tượng ProductResponseDTO từ kết quả
+//            return response.hits().hits().stream()
+//                    .map(Hit::source) // Lấy source (ProductResponseDTO)
+//                    .collect(Collectors.toList());
+//
+//        } catch (IOException e) {
+//            log.error("Lỗi khi tìm kiếm sản phẩm trên OpenSearch", e);
+//            return Collections.emptyList();
+//        }
+//    }
 
     public List<ProductResponseDTO> searchByTitle(String title, int size) {
         try {
-            // Tạo truy vấn match với fuzziness, prefix_length và operator
-            MatchQuery matchQuery = new MatchQuery.Builder()
-                    .field("title") // Chỉ định trường "title"
-                    .query(FieldValue.of(title)) // Dữ liệu truy vấn là "title"
-                    .fuzziness("auto") // Fuzziness tự động
-                    .operator(Operator.And) // Cấu hình để tất cả các từ đều phải xuất hiện
+            // Xây dựng query với fuzziness
+            Query query = new Query.Builder()
+                    .bool(b -> b
+                            .must(m -> m
+                                    .match(t -> t
+                                            .field("title")
+                                            .query(FieldValue.of(title))
+                                            .fuzziness("AUTO") // Cho phép tìm kiếm gần đúng
+                                            .operator(Operator.And)
+                                    )
+                            )
+                            .filter(f -> f
+                                    .term(t -> t.field("status.keyword").value(FieldValue.of("ACTIVE")))
+                            )
+                            .filter(f -> f
+                                    .term(t -> t.field("deleted").value(FieldValue.of(false)))
+                            )
+                    )
                     .build();
 
-            // Xây dựng truy vấn với MatchQuery
-            Query searchQuery = new Query.Builder()
-                    .match(matchQuery)
-                    .build();
-
-            // Tạo SearchRequest, chỉ lấy số lượng kết quả tối đa là "size"
+            // Tạo request
             SearchRequest searchRequest = new SearchRequest.Builder()
-                    .index("products") // Chỉ định index
-                    .query(searchQuery) // Thêm truy vấn vào request
-                    .size(size) // Số lượng kết quả trả về
+                    .index("products")
+                    .query(query)
+                    .size(size)
                     .build();
 
-            // Gửi yêu cầu tìm kiếm
+            log.info("Generated Query: {}", query.toString());
+
+
+            // Gửi request
             SearchResponse<ProductResponseDTO> response = openSearchClient.search(searchRequest, ProductResponseDTO.class);
 
-            // Trích xuất danh sách các đối tượng ProductResponseDTO từ kết quả
+            // Trả về danh sách kết quả
             return response.hits().hits().stream()
-                    .map(Hit::source) // Lấy source (ProductResponseDTO)
+                    .map(Hit::source)
                     .collect(Collectors.toList());
-
         } catch (IOException e) {
             log.error("Lỗi khi tìm kiếm sản phẩm trên OpenSearch", e);
             return Collections.emptyList();
         }
     }
 
-    public ProductResponseDTO searchBySlug(String slug) {
+    public List<ProductResponseDTO> searchByTitle(String title, int page, int size) {
         try {
-            TermQuery termQuery = new TermQuery.Builder()
-                    .field("slug.keyword")  // Sử dụng .keyword để tìm kiếm chính xác
+            // Xây dựng query với fuzziness
+            Query query = new Query.Builder()
+                    .bool(b -> b
+                            .must(m -> m
+                                    .match(t -> t
+                                            .field("title")
+                                            .query(FieldValue.of(title))
+                                            .fuzziness("AUTO") // Cho phép tìm kiếm gần đúng
+                                            .operator(Operator.And)
+                                    )
+                            )
+                            .filter(f -> f
+                                    .term(t -> t.field("status.keyword").value(FieldValue.of("ACTIVE")))
+                            )
+                            .filter(f -> f
+                                    .term(t -> t.field("deleted").value(FieldValue.of(false)))
+                            )
+                    )
+                    .build();
+
+            // Tạo request
+            SearchRequest searchRequest = new SearchRequest.Builder()
+                    .index("products")
+                    .query(query)
+                    .from(page * size)
+                    .size(size)
+                    .build();
+
+            log.info("Generated Query: {}", query.toString());
+
+
+            // Gửi request
+            SearchResponse<ProductResponseDTO> response = openSearchClient.search(searchRequest, ProductResponseDTO.class);
+
+            // Trả về danh sách kết quả
+            return response.hits().hits().stream()
+                    .map(Hit::source)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("Lỗi khi tìm kiếm sản phẩm trên OpenSearch", e);
+            return Collections.emptyList();
+        }
+    }
+
+
+    public List<ProductResponseDTO> findBySlugs(String slug, String status, boolean deleted) {
+        try {
+            List<Query> queries = new ArrayList<>();
+
+            // Tìm kiếm theo slug (của category)
+            TermQuery termQuerySlug = new TermQuery.Builder()
+                    .field("category.slug.keyword")  // Đúng tên trường là "category.slug.keyword"
                     .value(FieldValue.of(slug))
                     .build();
 
-            Query searchQuery = new Query.Builder()
-                    .term(termQuery)
+            // Tìm kiếm theo slug của category cha
+            TermQuery termQueryCateParent = new TermQuery.Builder()
+                    .field("category.parent.slug.keyword")
+                    .value(FieldValue.of(slug))
                     .build();
 
-            // Tạo SearchRequest để thực hiện tìm kiếm
+            // Tìm kiếm theo slug của category ông nội
+            TermQuery termQueryGrandParent = new TermQuery.Builder()
+                    .field("category.parent.parent.slug.keyword")
+                    .value(FieldValue.of(slug))
+                    .build();
+
+            // Thêm điều kiện tìm theo status
+            TermQuery termQueryStatus = new TermQuery.Builder()
+                    .field("status.keyword")
+                    .value(FieldValue.of(status))
+                    .build();
+
+            // Thêm điều kiện tìm theo deleted
+            TermQuery termQueryDeleted = new TermQuery.Builder()
+                    .field("deleted")
+                    .value(FieldValue.of(deleted))
+                    .build();
+
+            // Thêm các query vào danh sách
+            queries.add(new Query.Builder().term(termQuerySlug).build());
+            queries.add(new Query.Builder().term(termQueryCateParent).build());
+            queries.add(new Query.Builder().term(termQueryGrandParent).build());
+            queries.add(new Query.Builder().term(termQueryStatus).build());
+            queries.add(new Query.Builder().term(termQueryDeleted).build());
+
+            // Sử dụng BoolQuery để kết hợp các điều kiện (OR)
+            BoolQuery boolQuery = new BoolQuery.Builder()
+                    .should(queries)  // Các điều kiện OR
+                    .minimumShouldMatch("1")  // Ít nhất một điều kiện phải khớp
+                    .build();
+
+            Query searchQuery = new Query.Builder().bool(boolQuery).build();
+
+
+            SearchRequest searchRequest = new SearchRequest.Builder()
+                    .index("products")
+                    .query(searchQuery)
+                    .size(500)
+                    .build();
+
+            // Thực hiện tìm kiếm
+            SearchResponse<ProductResponseDTO> response = openSearchClient.search(searchRequest, ProductResponseDTO.class);
+
+            // Kiểm tra và trả về kết quả
+            if (!response.hits().hits().isEmpty()) {
+                // Chuyển đổi kết quả từ hits thành danh sách ProductResponseDTO
+                return response.hits().hits().stream()
+                        .map(Hit::source)  // Chuyển đổi hit thành đối tượng ProductResponseDTO
+                        .collect(Collectors.toList());
+            } else {
+                return Collections.emptyList();
+            }
+
+        } catch (Exception ex) {
+            log.error("Error while fetching products by slug", ex);
+            return Collections.emptyList();
+        }
+    }
+
+
+    public ProductResponseDTO findBySlug(String slug, String status, boolean deleted) {
+        try {
+            // Điều kiện tìm theo slug (exact match)
+            TermQuery termQuerySlug = new TermQuery.Builder()
+                    .field("slug.keyword")
+                    .value(FieldValue.of(slug))
+                    .build();
+
+            // Điều kiện tìm theo deleted (true/false)
+            TermQuery termQueryDeleted = new TermQuery.Builder()
+                    .field("deleted")
+                    .value(FieldValue.of(deleted))
+                    .build();
+
+            // Tạo danh sách query
+            List<Query> queries = new ArrayList<>();
+            queries.add(new Query.Builder().term(termQuerySlug).build());
+            queries.add(new Query.Builder().term(termQueryDeleted).build());
+
+            MatchQuery matchQueryStatus = new MatchQuery.Builder()
+                    .field("status")
+                    .query(FieldValue.of(status))
+                    .build();
+            queries.add(new Query.Builder().match(matchQueryStatus).build());
+
+
+            // Kết hợp tất cả các điều kiện bằng BoolQuery (AND)
+            BoolQuery boolQuery = new BoolQuery.Builder()
+                    .must(queries)
+                    .build();
+
+            Query searchQuery = new Query.Builder()
+                    .bool(boolQuery)
+                    .build();
+
             SearchRequest searchRequest = new SearchRequest.Builder()
                     .index("products")
                     .query(searchQuery)
                     .size(1)
                     .build();
 
-            // Gửi yêu cầu tìm kiếm
             SearchResponse<ProductResponseDTO> response = openSearchClient.search(searchRequest, ProductResponseDTO.class);
 
-            // Kiểm tra kết quả và trả về sản phẩm tìm thấy
+            // Kiểm tra kết quả
             if (!response.hits().hits().isEmpty()) {
                 return response.hits().hits().getFirst().source();
             } else {
-                return null; // Không tìm thấy sản phẩm
+                return null;
             }
-
         } catch (IOException e) {
             log.error("Error while fetching product by slug", e);
-            return null; // Trả về null nếu gặp lỗi
+            return null;
         }
     }
 
 
+    public List<ProductResponseDTO> getProductByCategoryIDs(List<Long> categoryIds, String status, boolean deleted, int size) {
+        try {
+            Query query = new Query.Builder()
+                    .bool(b -> b
+                            .must(m -> m.terms(t -> t
+                                    .field("category.id")
+                                    .terms(ts -> ts.value(categoryIds.stream()
+                                            .map(FieldValue::of)
+                                            .collect(Collectors.toList())))
+                            ))
+                            .filter(f -> f.term(t -> t
+                                    .field("status.keyword")
+                                    .value(FieldValue.of(status))
+                            ))
+                            .filter(f -> f.term(t -> t
+                                    .field("deleted")
+                                    .value(FieldValue.of(deleted))
+                            ))
+                    )
+                    .build();
+
+            // Tạo request với sort theo position giảm dần
+            SearchRequest searchRequest = new SearchRequest.Builder()
+                    .index("products")
+                    .query(query)
+                    .size(size)
+                    .sort(s -> s
+                            .field(f -> f
+                                    .field("position")
+                                    .order(SortOrder.Desc)
+                            )
+                    )
+                    .build();
+
+            SearchResponse<ProductResponseDTO> response = openSearchClient.search(searchRequest, ProductResponseDTO.class);
+
+            return response.hits().hits().stream()
+                    .map(Hit::source)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("Error while fetching products by categoryIds", e);
+            return Collections.emptyList();
+        }
+    }
 
 
 }

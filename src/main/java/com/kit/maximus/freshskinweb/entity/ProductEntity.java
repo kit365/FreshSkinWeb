@@ -2,7 +2,7 @@ package com.kit.maximus.freshskinweb.entity;
 
 
 import com.fasterxml.jackson.annotation.*;
-import com.kit.maximus.freshskinweb.utils.SkinType;
+import com.kit.maximus.freshskinweb.entity.review.ReviewEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
@@ -18,7 +18,8 @@ import java.util.List;
 @Entity
 @Table(name = "Product", indexes = {
         @Index(name = "idx_title", columnList = "Title"),
-        @Index(name = "idx_slug", columnList = "Slug")
+        @Index(name = "idx_slug", columnList = "Slug"),
+        @Index(name = "idx_brand", columnList = "brandID"),
 })
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "category", "variants", "skinTypes", "reviews"})
 public class ProductEntity extends AbstractEntity {
@@ -76,7 +77,7 @@ public class ProductEntity extends AbstractEntity {
     List<String> thumbnail;
 
     @Column(name = "DiscountPercentage")
-    int discountPercent;
+    double discountPercent;
 
     @Column(name = "Position")
     Integer position;
@@ -85,27 +86,27 @@ public class ProductEntity extends AbstractEntity {
     boolean featured;
 
     /// /////////////
-    @Column(name = "Origin",columnDefinition = "MEDIUMTEXT" )
+    @Column(name = "Origin", columnDefinition = "MEDIUMTEXT")
     String origin;
 
-    @Column(name = "Ingredients",columnDefinition = "MEDIUMTEXT")
+    @Column(name = "Ingredients", columnDefinition = "MEDIUMTEXT")
     String ingredients;
 
-    @Column(name = "UsageInstructions",columnDefinition = "MEDIUMTEXT")
+    @Column(name = "UsageInstructions", columnDefinition = "MEDIUMTEXT")
     String usageInstructions;
 
-    @Column(name = "Benefits",columnDefinition = "MEDIUMTEXT")
+    @Column(name = "Benefits", columnDefinition = "MEDIUMTEXT")
     String benefits;
 
-    @Column(name = "SkinIssues",columnDefinition = "MEDIUMTEXT")
+    @Column(name = "SkinIssues", columnDefinition = "MEDIUMTEXT")
     String skinIssues;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "product")
     List<ReviewEntity> reviews = new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "PromoCode")
-    DiscountEntity discountEntity;
+    @JoinColumn(name = "discountId")
+    DiscountEntity discount;
 
     public void createProductVariant(ProductVariantEntity productVariantEntity) {
         variants.add(productVariantEntity);
@@ -134,7 +135,7 @@ public class ProductEntity extends AbstractEntity {
                 ", usageInstructions='" + usageInstructions + '\'' +
                 ", benefits='" + benefits + '\'' +
                 ", skinIssues='" + skinIssues + '\'' +
-                ", discountEntity='" + discountEntity + '\'' +
+                ", discountEntity='" + discount + '\'' +
                 '}';
     }
 }

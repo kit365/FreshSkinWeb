@@ -1,27 +1,26 @@
 package com.kit.maximus.freshskinweb.mapper;
 
 
-import com.kit.maximus.freshskinweb.dto.request.skin_test.CreationSkinTestRequest;
-import com.kit.maximus.freshskinweb.dto.request.skin_test.UpdationSkinTestRequest;
+import com.kit.maximus.freshskinweb.dto.request.skin_test.SkinTestRequest;
 import com.kit.maximus.freshskinweb.dto.response.SkinTestResponse;
 import com.kit.maximus.freshskinweb.entity.SkinTestEntity;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface SkinTestMapper  {
-    @Mapping(target = "userEntity", ignore = true)
-    @Mapping(target = "skinType", ignore = true)
+    @Mapping(target = "user", ignore = true)
     @Mapping(target = "questionGroup", ignore = true)
-    SkinTestEntity toSkinTestEntity(CreationSkinTestRequest request);
+    @Mapping(target = "notes", ignore = true)
+    @Mapping(target = "totalScore", ignore = true)
+    @Mapping(target = "skinType", ignore = true)
+    SkinTestEntity toSkinTestEntity(SkinTestRequest request);
 
-    @Mapping(target = "userEntity", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "questionGroup", ignore = true)
+    @Mapping(target = "notes", ignore = true)
+    @Mapping(target = "totalScore", ignore = true)
+    @Mapping(target = "skinType", ignore = true)
     SkinTestResponse toSkinTestResponse(SkinTestEntity skinTestEntity);
-
-    @Mapping(target = "userEntity", ignore = true)
-    @Mapping(target = "skinType", ignore = true)
-    @Mapping(target = "questionGroup", ignore = true)
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateSkinTestEntity(@MappingTarget SkinTestEntity skinTestEntity, UpdationSkinTestRequest request);
-
 
 }

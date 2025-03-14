@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
@@ -50,6 +50,18 @@ public class ProductCategoryAdminController {
             return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.BAD_REQUEST.value()).message(message_failed).build();
         }
     }
+
+
+    @PostMapping("indexed")
+    public ResponseAPI<String> indexProductCategory() {
+        boolean result = productCategoryService.indexProductCategory();
+        String message = String.valueOf(result);
+        return ResponseAPI.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message(message)
+                .build();
+    }
+
 
     @GetMapping()
     public ResponseAPI<Map<String, Object>> getAllProductCategory(@RequestParam(defaultValue = "1") int page,

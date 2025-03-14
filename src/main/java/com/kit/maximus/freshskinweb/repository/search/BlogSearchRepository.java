@@ -243,6 +243,88 @@ public class BlogSearchRepository {
         }
     }
 
+    public List<BlogResponse> getBlogsByCategorySlug(String categorySlug, String status, boolean deleted, int page, int size) {
+        try {
+            // Xây dựng query
+            Query query = new Query.Builder()
+                    .bool(b -> b
+                            .must(m -> m.term(t -> t
+                                    .field("blogCategory.slug.keyword") // Sử dụng slug thay vì ID
+                                    .value(FieldValue.of(categorySlug))
+                            ))
+                            .filter(f -> f.term(t -> t
+                                    .field("status.keyword")
+                                    .value(FieldValue.of(status))
+                            ))
+                            .filter(f -> f.term(t -> t
+                                    .field("deleted")
+                                    .value(FieldValue.of(deleted))
+                            ))
+                    )
+                    .build();
+
+            // Tạo request
+            SearchRequest searchRequest = new SearchRequest.Builder()
+                    .index("blogs") // Index Elasticsearch
+                    .query(query)
+                    .from(page * size)
+                    .size(size)
+                    .build();
+
+            // Gửi request đến OpenSearch
+            SearchResponse<BlogResponse> response = openSearchClient.search(searchRequest, BlogResponse.class);
+
+            // Trả về danh sách BlogResponse
+            return response.hits().hits().stream()
+                    .map(Hit::source)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("Error while fetching blogs by categorySlug", e);
+            return Collections.emptyList();
+        }
+    }
+
+    public List<BlogResponse> getBlogsByCategorySlug(String categorySlug, String status, boolean deleted) {
+        try {
+            // Xây dựng query
+            Query query = new Query.Builder()
+                    .bool(b -> b
+                            .must(m -> m.term(t -> t
+                                    .field("blogCategory.slug.keyword") // Sử dụng slug thay vì ID
+                                    .value(FieldValue.of(categorySlug))
+                            ))
+                            .filter(f -> f.term(t -> t
+                                    .field("status.keyword")
+                                    .value(FieldValue.of(status))
+                            ))
+                            .filter(f -> f.term(t -> t
+                                    .field("deleted")
+                                    .value(FieldValue.of(deleted))
+                            ))
+                    )
+                    .build();
+
+            // Tạo request
+            SearchRequest searchRequest = new SearchRequest.Builder()
+                    .index("blogs") // Index Elasticsearch
+                    .query(query)
+                    .size(300)
+                    .build();
+
+            // Gửi request đến OpenSearch
+            SearchResponse<BlogResponse> response = openSearchClient.search(searchRequest, BlogResponse.class);
+
+            // Trả về danh sách BlogResponse
+            return response.hits().hits().stream()
+                    .map(Hit::source)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("Error while fetching blogs by categorySlug", e);
+            return Collections.emptyList();
+        }
+    }
+
+
     public List<BlogResponse> getBlogsByCategoryIds(List<Long> categoryIds, String status, boolean deleted) {
         try {
             Query query = new Query.Builder()

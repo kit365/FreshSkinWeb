@@ -14,7 +14,7 @@ import java.util.Date;
 @AllArgsConstructor
 @ToString
 @Entity
-@Table(name = "SkinTest")
+@Table(name = "SkinResult")
 public class SkinTestEntity extends AbstractEntity {
 
     @Id
@@ -26,9 +26,12 @@ public class SkinTestEntity extends AbstractEntity {
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "User_ID", nullable = true)
     @JsonBackReference
-    UserEntity userEntity;
+    UserEntity user;
 
-    String questionGroup;
+    @ManyToOne(fetch = FetchType.LAZY)
+            @OnDelete(action = OnDeleteAction.SET_NULL)
+            @JoinColumn(name = "questionGroupID", nullable = true)
+    QuestionGroupEntity questionGroup;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
@@ -38,5 +41,8 @@ public class SkinTestEntity extends AbstractEntity {
 
     @Column(name = "notes", columnDefinition = "MEDIUMTEXT")
     String notes;
+
+    @Column(name = "total_score")
+    Long totalScore;
 
 }

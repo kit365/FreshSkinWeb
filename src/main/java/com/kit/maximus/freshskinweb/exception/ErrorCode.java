@@ -2,6 +2,8 @@ package com.kit.maximus.freshskinweb.exception;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.apache.http.HttpStatus;
+import org.opensearch.client.opensearch.nodes.Http;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Getter
@@ -24,10 +26,12 @@ public enum ErrorCode {
     PASSWORD_NOT_BLANK(400, "Mật khẩu không được để trống"),
     PASSWORD_INVALID(400, "Mật khẩu phải từ 8 đến 20 ký tự"),
     PASSWORD_REGEXP_INVALID(400, "Mật khẩu phải chứa ít nhất một chữ cái và một số"),
-    USER_EXISTED(400, "User already existed"),
+    USER_EXISTED(400, "Người dùng này đã tồn tại"),
+    EMAIL_NOT_FOUND(400, "Không tìm thấy email"),
     EMAIL_EXISTED(400, "Email already existed"),
     EMAIL_NOT_BLANK(400, "Email không được để trống"),
     EMAIL_INVALID(400, "Email không hợp lệ"),
+    EMAIL_SEND_ERROR(400, "Lỗi gửi email"),
     PHONE_NUMBER_EXISTED(400, "Phone Number already existed"),
     PHONE_NUMBER_NOT_BLANK(400, "Số điện thoại không được để trống"),
     PHONE_NUMBER_INVALID(400, "Số điện thoại không hợp lệ"),
@@ -94,6 +98,7 @@ public enum ErrorCode {
 
     //SKIN TYPE
     SKIN_TYPE_NOT_FOUND(404, "Không tìm thấy loại da"),
+    INVALID_SKIN_TYPE(404, "Loại da không hợp lệ"),
 
     //SKIN TEST
     SKIN_TEST_NOT_FOUND(404, "Không tìm thấy bài đánh giá loại da nào"),
@@ -102,6 +107,14 @@ public enum ErrorCode {
     RATING_INVALID(400, "Giá trị phải từ 1 đến 5"),
     REVIEW_NOT_FOUND(404, "Không tìm thấy đánh giá"),
 
+
+    //STATUS
+    STATUS_NOT_FOUND(404, "Không tìm thấy trạng thái"),
+    INVALID_STATUS(400, "Trạng thái không hợp lệ"),
+
+    //TYPE USER
+    TYPE_USER_NOT_FOUND(404, "Không tìm thấy loại người dùng"),
+    INVALID_TYPE_USER(400, "Loại người dùng không hợp lệ"),
 
     //SKIN QUESTIONS
     SKIN_QUESTIONS_NOT_FOUND(404, "Không tìm thấy câu hỏi"),
@@ -114,13 +127,57 @@ public enum ErrorCode {
     NOTIFICATION_NOT_FOUND(404, "Không tìm thấy thông báo"),
 
     //ORDERSTATUS
-    ORDER_STATUS_INVALID(404, "Không tìm thấy trạng thái đơn hàng"),
+    ORDER_STATUS_INVALID(400, "Không tìm thấy trạng thái đơn hàng"),
 
     //DISCOUNT
     DISCOUNT_NOT_FOUND(404, "Không tìm thấy mã giảm giá"),
-    DISCOUNT_IS_EXISTED(404, "Mã giảm giá đã tồn tại trước đó"),
-    WRONG_DISCOUNT_TYPE(404, "Loại giảm giá không đúng"),
-    DISCOUNT_TYPE_NOT_BE_NULL(404, "Loại mã lỗi không được null"),
+    DISCOUNT_IS_EXISTED(404, "Mã giảm giá đã tồn tại trong hệ thống"),
+    WRONG_DISCOUNT_TYPE(400, "Loại giảm giá không đúng"),
+    DISCOUNT_TYPE_NOT_BE_NULL(400, "Loại mã lỗi không được null"),
+    DISCOUNT_NOT_NULL(400, "Mã giảm giá không được để trống"),
+    NAME_INVALID(400, "Tên mã giảm giá không được vượt quá 255 ký tự"),
+    DISCOUNT_PERCENTAGE_INVALID_MIN(400, "Phần trăm giảm giá phải lớn hơn 0"),
+    DISCOUNT_PERCENTAGE_INVALID_MAX(400, "Phần trăm giảm giá không được vượt quá 100%"),
+    DISCOUNT_AMOUNT_INVALID(400, "Số tiền giảm giá phải lớn hơn 0"),
+    MAX_DISCOUNT_INVALID(400, "Giảm giá tối đa không được nhỏ hơn 0"),
+    START_DATE_INVALID(400, "Ngày bắt đầu phải từ hiện tại trở đi"),
+    END_DATE_INVALID(400, "Ngày kết thúc phải ở tương lai"),
+    USAGE_LIMIT_INVALID(400, "Số lần sử dụng tối thiểu là 1"),
+
+
+
+
+
+
+
+    //IMAGE
+    IMAGE_PROCESSING_ERROR(400, "Lỗi xử lý ảnh"),
+    FILE_NOT_FOUND(400, "Không tìm thấy tệp"),
+
+    //SETTING
+    SETTING_NOT_FOUND(404, "Không tìm thấy cài đặt"),
+
+    //SERVER
+    INTERNAL_SERVER_ERROR(500, "Lỗi máy chủ"),
+
+    //OTP
+    OTP_EXPIRED(400, "OTP đã hết hạn"),
+    INVALID_OTP(400, "OTP không hợp lệ"),
+
+    //QUESTION_GROUP
+    QUESTION_GROUP_NOT_FOUND(404, "Không tìm thấy nhóm câu hỏi"),
+    QUESTION_GROUP_INVALID(400, "Nhóm câu hỏi không hợp lệ"),
+
+    //SCORE RANGE
+    INVALID_SCORE_RANGE(404,"Điểm nằm ngoài phạm vi điểm số "),
+
+    //Review
+    //ReviewVote
+    CANNOT_VOTE_OWN_REVIEW(400, "Không thể tự vote cho chính mình"),
+    ALREADY_VOTED(400, "Đã vote!"),
+    VOTE_NOT_FOUND(400, "Lượt vote không tồn tại"),
+    VOTE_STATUS_INVALID(404, "Lượt vote không hợp lệ[-1(dislike),0(unvote),1(like)]"),PARENT_REVIEW_NOT_FOUND(404, "Bình luận không tìm thấy, không thể trả lời.")
+
     ;
 
 

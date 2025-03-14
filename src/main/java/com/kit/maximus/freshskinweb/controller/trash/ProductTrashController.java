@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @Slf4j
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -131,7 +131,5 @@ public class ProductTrashController {
         ProductResponseDTO result = productService.showDetail(id);
         return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).data(result).build();
     }
-
-
 
 }

@@ -16,15 +16,15 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 public class SkinAnswerResponse implements Serializable {
 
     Long id;
 
-    String skinOption;
-
-    Long answerScore;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String option;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    SkinQuestionsResponse skinQuestionsResponse;
+    Long score;
 
 }

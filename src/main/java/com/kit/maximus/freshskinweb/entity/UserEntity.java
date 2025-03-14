@@ -1,24 +1,21 @@
 package com.kit.maximus.freshskinweb.entity;
 
 import com.fasterxml.jackson.annotation.*;
-import com.kit.maximus.freshskinweb.utils.RoleEnum;
+import com.kit.maximus.freshskinweb.entity.review.ReviewEntity;
+import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.TypeUser;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.hibernate.annotations.Type;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Setter
 @Getter
@@ -63,19 +60,31 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @Column(name = "Address")
     String address;
 
+//    2 field này được lưu khi user đăng nhập bằng google
+    @Column(name = "provider")
+    private String provider; // GOOGLE, LOCAL, etc.
+
+    @Column(name = "provider_id")
+    private String providerId; // Google user ID
+
     //    TypeUser VARCHAR(10) DEFAULT 'Normal' CHECK (TypeUser IN ('Normal', 'VIP')),
     @Enumerated(EnumType.STRING)
     @Column(name = "Type_user")
     TypeUser typeUser = TypeUser.NORMAL;
 
+    @Column(name = "skin_type")
+    String skinType = SkinType.NORMAL.getVNESEname();
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonManagedReference
     List<OrderEntity> orders  = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "roleId", nullable = true)
     RoleEntity role;
+
+
 
 //    @JsonBackReference
 //    @ManyToMany
@@ -86,23 +95,10 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "user")
     List<ReviewEntity> reviews = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "userEntity")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "user")
     @JsonManagedReference
     List<SkinTestEntity> skinTests = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "userEntity")
-    @JsonManagedReference
-    List<UserDiscountUsageEntity> userDiscountUsageEntities = new ArrayList<>();
-
-    public void createUserDiscountUsageEntity(UserDiscountUsageEntity userDiscountUsageEntity) {
-        userDiscountUsageEntities.add(userDiscountUsageEntity);
-        userDiscountUsageEntity.setUserEntity(this);
-    }
-
-    public void removeUserDiscountUsageEntity(UserDiscountUsageEntity userDiscountUsageEntity) {
-        userDiscountUsageEntities.remove(userDiscountUsageEntity);
-        userDiscountUsageEntity.setUserEntity(null);
-    }
 
     public void createOrder(OrderEntity order) {
             orders.add(order);

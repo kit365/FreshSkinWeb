@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
@@ -65,7 +65,7 @@ public class OrderHomeController {
             @RequestParam(defaultValue = "1") int page,  // Giá trị mặc định là trang 1
             @RequestParam(defaultValue = "10") int size  // Giá trị mặc định là 10 item/trang
     ) {
-        var result = orderService.getAllOrder(status, keyword, orderId, page, size);
+        var result = orderService.getAllOrders(status, keyword, orderId, page, size);
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
