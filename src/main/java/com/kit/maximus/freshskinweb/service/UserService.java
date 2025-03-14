@@ -153,12 +153,12 @@ public class UserService  {
 
     //Method: Xóa tạm thời => deleted thành true
     public boolean deleteTemporarily(Long id) {
+        UserEntity userEntity = getUserEntityById(id);
+
+        log.info("Delete temporarily : {}", id);
+        userEntity.setDeleted(true);
+        userRepository.save(userEntity);
         return true;
-    }
-
-
-    public boolean restore(Long id) {
-        return false;
     }
 
 
@@ -621,5 +621,13 @@ public class UserService  {
             }
         }
     return true;
+    }
+
+    public boolean restore(Long id) {
+        UserEntity userEntity = getUserEntityById(id);
+        userEntity.setDeleted(false);
+        userRepository.save(userEntity);
+
+        return true;
     }
 }
