@@ -44,18 +44,23 @@ public class OAuth2Config {
         return getEnvOrDefault("GOOGLE_SCOPE", "email,profile");
     }
 
-    // Nếu chạy ở localhost -> lấy từ properties, nếu là server -> lấy từ env
     public String getRedirectUri() {
-        return getEnvOrDefault("GOOGLE_REDIRECT_URI", redirectUriFromProperties != null ? redirectUriFromProperties : "http://localhost:8080/oauth2/callback");
-    }
+        String envValue = getEnvOrDefault("GOOGLE_REDIRECT_URI", null);
 
-    @PostConstruct
-    public void init() {
-        System.out.println("🔎 GOOGLE_CLIENT_ID: " + getClientId());
-        System.out.println("🔎 GOOGLE_CLIENT_SECRET: " + getClientSecret());
-        System.out.println("🔎 GOOGLE_REDIRECT_URI: " + getRedirectUri());
-        System.out.println("🔎 GOOGLE_SCOPE: " + getScope());
+        if (envValue == null || envValue.isEmpty()) {
+            envValue = "http://localhost:8080/login/oauth2/code/google"; // Default cho local
+        }
+
+        System.out.println("✅ Redirect URI đang dùng: " + envValue);
+        return envValue;
     }
+//    @PostConstruct
+//    public void init() {
+//        System.out.println("🔎 GOOGLE_CLIENT_ID: " + getClientId());
+//        System.out.println("🔎 GOOGLE_CLIENT_SECRET: " + getClientSecret());
+//        System.out.println("🔎 GOOGLE_REDIRECT_URI: " + getRedirectUri());
+//        System.out.println("🔎 GOOGLE_SCOPE: " + getScope());
+//    }
 
     @Bean
     public ClientRegistrationRepository clientRegistrationRepository() {
