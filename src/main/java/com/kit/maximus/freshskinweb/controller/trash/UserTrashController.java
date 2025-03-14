@@ -1,12 +1,17 @@
 package com.kit.maximus.freshskinweb.controller.trash;
 
+import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
+import com.kit.maximus.freshskinweb.exception.AppException;
+import com.kit.maximus.freshskinweb.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 //@CrossOrigin(origins = "*")
 @Slf4j
@@ -15,4 +20,59 @@ import org.springframework.web.bind.annotation.RestController;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("admin/users/trash")
 public class UserTrashController {
+
+    UserService userService;
+
+    @GetMapping()
+    public ResponseAPI<Map<String, Object>> getTrash(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "updatedAt") String sortKey,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword) {
+
+        log.info("GET TRASH USERS");
+        log.info("Page: {}, Size: {}", page, size);
+        log.info("Sort: {} {}", sortKey, sortDirection);
+        log.info("Filters - Status: {}, Keyword: {}", status, keyword);
+
+        try {
+            Map<String, Object> result = userService.getTrash(
+                    page,
+                    size,
+                    sortKey,
+                    sortDirection,
+                    status,
+                    keyword
+            );
+
+            if (result.get("users") instanceof List && ((List<?>) result.get("users")).isEmpty()) {
+                return ResponseAPI.<Map<String, Object>>builder()
+                        .code(HttpStatus.NOT_FOUND.value())
+                        .message("Không tìm thấy người dùng đã xóa phù hợp.")
+                        .data(result)
+                        .build();
+            }
+
+            return ResponseAPI.<Map<String, Object>>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lấy danh sách người dùng đã xóa thành công.")
+                    .data(result)
+                    .build();
+
+        } catch (AppException e) {
+            log.error("Error getting trash users: {}", e.getMessage());
+            return ResponseAPI.<Map<String, Object>>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message(e.getMessage())
+                    .build();
+        } catch (Exception e) {
+            log.error("Unexpected error getting trash users", e);
+            return ResponseAPI.<Map<String, Object>>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Có lỗi xảy ra khi lấy danh sách người dùng đã xóa.")
+                    .build();
+        }
+    }
 }
