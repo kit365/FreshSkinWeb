@@ -78,6 +78,13 @@ public class UserTrashController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseAPI<UserResponseDTO> showDetailUser(@PathVariable Long id) {
+        String message = "Get user successfully";
+        var result = userService.showDetail(id);
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+    }
+
     @PatchMapping("change-multi")
     public ResponseAPI<String> updataUser(@RequestBody Map<String, Object> request) {
 
