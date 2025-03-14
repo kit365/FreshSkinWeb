@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.controller.admin;
+package com.kit.maximus.freshskinweb.controller.home;
 
 import com.kit.maximus.freshskinweb.dto.request.review.ReviewCreateRequest;
 import com.kit.maximus.freshskinweb.dto.request.review.ReviewUpdateRequest;
@@ -15,12 +15,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping("/reviews")
-public class ReviewController {
+@RequestMapping("/admin/reviews")
+public class ReviewHomeController {
 
     ReviewService reviewService;
 

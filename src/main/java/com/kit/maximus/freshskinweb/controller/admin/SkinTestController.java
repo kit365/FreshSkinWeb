@@ -1,7 +1,6 @@
 package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.kit.maximus.freshskinweb.dto.request.skin_test.CreationSkinTestRequest;
-import com.kit.maximus.freshskinweb.dto.request.skin_test.SkinResultSearchRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_test.UpdationSkinTestRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.SkinTestResponse;
