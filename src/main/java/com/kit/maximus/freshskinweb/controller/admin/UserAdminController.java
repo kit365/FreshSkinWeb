@@ -149,7 +149,7 @@ public class UserAdminController {
     }
 
     @PatchMapping("change-multi")
-    public ResponseAPI<String> updataUser(@RequestBody Map<String, Object> request) {
+    public ResponseAPI<String> updateUser(@RequestBody Map<String, Object> request) {
 
         if (!request.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
@@ -210,6 +210,14 @@ public class UserAdminController {
     public ResponseAPI<UserResponseDTO> deleteUserT(@PathVariable("id") Long id) {
         String message = "Delete user successfully";
         userService.deleteTemporarily(id);
+        log.info(message);
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
+    }
+
+    @PatchMapping("restore/{id}")
+    public ResponseAPI<UserResponseDTO> restoreUser(@PathVariable("id") Long id) {
+        String message = "Phục hồi tài khoản thành công";
+        userService.restore(id);
         log.info(message);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }

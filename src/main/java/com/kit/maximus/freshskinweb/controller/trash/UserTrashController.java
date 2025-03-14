@@ -78,6 +78,14 @@ public class UserTrashController {
         }
     }
 
+    @PatchMapping("restore/{id}")
+    public ResponseAPI<UserResponseDTO> restoreUser(@PathVariable("id") Long id) {
+        String message = "Phục hồi tài khoản thành công";
+        userService.restore(id);
+        log.info(message);
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
+    }
+
     @PatchMapping("change-multi")
     public ResponseAPI<String> updataUser(@RequestBody Map<String, Object> request) {
 
