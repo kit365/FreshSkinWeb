@@ -23,7 +23,8 @@ import java.util.UUID;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     UserRepository userRepository;
-    OAuth2Config oAuth2Config;
+
+
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -49,4 +50,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         return oauth2User;
     }
+
+
+
 }
