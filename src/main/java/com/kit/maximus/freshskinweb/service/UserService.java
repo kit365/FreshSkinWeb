@@ -172,7 +172,7 @@ public class UserService {
         return userMapper.toUserResponseDTO(userRepository.findById(aLong).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)));
     }
 
-    public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String type, String keyword) {
+    public Map<String, Object> getAllUser(int page, int size, String sortKey, String sortDirection, String status, String type, String keyword) {
         // Tạo Pageable với sắp xếp mặc định theo updatedAt
         Pageable pageable = PageRequest.of(
                 page,
@@ -180,15 +180,16 @@ public class UserService {
                 Sort.by(Sort.Direction.fromString(sortDirection.toLowerCase()), sortKey)
         );
 
-        // Bắt đầu với specification để lấy user có role là null
+        // Bắt đầu với specification để lấy user có role là null và deleted = false
         Specification<UserEntity> spec = (root, query, builder) ->
-                builder.isNull(root.get("role"));
+                builder.and(
+                        builder.isNull(root.get("role")),
+                        builder.isFalse(root.get("deleted"))
+                );
 
         // Chỉ áp dụng các bộ lọc nếu có tham số truyền vào
         if (StringUtils.hasText(status) || StringUtils.hasText(type) || StringUtils.hasText(keyword)) {
             try {
-                spec = Specification.where(null);
-
                 // Thêm điều kiện lọc theo status nếu có
                 if (StringUtils.hasText(status)) {
                     try {
@@ -508,7 +509,7 @@ public class UserService {
     }
 
 
-    public Map<String, Object> getAll(String status, String keyword, Pageable pageable) {
+    public Map<String, Object> getAllAccount(String status, String keyword, Pageable pageable) {
         Specification<UserEntity> spec = AccountSpecification.hasRole();
 
         if (keyword != null && !keyword.trim().isEmpty()) {

@@ -132,6 +132,4 @@ public class ProductTrashController {
         return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
-
-
 }

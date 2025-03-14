@@ -88,7 +88,7 @@ public class UserAdminController {
         log.info("Filters - Status: {}, Type: {}, Keyword: {}", status, type, keyword);
 
         try {
-            Map<String, Object> result = userService.getAll(
+            Map<String, Object> result = userService.getAllUser(
                     page,
                     size,
                     sortKey,
@@ -129,21 +129,21 @@ public class UserAdminController {
 
     @GetMapping("/{id}")
     public ResponseAPI<UserResponseDTO> showDetailUser(@PathVariable Long id) {
-        String message = "Get user successfully";
+        String message = "Lấy dữ liệu thành công";
         var result = userService.showDetail(id);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
     @PatchMapping("change-password/{id}")
     public ResponseAPI<Boolean> updateUserPassword(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest request) {
-        String message = "Update user password successfully";
+        String message = "Cập nhật mật khẩu thành công";
         userService.updatePassword(id, request);
         return ResponseAPI.<Boolean>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
     @PatchMapping("edit/{id}")
     public ResponseAPI<UserResponseDTO> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest userRequestDTO) {
-        String message = "Update user successfully";
+        String message = "Cập nhật tài khoản thành công";
         var result = userService.update(id, userRequestDTO);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
@@ -189,7 +189,7 @@ public class UserAdminController {
     @DeleteMapping("delete/{id}")
     public ResponseAPI<UserResponseDTO> deleteUser(@PathVariable("id") Long id) {
         {
-            String message = "Delete user successfully";
+            String message = "Xóa vĩnh viễn tài khoản thành công";
             userService.delete(id);
             log.info(message);
             return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
@@ -199,7 +199,7 @@ public class UserAdminController {
     @DeleteMapping("deleteAll")
     public ResponseAPI<UserResponseDTO> deleteUser() {
         {
-            String message = "Delete all users successfully";
+            String message = "Tất cả tài khoản đã bị xóa";
             userService.deleteAllUsers();
             log.info(message);
             return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
@@ -208,7 +208,7 @@ public class UserAdminController {
 
     @PatchMapping("deleteT/{id}")
     public ResponseAPI<UserResponseDTO> deleteUserT(@PathVariable("id") Long id) {
-        String message = "Delete user successfully";
+        String message = "Xóa tài khoản thành công";
         userService.deleteTemporarily(id);
         log.info(message);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
