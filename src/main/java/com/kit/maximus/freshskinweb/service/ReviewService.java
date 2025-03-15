@@ -6,6 +6,7 @@ import com.kit.maximus.freshskinweb.dto.request.review.ReviewUpdateRequest;
 import com.kit.maximus.freshskinweb.dto.request.review.ReviewVoteRequest;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.review.ReviewResponse;
+import com.kit.maximus.freshskinweb.entity.NotificationEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.entity.review.ReviewEntity;
@@ -18,13 +19,14 @@ import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.repository.review.ReviewRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.repository.review.ReviewVoteRepository;
-import com.kit.maximus.freshskinweb.repository.search.ProductSearchRepository;
+import com.kit.maximus.freshskinweb.service.notification.NotificationEvent;
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -46,7 +48,7 @@ public class ReviewService {
     ReviewVoteRepository reviewVoteRepository;
     ReviewMapper reviewMapper;
     ReviewVoteMapper reviewVoteMapper;
-    ProductSearchRepository productSearchRepository;
+    ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void addVote(ReviewVoteRequest request) {
@@ -72,7 +74,6 @@ public class ReviewService {
             reviewVoteEntity.setVoteType(request.getVoteType());
 
             reviewVoteRepository.save(reviewVoteEntity);
-
 
         }
     }
@@ -112,7 +113,13 @@ public class ReviewService {
                 autoReply(review);
             }
 
-           reviewRepository.save(review);
+            reviewRepository.save(review);
+
+            NotificationEntity notification = new NotificationEntity();
+            notification.setUser(user);
+            notification.setReview(review);
+            notification.setMessage("Bạn có một đánh giá mới trên sản phẩm: " + product.getTitle());
+            eventPublisher.publishEvent(new NotificationEvent(this, notification));
 
         } catch (Exception exception) {
             throw new RuntimeException(exception);
@@ -210,7 +217,6 @@ public class ReviewService {
         ReviewEntity review = reviewRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
         reviewRepository.delete(review);
     }
-
 
 
     public Map<String, Object> getAllByProductSlug(int page, int size, String sortKey, String sortDirection, long id) {

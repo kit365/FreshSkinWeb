@@ -16,8 +16,6 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ReviewResponse {
 
@@ -48,4 +46,6 @@ public class ReviewResponse {
         SimpleDateFormat formatter = new SimpleDateFormat("HH:mm | yyyy-MM-dd");
         return formatter.format(createdAt);
     }
+
+
 }
