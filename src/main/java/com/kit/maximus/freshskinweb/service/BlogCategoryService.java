@@ -333,7 +333,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
 
         Page<BlogCategoryResponse> list = blogCategoryEntities.map(blogCategoryMapper::toBlogCategoryResponse);
 
-        map.put("product_category", list.getContent());
+        map.put("blog_category", list.getContent());
         map.put("currentPage", list.getNumber() + 1);
         map.put("totalItems", list.getTotalElements());
         map.put("totalPages", list.getTotalPages());

@@ -10,15 +10,18 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping("/admin/reviews")
+@RequestMapping("/reviews")
 public class ReviewHomeController {
 
     ReviewService reviewService;
@@ -44,17 +47,6 @@ public class ReviewHomeController {
     }
 
 
-
-    @GetMapping("/show")
-    public ResponseAPI<List<ReviewResponse>> showReview() {
-        String message = "Hiện tất cả đánh giá thành công";
-        return ResponseAPI.<List<ReviewResponse>>builder()
-                .code(HttpStatus.OK.value())
-                .message(message)
-                .data(reviewService.getAllReview())
-                .build();
-    }
-
     @PatchMapping("/update/{id}")
     public ResponseAPI<ReviewResponse> updateReview(@PathVariable("id") Long id, @RequestBody @Valid ReviewUpdateRequest request) {
         String message = "Thay đổi đánh giá thành công";
@@ -74,5 +66,26 @@ public class ReviewHomeController {
                 .code(HttpStatus.OK.value())
                 .message(message)
                 .build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseAPI<?> showAllReview(@RequestParam(value = "page", defaultValue = "1") int page,
+                                        @RequestParam(value = "size", defaultValue = "6") int size,
+                                        @RequestParam(value = "sortKey", defaultValue = "createdAt") String sortKey,
+                                        @RequestParam(value = "sortDirection", defaultValue = "desc") String sortDirection,
+                                        @PathVariable("id") long id) {
+        try {
+            return ResponseAPI.<Map<String,Object>>builder()
+                    .code(HttpStatus.OK.value())
+                    .data(reviewService.getAllByProductSlug(page,size,sortKey,sortDirection,id))
+                    .build();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseAPI.<ReviewResponse>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lỗi trong quá trình show bình luận")
+                    .build();
+        }
+
     }
 }

@@ -1,6 +1,5 @@
 package com.kit.maximus.freshskinweb.service;
 
-import com.kit.maximus.freshskinweb.config.OAuth2Config;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import lombok.AccessLevel;
@@ -24,8 +23,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     UserRepository userRepository;
 
-
-
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oauth2User = super.loadUser(userRequest);
@@ -41,16 +38,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user.setPassword(UUID.randomUUID().toString());
             user.setUsername(UUID.randomUUID().toString());
             user.setEmail(email);
-            user.setFirstName(name);
+            user.setFirstName(name); // tạm thời
             user.setProvider("GOOGLE");
             user.setProviderId(providerId);
             userRepository.save(user);
-            log.info("✅ Saved new user from Google login: " + user.getFirstName());
+            log.info("Saved user from GG login: " + user);
         }
 
         return oauth2User;
     }
-
-
-
 }

@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.kit.maximus.freshskinweb.entity.review.ReviewEntity;
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,9 +38,16 @@ public class NotificationEntity {
     @OnDelete(action = OnDeleteAction.SET_NULL)
     OrderEntity order;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "review_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    ReviewEntity review;
+
+    @Column(name = "message")
     String message;
 
-    boolean is_read;
+    @Column(name = "is_read")
+    Boolean isRead = false; // Use isRead instead of is_read
 
     @Column(name = "Created_at")
     @Temporal(TemporalType.TIMESTAMP)
