@@ -72,6 +72,7 @@ public class OAuth2Config {
                 .authorizationUri("https://accounts.google.com/o/oauth2/auth")
                 .tokenUri("https://oauth2.googleapis.com/token")
                 .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
+                .userNameAttributeName("sub") // kha nang bi thieu field nay => khong tao duoc tai khoan googleRegistration
                 .redirectUri(getRedirectUri())
                 .clientName("Google")
                 .build();
