@@ -1,10 +1,14 @@
 package com.kit.maximus.freshskinweb.service;
 
 import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.SkinCareRountineRequest;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.SkinCareRountineResponse;
+import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.SkinCareRoutineEntity;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
+import com.kit.maximus.freshskinweb.mapper.ProductMapper;
 import com.kit.maximus.freshskinweb.mapper.SkinCareRoutineMapper;
+import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.repository.SkinCareRountineRepository;
 import com.kit.maximus.freshskinweb.repository.SkinTypeRepository;
 import com.kit.maximus.freshskinweb.specification.SkinCareRoutineSpecification;
@@ -103,32 +107,5 @@ public class SkinCareRountineService {
 
         return skinCareRountineRepository.findAll(spec, pageable);
     }
-
-    public Page<SkinCareRountineResponse> getRelatedBySkinType(Long skinTypeId, int page, int size) {
-        List<String> orderedCategories = List.of(
-                "Tẩy trang",
-                "Sữa rửa mặt",
-                "Tẩy tế bào chết",
-                "Toner",
-                "Serum",
-                "Kem dưỡng ẩm",
-                "Kem chống nắng"
-        );
-
-        // Create base specification
-        Specification<SkinCareRoutineEntity> spec = Specification
-                .where(SkinCareRoutineSpecification.hasActiveSkinType(skinTypeId))
-                .and(SkinCareRoutineSpecification.isNotDeleted())
-                .and(SkinCareRoutineSpecification.hasCategories(orderedCategories));
-
-        // Create sort by category order
-        Sort sort = Sort.by(Sort.Direction.ASC, "category")
-                .and(Sort.by(Sort.Direction.DESC, "updatedAt"));
-
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        Page<SkinCareRoutineEntity> entityPage = skinCareRountineRepository.findAll(spec, pageable);
-
-        return entityPage.map(skinCareRoutineMapper::toResponse);
-    }    }
+}
 

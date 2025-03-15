@@ -16,8 +16,15 @@ import com.kit.maximus.freshskinweb.repository.ProductCategoryRepository;
 import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.repository.SkinTypeRepository;
 import com.kit.maximus.freshskinweb.repository.search.ProductSearchRepository;
+import com.kit.maximus.freshskinweb.specification.SkinCareRoutineSpecification;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.Status;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -61,6 +68,18 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     Cloudinary cloudinary;
 
     ProductSearchRepository productSearchRepository;
+
+
+    // Là annotation của JPA để inject EntityManager instance
+    // Quản lý lifecycle của EntityManager
+    // Đảm bảo thread-safe khi nhiều request đồng thời truy cập
+    @PersistenceContext
+    EntityManager entityManager;
+    //EntityManager được sử dụng để:
+        //+ Thực hiện các thao tác CRUD với database
+        //+ Quản lý các entity và lifecycle của chúng
+        //+ Thực thi native SQL queries
+        //+ Cache các entity
 
     @Lazy
     ReviewService reviewService; //giảm tỉ lệ bị vòng lap
@@ -1352,7 +1371,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                     }
 
 
-
                     return categoryResponse;
                 }).collect(Collectors.toList()));
             }
@@ -1386,6 +1404,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         return productResponseDTOs;
     }
+
     private ProductResponseDTO mapProductIndexResponsesDTO(ProductEntity product) {
         ProductResponseDTO dto = productMapper.productToProductResponseDTO(product);
 
@@ -1465,7 +1484,103 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return false;
     }
 
+    //    Hỗ trợ cho lấy 7 loại danh mục sản phảm cô lộ trình da
+    public Page<ProductRoutineDTO> getProductsBySkinTypeAndCategories(Long skinTypeId, int page, int size) {
+        List<String> orderedCategories = List.of(
+                "Nước tẩy trang",
+                "Sữa rửa mặt",
+                "Tẩy tế bào chết",
+                "Toner / Nước cân bằng da",
+                "Hỗ trợ trị mụn",
+                "Serum / Tinh Chất",
+                "Dưỡng ẩm",
+                "Chống nắng da mặt"
+        );
 
+        String sql = """
+        WITH RankedProducts AS (
+            SELECT p.*,
+                   c.title as category_title,
+                   ROW_NUMBER() OVER (PARTITION BY c.title ORDER BY p.product_id) as rn
+            FROM product p
+            JOIN product_category pc ON p.product_id = pc.productid
+            JOIN category c ON pc.categoryid = c.id
+            JOIN product_skin_type pst ON p.product_id = pst.product_id
+            WHERE pst.skin_type_id = :skinTypeId
+            AND c.title IN :categories
+            AND p.deleted = false
+            AND p.status = 'ACTIVE'
+        )
+        SELECT * FROM RankedProducts
+        WHERE rn = 1
+        ORDER BY FIELD(category_title, :orderList)
+    """;
+
+        Query query = entityManager.createNativeQuery(sql, ProductEntity.class)
+                .setParameter("skinTypeId", skinTypeId)
+                .setParameter("categories", orderedCategories)
+                .setParameter("orderList", orderedCategories.stream()
+                        .collect(Collectors.joining("','", "'", "'"))); // Format: 'cat1','cat2',...
+
+        List<ProductEntity> products = query.getResultList();
+
+        // Apply pagination
+        Pageable pageable = PageRequest.of(page, size);
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), products.size());
+
+        List<ProductRoutineDTO> dtoList = products.subList(start, end)
+                .stream()
+                .map(this::mapToRoutineDTO)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(dtoList, pageable, products.size());
+    }
+
+    private ProductRoutineDTO mapToRoutineDTO(ProductEntity product) {
+        ProductRoutineDTO dto = new ProductRoutineDTO();
+        dto.setId(product.getId());
+        dto.setTitle(product.getTitle());
+        dto.setSlug(product.getSlug());
+        dto.setThumbnail(product.getThumbnail());
+
+        if (product.getBrand() != null) {
+            ProductBrandResponse brandResponse = new ProductBrandResponse();
+            brandResponse.setId(product.getBrand().getId());
+            brandResponse.setTitle(product.getBrand().getTitle());
+            brandResponse.setSlug(product.getBrand().getSlug());
+            dto.setBrand(brandResponse);
+        }
+
+        if (product.getCategory() != null) {
+            List<ProductCategoryResponse> categoryResponses = product.getCategory().stream()
+                    .map(category -> {
+                        ProductCategoryResponse response = new ProductCategoryResponse();
+                        response.setId(category.getId());
+                        response.setTitle(category.getTitle());
+                        response.setSlug(category.getSlug());
+                        return response;
+                    })
+                    .collect(Collectors.toList());
+            dto.setCategory(categoryResponses);
+        }
+
+        if (product.getVariants() != null) {
+            List<ProductVariantResponse> variantResponses = product.getVariants().stream()
+                    .map(variant -> {
+                        ProductVariantResponse response = new ProductVariantResponse();
+                        response.setId(variant.getId());
+                        response.setPrice(variant.getPrice());
+                        response.setVolume(variant.getVolume());
+                        response.setUnit(variant.getUnit());
+                        return response;
+                    })
+                    .collect(Collectors.toList());
+            dto.setVariants(variantResponses);
+        }
+
+        return dto;
+    }
 }
 
 

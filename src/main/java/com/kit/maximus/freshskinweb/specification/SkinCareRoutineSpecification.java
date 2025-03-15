@@ -1,10 +1,14 @@
 package com.kit.maximus.freshskinweb.specification;
 
+import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
+import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.SkinCareRoutineEntity;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
 import com.kit.maximus.freshskinweb.utils.Status;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
@@ -36,21 +40,37 @@ public class SkinCareRoutineSpecification {
         };
     }
 
-    public static Specification<SkinCareRoutineEntity> hasActiveSkinType(Long skinTypeId) {
-        return (root, query, cb) -> {
-            if (skinTypeId == null) return null;
-            return cb.and(
-                    cb.equal(root.get("skinType").get("id"), skinTypeId),
-                    cb.equal(root.get("skinType").get("status"), Status.ACTIVE)
-            );
-        };
-    }
-
     public static Specification<SkinCareRoutineEntity> isNotDeleted() {
         return (root, query, cb) -> cb.equal(root.get("deleted"), false);
     }
 
-    public static Specification<SkinCareRoutineEntity> hasCategories(List<String> categories) {
-        return (root, query, cb) -> root.get("category").in(categories);
+    public static Specification<ProductEntity> getProductsBySkinTypeAndCategories(Long skinTypeId, List<String> categories) {
+        return (root, query, cb) -> {
+            Join<ProductEntity, SkinTypeEntity> skinTypeJoin = root.join("skinTypes");
+            Join<ProductEntity, ProductCategoryEntity> categoryJoin = root.join("category");
+
+            // Điều kiện cho skinType
+            Predicate skinTypePredicate = cb.equal(skinTypeJoin.get("id"), skinTypeId);
+
+            // Sử dụng title thay vì name
+            Expression<String> categoryExpression = categoryJoin.get("title");
+
+            // Điều kiện category nằm trong danh sách
+            Predicate categoryPredicate = categoryExpression.in(categories);
+
+            // Thêm điều kiện không bị xóa
+            Predicate notDeleted = cb.equal(root.get("deleted"), false);
+
+            // Sắp xếp theo thứ tự category
+            query.orderBy(cb.asc(cb.function(
+                    "FIELD",
+                    Integer.class,
+                    categoryExpression,
+                    cb.literal(String.join(",", categories))
+            )));
+
+            return cb.and(skinTypePredicate, categoryPredicate, notDeleted);
+        };
     }
+
 }
