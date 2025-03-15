@@ -35,10 +35,12 @@ public class SkinCareRountineService {
     public boolean add(SkinCareRountineRequest request) {
 
         SkinCareRoutineEntity skinCareRountineEntity = skinCareRoutineMapper.toEntity(request);
-        SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(request.getSkinType()).orElse(null);
+        SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(request.getSkinTypeEntity()).orElse(null);
 
         if(skinTypeEntity != null) {
             skinCareRountineEntity.setSkinTypeEntity(skinTypeEntity);
+        } else {
+            skinCareRountineEntity.setSkinTypeEntity(null);
         }
 
         skinCareRountineRepository.save(skinCareRountineEntity);
@@ -46,17 +48,18 @@ public class SkinCareRountineService {
     }
 
     public SkinCareRountineResponse update(Long id, SkinCareRountineRequest request) {
-        SkinCareRoutineEntity skinCareRoutineEntity = skinCareRountineRepository.findById(id).orElse(null);
-
-        SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(request.getSkinType()).orElse(null);
+        SkinCareRoutineEntity skinCareRountineEntity = skinCareRountineRepository.findById(id).orElse(null);
+        SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(request.getSkinTypeEntity()).orElse(null);
 
         if(skinTypeEntity != null) {
-            skinCareRoutineEntity.setSkinTypeEntity(skinTypeEntity);
+            skinCareRountineEntity.setSkinTypeEntity(skinTypeEntity);
+        } else {
+            skinCareRountineEntity.setSkinTypeEntity(skinCareRountineEntity.getSkinTypeEntity());
         }
 
-        if(skinCareRoutineEntity != null) {
-            skinCareRoutineMapper.updateEntity(request , skinCareRoutineEntity);
-            return skinCareRoutineMapper.toResponse(skinCareRoutineEntity);
+        if(skinCareRountineEntity != null) {
+            skinCareRoutineMapper.updateEntity(request , skinCareRountineEntity);
+            return skinCareRoutineMapper.toResponse(skinCareRountineEntity);
         }
         return null;
     }
@@ -79,15 +82,53 @@ public class SkinCareRountineService {
         return null;
     }
 
+    public Page<SkinCareRoutineEntity> getFilteredSkinCareRoutines(Status status, String keyword, Pageable pageable) {
+        Specification<SkinCareRoutineEntity> spec = Specification.where(null);
 
-        public Page<SkinCareRoutineEntity> getFilteredSkinCareRoutines (Status status, String keyword, Pageable pageable)
-        {
-            Specification<SkinCareRoutineEntity> spec = Specification
-                    .where(SkinCareRoutineSpecification.filterByStatus(status))
-                    .and(SkinCareRoutineSpecification.filterByKeyword(keyword))
-                    .and(SkinCareRoutineSpecification.sortByUpdatedAt());
-
-            return skinCareRountineRepository.findAll(spec, pageable);
+        // Add status filter if provided
+        if (status != null) {
+            spec = spec.and(SkinCareRoutineSpecification.filterByStatus(status));
         }
+
+        // Add keyword filter if provided
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            spec = spec.and(SkinCareRoutineSpecification.filterByKeyword(keyword.trim()));
+        }
+
+        // Always apply sorting by updatedAt
+        spec = spec.and(SkinCareRoutineSpecification.sortByUpdatedAt());
+
+        // Always filter out deleted items
+        spec = spec.and(SkinCareRoutineSpecification.isNotDeleted());
+
+        return skinCareRountineRepository.findAll(spec, pageable);
     }
+
+    public Page<SkinCareRountineResponse> getRelatedBySkinType(Long skinTypeId, int page, int size) {
+        List<String> orderedCategories = List.of(
+                "Tẩy trang",
+                "Sữa rửa mặt",
+                "Tẩy tế bào chết",
+                "Toner",
+                "Serum",
+                "Kem dưỡng ẩm",
+                "Kem chống nắng"
+        );
+
+        // Create base specification
+        Specification<SkinCareRoutineEntity> spec = Specification
+                .where(SkinCareRoutineSpecification.hasActiveSkinType(skinTypeId))
+                .and(SkinCareRoutineSpecification.isNotDeleted())
+                .and(SkinCareRoutineSpecification.hasCategories(orderedCategories));
+
+        // Create sort by category order
+        Sort sort = Sort.by(Sort.Direction.ASC, "category")
+                .and(Sort.by(Sort.Direction.DESC, "updatedAt"));
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<SkinCareRoutineEntity> entityPage = skinCareRountineRepository.findAll(spec, pageable);
+
+        return entityPage.map(skinCareRoutineMapper::toResponse);
+    }    }
 

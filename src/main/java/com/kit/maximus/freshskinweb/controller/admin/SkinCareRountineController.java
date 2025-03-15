@@ -54,4 +54,14 @@ public class SkinCareRountineController {
     ) {
         return skinCareRountineService.getFilteredSkinCareRoutines(status, keyword, PageRequest.of(page, size));
     }
+
+    @GetMapping("/related/{skinTypeId}")
+    public ResponseEntity<Page<SkinCareRountineResponse>> getRelatedProducts(
+            @PathVariable Long skinTypeId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Page<SkinCareRountineResponse> response = skinCareRountineService.getRelatedBySkinType(skinTypeId, page, size);
+        return ResponseEntity.ok(response);
+    }
 }

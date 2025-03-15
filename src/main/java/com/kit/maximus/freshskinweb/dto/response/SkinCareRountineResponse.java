@@ -16,10 +16,9 @@ import java.util.Date;
 @NoArgsConstructor
 public class SkinCareRountineResponse {
     Long id;
-    SkinTypeResponse skinType;
-    String morningRoutine;
-    String mveningRoutine;
-    String mpecialCare;
+    SkinTypeResponse skinTypeEntity;
+    String rountine;
+
 
     boolean deleted;
 

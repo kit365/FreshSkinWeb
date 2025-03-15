@@ -117,6 +117,50 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
         return response;
     }
 
+    public Map<String, Object> getAllByUser(Long userId, int page, int size) {
+        Sort sort = Sort.by(
+                Sort.Order.asc("isRead"),
+                Sort.Order.desc("time")
+        );
+
+        PageRequest pageable = PageRequest.of(page, size, sort);
+
+        // Sử dụng Specification để lọc theo userId
+        Specification<NotificationEntity> spec = NotificationSpecification.hasUserId(userId);
+        Page<NotificationEntity> entityPage = notificationRepository.findAll(spec, pageable);
+
+        List<NotificationResponse> notifications = entityPage.getContent().stream()
+                .map(entity -> {
+                    NotificationResponse response = new NotificationResponse();
+                    response.setId(entity.getId());
+                    response.setMessage(entity.getMessage());
+                    response.setIsRead(entity.getIsRead());
+                    response.setTime(entity.getTime());
+                    response.setDeleted(entity.isDeleted());
+                    response.setStatus(entity.getStatus().name());
+
+                    if (entity.getUser() != null) {
+                        response.setUsername(entity.getUser().getUsername());
+                    }
+                    if (entity.getOrder() != null) {
+                        response.setOrder(String.valueOf(entity.getOrder().getOrderId()));
+                    }
+                    if (entity.getReview() != null) {
+                        response.setReview(entity.getReview().getReviewId());
+                    }
+
+                    return response;
+                })
+                .collect(Collectors.toList());
+
+        return Map.of(
+                "notifications", notifications,
+                "page", entityPage.getNumber(),
+                "totalElements", entityPage.getTotalElements(),
+                "totalPages", entityPage.getTotalPages()
+        );
+    }
+
     @Override
     public String update(List<Long> id, String status) {
         return "";
