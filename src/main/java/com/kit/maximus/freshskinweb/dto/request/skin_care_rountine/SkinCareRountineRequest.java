@@ -11,8 +11,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SkinCareRountineRequest {
-    Long skinType;
-    String morningRoutine;
-    String mveningRoutine;
-    String mpecialCare;
+    Long skinTypeEntity;
+    String rountine;
 }

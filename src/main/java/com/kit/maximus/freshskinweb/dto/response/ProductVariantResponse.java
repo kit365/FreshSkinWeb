@@ -30,4 +30,5 @@ public class ProductVariantResponse {
     List<Long> productID;
 
     ProductResponseDTO product;
+
 }

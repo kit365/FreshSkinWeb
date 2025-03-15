@@ -37,4 +37,8 @@ public class NotificationSpecification {
             return cb.conjunction();
         };
     }
+
+    public static Specification<NotificationEntity> hasUserId(Long userId) {
+        return (root, query, cb) -> cb.equal(root.get("user").get("id"), userId);
+    }
 }

@@ -24,13 +24,7 @@ public class SkinCareRoutineEntity extends AbstractEntity {
     @JsonBackReference
     SkinTypeEntity skinTypeEntity;
 
-    @Column(name = "MorningRoutine")
-    String morningRoutine;
-
-    @Column(name = "EveningRoutine")
-    String eveningRoutine;
-
-    @Column(name = "SpecialCare")
-    String specialCare;
+    @Column(name = "Rountine",columnDefinition = "MEDIUMTEXT")
+    String rountine;
 
 }
