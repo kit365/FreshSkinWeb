@@ -77,7 +77,7 @@ public class OrderHomeController {
     }
 
     // TRA CỨU ĐƠN HÀNG
-    @GetMapping("/track/{orderId}")
+    @GetMapping("/{orderId}")
     public ResponseAPI<OrderResponse> trackOrder(@PathVariable String orderId) {
         var order = orderService.getOrderById(orderId);
         return ResponseAPI.<OrderResponse>builder()
@@ -86,15 +86,4 @@ public class OrderHomeController {
                 .data(order)
                 .build();
     }
-
-    @GetMapping("/{id}")
-    public ResponseAPI<OrderResponse> getOrderById(@PathVariable String id) {
-        String message = "Tạo đơn hàng thành công";
-        var order = orderService.getOrderById(id);
-
-        return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
-    }
-
-
-
 }
