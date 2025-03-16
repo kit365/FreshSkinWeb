@@ -101,10 +101,10 @@ public class ProductEntity extends AbstractEntity {
     @Column(name = "SkinIssues", columnDefinition = "MEDIUMTEXT")
     String skinIssues;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "product")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "product")
     List<ReviewEntity> reviews = new ArrayList<>();
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "discountId")
     DiscountEntity discount;
 

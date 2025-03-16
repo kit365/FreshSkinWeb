@@ -1,9 +1,7 @@
-package com.kit.maximus.freshskinweb.service;
-
+package com.kit.maximus.freshskinweb.service.notification;
 import com.kit.maximus.freshskinweb.dto.request.notification.CreationNotificationRequest;
 import com.kit.maximus.freshskinweb.dto.request.notification.UpdationNotificationRequest;
 import com.kit.maximus.freshskinweb.dto.response.NotificationResponse;
-import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.NotificationEntity;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
@@ -15,29 +13,27 @@ import com.kit.maximus.freshskinweb.repository.NotificationRepository;
 import com.kit.maximus.freshskinweb.repository.OrderRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.repository.review.ReviewRepository;
+import com.kit.maximus.freshskinweb.service.BaseService;
 import com.kit.maximus.freshskinweb.specification.NotificationSpecification;
-import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import javax.management.Notification;
-import java.awt.print.Pageable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class NotificationService implements BaseService<NotificationResponse, CreationNotificationRequest, UpdationNotificationRequest, Long> {
 
     NotificationRepository notificationRepository;
@@ -45,6 +41,7 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
     UserRepository userRepository;
     OrderRepository orderRepository;
     ReviewRepository reviewRepository;
+    ApplicationEventPublisher eventPublisher; //công cụ phát sự kiện,
 
 
     @Override
@@ -75,7 +72,8 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
                     .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
             entity.setReview(reviewEntity);
 
-            String reviewMessage = reviewEntity.getUser().getUsername() + " đã trả lời tin nhắn của bạn";
+
+            String reviewMessage = STR."\{reviewEntity.getUser().getUsername()} đã trả lời tin nhắn của bạn";
             entity.setMessage(reviewMessage);
         }
 
@@ -84,9 +82,14 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
             entity.setMessage(request.getMessage());
         }
 
-        notificationRepository.save(entity);
+//        notificationRepository.save(entity); //nếu bị deplay th bỏ ở bên kia mà lưu ở đay
+
+        //Phát event khi lưu
+        eventPublisher.publishEvent(new NotificationEvent(this, entity));
+
         return true;
-}
+    }
+
 
     @Override
     public NotificationResponse update(Long id, UpdationNotificationRequest request) {
@@ -101,18 +104,18 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
         response.setMessage(savedEntity.getMessage());
         response.setIsRead(savedEntity.getIsRead());
         response.setTime(savedEntity.getTime());
-        response.setDeleted(savedEntity.isDeleted());
+//        response.setDeleted(savedEntity.isDeleted());
         response.setStatus(savedEntity.getStatus().name());
 
-        if (savedEntity.getUser() != null) {
-            response.setUsername(savedEntity.getUser().getUsername());
-        }
-        if (savedEntity.getOrder() != null) {
-            response.setOrder(String.valueOf(savedEntity.getOrder().getOrderId()));
-        }
-        if (savedEntity.getReview() != null) {
-            response.setReview(savedEntity.getReview().getReviewId());
-        }
+//        if (savedEntity.getUser() != null) {
+//            response.setUsername(savedEntity.getUser().getUsername());
+//        }
+//        if (savedEntity.getOrder() != null) {
+//            response.setOrder(String.valueOf(savedEntity.getOrder().getOrderId()));
+//        }
+//        if (savedEntity.getReview() != null) {
+//            response.setReview(savedEntity.getReview().getReviewId());
+//        }
 
         return response;
     }
@@ -136,18 +139,18 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
                     response.setMessage(entity.getMessage());
                     response.setIsRead(entity.getIsRead());
                     response.setTime(entity.getTime());
-                    response.setDeleted(entity.isDeleted());
+//                    response.setDeleted(entity.isDeleted());
                     response.setStatus(entity.getStatus().name());
 
-                    if (entity.getUser() != null) {
-                        response.setUsername(entity.getUser().getUsername());
-                    }
-                    if (entity.getOrder() != null) {
-                        response.setOrder(String.valueOf(entity.getOrder().getOrderId()));
-                    }
-                    if (entity.getReview() != null) {
-                        response.setReview(entity.getReview().getReviewId());
-                    }
+//                    if (entity.getUser() != null) {
+//                        response.setUsername(entity.getUser().getUsername());
+//                    }
+//                    if (entity.getOrder() != null) {
+//                        response.setOrder(String.valueOf(entity.getOrder().getOrderId()));
+//                    }
+//                    if (entity.getReview() != null) {
+//                        response.setReview(entity.getReview().getReviewId());
+//                    }
 
                     return response;
                 })
@@ -208,18 +211,18 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
                     response.setMessage(entity.getMessage());
                     response.setIsRead(entity.getIsRead());
                     response.setTime(entity.getTime());
-                    response.setDeleted(entity.isDeleted());
+//                    response.setDeleted(entity.isDeleted());
                     response.setStatus(entity.getStatus().name());
 
-                    if (entity.getUser() != null) {
-                        response.setUsername(entity.getUser().getUsername());
-                    }
-                    if (entity.getOrder() != null) {
-                        response.setOrder(String.valueOf(entity.getOrder().getOrderId()));
-                    }
-                    if (entity.getReview() != null) {
-                        response.setReview(entity.getReview().getReviewId());
-                    }
+//                    if (entity.getUser() != null) {
+//                        response.setUsername(entity.getUser().getUsername());
+//                    }
+//                    if (entity.getOrder() != null) {
+//                        response.setOrder(String.valueOf(entity.getOrder().getOrderId()));
+//                    }
+//                    if (entity.getReview() != null) {
+//                        response.setReview(entity.getReview().getReviewId());
+//                    }
 
                     return response;
                 })

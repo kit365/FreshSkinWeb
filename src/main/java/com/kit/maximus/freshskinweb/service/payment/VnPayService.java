@@ -31,6 +31,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Slf4j
@@ -105,6 +107,9 @@ public class VnPayService implements PaymentService {
 
             Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+//            ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh"); // Đặt múi giờ Việt Nam
+
+//            String vnp_CreateDate = LocalDateTime.now(zoneId).format(formatter); /neu bi loi khi render len sever
             String vnp_CreateDate = formatter.format(cld.getTime());
 
             params.put("vnp_CreateDate", vnp_CreateDate);

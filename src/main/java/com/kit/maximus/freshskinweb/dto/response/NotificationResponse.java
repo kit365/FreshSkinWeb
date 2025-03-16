@@ -21,14 +21,14 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class NotificationResponse {
     Long id;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    String username;
+//    @JsonInclude(JsonInclude.Include.NON_NULL)
+//    String username;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    String order;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    Long review;
+//    @JsonInclude(JsonInclude.Include.NON_NULL)
+//    String order;
+//
+//    @JsonInclude(JsonInclude.Include.NON_NULL)
+//    Long review;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String message;
@@ -39,8 +39,7 @@ public class NotificationResponse {
     String status;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     Date time;
 
-    boolean deleted;
 }

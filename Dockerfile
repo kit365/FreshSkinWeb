@@ -12,4 +12,5 @@ WORKDIR /app
 COPY --from=build /app/target/FreshSkinWeb-0.0.1-SNAPSHOT.jar FreshSkinWeb.jar
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "FreshSkinWeb.jar"]
+# Thêm --enable-preview vào ENTRYPOINT
+ENTRYPOINT ["java", "--enable-preview", "-jar", "FreshSkinWeb.jar"]
