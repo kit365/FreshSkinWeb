@@ -1586,6 +1586,14 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     public long countProduct() {
         return productRepository.count();
     }
+
+    //top sản phẩm bán chạy
+
+    public List<ProductResponseDTO> top10SellingProducts() {
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<ProductEntity> result = productRepository.findTop10SellingProducts(pageRequest);
+        return mapProductResponsesDTO(result);
+    }
 }
 
 

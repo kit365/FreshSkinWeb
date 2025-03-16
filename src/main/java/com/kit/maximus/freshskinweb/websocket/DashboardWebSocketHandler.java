@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -53,6 +55,7 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
         CompletableFuture<Long> totalFeedback = dashboardService.getTotalReviews();
         CompletableFuture<Long> totalUser = dashboardService.getTotalUsers();
         CompletableFuture<Long> totalProduct = dashboardService.getTotalProducts();
+        CompletableFuture<List<ProductResponseDTO>> top10ProductSelling = dashboardService.getTop10SellingProducts();
 
         CompletableFuture.allOf(
                 totalRevenue,
@@ -63,7 +66,8 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
                 totalBlogs,
                 totalFeedback,
                 totalUser,
-                totalProduct
+                totalProduct,
+                top10ProductSelling
         ).join();
 
 
@@ -78,6 +82,7 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
             data.put("totalFeedbacks", totalFeedback.get());
             data.put("totalUsers", totalUser.get());
             data.put("totalProducts", totalProduct.get());
+            data.put("top10ProductSelling", top10ProductSelling.get());
 
             // Chuyển dữ liệu thành JSON và gửi qua WebSocket
             String JsonData = new ObjectMapper().writeValueAsString(data);
