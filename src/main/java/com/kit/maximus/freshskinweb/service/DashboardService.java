@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.service;
 
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -7,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -64,6 +66,11 @@ public class DashboardService {
     @Async
     public CompletableFuture<Long> getTotalProducts() {
         return CompletableFuture.completedFuture(productService.countProduct());
+    }
+
+    @Async
+    public  CompletableFuture<List<ProductResponseDTO>> getTop10SellingProducts() {
+        return CompletableFuture.completedFuture(productService.top10SellingProducts());
     }
 
 
