@@ -276,6 +276,54 @@ public class OrderService {
 
 //    }
 
+    /*PHÂN TRANG ORDER CHO USER */
+    public Map<String, Object> getUserOrders(Long userId, OrderStatus status, String keyword,
+                                             String orderId, int page, int size,
+                                             String sortBy, OrderStatus priorityStatus) {
+        Map<String, Object> map = new HashMap<>();
+        int p = Math.max(page - 1, 0);
+
+        Specification<OrderEntity> spec = Specification
+                .where(OrderSpecification.isNotDeleted())
+                .and(OrderSpecification.hasUserId(userId))
+                .and(OrderSpecification.hasStatus(status))
+                .and(OrderSpecification.hasKeyword(keyword))
+                .and(OrderSpecification.hasOrderId(orderId));
+
+        Pageable pageable;
+        Page<OrderEntity> ordersPage;
+
+        if (sortBy != null && sortBy.equals("updatedAt")) {
+            pageable = PageRequest.of(p, size, Sort.by("updatedAt").descending());
+            ordersPage = orderRepository.findAll(spec, pageable);
+        } else {
+            pageable = PageRequest.of(p, size);
+            spec = spec.and(OrderSpecification.orderByStatusPriorityAndDate(priorityStatus));
+            ordersPage = orderRepository.findAll(spec, pageable);
+        }
+
+        List<OrderResponse> orderResponses = ordersPage.getContent().stream()
+                .map(orderEntity -> {
+                    OrderResponse response = orderMapper.toOrderResponse(orderEntity);
+                    if (orderEntity.getOrderItems() != null) {
+                        response.setOrderItems(orderEntity.getOrderItems().stream()
+                                .map(this::createOrderItemResponse)
+                                .collect(Collectors.toList()));
+                    }
+                    return response;
+                })
+                .collect(Collectors.toList());
+
+        map.put("orders", orderResponses);
+        map.put("currentPage", ordersPage.getNumber() + 1);
+        map.put("totalItems", ordersPage.getTotalElements());
+        map.put("totalPages", ordersPage.getTotalPages());
+        map.put("pageSize", ordersPage.getSize());
+
+        return map;
+    }
+
+    /*PHÂN TRANG ORDER CHO ADMIN */
     /* PHẦN NÀY TÍCH HƠP THÊM BỘ LỌC THÔNG TIN THÔNG QUA Status và user */
     /* TÍCH HỢP THÊM TÌM KIẾM INDEX CỦA DATABASE, GIÚP TÌM NHANH HƠN TRÁNH PHẢI CHẠY NHIỀU VÒNG FOR */
     public Map<String, Object> getAllOrders(OrderStatus status, String keyword, String orderId,

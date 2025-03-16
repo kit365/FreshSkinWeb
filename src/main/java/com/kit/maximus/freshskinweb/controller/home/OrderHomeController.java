@@ -57,8 +57,10 @@ public class OrderHomeController {
 //    }
 
 
-    @GetMapping
-    public ResponseAPI<Map<String, Object>> getAllOrder(
+    //SHOW LIST ORDER THEO USER
+    @GetMapping("/user/{userId}")
+    public ResponseAPI<Map<String, Object>> getUserOrders(
+            @PathVariable Long userId,
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String orderId,
@@ -67,14 +69,23 @@ public class OrderHomeController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        var result = orderService.getAllOrders(status, keyword, orderId, page, size, sortBy, priorityStatus);
+        var result = orderService.getUserOrders(userId, status, keyword, orderId, page, size, sortBy, priorityStatus);
         return ResponseAPI.<Map<String, Object>>builder()
                 .code(HttpStatus.OK.value())
                 .data(result)
                 .build();
     }
 
-
+    // TRA CỨU ĐƠN HÀNG
+    @GetMapping("/track/{orderId}")
+    public ResponseAPI<OrderResponse> trackOrder(@PathVariable String orderId) {
+        var order = orderService.getOrderById(orderId);
+        return ResponseAPI.<OrderResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Tra cứu đơn hàng thành công, đơn hàng: " + orderId)
+                .data(order)
+                .build();
+    }
 
     @GetMapping("/{id}")
     public ResponseAPI<OrderResponse> getOrderById(@PathVariable String id) {
