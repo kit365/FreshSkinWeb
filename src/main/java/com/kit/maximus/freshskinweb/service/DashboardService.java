@@ -6,6 +6,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
@@ -14,9 +16,9 @@ public class DashboardService {
 
     OrderService orderService;
 
-//    public Double getTotalRevenue() {
-//        return orderService.countRevenue();
-//    }
+    public String getTotalRevenue() {
+        return orderService.countRevenue();
+    }
 
     public long getOrderCompleted() {
         return orderService.countCompleted();
