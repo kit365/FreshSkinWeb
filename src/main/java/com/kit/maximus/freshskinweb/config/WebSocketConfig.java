@@ -11,6 +11,7 @@ import org.springframework.web.socket.config.annotation.*;
 
 @Configuration
 @EnableWebSocket
+
 //định nghĩa các channel
 public class WebSocketConfig implements WebSocketConfigurer {
 

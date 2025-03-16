@@ -2,8 +2,10 @@ package com.kit.maximus.freshskinweb.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kit.maximus.freshskinweb.service.DashboardService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -15,12 +17,14 @@ import java.util.Map;
 
 @Slf4j
 @Component
+
 public class DashboardWebSocketHandler extends TextWebSocketHandler {
 
-    DashboardService dashboardService;
+    @Autowired
+    private DashboardService dashboardService;
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message){
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         String payload = message.getPayload();
         System.out.println("Cổng dashboard trả data:");
         sendDataDashBoard(session);
@@ -37,13 +41,17 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
         System.out.println("❌ Kết nối đóng từ cổng dashboard: " + session.getId());
     }
 
-    public void sendDataDashBoard(WebSocketSession session){
+    public void sendDataDashBoard(WebSocketSession session) {
         Map<String, Object> data = new HashMap<>();
 
         data.put("totalOrder", dashboardService.getTotalOrder());
+
         data.put("totalOrderCompleted", dashboardService.getOrderCompleted());
+
         data.put("totalOrderPending", dashboardService.getOrderPending());
+
         data.put("totalOrderCanceled", dashboardService.getOrderCanceled());
+
 //        data.put("totalRevenue", dashboardService.getTotalRevenue());
         try {
             String JsonData = new ObjectMapper().writeValueAsString(data);
@@ -53,7 +61,6 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
         }
 
     }
-
 
 
 }

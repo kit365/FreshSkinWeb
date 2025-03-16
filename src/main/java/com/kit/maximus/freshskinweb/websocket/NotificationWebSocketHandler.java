@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.websocket;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import java.util.Set;
 //nhận các thông báod9e63e gui về cho FE qua kênh socket đã đăng ký /ws/notify
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class NotificationWebSocketHandler extends TextWebSocketHandler {
 
     //    dùng currentmap để tránh lỗi race condition khi nhiều role out session
