@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -67,6 +68,7 @@ public class DashboardService {
     public CompletableFuture<Long> getTotalProducts() {
         return CompletableFuture.completedFuture(productService.countProduct());
     }
+
 
     @Async
     public  CompletableFuture<List<ProductResponseDTO>> getTop10SellingProducts() {

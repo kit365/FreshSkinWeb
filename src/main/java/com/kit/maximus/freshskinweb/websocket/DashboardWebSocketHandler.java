@@ -7,12 +7,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,32 +22,42 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
-
 public class DashboardWebSocketHandler extends TextWebSocketHandler {
 
     @Autowired
     private DashboardService dashboardService;
 
-    @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-        String payload = message.getPayload();
-        System.out.println("Cổng dashboard trả data:");
-        sendDataDashBoard(session);
-    }
+    private List<WebSocketSession> sessions = new ArrayList<>();
+    // Dữ liệu cũ để so sánh để tránh spam quá niều
+    private Map<String, Object> previousData = new HashMap<>();
 
     @Override
-    public void afterConnectionEstablished(@NotNull WebSocketSession session) throws Exception {
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         System.out.println("📩 Kết nối cổng Dashboard mới từ:" + session.getId());
+        sessions.add(session);
+
+        //gửi dữ liệu khi connect
+        sendDataDashBoard(session);
+
     }
 
-    //xóa session khi đã đóng client
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         System.out.println("❌ Kết nối đóng từ cổng dashboard: " + session.getId());
+        sessions.remove(session);
+        previousData.clear();
+    }
+
+//     Gửi dữ liệu tự động mỗi 5s
+    @Scheduled(fixedRate = 5000) // Gửi mỗi 5s)
+    public void sendPeriodicDataToClients() {
+        for (WebSocketSession session : sessions) {
+                sendDataDashBoard(session);
+        }
     }
 
     public void sendDataDashBoard(WebSocketSession session) {
-
+        // Lấy dữ liệu mới từ các service
         CompletableFuture<String> totalRevenue = dashboardService.getTotalRevenue();
         CompletableFuture<Long> totalOrderCompleted = dashboardService.getOrderCompleted();
         CompletableFuture<Long> totalOrderPending = dashboardService.getOrderPending();
@@ -70,9 +82,9 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
                 top10ProductSelling
         ).join();
 
-
         Map<String, Object> data = new HashMap<>();
         try {
+            // Đặt giá trị vào map
             data.put("totalOrder", totalOrder.get());
             data.put("totalOrderCompleted", totalOrderCompleted.get());
             data.put("totalOrderPending", totalOrderPending.get());
@@ -84,14 +96,26 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
             data.put("totalProducts", totalProduct.get());
             data.put("top10ProductSelling", top10ProductSelling.get());
 
-            // Chuyển dữ liệu thành JSON và gửi qua WebSocket
-            String JsonData = new ObjectMapper().writeValueAsString(data);
-            session.sendMessage(new TextMessage(JsonData));
+            // Chuyển dữ liệu mới và cũ thành JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            String previousJson = objectMapper.writeValueAsString(previousData);
+            String newJson = objectMapper.writeValueAsString(data);
 
+            // Kiểm tra xem dữ liệu có thay đổi không
+            if (!previousJson.equals(newJson)) {
+                // Nếu có thay đổi, gửi qua WebSocket
+                String jsonData = new ObjectMapper().writeValueAsString(data);
+                session.sendMessage(new TextMessage(jsonData));
+
+                // Cập nhật dữ liệu cũ
+                previousData = new HashMap<>(data);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
+
 
 
 }

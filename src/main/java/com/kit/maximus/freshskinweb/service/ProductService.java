@@ -31,6 +31,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -1591,8 +1593,12 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     public List<ProductResponseDTO> top10SellingProducts() {
         PageRequest pageRequest = PageRequest.of(0, 10);
-        List<ProductEntity> result = productRepository.findTop10SellingProducts(pageRequest);
-        return mapProductResponsesDTO(result);
+        List<Long> result = productRepository.findTop10SellingProducts(pageRequest);
+        List<ProductResponseDTO> responseDTOS = new ArrayList<>();
+            result.forEach(productId -> {
+                responseDTOS.add(productSearchRepository.getProductById(productId));
+            });
+        return responseDTOS;
     }
 }
 
