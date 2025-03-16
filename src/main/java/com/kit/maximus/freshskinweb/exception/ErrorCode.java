@@ -170,6 +170,8 @@ public enum ErrorCode {
 
     //SCORE RANGE
     INVALID_SCORE_RANGE(404,"Điểm nằm ngoài phạm vi điểm số "),
+    SCORE_RANGE_NOT_FOUND(404, "Không tồn tại bản ghi cho mức điểm xét loại da"),
+    INVALID_REQUEST_SCORE_RANGE_ID(400, "Yêu cầu không hợp lệ: Thiếu 'id' trong nội dung yêu cầu"),
 
     //Review
     //ReviewVote

@@ -22,7 +22,7 @@ public class SkinCareRoutineEntity extends AbstractEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SkinTypeId", nullable = true)
     @JsonBackReference
-    SkinTypeEntity skinTypeEntity;
+    SkinTypeEntity skinType;
 
     @Column(name = "Rountine",columnDefinition = "MEDIUMTEXT")
     String rountine;

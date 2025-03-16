@@ -42,9 +42,9 @@ public class SkinCareRountineService {
         SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(request.getSkinTypeEntity()).orElse(null);
 
         if(skinTypeEntity != null) {
-            skinCareRountineEntity.setSkinTypeEntity(skinTypeEntity);
+            skinCareRountineEntity.setSkinType(skinTypeEntity);
         } else {
-            skinCareRountineEntity.setSkinTypeEntity(null);
+            skinCareRountineEntity.setSkinType(null);
         }
 
         skinCareRountineRepository.save(skinCareRountineEntity);
@@ -56,9 +56,9 @@ public class SkinCareRountineService {
         SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(request.getSkinTypeEntity()).orElse(null);
 
         if(skinTypeEntity != null) {
-            skinCareRountineEntity.setSkinTypeEntity(skinTypeEntity);
+            skinCareRountineEntity.setSkinType(skinTypeEntity);
         } else {
-            skinCareRountineEntity.setSkinTypeEntity(skinCareRountineEntity.getSkinTypeEntity());
+            skinCareRountineEntity.setSkinType(skinCareRountineEntity.getSkinType());
         }
 
         if(skinCareRountineEntity != null) {

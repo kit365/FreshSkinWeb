@@ -30,20 +30,15 @@ public class SkinTestService {
     SkinQuestionsRepository skinQuestionsRepository;
     QuestionGroupRepository questionGroupRepository;
 
+    SkinTypeScoreRangeRepository skinTypeScoreRangeRepository;
+
+    //Trả loại da theo thang điểm
+    // Lúc trước là fix cứng giá trị
     private String determineSkinType(Long totalScore) {
-        if (totalScore >= 0 && totalScore <= 7) {
-            return "Da thường";
-        } else if (totalScore >= 8 && totalScore <= 14) {
-            return "DRY";
-        } else if (totalScore >= 15 && totalScore <= 21) {
-            return "COMBINATION";
-        } else if (totalScore >= 22 && totalScore <= 28) {
-            return "OILY";
-        } else if (totalScore >= 29 && totalScore <= 36) {
-            return "SENSITIVE";
-        } else {
-            throw new AppException(ErrorCode.INVALID_SCORE_RANGE);
-        }
+        SkinTypeScoreRangeEntity range = skinTypeScoreRangeRepository.findByScoreRange(totalScore)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_SCORE_RANGE));
+
+        return range.getSkinType().getType();
     }
 
     public boolean add(SkinTestRequest request) {
