@@ -469,11 +469,11 @@ public class OrderService {
         return orderRepository.countByOrderStatus(OrderStatus.COMPLETED);
     }
 
-    public long countPending(){
+    public long countPending() {
         return orderRepository.countByOrderStatus(OrderStatus.PENDING);
     }
 
-    public long countCanceled(){
+    public long countCanceled() {
         return orderRepository.countByOrderStatus(OrderStatus.CANCELED);
     }
 
@@ -493,6 +493,8 @@ public class OrderService {
 
         return currencyFormat.format(totalRevenue.setScale(0, RoundingMode.HALF_UP).doubleValue());
     }
+
+
 
 
 
