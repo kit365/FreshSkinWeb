@@ -1,5 +1,4 @@
 package com.kit.maximus.freshskinweb.service.notification;
-
 import com.kit.maximus.freshskinweb.dto.request.notification.CreationNotificationRequest;
 import com.kit.maximus.freshskinweb.dto.request.notification.UpdationNotificationRequest;
 import com.kit.maximus.freshskinweb.dto.response.NotificationResponse;
@@ -20,45 +19,29 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.management.Notification;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class NotificationService implements BaseService<NotificationResponse, CreationNotificationRequest, UpdationNotificationRequest, Long> {
 
-    @Autowired
     NotificationRepository notificationRepository;
-
-    @Autowired
     NotificationMapper notificationMapper;
-
-    @Autowired
     UserRepository userRepository;
-
-    @Autowired
     OrderRepository orderRepository;
-
-    @Autowired
     ReviewRepository reviewRepository;
-
-    @Autowired
     ApplicationEventPublisher eventPublisher; //công cụ phát sự kiện,
-
-
 
 
     @Override
@@ -105,8 +88,7 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
         eventPublisher.publishEvent(new NotificationEvent(this, entity));
 
         return true;
-}
-
+    }
 
 
     @Override
