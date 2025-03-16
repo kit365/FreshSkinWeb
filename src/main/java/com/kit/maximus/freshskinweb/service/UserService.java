@@ -5,10 +5,8 @@ import com.cloudinary.utils.ObjectUtils;
 import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
-import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.RoleEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -20,7 +18,6 @@ import com.kit.maximus.freshskinweb.repository.RoleRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.specification.AccountSpecification;
 import com.kit.maximus.freshskinweb.specification.UserSpecification;
-import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import com.kit.maximus.freshskinweb.utils.Status;
 
 import com.kit.maximus.freshskinweb.utils.TypeUser;
@@ -45,7 +42,6 @@ import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -636,5 +632,10 @@ public class UserService {
             }
         }
         return true;
+    }
+
+    //dashboard data
+    public long countUser() {
+        return userRepository.count();
     }
 }

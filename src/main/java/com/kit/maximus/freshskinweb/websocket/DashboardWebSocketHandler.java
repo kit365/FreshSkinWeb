@@ -53,6 +53,16 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
         data.put("totalOrderCanceled", dashboardService.getOrderCanceled());
 
         data.put("totalRevenue", dashboardService.getTotalRevenue());
+
+
+        data.put("totalBlogs", dashboardService.getTotalBlogs());
+
+        data.put("totalFeedback", dashboardService.getTotalReviews());
+
+
+        data.put("totalUser", dashboardService.getTotalUsers());
+
+
         try {
             String JsonData = new ObjectMapper().writeValueAsString(data);
             session.sendMessage(new TextMessage(JsonData));

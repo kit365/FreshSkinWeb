@@ -576,5 +576,10 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         return true;
     }
 
+    //data dashboard
+    public long countBlogs() {
+        return blogRepository.count();
+    }
+
 
 }

@@ -15,6 +15,9 @@ import java.math.BigDecimal;
 public class DashboardService {
 
     OrderService orderService;
+    BlogService blogService;
+    ReviewService reviewService;
+    UserService userService;
 
     public String getTotalRevenue() {
         return orderService.countRevenue();
@@ -36,7 +39,17 @@ public class DashboardService {
         return orderService.countTotalOrders();
     }
 
+    public long getTotalBlogs() {
+        return blogService.countBlogs();
+    }
 
+    public long getTotalReviews() {
+        return reviewService.countReview();
+    }
+
+    public long getTotalUsers() {
+        return userService.countUser();
+    }
 
 
 }

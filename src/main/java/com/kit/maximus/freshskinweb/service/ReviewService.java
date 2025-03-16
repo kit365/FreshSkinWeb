@@ -280,7 +280,11 @@ public class ReviewService {
         return sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
     }
 
-    //product
+    //dashboard data
+
+    public long countReview() {
+        return  reviewRepository.count();
+    }
 
 
 }
