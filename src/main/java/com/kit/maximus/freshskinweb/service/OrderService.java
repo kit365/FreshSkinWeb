@@ -274,28 +274,41 @@ public class OrderService {
 
 //    }
 
+        /* PHẦN PHÂN TRANG CHO ORDER*/
+
         /* PHẦN NÀY TÍCH HƠP THÊM BỘ LỌC THÔNG TIN THÔNG QUA Status và user */
         /* TÍCH HỢP THÊM TÌM KIẾM INDEX CỦA DATABASE, GIÚP TÌM NHANH HƠN TRÁNH PHẢI CHẠY NHIỀU VÒNG FOR */
-        public Map<String, Object> getAllOrders (OrderStatus status, String keyword, String orderId,int page, int size){
+        public Map<String, Object> getAllOrders(OrderStatus status, String keyword, String orderId,
+                                                int page, int size, String sortBy, OrderStatus priorityStatus) {
             Map<String, Object> map = new HashMap<>();
+            int p = Math.max(page - 1, 0);
 
             Specification<OrderEntity> spec = Specification
-                    .where(OrderSpecification.hasStatus(status))
+                    .where(OrderSpecification.isNotDeleted())
+                    .and(OrderSpecification.hasStatus(status))
                     .and(OrderSpecification.hasKeyword(keyword))
                     .and(OrderSpecification.hasOrderId(orderId));
 
-            int p = Math.max(page - 1, 0);
-            Pageable pageable = PageRequest.of(p, size, Sort.by("updatedAt").descending());
+            Pageable pageable;
+            Page<OrderEntity> ordersPage;
 
-            Page<OrderEntity> ordersPage = orderRepository.findAll(spec, pageable);
+            if (sortBy != null && sortBy.equals("updatedAt")) {
+                // Sort by updatedAt only
+                pageable = PageRequest.of(p, size, Sort.by("updatedAt").descending());
+                ordersPage = orderRepository.findAll(spec, pageable);
+            } else {
+                // Use default status-based sorting
+                pageable = PageRequest.of(p, size);
+                spec = spec.and(OrderSpecification.orderByStatusPriorityAndDate(priorityStatus));
+                ordersPage = orderRepository.findAll(spec, pageable);
+            }
 
-            // Convert trực tiếp để tránh loop lồng nhau
             List<OrderResponse> orderResponses = ordersPage.getContent().stream()
                     .map(orderEntity -> {
                         OrderResponse response = orderMapper.toOrderResponse(orderEntity);
                         if (orderEntity.getOrderItems() != null) {
                             response.setOrderItems(orderEntity.getOrderItems().stream()
-                                    .map(item -> createOrderItemResponse(item))
+                                    .map(this::createOrderItemResponse)
                                     .collect(Collectors.toList()));
                         }
                         return response;
@@ -311,39 +324,35 @@ public class OrderService {
             return map;
         }
 
-        //Tạo hàm để ấy thông tin từ OrderItemsEntity sang OrderItemsResponse
-        private OrderItemResponse createOrderItemResponse (OrderItemEntity item){
-            OrderItemResponse response = new OrderItemResponse();
-            response.setOrderItemId(item.getOrderItemId());
-            response.setQuantity(item.getQuantity());
-            response.setSubtotal(item.getSubtotal());
-            response.setDiscountPrice(item.getDiscountPrice());
+    private OrderItemResponse createOrderItemResponse(OrderItemEntity orderItemEntity) {
+        OrderItemResponse orderItemResponse = new OrderItemResponse();
+        orderItemResponse.setOrderItemId(orderItemEntity.getOrderItemId());
+        orderItemResponse.setQuantity(orderItemEntity.getQuantity());
+        orderItemResponse.setSubtotal(orderItemEntity.getSubtotal());
+        orderItemResponse.setDiscountPrice(orderItemEntity.getDiscountPrice());
 
-            if (item.getProductVariant() != null) {
-                response.setProductVariant(createProductVariantResponse(item.getProductVariant()));
+        if (orderItemEntity.getProductVariant() != null) {
+            ProductVariantResponse productVariantResponse = new ProductVariantResponse();
+            productVariantResponse.setId(orderItemEntity.getProductVariant().getId());
+            productVariantResponse.setPrice(orderItemEntity.getProductVariant().getPrice());
+            productVariantResponse.setUnit(orderItemEntity.getProductVariant().getUnit());
+            productVariantResponse.setVolume(orderItemEntity.getProductVariant().getVolume());
+
+            if (orderItemEntity.getProductVariant().getProduct() != null) {
+                ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+                productResponseDTO.setTitle(orderItemEntity.getProductVariant().getProduct().getTitle());
+                productResponseDTO.setThumbnail(orderItemEntity.getProductVariant().getProduct().getThumbnail());
+                productResponseDTO.setDiscountPercent(orderItemEntity.getProductVariant().getProduct().getDiscountPercent());
+                productResponseDTO.setSlug(orderItemEntity.getProductVariant().getProduct().getSlug());
+                productResponseDTO.setId(orderItemEntity.getProductVariant().getProduct().getId());
+                productVariantResponse.setProduct(productResponseDTO);
             }
-            return response;
+
+            orderItemResponse.setProductVariant(productVariantResponse);
         }
 
-        //Tạo hàm để ấy thông tin từ ProductVariantEntity sang ProductVariantResponse
-        private ProductVariantResponse createProductVariantResponse (ProductVariantEntity variant){
-            ProductVariantResponse response = new ProductVariantResponse();
-            response.setId(variant.getId());
-            response.setPrice(variant.getPrice());
-            response.setUnit(variant.getUnit());
-            response.setVolume(variant.getVolume());
-
-            if (variant.getProduct() != null) {
-                ProductResponseDTO productResponse = new ProductResponseDTO();
-                productResponse.setId(variant.getProduct().getId());
-                productResponse.setTitle(variant.getProduct().getTitle());
-                productResponse.setThumbnail(variant.getProduct().getThumbnail());
-                productResponse.setDiscountPercent(variant.getProduct().getDiscountPercent());
-                productResponse.setSlug(variant.getProduct().getSlug());
-                response.setProduct(productResponse);
-            }
-            return response;
-        }
+        return orderItemResponse;
+    }
 
 //    Cập nhật trạng thái cho đơn hàng được chọn
         public String update (List < String > id, String orderStatus){
