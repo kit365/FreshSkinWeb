@@ -4,9 +4,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -18,37 +19,51 @@ public class DashboardService {
     BlogService blogService;
     ReviewService reviewService;
     UserService userService;
+    ProductService productService;
 
-    public String getTotalRevenue() {
-        return orderService.countRevenue();
+    @Async
+    public CompletableFuture<String> getTotalRevenue() {
+        return CompletableFuture.completedFuture(orderService.countRevenue());
     }
 
-    public long getOrderCompleted() {
-        return orderService.countCompleted();
+    @Async
+    public CompletableFuture<Long> getOrderCompleted() {
+        return CompletableFuture.completedFuture(orderService.countCompleted());
     }
 
-    public long getOrderCanceled() {
-        return orderService.countCanceled();
+    @Async
+    public CompletableFuture<Long> getOrderCanceled() {
+        return CompletableFuture.completedFuture(orderService.countCanceled());
     }
 
-    public long getOrderPending() {
-        return orderService.countPending();
+    @Async
+    public CompletableFuture<Long> getOrderPending() {
+        return CompletableFuture.completedFuture(orderService.countPending());
     }
 
-    public long getTotalOrder() {
-        return orderService.countTotalOrders();
+    @Async
+    public CompletableFuture<Long> getTotalOrder() {
+        return CompletableFuture.completedFuture(orderService.countTotalOrders());
     }
 
-    public long getTotalBlogs() {
-        return blogService.countBlogs();
+    @Async
+    public CompletableFuture<Long> getTotalBlogs() {
+        return CompletableFuture.completedFuture(blogService.countBlogs());
     }
 
-    public long getTotalReviews() {
-        return reviewService.countReview();
+    @Async
+    public CompletableFuture<Long> getTotalReviews() {
+        return CompletableFuture.completedFuture(reviewService.countReview());
     }
 
-    public long getTotalUsers() {
-        return userService.countUser();
+    @Async
+    public CompletableFuture<Long> getTotalUsers() {
+        return CompletableFuture.completedFuture(userService.countUser());
+    }
+
+    @Async
+    public CompletableFuture<Long> getTotalProducts() {
+        return CompletableFuture.completedFuture(productService.countProduct());
     }
 
 

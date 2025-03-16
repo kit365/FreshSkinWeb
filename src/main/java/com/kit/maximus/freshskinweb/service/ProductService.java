@@ -1581,6 +1581,11 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         return dto;
     }
+
+    //data dashboard
+    public long countProduct() {
+        return productRepository.count();
+    }
 }
 
 

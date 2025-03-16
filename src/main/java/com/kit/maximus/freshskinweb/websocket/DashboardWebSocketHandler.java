@@ -14,6 +14,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
@@ -42,34 +43,49 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
     }
 
     public void sendDataDashBoard(WebSocketSession session) {
+
+        CompletableFuture<String> totalRevenue = dashboardService.getTotalRevenue();
+        CompletableFuture<Long> totalOrderCompleted = dashboardService.getOrderCompleted();
+        CompletableFuture<Long> totalOrderPending = dashboardService.getOrderPending();
+        CompletableFuture<Long> totalOrderCanceled = dashboardService.getOrderCanceled();
+        CompletableFuture<Long> totalOrder = dashboardService.getTotalOrder();
+        CompletableFuture<Long> totalBlogs = dashboardService.getTotalBlogs();
+        CompletableFuture<Long> totalFeedback = dashboardService.getTotalReviews();
+        CompletableFuture<Long> totalUser = dashboardService.getTotalUsers();
+        CompletableFuture<Long> totalProduct = dashboardService.getTotalProducts();
+
+        CompletableFuture.allOf(
+                totalRevenue,
+                totalOrderCompleted,
+                totalOrderPending,
+                totalOrderCanceled,
+                totalOrder,
+                totalBlogs,
+                totalFeedback,
+                totalUser,
+                totalProduct
+        ).join();
+
+
         Map<String, Object> data = new HashMap<>();
-
-        data.put("totalOrder", dashboardService.getTotalOrder());
-
-        data.put("totalOrderCompleted", dashboardService.getOrderCompleted());
-
-        data.put("totalOrderPending", dashboardService.getOrderPending());
-
-        data.put("totalOrderCanceled", dashboardService.getOrderCanceled());
-
-        data.put("totalRevenue", dashboardService.getTotalRevenue());
-
-
-        data.put("totalBlogs", dashboardService.getTotalBlogs());
-
-        data.put("totalFeedback", dashboardService.getTotalReviews());
-
-
-        data.put("totalUser", dashboardService.getTotalUsers());
-
-
         try {
+            data.put("totalOrder", totalOrder.get());
+            data.put("totalOrderCompleted", totalOrderCompleted.get());
+            data.put("totalOrderPending", totalOrderPending.get());
+            data.put("totalOrderCanceled", totalOrderCanceled.get());
+            data.put("totalRevenue", totalRevenue.get());
+            data.put("totalBlogs", totalBlogs.get());
+            data.put("totalFeedbacks", totalFeedback.get());
+            data.put("totalUsers", totalUser.get());
+            data.put("totalProducts", totalProduct.get());
+
+            // Chuyển dữ liệu thành JSON và gửi qua WebSocket
             String JsonData = new ObjectMapper().writeValueAsString(data);
             session.sendMessage(new TextMessage(JsonData));
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
 
