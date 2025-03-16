@@ -14,7 +14,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new NotificationWebSocketHandler(), "/ws/notify");
-//                .setAllowedOrigins("https://project-swp391-n9j6.onrender.com", "http://localhost:8080", "http://localhost:3000","https://freshskinweb.onrender.com");
+        registry.addHandler(new NotificationWebSocketHandler(), "/ws/notify")
+                .setAllowedOrigins("https://project-swp391-n9j6.onrender.com", "http://localhost:8080", "http://localhost:3000","https://freshskinweb.onrender.com");
     }
 }
