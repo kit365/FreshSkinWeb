@@ -13,9 +13,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreationSkinTypeScoreRangeRequest {
-    Double MinScore;
+    Double minScore;
 
-    Double MaxScore;
+    Double maxScore;
 
     Long skinType;
 }

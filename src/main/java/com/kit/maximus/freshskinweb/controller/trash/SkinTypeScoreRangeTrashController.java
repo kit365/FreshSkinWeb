@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.controller.trash;
 
 import com.kit.maximus.freshskinweb.dto.request.skin_type_score_range.CreationSkinTypeScoreRangeRequest;
+import com.kit.maximus.freshskinweb.dto.request.skin_type_score_range.UpdationSkinTypeScoreRangeRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.SkinTypeScoreRangeResponse;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -32,16 +33,16 @@ public class SkinTypeScoreRangeTrashController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "desc") String sortDir
     ) {
-        var result = service.getAll(status, keyword, page, size, sortDir);
+        var result = service.getTrash(status, keyword, page, size, sortDir);
         return ResponseAPI.<Map<String, Object>>builder()
                 .code(HttpStatus.OK.value())
                 .data(result)
                 .build();
     }
 
-    @PutMapping("edit/{id}")
-    public ResponseAPI<Boolean> update(@RequestBody CreationSkinTypeScoreRangeRequest request) {
-        var result = service.update(request);
+    @PatchMapping("edit/{id}")
+    public ResponseAPI<Boolean> update(@PathVariable Long id, @RequestBody UpdationSkinTypeScoreRangeRequest request) {
+        var result = service.update(id, request);
         return ResponseAPI.<Boolean>builder()
                 .code(HttpStatus.OK.value())
                 .message("Cập nhật mức điểm loại da thành công")
@@ -58,9 +59,8 @@ public class SkinTypeScoreRangeTrashController {
                 .build();
     }
 
-    @PutMapping("change-multi")
-    public ResponseAPI<String> updateStatus(
-            @RequestBody Map<String, Object> map ) {
+    @PatchMapping("/change-multi")
+    public ResponseAPI<String> updateStatus(@RequestBody Map<String, Object> map ) {
 
         if (!map.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
@@ -113,7 +113,7 @@ public class SkinTypeScoreRangeTrashController {
                 .build();
     }
 
-    @DeleteMapping("deleteT/{id}")
+    @PatchMapping("deleteT/{id}")
     public ResponseAPI<Boolean> deleteTemporarily(@PathVariable Long id) {
         var result = service.deleteTemporarily(id);
         return ResponseAPI.<Boolean>builder()

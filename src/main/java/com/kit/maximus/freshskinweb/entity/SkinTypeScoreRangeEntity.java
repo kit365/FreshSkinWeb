@@ -17,18 +17,21 @@ import org.hibernate.annotations.OnDeleteAction;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SkinTypeScoreRangeEntity extends AbstractEntity{
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "SkinTypeScoreRangeId", insertable = false, updatable = false)
     Long id;
 
-    Double MinScore;
+    @Column(name = "MinScore")
+    Double minScore;
 
-    Double MaxScore;
+    @Column(name = "MaxScore")
+    Double maxScore;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "SkinTypeId")
-            @OnDelete(action = OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     SkinTypeEntity skinType;
 
 }

@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.kit.maximus.freshskinweb.dto.request.skin_type_score_range.CreationSkinTypeScoreRangeRequest;
+import com.kit.maximus.freshskinweb.dto.request.skin_type_score_range.UpdationSkinTypeScoreRangeRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.SkinTypeScoreRangeResponse;
 import com.kit.maximus.freshskinweb.entity.SkinTypeScoreRangeEntity;
@@ -61,9 +62,9 @@ public class SkinTypeScoreRangeController {
                 .build();
     }
 
-    @PutMapping("edit/{id}")
-    public ResponseAPI<Boolean> update(@RequestBody CreationSkinTypeScoreRangeRequest request) {
-        var result = service.update(request);
+    @PatchMapping("edit/{id}")
+    public ResponseAPI<Boolean> update(@PathVariable Long id, @RequestBody UpdationSkinTypeScoreRangeRequest request) {
+        var result = service.update(id, request);
         return ResponseAPI.<Boolean>builder()
                 .code(HttpStatus.OK.value())
                 .message("Cập nhật mức điểm loại da thành công")
@@ -80,7 +81,7 @@ public class SkinTypeScoreRangeController {
                 .build();
     }
 
-    @PutMapping("change-multi")
+    @PatchMapping("/change-multi")
     public ResponseAPI<String> updateStatus(
             @RequestBody Map<String, Object> map ) {
 
@@ -135,7 +136,7 @@ public class SkinTypeScoreRangeController {
                 .build();
     }
 
-    @DeleteMapping("deleteT/{id}")
+    @PatchMapping("deleteT/{id}")
     public ResponseAPI<Boolean> deleteTemporarily(@PathVariable Long id) {
         var result = service.deleteTemporarily(id);
         return ResponseAPI.<Boolean>builder()

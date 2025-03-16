@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface SkinTypeScoreRangeRepository extends JpaRepository<SkinTypeScoreRangeEntity, Long>, JpaSpecificationExecutor<SkinTypeScoreRangeEntity> {
     @Query("SELECT s FROM SkinTypeScoreRangeEntity s " +
-            "WHERE s.MinScore <= :score AND s.MaxScore >= :score " +
+            "WHERE s.minScore <= :score AND s.maxScore >= :score " +
             "AND s.status = 'ACTIVE' AND s.deleted = false")
     Optional<SkinTypeScoreRangeEntity> findByScoreRange(@Param("score") Long score);
 }

@@ -1,6 +1,8 @@
 package com.kit.maximus.freshskinweb.service;
 
+import com.kit.maximus.freshskinweb.dto.request.question_group.UpdationQuestionGroupRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_type_score_range.CreationSkinTypeScoreRangeRequest;
+import com.kit.maximus.freshskinweb.dto.request.skin_type_score_range.UpdationSkinTypeScoreRangeRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.SkinTypeScoreRangeResponse;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
@@ -23,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -107,6 +110,10 @@ public class SkinTypeScoreRangeService {
                     item.put("maxScore", entity.getMaxScore());
                     item.put("type", entity.getSkinType().getType());
                     item.put("description", entity.getSkinType().getDescription());
+                    item.put("createdAt", entity.getCreatedAt());
+                    item.put("updatedAt",entity.getUpdatedAt());
+                    item.put("deleted", entity.isDeleted());
+                    item.put("status", entity.getStatus());
                     return item;
                 })
                 .collect(Collectors.toList());
@@ -171,6 +178,10 @@ public class SkinTypeScoreRangeService {
                     item.put("maxScore", entity.getMaxScore());
                     item.put("type", entity.getSkinType().getType());
                     item.put("description", entity.getSkinType().getDescription());
+                    item.put("createdAt", entity.getCreatedAt());
+                    item.put("updatedAt",entity.getUpdatedAt());
+                    item.put("deleted", entity.isDeleted());
+                    item.put("status", entity.getStatus());
                     return item;
                 })
                 .collect(Collectors.toList());
@@ -184,17 +195,19 @@ public class SkinTypeScoreRangeService {
         return response;
     }
 
-    public boolean update(CreationSkinTypeScoreRangeRequest request){
-        SkinTypeScoreRangeEntity entity = mapper.toSkinTypeScoreRangeEntity(request);
-        SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(request.getSkinType()).orElse(null);
+    @Transactional
+    public boolean update(Long id, UpdationSkinTypeScoreRangeRequest request){
+        SkinTypeScoreRangeEntity entity = repository.findById(id).orElse(null);
+        SkinTypeEntity skinTypeEntity = entity.getSkinType();
+        mapper.update(entity,request);
         if (skinTypeEntity != null) {
             entity.setSkinType(skinTypeEntity);
-            repository.save(entity);
-            return true;
         } else {
             entity.setSkinType(null);
             throw new AppException(ErrorCode.SKIN_TYPE_NOT_FOUND);
         }
+        repository.save(entity);
+        return true;
     }
 
     public SkinTypeScoreRangeResponse getDetail(Long id){

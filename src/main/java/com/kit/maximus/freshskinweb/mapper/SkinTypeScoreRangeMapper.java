@@ -14,13 +14,7 @@ public interface SkinTypeScoreRangeMapper {
     @Mapping(target = "skinType", ignore = true)
     SkinTypeScoreRangeEntity toSkinTypeScoreRangeEntity(CreationSkinTypeScoreRangeRequest request);
 
-    @Mapping(target = "skinType.type", ignore = true)
-    @Mapping(target = "skinType.description", ignore = true)
     SkinTypeScoreRangeResponse toSkinTypeScoreRangeResponse(SkinTypeScoreRangeEntity entity);
-
-    @Mapping(target = "skinType.type", ignore = true)
-    @Mapping(target = "skinType.description", ignore = true)
-    List<SkinTypeScoreRangeResponse> toSkinTypeScoreRangeResponse(List<SkinTypeScoreRangeEntity> entity);
 
     @Mapping(target = "skinType", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
