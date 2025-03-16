@@ -33,6 +33,13 @@ public class OrderSpecification {
         };
     }
 
+    public static Specification<OrderEntity> hasUserId(Long userId) {
+        return (root, query, criteriaBuilder) -> {
+            if (userId == null) return null;
+            return criteriaBuilder.equal(root.get("user").get("userID"), userId);
+        };
+    }
+
     public static Specification<OrderEntity> isNotDeleted() {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("deleted"), false);
     }
