@@ -3,6 +3,7 @@ package com.kit.maximus.freshskinweb.repository;
 
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.utils.Status;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -27,13 +28,18 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
 
 
 
+//    @Query("SELECT p FROM ProductEntity p " +
+//            "JOIN p.variants pv " +
+//            "JOIN OrderItemEntity oi ON oi.productVariant.id = pv.id " +
+//            "GROUP BY p.id " +
+//            "ORDER BY COUNT(oi) DESC")
+//    List<ProductEntity> findTop10SellingProducts(Pageable pageable);
 
-    @Query("SELECT p FROM ProductEntity p " +
+    @Query("SELECT p.id FROM ProductEntity p " +
             "JOIN p.variants pv " +
             "JOIN OrderItemEntity oi ON oi.productVariant.id = pv.id " +
             "GROUP BY p.id " +
             "ORDER BY COUNT(oi) DESC")
-    List<ProductEntity> findTop10SellingProducts(Pageable pageable);
-
+    List<Long> findTop10SellingProducts(Pageable pageable);
 
 }
