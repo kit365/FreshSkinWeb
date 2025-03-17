@@ -4,9 +4,7 @@ import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
 import com.kit.maximus.freshskinweb.dto.response.OrderIdResponse;
 import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
-import com.kit.maximus.freshskinweb.service.OrderService;
-import com.kit.maximus.freshskinweb.service.ProductCategoryService;
-import com.kit.maximus.freshskinweb.service.ProductService;
+import com.kit.maximus.freshskinweb.service.order.OrderService;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -16,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 //@CrossOrigin(origins = "*")

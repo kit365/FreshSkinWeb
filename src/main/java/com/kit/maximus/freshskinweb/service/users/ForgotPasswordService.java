@@ -1,6 +1,5 @@
-package com.kit.maximus.freshskinweb.service;
+package com.kit.maximus.freshskinweb.service.users;
 
-import com.kit.maximus.freshskinweb.dto.request.forgot_password.ForgotPasswordRequest;
 import com.kit.maximus.freshskinweb.entity.ForgotPasswordEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;

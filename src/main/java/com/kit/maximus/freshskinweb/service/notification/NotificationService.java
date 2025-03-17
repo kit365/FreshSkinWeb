@@ -236,6 +236,13 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
         );
     }
 
+    //số tin nhắn chưa đọc(admin)
+    public long countMessageIsNotRead() {
+        return notificationRepository.countByIsRead(false);
+    }
+
+
+
     @Override
     public Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         return Map.of();
