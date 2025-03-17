@@ -98,6 +98,7 @@ public enum ErrorCode {
 
     //SKIN TYPE
     SKIN_TYPE_NOT_FOUND(404, "Không tìm thấy loại da"),
+    INVALID_SKIN_TYPE(404, "Loại da không hợp lệ"),
 
     //SKIN TEST
     SKIN_TEST_NOT_FOUND(404, "Không tìm thấy bài đánh giá loại da nào"),
@@ -166,6 +167,11 @@ public enum ErrorCode {
     //QUESTION_GROUP
     QUESTION_GROUP_NOT_FOUND(404, "Không tìm thấy nhóm câu hỏi"),
     QUESTION_GROUP_INVALID(400, "Nhóm câu hỏi không hợp lệ"),
+
+    //SCORE RANGE
+    INVALID_SCORE_RANGE(404,"Điểm nằm ngoài phạm vi điểm số "),
+    SCORE_RANGE_NOT_FOUND(404, "Không tồn tại bản ghi cho mức điểm xét loại da"),
+    INVALID_REQUEST_SCORE_RANGE_ID(400, "Yêu cầu không hợp lệ: Thiếu 'id' trong nội dung yêu cầu"),
 
     //Review
     //ReviewVote

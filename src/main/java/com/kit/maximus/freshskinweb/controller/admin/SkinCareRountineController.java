@@ -3,6 +3,7 @@ package com.kit.maximus.freshskinweb.controller.admin;
 import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.SkinCareRountineRequest;
 import com.kit.maximus.freshskinweb.dto.response.SkinCareRountineResponse;
 import com.kit.maximus.freshskinweb.entity.SkinCareRoutineEntity;
+import com.kit.maximus.freshskinweb.service.ProductService;
 import com.kit.maximus.freshskinweb.service.SkinCareRountineService;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +19,9 @@ import org.springframework.web.bind.annotation.*;
 @FieldDefaults(makeFinal = true, level = lombok.AccessLevel.PRIVATE)
 public class SkinCareRountineController {
 
+    SkinCareRountineService skinCareRountineService;
 
-    private final SkinCareRountineService skinCareRountineService;
+    ProductService productService;
 
     @PostMapping("create")
     public ResponseEntity<Boolean> addSkinCareRoutine(@RequestBody SkinCareRountineRequest request) {
@@ -54,4 +56,5 @@ public class SkinCareRountineController {
     ) {
         return skinCareRountineService.getFilteredSkinCareRoutines(status, keyword, PageRequest.of(page, size));
     }
+
 }

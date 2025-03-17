@@ -17,6 +17,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+@With
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductVariantResponse {
@@ -30,4 +31,5 @@ public class ProductVariantResponse {
     List<Long> productID;
 
     ProductResponseDTO product;
+
 }

@@ -5,9 +5,7 @@ import com.kit.maximus.freshskinweb.dto.request.role.CreateRoleRequest;
 import com.kit.maximus.freshskinweb.dto.request.role.UpdateRoleRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.RoleResponseDTO;
-import com.kit.maximus.freshskinweb.exception.AppException;
-import com.kit.maximus.freshskinweb.exception.ErrorCode;
-import com.kit.maximus.freshskinweb.service.RoleService;
+import com.kit.maximus.freshskinweb.service.users.RoleService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 //@CrossOrigin(origins = "*")
 @Slf4j

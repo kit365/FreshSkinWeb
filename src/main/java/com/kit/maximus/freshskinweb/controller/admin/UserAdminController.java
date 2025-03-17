@@ -8,7 +8,7 @@ import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
-import com.kit.maximus.freshskinweb.service.UserService;
+import com.kit.maximus.freshskinweb.service.users.UserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -88,7 +88,7 @@ public class UserAdminController {
         log.info("Filters - Status: {}, Type: {}, Keyword: {}", status, type, keyword);
 
         try {
-            Map<String, Object> result = userService.getAll(
+            Map<String, Object> result = userService.getAllUser(
                     page,
                     size,
                     sortKey,
@@ -129,35 +129,27 @@ public class UserAdminController {
 
     @GetMapping("/{id}")
     public ResponseAPI<UserResponseDTO> showDetailUser(@PathVariable Long id) {
-        String message = "Get user successfully";
+        String message = "Lấy dữ liệu thành công";
         var result = userService.showDetail(id);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
-    @GetMapping("search")
-    public ResponseAPI<List<UserResponseDTO>> searchUser(@RequestParam("keyword") String name) {
-        String message = "Search user successfully";
-        var user = userService.getUserByUsername(name);
-//        return Collections.singletonList(userService.getUserByUsername(name));
-        return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(user).build();
-    }
-
     @PatchMapping("change-password/{id}")
     public ResponseAPI<Boolean> updateUserPassword(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest request) {
-        String message = "Update user password successfully";
+        String message = "Cập nhật mật khẩu thành công";
         userService.updatePassword(id, request);
         return ResponseAPI.<Boolean>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
     @PatchMapping("edit/{id}")
     public ResponseAPI<UserResponseDTO> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest userRequestDTO) {
-        String message = "Update user successfully";
+        String message = "Cập nhật tài khoản thành công";
         var result = userService.update(id, userRequestDTO);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
     }
 
     @PatchMapping("change-multi")
-    public ResponseAPI<String> updataUser(@RequestBody Map<String, Object> request) {
+    public ResponseAPI<String> updateUser(@RequestBody Map<String, Object> request) {
 
         if (!request.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
@@ -168,7 +160,7 @@ public class UserAdminController {
         List<Long> ids = (List<Long>) request.get("id");
         String status = request.get("status").toString();
 
-        var result = userService.update(ids, status);
+        var result = userService.updateMulti(ids, status);
         return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
@@ -197,7 +189,7 @@ public class UserAdminController {
     @DeleteMapping("delete/{id}")
     public ResponseAPI<UserResponseDTO> deleteUser(@PathVariable("id") Long id) {
         {
-            String message = "Delete user successfully";
+            String message = "Xóa vĩnh viễn tài khoản thành công";
             userService.delete(id);
             log.info(message);
             return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
@@ -207,7 +199,7 @@ public class UserAdminController {
     @DeleteMapping("deleteAll")
     public ResponseAPI<UserResponseDTO> deleteUser() {
         {
-            String message = "Delete all users successfully";
+            String message = "Tất cả tài khoản đã bị xóa";
             userService.deleteAllUsers();
             log.info(message);
             return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
@@ -216,8 +208,16 @@ public class UserAdminController {
 
     @PatchMapping("deleteT/{id}")
     public ResponseAPI<UserResponseDTO> deleteUserT(@PathVariable("id") Long id) {
-        String message = "Delete user successfully";
+        String message = "Xóa tài khoản thành công";
         userService.deleteTemporarily(id);
+        log.info(message);
+        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
+    }
+
+    @PatchMapping("restore/{id}")
+    public ResponseAPI<UserResponseDTO> restoreUser(@PathVariable("id") Long id) {
+        String message = "Phục hồi tài khoản thành công";
+        userService.restore(id);
         log.info(message);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }

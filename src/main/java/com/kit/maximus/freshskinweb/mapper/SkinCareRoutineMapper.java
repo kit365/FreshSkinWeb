@@ -9,14 +9,14 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface SkinCareRoutineMapper {
-    @Mapping(target = "skinTypeEntity", ignore = true)
+    @Mapping(target = "skinType", ignore = true)
     SkinCareRoutineEntity toEntity(SkinCareRountineRequest request);
 
     SkinCareRountineResponse toResponse(SkinCareRoutineEntity entity);
 
     List<SkinCareRountineResponse> toResponse(List<SkinCareRoutineEntity> entity);
 
-    @Mapping(target = "skinTypeEntity", ignore = true)
+    @Mapping(target = "skinType", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntity(SkinCareRountineRequest request, @MappingTarget SkinCareRoutineEntity entity);
 }

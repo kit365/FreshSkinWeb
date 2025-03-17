@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
+import com.kit.maximus.freshskinweb.dto.response.ProductRoutineDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -13,6 +14,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -210,5 +212,19 @@ public class ProductAdminController {
     public ResponseAPI<ProductResponseDTO> getProduct(@PathVariable("id") Long id) {
         ProductResponseDTO result = productService.showDetail(id);
         return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).data(result).build();
+    }
+
+    @GetMapping("/skin-type/{skinTypeId}")
+    public ResponseAPI<Page<ProductRoutineDTO>> getProductsBySkinType(
+            @PathVariable Long skinTypeId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "7") int size) {
+
+        Page<ProductRoutineDTO> products = productService
+                .getProductsBySkinTypeAndCategories(skinTypeId, page, size);
+        return ResponseAPI.<Page<ProductRoutineDTO>>builder()
+                .code(HttpStatus.OK.value())
+                .data(products)
+                .build();
     }
 }

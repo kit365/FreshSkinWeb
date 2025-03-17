@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//@CrossOrigin(origins = "*")
+
 @RequiredArgsConstructor
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping("/reviews")
+@RequestMapping("/admin/reviews")
 public class ReviewAdminController {
 
     ReviewService reviewService;

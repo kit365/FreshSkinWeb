@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.utils.Status;
@@ -20,16 +21,27 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class NotificationResponse {
     Long id;
+//    @JsonInclude(JsonInclude.Include.NON_NULL)
+//    String username;
 
-    UserResponseDTO user;
+//    @JsonInclude(JsonInclude.Include.NON_NULL)
+//    String order;
+//
+//    @JsonInclude(JsonInclude.Include.NON_NULL)
+//    Long review;
 
-    OrderResponse order;
+    String slugProduct;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String message;
 
-    boolean is_read;
+    Boolean isRead;
 
-    Status status;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    String status;
 
-    boolean deleted;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    Date time;
+
 }

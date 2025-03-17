@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ProductBrandRepository extends JpaRepository<ProductBrandEntity,Long> {
     Page<ProductBrandEntity> findByTitleContainingIgnoreCaseAndDeleted(String keyword, boolean b, Pageable pageable);
@@ -19,4 +21,6 @@ public interface ProductBrandRepository extends JpaRepository<ProductBrandEntity
     Page<ProductBrandEntity> findAllByStatusAndDeleted(Status statusEnum, boolean b, Pageable pageable);
 
     ProductBrandEntity findBySlug(String slug);
+
+    List<ProductBrandEntity> findTop10ByStatusAndDeleted(Status status, boolean b);
 }

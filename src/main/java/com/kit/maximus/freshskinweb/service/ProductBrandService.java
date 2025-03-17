@@ -96,6 +96,24 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         return list;
     }
 
+    @Transactional(readOnly = true)
+    public List<ProductBrandResponse> getTop10() {
+        List<ProductBrandResponse> list =  productBrandMapper.toProductBrandsResponseDTO(productBrandRepository.findTop10ByStatusAndDeleted(Status.ACTIVE,false));
+
+        list.forEach(productBrandResponse -> {
+            productBrandResponse.setStatus(null);
+            productBrandResponse.setCreatedAt(null);
+            productBrandResponse.setUpdatedAt(null);
+            productBrandResponse.setDescription(null);
+            productBrandResponse.setImage(null);
+            productBrandResponse.setImage(null);
+            productBrandResponse.setPosition(null);
+            productBrandResponse.setFeatured(null);
+        });
+
+        return list;
+    }
+
     @Override
     public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);

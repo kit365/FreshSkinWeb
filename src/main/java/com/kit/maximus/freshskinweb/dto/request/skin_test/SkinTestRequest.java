@@ -8,14 +8,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class CreationSkinTestRequest {
+public class SkinTestRequest {
 
     Long user;
 
-    Long skinType;
-
     Long questionGroup;
 
-    String notes;
+    Long totalScore;
 
 }

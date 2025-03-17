@@ -21,7 +21,11 @@ public class OrderResponse implements Serializable {
 
     String orderId;
 
+    Long userId;
+
     String username;
+
+    String typeUser;
 
     String firstName;
 

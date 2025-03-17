@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.service;
+package com.kit.maximus.freshskinweb.service.users;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
@@ -42,14 +42,13 @@ import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UserService  {
+public class UserService {
 
     UserRepository userRepository;
 
@@ -72,11 +71,11 @@ public class UserService  {
             userEntity.setUsername(request.getUsername());
         }
 
-        if(request.getEmail() == null) {
+        if (request.getEmail() == null) {
             userEntity.setEmail(request.getEmail());
-        } else if(userRepository.existsByEmail(request.getEmail())){
+        } else if (userRepository.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
-        } else if(request.getEmail() != null && !userRepository.existsByEmail(request.getEmail())) {
+        } else if (request.getEmail() != null && !userRepository.existsByEmail(request.getEmail())) {
             userEntity.setEmail(request.getEmail());
         }
 
@@ -150,12 +149,18 @@ public class UserService  {
 
     //Method: Xóa tạm thời => deleted thành true
     public boolean deleteTemporarily(Long id) {
+        UserEntity userEntity = getUserEntityById(id);
+        userEntity.setDeleted(true);
+        userRepository.save(userEntity);
         return true;
     }
 
 
     public boolean restore(Long id) {
-        return false;
+        UserEntity userEntity = getUserEntityById(id);
+        userEntity.setDeleted(false);
+        userRepository.save(userEntity);
+        return true;
     }
 
 
@@ -163,7 +168,7 @@ public class UserService  {
         return userMapper.toUserResponseDTO(userRepository.findById(aLong).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)));
     }
 
-    public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String type, String keyword) {
+    public Map<String, Object> getAllUser(int page, int size, String sortKey, String sortDirection, String status, String type, String keyword) {
         // Tạo Pageable với sắp xếp mặc định theo updatedAt
         Pageable pageable = PageRequest.of(
                 page,
@@ -171,15 +176,16 @@ public class UserService  {
                 Sort.by(Sort.Direction.fromString(sortDirection.toLowerCase()), sortKey)
         );
 
-        // Bắt đầu với specification để lấy user có role là null
+        // Bắt đầu với specification để lấy user có role là null và deleted = false
         Specification<UserEntity> spec = (root, query, builder) ->
-                builder.isNull(root.get("role"));
+                builder.and(
+                        builder.isNull(root.get("role")),
+                        builder.isFalse(root.get("deleted"))
+                );
 
         // Chỉ áp dụng các bộ lọc nếu có tham số truyền vào
         if (StringUtils.hasText(status) || StringUtils.hasText(type) || StringUtils.hasText(keyword)) {
             try {
-                spec = Specification.where(null);
-
                 // Thêm điều kiện lọc theo status nếu có
                 if (StringUtils.hasText(status)) {
                     try {
@@ -281,7 +287,6 @@ public class UserService  {
     }
 
 
-
     // Phương thức hỗ trợ tạo response rỗng
     private Map<String, Object> createEmptyResponse(Pageable pageable) {
         Map<String, Object> response = new HashMap<>();
@@ -315,11 +320,11 @@ public class UserService  {
 
         userEntity.setUsername(userEntity.getUsername());
 
-        if(userRequestDTO.getEmail() == null) {
+        if (userRequestDTO.getEmail() == null) {
             userEntity.setEmail(userRequestDTO.getEmail());
-        } else if(userRepository.existsByEmail(userRequestDTO.getEmail())){
+        } else if (userRepository.existsByEmail(userRequestDTO.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
-        } else if(userRequestDTO.getEmail() != null && !userRepository.existsByEmail(userRequestDTO.getEmail())) {
+        } else if (userRequestDTO.getEmail() != null && !userRepository.existsByEmail(userRequestDTO.getEmail())) {
             userEntity.setEmail(userRequestDTO.getEmail());
         }
 
@@ -343,23 +348,32 @@ public class UserService  {
 
     public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
+
+        if (statusEnum == null) {
+            return "Trạng thái không hợp lệ";
+        }
+
         List<UserEntity> userEntities = userRepository.findAllById(id);
+        if (userEntities.isEmpty()) {
+            return "Không tìm thấy người dùng";
+        }
+
         if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
-            userEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
+            userEntities.forEach(userEntity -> userEntity.setStatus(statusEnum));
             userRepository.saveAll(userEntities);
             return "Cập nhật trạng thái USER thành công";
         } else if (statusEnum == Status.SOFT_DELETED) {
-            userEntities.forEach(productEntity -> productEntity.setDeleted(true));
+            userEntities.forEach(userEntity -> userEntity.setDeleted(true));
             userRepository.saveAll(userEntities);
             return "Xóa mềm USER thành công";
         } else if (statusEnum == Status.RESTORED) {
-            userEntities.forEach(productEntity -> productEntity.setDeleted(false));
+            userEntities.forEach(userEntity -> userEntity.setDeleted(false));
             userRepository.saveAll(userEntities);
             return "Phục hồi USER thành công";
         }
+
         return "Cập nhật USER thất bại";
     }
-
 
     public UserResponseDTO addOrder(Long id, OrderRequest request) {
         UserEntity user = userRepository.findById(id)
@@ -377,11 +391,6 @@ public class UserService  {
     private void encodePassword(UserEntity user) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-    }
-
-
-    public List<UserResponseDTO> getUserByUsername(String username) {
-        return userMapper.toUserResponseDTO(userRepository.searchByKeyword(username));
     }
 
     public UserEntity getUserEntityById(Long id) {
@@ -482,21 +491,21 @@ public class UserService  {
         return uploadResult.get("secure_url").toString(); // Trả về URL của ảnh
     }
 
-                                /* PHẦN CHO ACCOUNT CỦA DŨNG */
+    /* PHẦN CHO ACCOUNT CỦA DŨNG */
 
 
     public UserResponseDTO showDetailByRole(Long id) {
         UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-            if (userEntity.getRole() != null) {
-                return userMapper.toUserResponseDTO(userEntity);
-            } else {
-                throw new AppException(ErrorCode.THIS_USER_NOT_ALLOWED_TO_DELETE);
-            }
+        if (userEntity.getRole() != null) {
+            return userMapper.toUserResponseDTO(userEntity);
+        } else {
+            throw new AppException(ErrorCode.THIS_USER_NOT_ALLOWED_TO_DELETE);
+        }
     }
 
 
-    public Map<String, Object> getAll(String status, String keyword, Pageable pageable) {
+    public Map<String, Object> getAllAccount(String status, String keyword, Pageable pageable) {
         Specification<UserEntity> spec = AccountSpecification.hasRole();
 
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -574,23 +583,36 @@ public class UserService  {
     }
 
     public String updateMulti(List<Long> id, String status) {
-        Status statusEnum = getStatus(status);
-        List<UserEntity> userEntities = userRepository.findAllById(id);
-        for(UserEntity userEntity : userEntities) {
-            if(userEntity.getRole() != null) {
-                if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
-                    userEntity.setStatus(statusEnum);
-                    userRepository.save(userEntity);
-                } else if (statusEnum == Status.SOFT_DELETED) {
-                    userEntity.setDeleted(true);
-                    userRepository.save(userEntity);
-                } else if (statusEnum == Status.RESTORED) {
-                    userEntity.setDeleted(false);
-                    userRepository.save(userEntity);
-                }
+        try {
+            if (userRepository.findAllById(id) == null) {
+                return "Không tìm thấy người dùng nào để cập nhật";
             }
+            Status statusEnum = Status.valueOf(status);
+            if (statusEnum == null) {
+                return "Trạng thái không hợp lệ";
+            }
+
+            List<UserEntity> userEntities = userRepository.findAllById(id);
+
+            if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
+                userEntities.forEach(userEntity -> userEntity.setStatus(statusEnum));
+                userRepository.saveAll(userEntities);
+                return "Cập nhật trạng thái người dùng thành công";
+            }
+            if (statusEnum == Status.SOFT_DELETED) {
+                userEntities.forEach(userEntity -> userEntity.setDeleted(true));
+                userRepository.saveAll(userEntities);
+                return "Cập nhật trạng thái người dùng thành công";
+            }
+            if (statusEnum == Status.RESTORED) {
+                userEntities.forEach(userEntity -> userEntity.setDeleted(false));
+                userRepository.saveAll(userEntities);
+                return "Cập nhật trạng thái người dùng thành công";
+            }
+            return "Không tìm thấy người dùng nào để cập nhật";
+        } catch (IllegalArgumentException e) {
+            return e.getMessage(); // Hiển thị lỗi rõ ràng hơn
         }
-        return "Cập nhật Account thất bại";
     }
 
     public boolean deleteSelectedAccount(List<Long> id) {
@@ -609,6 +631,11 @@ public class UserService  {
                 throw new AppException(ErrorCode.THIS_USER_NOT_ALLOWED_TO_DELETE);
             }
         }
-    return true;
+        return true;
+    }
+
+    //dashboard data
+    public long countUser() {
+        return userRepository.count();
     }
 }

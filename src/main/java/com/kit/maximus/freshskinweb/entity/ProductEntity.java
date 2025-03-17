@@ -16,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@With
 @Table(name = "Product", indexes = {
         @Index(name = "idx_title", columnList = "Title"),
         @Index(name = "idx_slug", columnList = "Slug"),
@@ -101,10 +102,10 @@ public class ProductEntity extends AbstractEntity {
     @Column(name = "SkinIssues", columnDefinition = "MEDIUMTEXT")
     String skinIssues;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "product")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "product")
     List<ReviewEntity> reviews = new ArrayList<>();
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "discountId")
     DiscountEntity discount;
 

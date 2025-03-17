@@ -1,10 +1,12 @@
 package com.kit.maximus.freshskinweb.specification;
 
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.criteria.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -193,12 +195,9 @@ public class ProductSpecification {
         };
     }
 
-
     public static Specification<ProductEntity> sortByPrice(String sortDirection) {
         return (root, query, criteriaBuilder) -> {
             return null;
         };
     }
-
-
 }

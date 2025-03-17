@@ -33,12 +33,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
 
     Optional<UserEntity> findByUsername(String username);
 
-    Page<UserEntity> findAllByDeleted(boolean b, Pageable pageable);
-
-    Page<UserEntity> findAllByStatusAndDeleted(Status statusEnum, boolean b, Pageable pageable);
 
     UserEntity findByEmail(String email);
 
-    List<UserEntity> findAllByStatus(Status status);
 
 }

@@ -13,8 +13,12 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @ToString
+@With
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "orderItems", "product"})
-@Table(name = "ProductVariant")
+@Table(name = "ProductVariant", indexes = {
+        @Index(name = "idx_product", columnList = "ProductID")
+})
+
 public class ProductVariantEntity {
 
     @Id

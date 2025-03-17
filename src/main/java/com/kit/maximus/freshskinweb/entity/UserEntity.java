@@ -2,6 +2,7 @@ package com.kit.maximus.freshskinweb.entity;
 
 import com.fasterxml.jackson.annotation.*;
 import com.kit.maximus.freshskinweb.entity.review.ReviewEntity;
+import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.TypeUser;
 import jakarta.persistence.*;
 import lombok.*;
@@ -59,10 +60,20 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @Column(name = "Address")
     String address;
 
+//    2 field này được lưu khi user đăng nhập bằng google
+    @Column(name = "provider")
+    private String provider; // GOOGLE, LOCAL, etc.
+
+    @Column(name = "provider_id")
+    private String providerId; // Google user ID
+
     //    TypeUser VARCHAR(10) DEFAULT 'Normal' CHECK (TypeUser IN ('Normal', 'VIP')),
     @Enumerated(EnumType.STRING)
     @Column(name = "Type_user")
     TypeUser typeUser = TypeUser.NORMAL;
+
+    @Column(name = "skin_type")
+    String skinType = SkinType.NORMAL.getVNESEname();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonManagedReference
@@ -73,8 +84,7 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @JoinColumn(name = "roleId", nullable = true)
     RoleEntity role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderVoucherEntity> orderVouchers = new ArrayList<>();
+
 
 //    @JsonBackReference
 //    @ManyToMany

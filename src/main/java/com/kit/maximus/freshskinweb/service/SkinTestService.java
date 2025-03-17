@@ -1,8 +1,7 @@
 package com.kit.maximus.freshskinweb.service;
 
-import com.kit.maximus.freshskinweb.dto.request.skin_test.CreationSkinTestRequest;
+import com.kit.maximus.freshskinweb.dto.request.skin_test.SkinTestRequest;
 //import com.kit.maximus.freshskinweb.dto.request.skin_test.SkinResultSearchRequest;
-import com.kit.maximus.freshskinweb.dto.request.skin_test.UpdationSkinTestRequest;
 import com.kit.maximus.freshskinweb.dto.response.SkinTestResponse;
 import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -10,14 +9,12 @@ import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.SkinTestMapper;
 import com.kit.maximus.freshskinweb.repository.*;
 //import com.kit.maximus.freshskinweb.specification.SkinTestSpecification;
+import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,86 +30,89 @@ public class SkinTestService {
     SkinQuestionsRepository skinQuestionsRepository;
     QuestionGroupRepository questionGroupRepository;
 
-    public boolean add(CreationSkinTestRequest request){
-        SkinTestEntity skinTestEntity = skinTestMapper.toSkinTestEntity(request);
-        QuestionGroupEntity questionGroupEntity = questionGroupRepository.findById(request.getQuestionGroup()).orElse(null);
-        UserEntity userEntity = userRepository.findById(request.getUser()).orElse(null);
-        SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(request.getSkinType()).orElse(null);
-        SkinQuestionsEntity skinQuestionsEntity = skinQuestionsRepository.findById(request.getQuestionGroup()).orElse(null);
+    SkinTypeScoreRangeRepository skinTypeScoreRangeRepository;
 
-        if(userEntity == null){
-            throw new AppException(ErrorCode.USER_NOT_FOUND);
-        } else {
-            skinTestEntity.setUser(userEntity);
-        }
-        if(skinTypeEntity == null){
+    //Trả loại da theo thang điểm
+    // Lúc trước là fix cứng giá trị
+    private String determineSkinType(Long totalScore) {
+        log.info("Input score: {}", totalScore);
+
+        // First check - database query
+        SkinTypeScoreRangeEntity range = skinTypeScoreRangeRepository.findByScoreRange(totalScore)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_SCORE_RANGE));
+
+        log.info("Found range: {}", range);
+
+        // Get the type string
+        String skinType = range.getSkinType().getType();
+        log.info("Database skin type: {}", skinType);
+
+        // Convert to enum value
+        String result = switch (skinType) {
+            case "Da khô" -> SkinType.DRY.name();
+            case "Da thường" -> SkinType.NORMAL.name();
+            case "Da hỗn hợp" -> SkinType.COMBINATION.name();
+            case "Da nhạy cảm" -> SkinType.SENSITIVE.name();
+            case "Da dầu" -> SkinType.OILY.name();
+            default -> throw new AppException(ErrorCode.INVALID_SKIN_TYPE);
+        };
+
+        log.info("Result: {}", result);
+        return result;
+    }
+
+    public boolean add(SkinTestRequest request) {
+        log.info("Processing request: {}", request);
+
+        UserEntity user = userRepository.findById(request.getUser())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        QuestionGroupEntity questionGroup = questionGroupRepository.findById(request.getQuestionGroup())
+                .orElseThrow(() -> new AppException(ErrorCode.QUESTION_GROUP_NOT_FOUND));
+
+        // Get skin type first to validate
+        String skinTypeStr = determineSkinType(request.getTotalScore());
+        log.info("Determined skin type: {}", skinTypeStr);
+
+        // Convert to enum to get Vietnamese name
+        SkinType skinTypeEnum = SkinType.valueOf(skinTypeStr);
+        String vnName = skinTypeEnum.getVNESEname();
+        log.info("Vietnamese name: {}", vnName);
+
+        // Find skin type entity
+        SkinTypeEntity skinTypeEntity = skinTypeRepository.findByType(vnName);
+        if (skinTypeEntity == null) {
+            log.error("Skin type not found in database: {}", vnName);
             throw new AppException(ErrorCode.SKIN_TYPE_NOT_FOUND);
-        } else {
-            skinTestEntity.setSkinType(skinTypeEntity);
         }
 
-        if(questionGroupEntity == null){
-            throw new AppException(ErrorCode.QUESTION_GROUP_NOT_FOUND);
-        } else if (questionGroupEntity.getQuestions().size() == 0){
-            throw new AppException(ErrorCode.SKIN_QUESTIONS_NOT_FOUND);
-        } else {
-            skinTestEntity.setQuestionGroup(questionGroupRepository.findById(request.getQuestionGroup()).orElse(null));
-        }
+        // Create and save test result
+        SkinTestEntity skinTest = new SkinTestEntity();
+        skinTest.setUser(user);
+        skinTest.setQuestionGroup(questionGroup);
+        skinTest.setTotalScore(request.getTotalScore());
+        skinTest.setSkinType(skinTypeEntity);
+        skinTest.setNotes(skinTypeEnum.getMessage());
 
-        skinTestRepository.save(skinTestEntity);
+        // Update user's skin type
+        user.setSkinType(vnName);
+        userRepository.save(user);
+
+        // Save test result
+        skinTestRepository.save(skinTest);
         return true;
     }
 
-    public boolean update(Long id, UpdationSkinTestRequest request){
-        SkinTestEntity skinTestEntity = skinTestRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SKIN_TEST_NOT_FOUND));
-
-        if(request.getUser() != null){
-            skinTestEntity.setUser(userRepository.findById(request.getUser()).orElse(null));
-        } else {
-            skinTestEntity.setUser(skinTestEntity.getUser());
-        }
-
-        if(request.getSkinType() != null){
-            skinTestEntity.setSkinType(skinTypeRepository.findById(request.getSkinType()).orElse(null));
-        } else {
-            skinTestEntity.setSkinType(skinTestEntity.getSkinType());
-        }
-
-        if(request.getQuestionGroup() != null){
-            skinTestEntity.setQuestionGroup(questionGroupRepository.findById(request.getQuestionGroup()).orElse(null));
-        } else {
-            skinTestEntity.setQuestionGroup(skinTestEntity.getQuestionGroup());
-        }
-
-        if( request.getStatus() != null){
-            Status status = getStatus(request.getStatus());
-            if(status == Status.ACTIVE || status == Status.INACTIVE){
-                skinTestEntity.setStatus(status);
-            } else if(status == Status.SOFT_DELETED){
-                skinTestEntity.setDeleted(true);
-            } else if (status == Status.RESTORED){
-                skinTestEntity.setDeleted(false);
-            }
-        }
-
-        skinTestMapper.updateSkinTestEntity(skinTestEntity, request);
-
-        skinTestRepository.save(skinTestEntity);
-        return true;
-    }
-
-    private Status getStatus(String status) {
-        try {
-            return Status.valueOf(status.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            log.warn("Invalid status provided: '{}'", status);
-            throw new AppException(ErrorCode.STATUS_INVALID);
-        }
-    }
-
-    public SkinTestResponse get(Long id){
-        SkinTestEntity skinTestEntity = skinTestRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SKIN_TEST_NOT_FOUND));
-        return skinTestMapper.toSkinTestResponse(skinTestEntity);
+    public SkinTestResponse getDetail(Long id){
+        SkinTestEntity skinTestEntity = skinTestRepository.findById(id).orElse(null);
+        SkinTestResponse skinTestResponse = skinTestMapper.toSkinTestResponse(skinTestEntity);
+        skinTestResponse.setId(skinTestEntity.getId());
+        skinTestResponse.setSkinType(skinTestEntity.getSkinType().getType());
+        skinTestResponse.setTotalScore(skinTestEntity.getTotalScore());
+        skinTestResponse.setNotes(skinTestEntity.getNotes());
+        skinTestResponse.setUser(skinTestEntity.getUser().getUsername());
+        skinTestResponse.setQuestionGroup(skinTestEntity.getQuestionGroup().getTitle());
+        return skinTestResponse;
     }
 
 //    public Page<SkinTestResponse> getAll(SkinResultSearchRequest request) {
@@ -133,11 +133,5 @@ public class SkinTestService {
 //        // Chuyển đổi kết quả sang DTO
 //        return skinTests.map(skinTestMapper::toSkinTestResponse);
 //    }
-
-    public boolean delete(Long id){
-        SkinTestEntity skinTestEntity = skinTestRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SKIN_TEST_NOT_FOUND));
-        skinTestRepository.delete(skinTestEntity);
-        return true;
-    }
 
 }

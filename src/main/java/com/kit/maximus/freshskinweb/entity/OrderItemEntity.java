@@ -15,7 +15,10 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "OrderItem")
+@Table(name = "OrderItem", indexes = {
+        @Index(name = "idx_product_variant_id", columnList = "ProductVariantId"),
+        @Index(name = "idx_order_id", columnList = "OrderId")
+})
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "order"})
 
 public class OrderItemEntity extends AbstractEntity {

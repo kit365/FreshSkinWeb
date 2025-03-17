@@ -6,7 +6,7 @@ import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
-import com.kit.maximus.freshskinweb.service.BlogCategoryService;
+import com.kit.maximus.freshskinweb.service.blog.BlogCategoryService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -52,7 +52,7 @@ public class BlogCategoryTrashController {
                                                                @RequestParam(name = "keyword", required = false) String keyword) {
         String message = "Tim thay List Blog Category";
         log.info("GET ALL BLOGS");
-        Map<String, Object> result = blogCategoryService.getAll(page, size,sortKey, sortValue,status,keyword);
+        Map<String, Object> result = blogCategoryService.getTrash(page, size,sortKey, sortValue,status,keyword);
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
