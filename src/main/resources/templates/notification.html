@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông báo</title>
+    <script>
+        let socket;
+
+        function connectWebSocket() {
+            socket = new WebSocket("ws://localhost:8080/ws/notify");
+
+            socket.onmessage = function(event) {
+                let data = JSON.parse(event.data);
+                updateNotificationUI(data);
+            };
+
+            socket.onclose = function() {
+                setTimeout(connectWebSocket, 3000); // Tự động kết nối lại nếu mất kết nối
+            };
+        }
+
+        function updateNotificationUI(data) {
+            let countElement = document.getElementById("notification-count");
+            let panelNotifications = document.getElementById("notifications");
+
+            // Cập nhật số thông báo chưa đọc
+            countElement.innerText = data.unreadCount;
+            countElement.style.display = data.unreadCount > 0 ? "flex" : "none";
+
+            // Thêm thông báo vào khu vực thông báo
+            let item = document.createElement("div");
+            item.className = "notification-item unread";
+            item.innerHTML = `
+                <div class="notification-content">
+                    <span class="notification-message">${data.message}</span>
+                    <span class="notification-date">${new Date(data.time).toLocaleString()}</span>
+                </div>
+                <div class="notification-actions">
+                   <a href="https://project-swp391-n9j6.onrender.com/home/${data.slugProduct}" onclick="changeStatus('${data.id}');">Xem sản phẩm</a>
+                    <button onclick="deleteNotification('${data.id}')">Xóa</button>
+                </div>
+            `;
+
+            panelNotifications.prepend(item); // Thêm mới vào đầu danh sách
+
+            // Kiểm tra nếu có nhiều hơn 6 thông báo
+            if (panelNotifications.children.length > 6) {
+                document.getElementById("see-more").style.display = "block"; // Hiện nút "Xem thêm"
+            }
+        }
+
+        function toggleNotifications() {
+            let panel = document.getElementById("notification-panel");
+            panel.classList.toggle("show");
+
+            if (panel.classList.contains("show")) {
+                fetchNotifications(); // Gọi API khi mở panel
+            }
+        }
+
+        function fetchNotifications() {
+            fetch('/admin/notify/show')
+                .then(response => response.json())
+                .then(data => {
+                    let panelNotifications = document.getElementById("notifications");
+                    panelNotifications.innerHTML = ""; // Xóa thông báo cũ
+
+                    data.forEach(notification => {
+                        let item = document.createElement("div");
+                        item.className = "notification-item " + (notification.read ? "" : "unread");
+                        item.innerHTML = `
+                            <div class="notification-content">
+                                <span class="notification-message">${notification.message}</span>
+                                <span class="notification-date">${new Date(notification.time).toLocaleString()}</span>
+                            </div>
+                            <div class="notification-actions">
+                                <a href="${notification.productLink}" onclick="changeStatus('${notification.id}');">Xem sản phẩm</a>
+                                <button onclick="deleteNotification('${notification.id}')">Xóa</button>
+                            </div>
+                        `;
+
+                        panelNotifications.appendChild(item); // Thêm thông báo vào danh sách
+                    });
+
+                    // Cập nhật số thông báo chưa đọc
+                    updateNotificationCount(data);
+
+                    // Kiểm tra nếu có nhiều hơn 6 thông báo
+                    if (panelNotifications.children.length > 6) {
+                        document.getElementById("see-more").style.display = "block"; // Hiện nút "Xem thêm"
+                    } else {
+                        document.getElementById("see-more").style.display = "none"; // Ẩn nút "Xem thêm"
+                    }
+                });
+        }
+
+        function updateNotificationCount(notifications) {
+            let unreadCount = notifications.filter(n => !n.read).length;
+            let countElement = document.getElementById("notification-count");
+            countElement.innerText = unreadCount;
+            countElement.style.display = unreadCount > 0 ? "flex" : "none";
+        }
+
+        function seeMoreNotifications() {
+            let panel = document.getElementById("notifications");
+            panel.style.maxHeight = "none"; // Bỏ giới hạn chiều cao để hiện tất cả thông báo
+            document.getElementById("see-more").style.display = "none"; // Ẩn nút "Xem thêm"
+        }
+
+        function changeStatus(id) {
+            fetch(`/admin/notify/change-status/${id}`, { method: 'PATCH' }) // Gọi API để thay đổi trạng thái
+                .then(response => {
+                    if (response.ok) {
+                        // Xử lý sau khi thay đổi trạng thái thành công (nếu cần)
+                    }
+                });
+        }
+
+        function deleteNotification(id) {
+            fetch(`/admin/notify/delete/${id}`, { method: 'DELETE' }) // Gọi API để xóa thông báo
+                .then(response => {
+                    if (response.ok) {
+                        // Tìm phần tử thông báo trong DOM và xóa nó
+                        let notificationItem = document.querySelector(`#notification-item-${id}`);
+                        if (notificationItem) {
+                            notificationItem.remove(); // Xóa phần tử thông báo khỏi DOM
+                        }
+
+                        // Cập nhật lại số lượng thông báo chưa đọc
+                        updateNotificationCount(getCurrentNotifications());
+                    }
+                });
+        }
+
+        function deleteAllNotifications() {
+            fetch('/admin/notify/delete-all', { method: 'DELETE' }) // Gọi API để xóa tất cả thông báo
+                .then(response => {
+                    if (response.ok) {
+                        fetchNotifications(); // Cập nhật lại danh sách thông báo
+                    }
+                });
+        }
+
+        window.onload = connectWebSocket;
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5; /* Màu nền nhẹ nhàng */
+            color: #333;
+        }
+
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+        }
+
+        .notification-icon {
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            background: red;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            display: none; /* Mặc định ẩn */
+        }
+
+        .notification-panel {
+            position: fixed;
+            top: 50px;
+            right: 10px;
+            width: 400px; /* Chiều rộng tối ưu cho giao diện */
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            display: none;
+            padding: 15px;
+            z-index: 1000; /* Đảm bảo panel nằm trên các phần tử khác */
+            max-height: 400px; /* Chiều cao tối đa cho panel */
+            overflow-y: auto; /* Cho phép cuộn dọc */
+        }
+
+        .notification-panel.show {
+            display: block;
+        }
+
+        .notification-item {
+            padding: 15px;
+            border-radius: 8px; /* Bo tròn góc */
+            margin-bottom: 10px; /* Khoảng cách giữa các thông báo */
+            background: #f9f9f9; /* Nền thông báo */
+            display: flex; /* Căn chỉnh các phần tử bên trong */
+            flex-direction: column; /* Đặt các phần tử theo chiều dọc */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Hiệu ứng bóng */
+        }
+
+        .notification-item.unread {
+            border-left: 4px solid #007bff; /* Đường viền bên trái cho thông báo chưa đọc */
+            background: #e9f5ff; /* Nền khác cho thông báo chưa đọc */
+        }
+
+        .notification-content {
+            display: flex;
+            justify-content: space-between; /* Căn chỉnh nội dung */
+            align-items: center; /* Căn giữa nội dung */
+            margin-bottom: 8px; /* Khoảng cách giữa nội dung và ngày tháng */
+        }
+
+        .notification-message {
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .notification-date {
+            font-size: 12px;
+            color: gray;
+            margin-left: 10px; /* Khoảng cách giữa tin nhắn và ngày tháng */
+        }
+
+        .notification-actions {
+            display: flex;
+            justify-content: flex-end; /* Căn chỉnh các nút */
+            gap: 5px; /* Khoảng cách giữa các nút */
+        }
+
+        .notification-actions a {
+            text-decoration: none;
+            color: white;
+            background: #007bff; /* Màu nền nút */
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .notification-actions a:hover {
+            background: #0056b3; /* Hiệu ứng hover */
+        }
+
+        .notification-actions button {
+            border: none;
+            background: #dc3545; /* Màu nền nút xóa */
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .notification-actions button:hover {
+            background: #c82333; /* Hiệu ứng hover */
+        }
+
+        .see-more {
+            display: none; /* Ẩn nút "Xem thêm" mặc định */
+            text-align: center;
+            margin-top: 10px;
+            cursor: pointer;
+            color: blue;
+            font-weight: bold;
+        }
+
+        .delete-all {
+            margin-top: 10px;
+            text-align: center;
+            cursor: pointer;
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="notification-container" onclick="toggleNotifications();">
+    <div class="notification-icon">
+        🔔
+        <span id="notification-count" class="notification-badge">0</span>
+    </div>
+</div>
+
+<div id="notification-panel" class="notification-panel">
+    <div id="notifications"></div> <!-- Tất cả thông báo sẽ được hiển thị ở đây -->
+    <div id="see-more" class="see-more" onclick="seeMoreNotifications();">Xem thêm</div> <!-- Nút "Xem thêm" -->
+    <div class="delete-all" onclick="deleteAllNotifications();">Xóa tất cả</div> <!-- Nút "Xóa tất cả" -->
+</div>
+</body>
+</html>

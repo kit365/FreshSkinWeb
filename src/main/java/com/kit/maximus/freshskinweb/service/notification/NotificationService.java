@@ -1,4 +1,5 @@
 package com.kit.maximus.freshskinweb.service.notification;
+
 import com.kit.maximus.freshskinweb.dto.request.notification.CreationNotificationRequest;
 import com.kit.maximus.freshskinweb.dto.request.notification.UpdationNotificationRequest;
 import com.kit.maximus.freshskinweb.dto.response.NotificationResponse;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -171,7 +173,8 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
 
     @Override
     public boolean delete(Long aLong) {
-        return false;
+        notificationRepository.deleteById(aLong);
+        return true;
     }
 
     @Override
@@ -237,10 +240,27 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
     }
 
     //số tin nhắn chưa đọc(admin)
-    public long countMessageIsNotRead() {
-        return notificationRepository.countByIsRead(false);
+    public long countMessageFeedbackIsNotRead() {
+        return notificationRepository.countByIsReadAndOrderIsNull(false);
     }
 
+    public List<NotificationResponse> show() {
+
+        List<NotificationEntity> request = notificationRepository.findAllByOrderIsNull();
+
+        List<NotificationResponse> responses = new ArrayList<>();
+        System.out.println(request.getFirst().getTime());
+        request.forEach(entity -> {
+            NotificationResponse response = new NotificationResponse();
+            response.setId(entity.getId());
+            response.setMessage(entity.getMessage());
+            response.setIsRead(entity.getIsRead());
+            response.setTime(entity.getTime());
+            response.setSlugProduct(entity.getReview().getProduct().getSlug());
+            responses.add(response);
+        });
+        return responses;
+    }
 
 
     @Override

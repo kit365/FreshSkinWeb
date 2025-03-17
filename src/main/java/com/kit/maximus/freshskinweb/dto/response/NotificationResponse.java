@@ -30,6 +30,8 @@ public class NotificationResponse {
 //    @JsonInclude(JsonInclude.Include.NON_NULL)
 //    Long review;
 
+    String slugProduct;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String message;
 
