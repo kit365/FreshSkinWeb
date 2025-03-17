@@ -281,6 +281,9 @@ public class OrderService {
     public Map<String, Object> getUserOrders(Long userId, OrderStatus status, String keyword,
                                              String orderId, int page, int size,
                                              String sortBy, OrderStatus priorityStatus) {
+
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
         Map<String, Object> map = new HashMap<>();
         int p = Math.max(page - 1, 0);
 
@@ -331,6 +334,8 @@ public class OrderService {
                                             int page, int size, String sortBy, OrderStatus priorityStatus) {
         Map<String, Object> map = new HashMap<>();
         int p = Math.max(page - 1, 0);
+
+        OrderEntity entity = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         Specification<OrderEntity> spec = Specification
                 .where(OrderSpecification.isNotDeleted())

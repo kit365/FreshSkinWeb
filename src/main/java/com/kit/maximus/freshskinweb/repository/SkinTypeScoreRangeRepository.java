@@ -6,13 +6,17 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Repository
 public interface SkinTypeScoreRangeRepository extends JpaRepository<SkinTypeScoreRangeEntity, Long>, JpaSpecificationExecutor<SkinTypeScoreRangeEntity> {
-    @Query("SELECT s FROM SkinTypeScoreRangeEntity s " +
-            "WHERE s.MinScore <= :score AND s.MaxScore >= :score " +
-            "AND s.status = 'ACTIVE' AND s.deleted = false")
+    @Query(value = """
+    SELECT * FROM skin_type_score_range 
+    WHERE CAST(:score AS DECIMAL) <= CAST(max_score AS DECIMAL)
+    AND CAST(:score AS DECIMAL) >= CAST(min_score AS DECIMAL)
+    """, nativeQuery = true)
+    @Transactional(readOnly = true)
     Optional<SkinTypeScoreRangeEntity> findByScoreRange(@Param("score") Long score);
 }

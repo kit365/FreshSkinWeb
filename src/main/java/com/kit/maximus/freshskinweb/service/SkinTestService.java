@@ -35,67 +35,72 @@ public class SkinTestService {
     //Trả loại da theo thang điểm
     // Lúc trước là fix cứng giá trị
     private String determineSkinType(Long totalScore) {
+        log.info("Input score: {}", totalScore);
+
+        // First check - database query
         SkinTypeScoreRangeEntity range = skinTypeScoreRangeRepository.findByScoreRange(totalScore)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_SCORE_RANGE));
 
-        return range.getSkinType().getType();
+        log.info("Found range: {}", range);
+
+        // Get the type string
+        String skinType = range.getSkinType().getType();
+        log.info("Database skin type: {}", skinType);
+
+        // Convert to enum value
+        String result = switch (skinType) {
+            case "Da khô" -> SkinType.DRY.name();
+            case "Da thường" -> SkinType.NORMAL.name();
+            case "Da hỗn hợp" -> SkinType.COMBINATION.name();
+            case "Da nhạy cảm" -> SkinType.SENSITIVE.name();
+            case "Da dầu" -> SkinType.OILY.name();
+            default -> throw new AppException(ErrorCode.INVALID_SKIN_TYPE);
+        };
+
+        log.info("Result: {}", result);
+        return result;
     }
 
     public boolean add(SkinTestRequest request) {
-        // Validate input
+        log.info("Processing request: {}", request);
+
         UserEntity user = userRepository.findById(request.getUser())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         QuestionGroupEntity questionGroup = questionGroupRepository.findById(request.getQuestionGroup())
                 .orElseThrow(() -> new AppException(ErrorCode.QUESTION_GROUP_NOT_FOUND));
 
-        // Xóa kết quả test cũ nếu có
-        SkinTestEntity existingTest = skinTestRepository.findByUser(user);
-        if (existingTest != null) {
-            skinTestRepository.delete(existingTest);
+        // Get skin type first to validate
+        String skinTypeStr = determineSkinType(request.getTotalScore());
+        log.info("Determined skin type: {}", skinTypeStr);
+
+        // Convert to enum to get Vietnamese name
+        SkinType skinTypeEnum = SkinType.valueOf(skinTypeStr);
+        String vnName = skinTypeEnum.getVNESEname();
+        log.info("Vietnamese name: {}", vnName);
+
+        // Find skin type entity
+        SkinTypeEntity skinTypeEntity = skinTypeRepository.findByType(vnName);
+        if (skinTypeEntity == null) {
+            log.error("Skin type not found in database: {}", vnName);
+            throw new AppException(ErrorCode.SKIN_TYPE_NOT_FOUND);
         }
 
-        // Tạo entity mới
+        // Create and save test result
         SkinTestEntity skinTest = new SkinTestEntity();
         skinTest.setUser(user);
         skinTest.setQuestionGroup(questionGroup);
         skinTest.setTotalScore(request.getTotalScore());
+        skinTest.setSkinType(skinTypeEntity);
+        skinTest.setNotes(skinTypeEnum.getMessage());
 
-        // Xác định loại da dựa trên điểm số
-        try {
-            String skinTypeStr = determineSkinType(request.getTotalScore());
-            SkinType skinType = SkinType.valueOf(skinTypeStr);
-            String getVNname = skinType.getVNESEname();
-            log.info("getVNname:{}", getVNname);
+        // Update user's skin type
+        user.setSkinType(vnName);
+        userRepository.save(user);
 
-            // Log để debug
-            log.info("Điểm số: {}, Loại da xác định: {}", request.getTotalScore(), skinTypeStr);
-
-            // Tìm entity loại da tương ứng
-            SkinTypeEntity skinTypeEntity = skinTypeRepository.findByType(getVNname);
-            log.info(" lấy skin type theo trong repo: {}", skinTypeEntity);
-            if (skinTypeEntity == null) {
-                log.error("Không tìm thấy loại da {} trong database", skinTypeStr);
-                throw new AppException(ErrorCode.SKIN_TYPE_NOT_FOUND);
-            }
-
-            // Cập nhật thông tin
-            skinTest.setSkinType(skinTypeEntity);
-            skinTest.setNotes(skinType.getMessage());
-
-            // Cập nhật loại da cho user
-            user.setSkinType(skinType.getVNESEname());
-            userRepository.save(user);
-
-            // Lưu kết quả test
-            skinTestRepository.save(skinTest);
-
-            return true;
-
-        } catch (IllegalArgumentException e) {
-            log.error("Lỗi xác định loại da: {}", e.getMessage());
-            throw new AppException(ErrorCode.INVALID_SKIN_TYPE);
-        }
+        // Save test result
+        skinTestRepository.save(skinTest);
+        return true;
     }
 
     public SkinTestResponse getDetail(Long id){
