@@ -16,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@With
 @Table(name = "Product", indexes = {
         @Index(name = "idx_title", columnList = "Title"),
         @Index(name = "idx_slug", columnList = "Slug"),

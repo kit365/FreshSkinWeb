@@ -19,6 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@With
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductResponseDTO implements Serializable {
