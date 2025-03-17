@@ -510,6 +510,13 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         // Lấy danh sách blog từ OpenSearch hoặc cơ sở dữ liệu
         List<BlogResponse> blogResponsesPage = getBlogsByCategorySlug(slug, "ACTIVE", false, p, size);
 
+        BlogCategoryResponse cateogry = blogResponsesPage.getFirst().getBlogCategory();
+        BlogCategoryResponse blogCategoryResponse = new BlogCategoryResponse();
+        blogCategoryResponse.setSlug(cateogry.getSlug());
+        blogCategoryResponse.setId(cateogry.getId());
+        blogCategoryResponse.setTitle(cateogry.getTitle());
+
+
         blogResponsesPage.forEach(blogResponse -> {
             // Xóa các trường không cần thiết
             blogResponse.setBlogCategory(null);
@@ -533,6 +540,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         pageDetail.put("pageSize", size);
 
         map.put("blogs", blogResponsesPage);
+        map.put("blogCategory", blogCategoryResponse);
         map.put("pageDetail", pageDetail);
         return map;
     }
