@@ -297,6 +297,11 @@ public class OrderService {
         List<OrderResponse> orderResponses = ordersPage.getContent().stream()
                 .map(orderEntity -> {
                     OrderResponse response = orderMapper.toOrderResponse(orderEntity);
+
+                    response.setUserId(user.getUserID());
+                    response.setUsername(user.getUsername());
+                    response.setTypeUser(user.getTypeUser().toString());
+
                     if (orderEntity.getOrderItems() != null) {
                         response.setOrderItems(orderEntity.getOrderItems().stream()
                                 .map(this::createOrderItemResponse)
@@ -350,12 +355,19 @@ public class OrderService {
         List<OrderResponse> orderResponses = ordersPage.getContent().stream()
                 .map(orderEntity -> {
                     OrderResponse response = orderMapper.toOrderResponse(orderEntity);
-                    if (orderEntity.getOrderItems() != null) {
-                        response.setOrderItems(orderEntity.getOrderItems().stream()
-                                .map(this::createOrderItemResponse)
-                                .collect(Collectors.toList()));
+
+                    // Xử lý trường hợp user == null ( vì cho phép user k đăng nhập vẫn có thể Order )
+                    if (orderEntity.getUser() != null) {
+                        response.setUserId(orderEntity.getUser().getUserID());
+                        response.setUsername(orderEntity.getUser().getUsername());
+                        response.setTypeUser(orderEntity.getUser().getSkinType());
+                    } else {
+                        response.setUserId(null);
+                        response.setUsername(null);
+                        response.setTypeUser(null);
                     }
                     return response;
+
                 })
                 .collect(Collectors.toList());
 
