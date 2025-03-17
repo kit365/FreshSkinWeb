@@ -73,6 +73,9 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @JoinColumn(name = "roleId", nullable = true)
     RoleEntity role;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderVoucherEntity> orderVouchers = new ArrayList<>();
+
 //    @JsonBackReference
 //    @ManyToMany
 //    Set<RoleEntity> roles;

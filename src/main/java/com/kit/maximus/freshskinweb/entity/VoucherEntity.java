@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kit.maximus.freshskinweb.utils.DiscountType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,18 +25,18 @@ public class VoucherEntity {
     @Column(name = "VoucherId")
     String voucherId;
 
-    @Column(name = "Code",nullable = false, unique = true)
-    String code; // Mã voucher
+    @Column(name = "Name",nullable = false, unique = true)
+    String name; // Mã voucher
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Type", nullable = false)
     DiscountType type; // PERCENTAGE hoặc FIXED
 
     @Column(name = "DiscountValue", nullable = false)
-    BigDecimal discountValue; // % hoặc số tiền giảm
+    Double discountValue; // % hoặc số tiền giảm
 
     @Column(name = "MaxDiscount")
-    BigDecimal maxDiscount; // Mức giảm tối đa khi dùng PERCENTAGE
+    Double maxDiscount; // Mức giảm tối đa khi dùng PERCENTAGE
 
     @Column(name = "MinOrderValue")
     BigDecimal minOrderValue; // Giá trị đơn hàng tối thiểu để áp dụng
@@ -46,41 +47,22 @@ public class VoucherEntity {
     @Column(name = "Used", nullable = false)
     Integer used = 0; // Số lần đã sử dụng
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     @Column(name = "StartDate", nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
     Date startDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     @Column(name = "EndDate", nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
     Date endDate;
 
-    @OneToMany(mappedBy = "voucher", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    List<OrderEntity> orders = new ArrayList<>();
+    @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<OrderVoucherEntity> orderVouchers = new ArrayList<>();
 
     public boolean isValid() {
         Date now = new Date();
         return used < usageLimit && now.after(startDate) && now.before(endDate);
-    }
-
-    public BigDecimal calculateDiscount(BigDecimal orderTotal) {
-        if (type == DiscountType.PERCENTAGE) {
-            BigDecimal discount = orderTotal.multiply(discountValue).divide(BigDecimal.valueOf(100));
-            if (maxDiscount != null && discount.compareTo(maxDiscount) > 0) {
-                return maxDiscount;
-            }
-            return discount;
-        }
-        return discountValue; // Nếu là FIXED thì trả về số tiền giảm cố định
-    }
-
-    public void applyVoucher(OrderEntity orderEntity) {
-        orders.add(orderEntity);
-        orderEntity.setVoucher(this);
-    }
-
-    public void removeVoucher(OrderEntity orderEntity) {
-        orders.remove(orderEntity);
-        orderEntity.setVoucher(null);
     }
 
 

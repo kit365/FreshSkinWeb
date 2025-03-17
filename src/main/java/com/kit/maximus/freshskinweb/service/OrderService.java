@@ -76,10 +76,9 @@ public class OrderService {
                     }
 
                     orderItemEntity.setQuantity(orderItem.getQuantity());
-//                    Double subtotal = productVariantEntity.getPrice() * orderItem.getQuantity();
-//                    orderItemEntity.setSubtotal(subtotal);
+                    Double subtotal = productVariantEntity.getPrice() * orderItem.getQuantity();
+                    orderItemEntity.setSubtotal(subtotal);
 //                    orderItemEntity.calculateSubtotal();
-                    assert productVariantEntity != null;
                     double discountPercent = (productVariantEntity.getProduct().getDiscount() != null
                             && productVariantEntity.getProduct().getDiscount().getDiscountPercentage() != 0.0)
                             ? productVariantEntity.getProduct().getDiscount().getDiscountPercentage() / 100.0
@@ -90,7 +89,7 @@ public class OrderService {
             }
         }
         double totalPrice = order.getOrderItems().stream()
-                .mapToDouble(item -> item.getDiscountPrice() != 0 ? item.getDiscountPrice() : item.getSubtotal())
+                .mapToDouble(item -> item.getDiscountPrice() > 0 ? item.getDiscountPrice() : item.getSubtotal())
                 .sum();
         order.setTotalPrice(totalPrice);
 
