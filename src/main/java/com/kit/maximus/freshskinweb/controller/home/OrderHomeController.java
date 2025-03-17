@@ -21,7 +21,7 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/home/order")
+@RequestMapping("/home/orders")
 public class OrderHomeController {
 
     OrderService orderService;
