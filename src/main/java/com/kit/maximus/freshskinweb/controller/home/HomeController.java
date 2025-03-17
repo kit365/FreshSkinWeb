@@ -1,8 +1,7 @@
 package com.kit.maximus.freshskinweb.controller.home;
 
-import com.kit.maximus.freshskinweb.dto.RouterDTO;
 import com.kit.maximus.freshskinweb.dto.response.*;
-import com.kit.maximus.freshskinweb.service.BlogCategoryService;
+import com.kit.maximus.freshskinweb.service.blog.BlogCategoryService;
 import com.kit.maximus.freshskinweb.service.ProductBrandService;
 import com.kit.maximus.freshskinweb.service.ProductCategoryService;
 import com.kit.maximus.freshskinweb.service.ProductService;
@@ -10,15 +9,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestClient;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -37,28 +33,11 @@ public class HomeController {
     ProductService productService;
 
     ProductBrandService productBrandService;
-    private final RestClient.Builder builder;
-
-
-    @GetMapping("/routes")
-    public List<RouterDTO> getRoutes() {
-        return List.of(
-                new RouterDTO("Trang chủ", "/home"),
-                new RouterDTO("Thương hiệu", "/brands"),
-                new RouterDTO("Dưỡng da", "/skincare"),
-                new RouterDTO("Khuyến mãi HOT", "/promotions"),
-                new RouterDTO("Sản phẩm mới", "/new-products"),
-                new RouterDTO("Top bán chạy", "/best-sellers"),
-                new RouterDTO("So sánh sản phẩm", "/compare"),
-                new RouterDTO("Loại Da Của Bạn", "/skin-type"),
-                new RouterDTO("Tạp Chí Làm Đẹp", "/home/blogs")
-        );
-    }
 
     //    @Cacheable("homeData")
     @GetMapping
     public Map<String, Object> getHomeData() {
-        int threadCount = 9;
+        int threadCount = 10;
 
         List<String> freshSkinSloganList = Arrays.asList("Nước tẩy trang", "Sữa rữa mặt", "Toner / Nước cân bằng da");
         List<String> topMoisturizingProductsList = Arrays.asList("Tẩy tế bào chết", "Chống nắng da mặt", "Serum / Tinh Chất");
@@ -75,7 +54,7 @@ public class HomeController {
                 CompletableFuture.supplyAsync(() -> productCategoryService.getFilteredCategories(beautyTrendsList, 5), executor);
 
         CompletableFuture<List<ProductBrandResponse>> listBrandsFuture =
-                CompletableFuture.supplyAsync(productBrandService::getAll, executor);
+                CompletableFuture.supplyAsync(productBrandService::getTop10, executor);
 
         CompletableFuture<List<ProductCategoryResponse>> listProductCategoryFutute =
                 CompletableFuture.supplyAsync(productCategoryService::showALL, executor);
@@ -88,8 +67,10 @@ public class HomeController {
         CompletableFuture<List<ProductResponseDTO>> Top7ProductFlashSaleFutute = CompletableFuture.supplyAsync(productService::findTop7FlashSale, executor);
 
         CompletableFuture<List<ProductResponseDTO>> Top3ProductFeatureFutute = CompletableFuture.supplyAsync(productService::getProductsFeature, executor);
+
+        CompletableFuture<List<ProductResponseDTO>> Top10ProductSellerFeatureFutute = CompletableFuture.supplyAsync(productService::top10SellingProducts, executor);
         // Đợi tất cả hoàn thành
-        CompletableFuture.allOf(freshSkinFuture, topMoisturizingFuture, beautyTrendsFuture, listBrandsFuture, listProductCategoryFutute, listBlogCategoryFeatureFuture, featuredProductCategoryFutute, Top7ProductFlashSaleFutute, Top3ProductFeatureFutute).join();
+        CompletableFuture.allOf(freshSkinFuture, topMoisturizingFuture, beautyTrendsFuture, listBrandsFuture, listProductCategoryFutute, listBlogCategoryFeatureFuture, featuredProductCategoryFutute, Top7ProductFlashSaleFutute, Top3ProductFeatureFutute, Top10ProductSellerFeatureFutute).join();
 
         try {
             return Map.of(
@@ -101,15 +82,97 @@ public class HomeController {
                     "BeautyTrends", beautyTrendsFuture.get(),
                     "Top3ProductFeature", Top3ProductFeatureFutute.get(),
                     "AllBrand", listBrandsFuture.get(),
-                    "AllCategory", listProductCategoryFutute.get()
+                    "AllCategory", listProductCategoryFutute.get(),
+                    "Top10ProductSeller", Top10ProductSellerFeatureFutute.get()
             );
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi lấy danh mục", e);
         } finally {
             executor.shutdown(); // Đóng ThreadPool sau khi hoàn thành
         }
-
     }
+
+//    @GetMapping
+//    public Map<String, Object> getHomeData() {
+//        int threadCount = 15;
+//        ExecutorService executor = Executors.newFixedThreadPool(threadCount); // Tạo ThreadPool để quản lý luồng
+//
+//        // Danh sách danh mục cần truy vấn
+//        List<String> freshSkinSloganList = Arrays.asList("Nước tẩy trang", "Sữa rữa mặt", "Toner / Nước cân bằng da");
+//        List<String> topMoisturizingProductsList = Arrays.asList("Tẩy tế bào chết", "Chống nắng da mặt", "Serum / Tinh Chất");
+//        List<String> beautyTrendsList = Arrays.asList("Dầu Gội", "Dầu Xả", "Xịt Dưỡng Tóc");
+//
+//        // Nhóm Future xử lý danh mục sản phẩm
+//        CompletableFuture<List<ProductCategoryResponse>> freshSkinFuture =
+//                CompletableFuture.supplyAsync(() -> productCategoryService.getFilteredCategories(freshSkinSloganList, 6), executor);
+//
+//        CompletableFuture<List<ProductCategoryResponse>> topMoisturizingFuture =
+//                CompletableFuture.supplyAsync(() -> productCategoryService.getFilteredCategories(topMoisturizingProductsList, 10), executor);
+//
+//        CompletableFuture<List<ProductCategoryResponse>> beautyTrendsFuture =
+//                CompletableFuture.supplyAsync(() -> productCategoryService.getFilteredCategories(beautyTrendsList, 5), executor);
+//
+//        CompletableFuture<List<ProductCategoryResponse>> listProductCategoryFuture =
+//                CompletableFuture.supplyAsync(productCategoryService::showALL, executor);
+//
+//        CompletableFuture<List<ProductCategoryResponse>> featuredProductCategoryFuture =
+//                CompletableFuture.supplyAsync(productCategoryService::getFeaturedProductCategories, executor);
+//
+//        // Nhóm Future xử lý sản phẩm
+//        CompletableFuture<List<ProductResponseDTO>> top7FlashSaleFuture =
+//                CompletableFuture.supplyAsync(productService::findTop7FlashSale, executor);
+//
+//        CompletableFuture<List<ProductResponseDTO>> top3ProductFeatureFuture =
+//                CompletableFuture.supplyAsync(productService::getProductsFeature, executor);
+//
+//        CompletableFuture<List<ProductResponseDTO>> top10ProductSellerFuture =
+//                CompletableFuture.supplyAsync(productService::top10SellingProducts, executor);
+//
+//        // Nhóm Future xử lý thương hiệu & blog
+//        CompletableFuture<List<ProductBrandResponse>> listBrandsFuture =
+//                CompletableFuture.supplyAsync(productBrandService::getTop10, executor);
+//
+//        CompletableFuture<List<BlogCategoryResponse>> listBlogCategoryFeatureFuture =
+//                CompletableFuture.supplyAsync(blogCategoryService::getFeaturedBlogCategories, executor);
+//
+//        CompletableFuture<List<ProductCategoryResponse>> allCategoriesFuture = listProductCategoryFuture
+//                .thenCombine(featuredProductCategoryFuture, (all, featured) -> {
+//                    all.addAll(featured);
+//                    return all;
+//                });
+//
+//        //thenCombine(): gộp 2 CompletableFuture thành 1
+//
+//        CompletableFuture<List<ProductResponseDTO>> topProductsFuture = top7FlashSaleFuture
+//                .thenCombine(top3ProductFeatureFuture, (flashSale, featured) -> {
+//                    flashSale.addAll(featured);
+//                    return flashSale;
+//                });
+//
+//        CompletableFuture.allOf(
+//                freshSkinFuture, topMoisturizingFuture, beautyTrendsFuture, allCategoriesFuture,
+//                topProductsFuture, top10ProductSellerFuture, listBrandsFuture, listBlogCategoryFeatureFuture
+//        ).join();
+//
+//        try {
+//            return Map.of(
+//                    "featuredProductCategory", featuredProductCategoryFuture.get(),
+//                    "featuredBlogCategory", listBlogCategoryFeatureFuture.get(),
+//                    "Top7ProductFlashSale", top7FlashSaleFuture.get(),
+//                    "FreshSkinSlogan", freshSkinFuture.get(),
+//                    "Top_moisturizing_products", topMoisturizingFuture.get(),
+//                    "BeautyTrends", beautyTrendsFuture.get(),
+//                    "Top3ProductFeature", top3ProductFeatureFuture.get(),
+//                    "AllBrand", listBrandsFuture.get(),
+//                    "AllCategory", allCategoriesFuture.get(),
+//                    "Top10ProductSeller", top10ProductSellerFuture.get()
+//            );
+//        } catch (Exception e) {
+//            throw new RuntimeException("Lỗi khi lấy danh mục", e);
+//        } finally {
+//            executor.shutdown(); // Đóng ThreadPool sau khi hoàn thành
+//        }
+//    }
 
     @GetMapping("/{slug}")
     public ResponseAPI<Map<String, Object>> getProductByCategorySlug(

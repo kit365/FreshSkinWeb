@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.service;
+package com.kit.maximus.freshskinweb.service.users;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;

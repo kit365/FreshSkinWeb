@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,11 +21,17 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
     @EntityGraph(attributePaths = {"reviews"}) // Chỉ fetch các quan hệ cần thiết
     Optional<ProductEntity> findWithReviewsById(Long id);
 
-    List<ProductEntity> findTop7ByStatusAndDeleted(Status status, boolean b, Sort discountPercent);
+//    List<ProductEntity> findTop7ByStatusAndDeleted(Status status, boolean b, Sort discountPercent);
+
+    @Query("SELECT p.id FROM ProductEntity p WHERE p.status = :status AND p.deleted = :deleted ORDER BY p.discountPercent DESC")
+    List<Long> findTop7ProductIdsByStatusAndDeleted(@Param("status") Status status, @Param("deleted") boolean deleted, Pageable pageable);
 
 
+    @Query("SELECT p.id FROM ProductEntity p WHERE p.status = :status AND p.deleted = :deleted ORDER BY p.featured DESC")
+    List<Long> findTop3ByStatusAndDeletedAndFeatured(@Param("status") Status status, @Param("deleted") boolean deleted, Pageable pageable);
 
-    List<ProductEntity> findTop3ByStatusAndDeletedAndFeatured(Status status, boolean b, boolean b1);
+
+//    List<ProductEntity> findTop3ByStatusAndDeletedAndFeatured(Status status, boolean b, boolean b1);
 
 
 

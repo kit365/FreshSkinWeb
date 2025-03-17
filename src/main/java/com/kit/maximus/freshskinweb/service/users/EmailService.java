@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.service;
+package com.kit.maximus.freshskinweb.service.users;
 
 import com.kit.maximus.freshskinweb.config.MailConfig;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
@@ -21,7 +21,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 

@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.service;
+package com.kit.maximus.freshskinweb.service.order;
 
 import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.orderItem.OrderItemRequest;
@@ -8,11 +8,10 @@ import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.OrderItemMapper;
 import com.kit.maximus.freshskinweb.mapper.OrderMapper;
-import com.kit.maximus.freshskinweb.mapper.ProductMapper;
 import com.kit.maximus.freshskinweb.repository.OrderRepository;
-import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.repository.ProductVariantRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
+import com.kit.maximus.freshskinweb.service.users.EmailService;
 import com.kit.maximus.freshskinweb.specification.OrderSpecification;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import jakarta.transaction.Transactional;
@@ -20,7 +19,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -49,58 +47,41 @@ public class OrderService {
     @Transactional
     public OrderIdResponse addOrder(OrderRequest orderRequest) {
         OrderEntity order = orderMapper.toOrderEntity(orderRequest);
-        order.setOrderId(generateOrderCode());
-        //Kêu Dũng có gửi UserID không => băắt Dũng phải gửi thêm id User nếu có sẵn
-        if (orderRequest.getUserId() != null) {
-            var user = userRepository.findById(orderRequest.getUserId()).orElse(null);
-            order.setUser(user);
-        } else {
-            order.setUser(null);
+
+        UserEntity user = userRepository.findById(orderRequest.getUserId()).orElse(null);
+        
+        order.setUser(user);
+
+        // Tạo orderId duy nhất
+        String orderId = generateOrderCode();
+        order.setOrderId(orderId);
+        order.setOrderStatus(OrderStatus.PENDING);
+
+        long totalAmount = 0;
+        double totalPrice = 0;
+        List<OrderItemEntity> orderItems = new ArrayList<>();
+
+        for (OrderItemRequest itemRequest : orderRequest.getOrderItems()) {
+            ProductVariantEntity variant = productVariantRepository.findById(itemRequest.getProductVariantId())
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+
+            OrderItemEntity orderItem = new OrderItemEntity();
+            orderItem.setProductVariant(variant);
+            orderItem.setQuantity(itemRequest.getQuantity());
+            orderItem.setSubtotal(variant.getPrice() * itemRequest.getQuantity());
+            orderItem.setOrder(order);
+            orderItems.add(orderItem);
+
+            totalAmount += itemRequest.getQuantity();
+            totalPrice += orderItem.getSubtotal();
         }
 
-        //Tạo order item thông qua order
-        // Dũng chỉ gửi ProductVariantID và số lượng để tạo Order Items
-        // xai OrderitemRepo de tim ID roi set vao, set 2 chiều để tạo OrderItem trong Order
-        if (orderRequest.getOrderItems() != null) {
-
-            for (OrderItemRequest orderItem : orderRequest.getOrderItems()) {
-
-                if (orderItem != null) {
-                    //Đóng vai trò làm phễu để lưu tạm thời, sau đó bỏ vào trong List OrderItems trong Order
-                    //Mỗi lần lặp là 1 đối tượng mới để lưu vào trong list OrderItems của Order
-                    OrderItemEntity orderItemEntity = new OrderItemEntity();
-
-                    ProductVariantEntity productVariantEntity = productVariantRepository.findById(orderItem.getProductVariantId()).orElse(null);
-
-                    if (productVariantEntity != null) {
-                        orderItemEntity.setProductVariant(productVariantEntity);
-                    } else {
-                        orderItemEntity.setProductVariant(null);
-                    }
-
-                    orderItemEntity.setQuantity(orderItem.getQuantity());
-//                    Double subtotal = productVariantEntity.getPrice() * orderItem.getQuantity();
-//                    orderItemEntity.setSubtotal(subtotal);
-//                    orderItemEntity.calculateSubtotal();
-                    assert productVariantEntity != null;
-                    double discountPercent = (productVariantEntity.getProduct().getDiscount() != null
-                            && productVariantEntity.getProduct().getDiscount().getDiscountPercentage() != 0.0)
-                            ? productVariantEntity.getProduct().getDiscount().getDiscountPercentage() / 100.0
-                            : 0.0;
-                    orderItemEntity.setDiscountPrice(orderItemEntity.getSubtotal() * (1 - discountPercent));
-                    order.addOrderItem(orderItemEntity);
-                }
-            }
-        }
-        double totalPrice = order.getOrderItems().stream()
-                .mapToDouble(item -> item.getDiscountPrice() != 0 ? item.getDiscountPrice() : item.getSubtotal())
-                .sum();
+        order.setTotalAmount(totalAmount);
         order.setTotalPrice(totalPrice);
+        order.setOrderItems(orderItems);
 
         OrderEntity savedOrder = orderRepository.save(order);
-
-        return orderMapper.toOrderResponseCreate(savedOrder);
-
+        return new OrderIdResponse(savedOrder.getOrderId());
     }
 
     public void processOrder(String orderId) {
@@ -281,18 +262,25 @@ public class OrderService {
     public Map<String, Object> getUserOrders(Long userId, OrderStatus status, String keyword,
                                              String orderId, int page, int size,
                                              String sortBy, OrderStatus priorityStatus) {
-
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        // Kiểm tra user tồn tại
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         Map<String, Object> map = new HashMap<>();
         int p = Math.max(page - 1, 0);
+
+        // Chỉ kiểm tra orderId khi nó không null
+        if (orderId != null) {
+            orderRepository.findById(orderId)
+                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        }
 
         Specification<OrderEntity> spec = Specification
                 .where(OrderSpecification.isNotDeleted())
                 .and(OrderSpecification.hasUserId(userId))
                 .and(OrderSpecification.hasStatus(status))
                 .and(OrderSpecification.hasKeyword(keyword))
-                .and(OrderSpecification.hasOrderId(orderId));
+                .and(orderId != null ? OrderSpecification.hasOrderId(orderId) : null);
 
         Pageable pageable;
         Page<OrderEntity> ordersPage;
@@ -335,23 +323,25 @@ public class OrderService {
         Map<String, Object> map = new HashMap<>();
         int p = Math.max(page - 1, 0);
 
-        OrderEntity entity = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        // Chỉ kiểm tra orderId khi nó không null
+        if (orderId != null) {
+            orderRepository.findById(orderId)
+                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        }
 
         Specification<OrderEntity> spec = Specification
                 .where(OrderSpecification.isNotDeleted())
                 .and(OrderSpecification.hasStatus(status))
                 .and(OrderSpecification.hasKeyword(keyword))
-                .and(OrderSpecification.hasOrderId(orderId));
+                .and(orderId != null ? OrderSpecification.hasOrderId(orderId) : null);
 
         Pageable pageable;
         Page<OrderEntity> ordersPage;
 
         if (sortBy != null && sortBy.equals("updatedAt")) {
-            // Sort by updatedAt only
             pageable = PageRequest.of(p, size, Sort.by("updatedAt").descending());
             ordersPage = orderRepository.findAll(spec, pageable);
         } else {
-            // Use default status-based sorting
             pageable = PageRequest.of(p, size);
             spec = spec.and(OrderSpecification.orderByStatusPriorityAndDate(priorityStatus));
             ordersPage = orderRepository.findAll(spec, pageable);

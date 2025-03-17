@@ -8,10 +8,13 @@ import java.io.Serializable;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderIdResponse implements Serializable {
-    Long orderId;
+    String orderId;
 }
 
 

@@ -3,7 +3,7 @@ package com.kit.maximus.freshskinweb.controller.admin;
 import com.kit.maximus.freshskinweb.dto.request.orderItem.OrderItemRequest;
 import com.kit.maximus.freshskinweb.dto.response.OrderItemResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
-import com.kit.maximus.freshskinweb.service.OrderItemService;
+import com.kit.maximus.freshskinweb.service.order.OrderItemService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
