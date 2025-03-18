@@ -37,4 +37,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
     UserEntity findByEmail(String email);
 
 
+    Optional<UserEntity> findByProviderId(String providerId);
 }

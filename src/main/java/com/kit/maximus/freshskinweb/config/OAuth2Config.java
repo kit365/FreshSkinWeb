@@ -54,30 +54,64 @@ public class OAuth2Config {
         System.out.println("✅ Redirect URI đang dùng: " + envValue);
         return envValue;
     }
-//    @PostConstruct
-//    public void init() {
-//        System.out.println("🔎 GOOGLE_CLIENT_ID: " + getClientId());
-//        System.out.println("🔎 GOOGLE_CLIENT_SECRET: " + getClientSecret());
-//        System.out.println("🔎 GOOGLE_REDIRECT_URI: " + getRedirectUri());
-//        System.out.println("🔎 GOOGLE_SCOPE: " + getScope());
-//    }
+
+    // Add Facebook fields
+    public String getFacebookClientId() {
+        return getEnvOrDefault("SPRING.SECURITY.OAUTH2.CLIENT.REGISTRATION.FACEBOOK.CLIENT-ID", "DEFAULT_FB_CLIENT_ID");
+    }
+
+    public String getFacebookClientSecret() {
+        return getEnvOrDefault("SPRING.SECURITY.OAUTH2.CLIENT.REGISTRATION.FACEBOOK.CLIENT-SECRET", "DEFAULT_FB_CLIENT_SECRET");
+    }
+
+    public String getFacebookScope() {
+        return getEnvOrDefault("SPRING.SECURITY.OAUTH2.CLIENT.REGISTRATION.FACEBOOK.SCOPE", "public_profile,email");
+    }
+
+    public String getFacebookRedirectUri() {
+        String envValue = getEnvOrDefault("SPRING.SECURITY.OAUTH2.CLIENT.REGISTRATION.FACEBOOK.REDIRECT-URI", null);
+        if (envValue == null || envValue.isEmpty()) {
+            envValue = "http://localhost:8080/login/oauth2/code/facebook";
+        }
+        return envValue;
+    }
 
     @Bean
     public ClientRegistrationRepository clientRegistrationRepository() {
         ClientRegistration googleRegistration = ClientRegistration.withRegistrationId("google")
+                .clientId(getEnvOrDefault("GOOGLE_CLIENT_ID", "default"))
+                .clientSecret(getEnvOrDefault("GOOGLE_CLIENT_SECRET", "default"))
+                .scope("email", "profile")
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .clientId(getClientId())
-                .clientSecret(getClientSecret())
-                .scope(getScope().split(","))
+                .redirectUri(getEnvOrDefault("GOOGLE_REDIRECT_URI", "http://localhost:8080/login/oauth2/code/google"))
                 .authorizationUri("https://accounts.google.com/o/oauth2/auth")
                 .tokenUri("https://oauth2.googleapis.com/token")
                 .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
-                .userNameAttributeName("sub") // kha nang bi thieu field nay => khong tao duoc tai khoan googleRegistration
-                .redirectUri(getRedirectUri())
+                .userNameAttributeName("sub")
                 .clientName("Google")
                 .build();
 
-        return new InMemoryClientRegistrationRepository(googleRegistration);
+        ClientRegistration facebookRegistration = ClientRegistration.withRegistrationId("facebook")
+                .clientId(getEnvOrDefault("FACEBOOK_CLIENT_ID", "default"))
+                .clientSecret(getEnvOrDefault("FACEBOOK_CLIENT_SECRET", "default"))
+                .scope("public_profile")  // Chỉ lấy thông tin công khai, không cần email
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .redirectUri(getFacebookRedirectUri())
+                .authorizationUri("https://www.facebook.com/v16.0/dialog/oauth")
+                .tokenUri("https://graph.facebook.com/v16.0/oauth/access_token")
+                .userInfoUri("https://graph.facebook.com/v16.0/me?fields=id,name,picture")  // Bỏ email
+                .userNameAttributeName("id")
+                .clientName("Facebook")
+                .build();
+
+        return new InMemoryClientRegistrationRepository(
+                List.of(googleRegistration, facebookRegistration)
+        );
+    }
+
+    @PostConstruct
+    public void init() {
+        System.out.println("getFacebookRedirectUri" + getFacebookRedirectUri());
     }
 
 }
