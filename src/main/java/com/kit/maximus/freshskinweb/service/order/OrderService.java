@@ -14,6 +14,7 @@ import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.service.users.EmailService;
 import com.kit.maximus.freshskinweb.specification.OrderSpecification;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
+import com.kit.maximus.freshskinweb.utils.PaymentMethod;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +58,19 @@ public class OrderService {
         order.setOrderId(orderId);
         order.setOrderStatus(OrderStatus.PENDING);
 
+        // Set payment method safely
+        if (orderRequest.getPaymentMethod() != null) {
+            System.out.println(orderRequest.getPaymentMethod() );
+            try {
+                order.setPaymentMethod(PaymentMethod.valueOf(orderRequest.getPaymentMethod().toUpperCase()));
+                System.out.println(order.getPaymentMethod() );
+
+            } catch (IllegalArgumentException e) {
+                log.error("Invalid payment method: {}", orderRequest.getPaymentMethod());
+                throw new AppException(ErrorCode.INVALID_PAYMENT_METHOD);
+            }
+        }
+
         long totalAmount = 0;
         double totalPrice = 0;
         List<OrderItemEntity> orderItems = new ArrayList<>();
@@ -99,6 +113,15 @@ public class OrderService {
         } catch (IllegalArgumentException e) {
             log.warn("Invalid status provided: '{}'", orderStatus);
             throw new AppException(ErrorCode.ORDER_STATUS_INVALID);
+        }
+    }
+
+    private PaymentMethod getPaymentMethod(String method) {
+        try {
+            return PaymentMethod.valueOf(method.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid payment method: {}", method);
+            throw new AppException(ErrorCode.INVALID_PAYMENT_METHOD);
         }
     }
 
@@ -304,7 +327,17 @@ public class OrderService {
 
                     if (orderEntity.getOrderItems() != null) {
                         response.setOrderItems(orderEntity.getOrderItems().stream()
-                                .map(this::createOrderItemResponse)
+                                .map(orderItem -> OrderItemResponse.builder()
+                                        .orderItemId(orderItem.getOrderItemId())
+                                        .quantity(orderItem.getQuantity())
+                                        .subtotal(orderItem.getSubtotal())
+                                        .productVariant(ProductVariantResponse.builder()
+                                                .id(orderItem.getProductVariant().getId())
+                                                .price(orderItem.getProductVariant().getPrice())
+                                                .volume(orderItem.getProductVariant().getVolume())
+                                                .unit(orderItem.getProductVariant().getUnit())
+                                                .build())
+                                        .build())
                                 .collect(Collectors.toList()));
                     }
                     return response;
@@ -366,8 +399,24 @@ public class OrderService {
                         response.setUsername(null);
                         response.setTypeUser(null);
                     }
-                    return response;
+                    // Ánh xạ orderItems vào response
+                    List<OrderItemResponse> orderItemResponses = orderEntity.getOrderItems().stream()
+                            .map(orderItem -> OrderItemResponse.builder()
+                                    .orderItemId(orderItem.getOrderItemId())
+                                    .quantity(orderItem.getQuantity())
+                                    .subtotal(orderItem.getSubtotal())
+                                    .productVariant(ProductVariantResponse.builder()
+                                            .id(orderItem.getProductVariant().getId())
+                                            .price(orderItem.getProductVariant().getPrice())
+                                            .volume(orderItem.getProductVariant().getVolume())
+                                            .unit(orderItem.getProductVariant().getUnit())
+                                            .build())
+                                    .build())
+                            .collect(Collectors.toList());
 
+                    response.setOrderItems(orderItemResponses);
+
+                    return response;
                 })
                 .collect(Collectors.toList());
 
@@ -378,40 +427,6 @@ public class OrderService {
         map.put("pageSize", ordersPage.getSize());
 
         return map;
-    }
-
-    //Tạo hàm để ấy thông tin từ OrderItemsEntity sang OrderItemsResponse
-    private OrderItemResponse createOrderItemResponse(OrderItemEntity item) {
-        OrderItemResponse response = new OrderItemResponse();
-        response.setOrderItemId(item.getOrderItemId());
-        response.setQuantity(item.getQuantity());
-        response.setSubtotal(item.getSubtotal());
-        response.setDiscountPrice(item.getDiscountPrice());
-
-        if (item.getProductVariant() != null) {
-            response.setProductVariant(createProductVariantResponse(item.getProductVariant()));
-        }
-        return response;
-    }
-
-    //Tạo hàm để ấy thông tin từ ProductVariantEntity sang ProductVariantResponse
-    private ProductVariantResponse createProductVariantResponse(ProductVariantEntity variant) {
-        ProductVariantResponse response = new ProductVariantResponse();
-        response.setId(variant.getId());
-        response.setPrice(variant.getPrice());
-        response.setUnit(variant.getUnit());
-        response.setVolume(variant.getVolume());
-
-        if (variant.getProduct() != null) {
-            ProductResponseDTO productResponse = new ProductResponseDTO();
-            productResponse.setId(variant.getProduct().getId());
-            productResponse.setTitle(variant.getProduct().getTitle());
-            productResponse.setThumbnail(variant.getProduct().getThumbnail());
-            productResponse.setDiscountPercent(variant.getProduct().getDiscountPercent());
-            productResponse.setSlug(variant.getProduct().getSlug());
-            response.setProduct(productResponse);
-        }
-        return response;
     }
 
     //    Cập nhật trạng thái cho đơn hàng được chọn

@@ -129,6 +129,9 @@ public enum ErrorCode {
     //ORDERSTATUS
     ORDER_STATUS_INVALID(400, "Không tìm thấy trạng thái đơn hàng"),
 
+    //PAYMENT METHOD
+    INVALID_PAYMENT_METHOD(404,"Phương thức thanh toán không hợp lệ"),
+
     //DISCOUNT
     DISCOUNT_NOT_FOUND(404, "Không tìm thấy mã giảm giá"),
     DISCOUNT_IS_EXISTED(404, "Mã giảm giá đã tồn tại trong hệ thống"),
