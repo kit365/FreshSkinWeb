@@ -244,9 +244,8 @@ public class NotificationService {
                 Sort.Order.asc("isRead"),
                 Sort.Order.desc("time")
         );
-        Pageable pageable = PageRequest.of(0, 50, sort);
 
-        List<NotificationEntity> request = notificationRepository.findAllByOrderIsNull(pageable);
+        List<NotificationEntity> request = notificationRepository.findAllByOrderIsNull(sort);
 
         return getNotificationResponses(request);
     }
