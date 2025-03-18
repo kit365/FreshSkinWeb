@@ -2,7 +2,7 @@ package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.kit.maximus.freshskinweb.dto.request.forgot_password.ForgotPasswordRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
-import com.kit.maximus.freshskinweb.service.ForgotPasswordService;
+import com.kit.maximus.freshskinweb.service.users.ForgotPasswordService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

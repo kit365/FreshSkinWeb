@@ -8,7 +8,7 @@ import com.kit.maximus.freshskinweb.dto.response.AuthenticationResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.IntrospectResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
-import com.kit.maximus.freshskinweb.service.AuthenticationService;
+import com.kit.maximus.freshskinweb.service.users.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.text.ParseException;
 
 //@CrossOrigin(origins = "*")
@@ -66,8 +65,6 @@ public class AuthenticationController {
     public ResponseAPI<UserResponseDTO> getUser(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
         String message = "Lấy dữ liệu user thành công";
         UserResponseDTO result = authenticationService.getUserByToken(request.getToken());
-
-
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
 
     }

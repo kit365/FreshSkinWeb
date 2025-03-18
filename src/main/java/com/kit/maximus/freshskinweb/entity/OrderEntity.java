@@ -96,6 +96,9 @@ public class OrderEntity extends AbstractEntity {
     @Column(name = "PaymentStatus")
     PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<OrderVoucherEntity> orderVouchers = new ArrayList<>();
+
     public void calculateTotalPrice() {
         this.totalPrice = orderItems.stream()
                 .mapToDouble(OrderItemEntity::getSubtotal) // Giả sử OrderItemEntity có phương thức getTotalPrice()

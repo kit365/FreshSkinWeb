@@ -178,7 +178,11 @@ public enum ErrorCode {
     CANNOT_VOTE_OWN_REVIEW(400, "Không thể tự vote cho chính mình"),
     ALREADY_VOTED(400, "Đã vote!"),
     VOTE_NOT_FOUND(400, "Lượt vote không tồn tại"),
-    VOTE_STATUS_INVALID(404, "Lượt vote không hợp lệ[-1(dislike),0(unvote),1(like)]"),PARENT_REVIEW_NOT_FOUND(404, "Bình luận không tìm thấy, không thể trả lời.")
+    VOTE_STATUS_INVALID(404, "Lượt vote không hợp lệ[-1(dislike),0(unvote),1(like)]"),PARENT_REVIEW_NOT_FOUND(404, "Bình luận không tìm thấy, không thể trả lời."),
+
+    //Voucher
+    VOUCHER_NOT_FOUND(404, "Không tìm thấy voucher"),
+    VOUCHER_IS_EXISTED(400, "Voucher đã tồn tại"),
 
     ;
 

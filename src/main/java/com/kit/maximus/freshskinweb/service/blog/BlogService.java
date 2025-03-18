@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.service;
+package com.kit.maximus.freshskinweb.service.blog;
 
 
 import com.cloudinary.Cloudinary;
@@ -18,6 +18,7 @@ import com.kit.maximus.freshskinweb.repository.BlogCategoryRepository;
 import com.kit.maximus.freshskinweb.repository.BlogRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.repository.search.BlogSearchRepository;
+import com.kit.maximus.freshskinweb.service.BaseService;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -509,6 +510,13 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         // Lấy danh sách blog từ OpenSearch hoặc cơ sở dữ liệu
         List<BlogResponse> blogResponsesPage = getBlogsByCategorySlug(slug, "ACTIVE", false, p, size);
 
+        BlogCategoryResponse cateogry = blogResponsesPage.getFirst().getBlogCategory();
+        BlogCategoryResponse blogCategoryResponse = new BlogCategoryResponse();
+        blogCategoryResponse.setSlug(cateogry.getSlug());
+        blogCategoryResponse.setId(cateogry.getId());
+        blogCategoryResponse.setTitle(cateogry.getTitle());
+
+
         blogResponsesPage.forEach(blogResponse -> {
             // Xóa các trường không cần thiết
             blogResponse.setBlogCategory(null);
@@ -532,6 +540,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         pageDetail.put("pageSize", size);
 
         map.put("blogs", blogResponsesPage);
+        map.put("blogCategory", blogCategoryResponse);
         map.put("pageDetail", pageDetail);
         return map;
     }

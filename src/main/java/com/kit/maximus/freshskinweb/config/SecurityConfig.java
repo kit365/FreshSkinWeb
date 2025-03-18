@@ -1,12 +1,11 @@
 package com.kit.maximus.freshskinweb.config;
 
-import com.kit.maximus.freshskinweb.service.AuthenticationService;
-import com.kit.maximus.freshskinweb.service.CustomOAuth2UserService;
+import com.kit.maximus.freshskinweb.service.users.AuthenticationService;
+import com.kit.maximus.freshskinweb.service.users.CustomOAuth2UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -69,9 +68,9 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
-                        .defaultSuccessUrl("/home")
-                        .authorizationEndpoint(auth -> auth.baseUri("/oauth2/authorization"))
-                        .redirectionEndpoint(redir -> redir.baseUri("/oauth2/callback/*"))
+                                .defaultSuccessUrl("https://project-swp391-n9j6.onrender.com", true)
+//                        .authorizationEndpoint(auth -> auth.baseUri("/oauth2/authorization"))
+//                        .redirectionEndpoint(redir -> redir.baseUri("/oauth2/callback/*"))
                         .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService()))
                 )
                 .userDetailsService(authenticationService)

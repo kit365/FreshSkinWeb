@@ -3,13 +3,17 @@ package com.kit.maximus.freshskinweb.dto.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kit.maximus.freshskinweb.entity.AbstractEntity;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
+import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serializable;
+import java.util.Date;
 
 @Setter
 @Getter
@@ -18,7 +22,7 @@ import java.io.Serializable;
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SkinTypeScoreRangeResponse implements Serializable {
+public class SkinTypeScoreRangeResponse extends AbstractEntity{
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Long id;
@@ -34,6 +38,5 @@ public class SkinTypeScoreRangeResponse implements Serializable {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String description;
-
 
 }

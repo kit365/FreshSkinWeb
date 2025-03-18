@@ -1,7 +1,7 @@
 package com.kit.maximus.freshskinweb.controller.home;
 
 import com.kit.maximus.freshskinweb.dto.response.*;
-import com.kit.maximus.freshskinweb.service.BlogCategoryService;
+import com.kit.maximus.freshskinweb.service.blog.BlogCategoryService;
 import com.kit.maximus.freshskinweb.service.ProductBrandService;
 import com.kit.maximus.freshskinweb.service.ProductCategoryService;
 import com.kit.maximus.freshskinweb.service.ProductService;
@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestClient;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
