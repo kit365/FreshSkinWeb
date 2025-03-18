@@ -29,9 +29,8 @@ public class SkinTypeScoreRangeEntity extends AbstractEntity{
     @Column(name = "MaxScore")
     Double maxScore;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SkinTypeId")
-    @OnDelete(action = OnDeleteAction.SET_NULL)
     SkinTypeEntity skinType;
 
 }
