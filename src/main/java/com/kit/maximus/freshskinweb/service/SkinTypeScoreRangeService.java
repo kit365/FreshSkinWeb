@@ -43,18 +43,39 @@ public class SkinTypeScoreRangeService {
     SkinTypeRepository skinTypeRepository;
 
 
-    public boolean add(CreationSkinTypeScoreRangeRequest request){
+    public boolean add(CreationSkinTypeScoreRangeRequest request) {
+        // Kiểm tra nếu có id và id đã tồn tại
+        if (request.getId() != null) {
+            SkinTypeScoreRangeEntity existingEntity = repository.findById(request.getId()).orElse(null);
+            if (existingEntity != null) {
+                // Cập nhật thông tin cho entity hiện có
+                existingEntity.setMinScore(request.getMinScore());
+                existingEntity.setMaxScore(request.getMaxScore());
+
+                SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(request.getSkinType()).orElse(null);
+                if (skinTypeEntity != null) {
+                    existingEntity.setSkinType(skinTypeEntity);
+                    repository.save(existingEntity);
+                    return true;
+                } else {
+                    existingEntity.setSkinType(null);
+                    return false;
+                }
+            }
+        }
+
+        // Xử lý thêm mới nếu không có id hoặc id chưa tồn tại
         SkinTypeScoreRangeEntity skinTypeScoreRangeEntity = mapper.toSkinTypeScoreRangeEntity(request);
         SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(request.getSkinType()).orElse(null);
 
-        if(skinTypeEntity != null){
+        if (skinTypeEntity != null) {
             skinTypeScoreRangeEntity.setSkinType(skinTypeEntity);
             repository.save(skinTypeScoreRangeEntity);
             return true;
         } else {
             skinTypeScoreRangeEntity.setSkinType(null);
+            return false;
         }
-    return false;
     }
 
     public Map<String, Object> getAll(String status, String skinType,
