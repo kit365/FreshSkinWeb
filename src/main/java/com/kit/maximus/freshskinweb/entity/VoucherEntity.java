@@ -33,10 +33,10 @@ public class VoucherEntity {
     DiscountType type; // PERCENTAGE hoặc FIXED
 
     @Column(name = "DiscountValue", nullable = false)
-    Double discountValue; // % hoặc số tiền giảm
+    BigDecimal discountValue; // % hoặc số tiền giảm
 
     @Column(name = "MaxDiscount")
-    Double maxDiscount; // Mức giảm tối đa khi dùng PERCENTAGE
+    BigDecimal maxDiscount; // Mức giảm tối đa khi dùng PERCENTAGE
 
     @Column(name = "MinOrderValue")
     BigDecimal minOrderValue; // Giá trị đơn hàng tối thiểu để áp dụng

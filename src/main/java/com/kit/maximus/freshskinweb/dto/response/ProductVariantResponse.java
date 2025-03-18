@@ -9,6 +9,7 @@ import com.kit.maximus.freshskinweb.utils.UnitType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -23,7 +24,7 @@ import java.util.List;
 public class ProductVariantResponse {
 
     Long id;
-    double price;
+    BigDecimal price;
     int volume;
     UnitType unit;
 

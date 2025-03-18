@@ -653,7 +653,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                 productResponseDTO.setDescription(productEntity.getDescription());
                 productResponseDTO.setThumbnail(productEntity.getThumbnail());
                 productResponseDTO.setDiscountPercent(productEntity.getDiscountPercent());
-                productResponseDTO.setFeatured(productEntity.isFeatured());
+                productResponseDTO.setFeatured(productEntity.getFeatured());
                 productResponseDTO.setStatus(String.valueOf(productEntity.getStatus()));
                 productResponseDTO.setDeleted(productEntity.isDeleted());
 
@@ -722,7 +722,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
             productResponseDTO.setDescription(productEntity.getDescription());
             productResponseDTO.setThumbnail(productEntity.getThumbnail());
             productResponseDTO.setDiscountPercent(productEntity.getDiscountPercent());
-            productResponseDTO.setFeatured(productEntity.isFeatured());
+            productResponseDTO.setFeatured(productEntity.getFeatured());
 
             ProductBrandResponse productBrandResponse = new ProductBrandResponse();
             productBrandResponse.setTitle(productEntity.getBrand().getTitle());

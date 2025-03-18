@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Setter
@@ -28,11 +29,11 @@ public class VoucherRequest {
 
     @NotNull(message = "Giá trị giảm giá không được để trống")
     @DecimalMin(value = "0.01", message = "Giá trị giảm giá phải lớn hơn 0")
-    Double discountValue;
+    BigDecimal discountValue;
 
-    Double maxDiscount; // Mức giảm tối đa khi dùng PERCENTAGE
+    BigDecimal maxDiscount; // Mức giảm tối đa khi dùng PERCENTAGE
 
-    Double minOrderValue; // Giá trị đơn hàng tối thiểu để áp dụng
+    BigDecimal minOrderValue; // Giá trị đơn hàng tối thiểu để áp dụng
 
     @NotNull(message = "Số lần sử dụng không được để trống")
     @Min(value = 1, message = "Số lần sử dụng phải lớn hơn 0")

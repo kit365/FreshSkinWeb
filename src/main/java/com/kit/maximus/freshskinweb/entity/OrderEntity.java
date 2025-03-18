@@ -14,6 +14,7 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -74,10 +75,13 @@ public class OrderEntity extends AbstractEntity {
     String phoneNumber;
 
     @Column(name = "TotalAmount")
-    long totalAmount;
+    Integer totalAmount;
 
     @Column(name = "TotalPrice")
-    double totalPrice;
+    BigDecimal totalPrice;
+
+    @Column(name = "DiscountAmount")
+    BigDecimal discountAmount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "PaymentMethod")
@@ -99,11 +103,6 @@ public class OrderEntity extends AbstractEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     List<OrderVoucherEntity> orderVouchers = new ArrayList<>();
 
-    public void calculateTotalPrice() {
-        this.totalPrice = orderItems.stream()
-                .mapToDouble(OrderItemEntity::getSubtotal) // Giả sử OrderItemEntity có phương thức getTotalPrice()
-                .sum();
-    }
 
     public void addOrderItem(OrderItemEntity orderItem) {
         orderItems.add(orderItem);

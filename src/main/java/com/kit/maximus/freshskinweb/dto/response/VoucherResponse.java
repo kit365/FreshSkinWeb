@@ -5,6 +5,7 @@ import com.kit.maximus.freshskinweb.utils.DiscountType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Setter
@@ -18,9 +19,9 @@ public class VoucherResponse {
     String voucherId;
     String name;
     DiscountType type;
-    Double discountValue;
-    Double maxDiscount;
-    Double minOrderValue;
+    BigDecimal discountValue;
+    BigDecimal maxDiscount;
+    BigDecimal minOrderValue;
     Integer usageLimit;
     Integer used;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

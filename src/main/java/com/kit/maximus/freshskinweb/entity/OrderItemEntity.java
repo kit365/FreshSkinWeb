@@ -40,10 +40,10 @@ public class OrderItemEntity extends AbstractEntity {
     Integer quantity;
 
     @Column(name = "Subtotal")
-    Double subtotal;
+    BigDecimal subtotal;
 
     @Column(name = "DiscountPrice")
-    Double discountPrice; // Tổng tiền sau giảm giá
+    BigDecimal discountPrice; // Tổng tiền sau giảm giá
 
 //    public void calculateSubtotal() {
 //        if (productVariant == null || productVariant.getProduct() == null) {

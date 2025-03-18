@@ -56,7 +56,7 @@ public class OrderResponse implements Serializable {
 
     String paymentStatus;
 
-    String voucherId; // Mã giảm giá nếu có
+    String voucherName; // Mã giảm giá nếu có
 
     Double discountAmount; // Số tiền giảm giá
 }

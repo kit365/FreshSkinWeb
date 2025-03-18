@@ -78,13 +78,13 @@ public class ProductEntity extends AbstractEntity {
     List<String> thumbnail;
 
     @Column(name = "DiscountPercentage")
-    double discountPercent;
+    Double discountPercent;
 
     @Column(name = "Position")
     Integer position;
 
     @Column(name = "Featured")
-    boolean featured;
+    Boolean featured;
 
     /// /////////////
     @Column(name = "Origin", columnDefinition = "MEDIUMTEXT")

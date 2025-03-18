@@ -5,6 +5,7 @@ import com.kit.maximus.freshskinweb.utils.UnitType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Setter
@@ -27,7 +28,7 @@ public class ProductVariantEntity {
     Long id;
 
     @Column(name = "Price")
-    double price;
+    BigDecimal price;
 
     @Column(name = "Volume")
     int volume;

@@ -29,10 +29,10 @@ public class OrderItemResponse implements Serializable {
 
     Integer quantity;
 
-    Double subtotal;
+    BigDecimal subtotal;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Status status;
 
-    Double discountPrice;
+//    BigDecimal discountPrice;
 }

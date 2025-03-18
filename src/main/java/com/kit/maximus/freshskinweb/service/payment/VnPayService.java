@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -76,7 +77,7 @@ public class VnPayService implements PaymentService {
             String version = "2.1.0";
             String command = "pay";
             String otherType = "130000";
-            long amount = (long) (order.getTotalPrice() * 100);
+            long amount = (long) (order.getTotalPrice().multiply(BigDecimal.valueOf(100)).doubleValue());
             ; // Format tiền theo cent
             String transactionReference = getRandomNumber(8);
             String clientIpAddress = getIpAddress(ipAddr);

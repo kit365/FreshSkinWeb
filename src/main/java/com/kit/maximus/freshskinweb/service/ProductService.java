@@ -32,6 +32,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -233,7 +234,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 if (currentList.containsKey(listUpdate.getVolume())) {
                     ProductVariantEntity productVariantEntity = currentList.get(listUpdate.getVolume());
                     //tương lai sẽ vứt loi
-                    if (productVariantEntity.getPrice() < 0) productVariantEntity.setPrice(0);
+                    if (productVariantEntity.getPrice().compareTo(BigDecimal.ZERO) < 0) productVariantEntity.setPrice(BigDecimal.ZERO);
                     productVariantEntity.setPrice(listUpdate.getPrice());
                 } else {
                     listProduct.createProductVariant(listUpdate);

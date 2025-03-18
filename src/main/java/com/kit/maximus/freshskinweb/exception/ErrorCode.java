@@ -186,7 +186,11 @@ public enum ErrorCode {
     //Voucher
     VOUCHER_NOT_FOUND(404, "Không tìm thấy voucher"),
     VOUCHER_IS_EXISTED(400, "Voucher đã tồn tại"),
-
+    VOUCHER_EXPIRED(400, "Voucher đã hết hạn"),
+    VOUCHER_NOT_VALID_YET(400, "Voucher chưa có hiệu lực"),
+    VOUCHER_IS_USED_UP(400, "Voucher đã được sử dụng hết"),
+    ORDER_NOT_ELIGIBLE(400, "Đơn hàng không đủ điều kiện để sử dụng voucher"),
+    VOUCHER_INVALID(400, "Voucher không hợp lệ"),
     ;
 
 
