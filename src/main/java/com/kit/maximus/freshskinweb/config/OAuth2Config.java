@@ -69,7 +69,7 @@ public class OAuth2Config {
     }
 
     public String getFacebookRedirectUri() {
-        String envValue = getEnvOrDefault("SPRING.SECURITY.OAUTH2.CLIENT.REGISTRATION.FACEBOOK.REDIRECT-URI", null);
+        String envValue = getEnvOrDefault("FACEBOOK_REDIRECT_URI", null);
         if (envValue == null || envValue.isEmpty()) {
             envValue = "http://localhost:8080/login/oauth2/code/facebook";
         }
