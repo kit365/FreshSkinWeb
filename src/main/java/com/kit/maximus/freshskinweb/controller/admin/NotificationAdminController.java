@@ -42,7 +42,7 @@ public class NotificationAdminController {
     }
 
     //xóa tất cả thông báo(chưa đọc) review
-    @DeleteMapping("review/deletedAll")
+    @DeleteMapping("review/deleteAll")
     public void deleteAllReviewNotification() {
         notificationService.deleteAllReviewNotification();
     }
