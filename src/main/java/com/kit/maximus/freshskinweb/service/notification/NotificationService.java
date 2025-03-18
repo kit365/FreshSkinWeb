@@ -1,7 +1,6 @@
 package com.kit.maximus.freshskinweb.service.notification;
 
 import com.kit.maximus.freshskinweb.dto.request.notification.CreationNotificationRequest;
-import com.kit.maximus.freshskinweb.dto.request.notification.UpdationNotificationRequest;
 import com.kit.maximus.freshskinweb.dto.response.NotificationResponse;
 import com.kit.maximus.freshskinweb.entity.NotificationEntity;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
@@ -14,15 +13,17 @@ import com.kit.maximus.freshskinweb.repository.NotificationRepository;
 import com.kit.maximus.freshskinweb.repository.OrderRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.repository.review.ReviewRepository;
-import com.kit.maximus.freshskinweb.service.BaseService;
 import com.kit.maximus.freshskinweb.specification.NotificationSpecification;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class NotificationService implements BaseService<NotificationResponse, CreationNotificationRequest, UpdationNotificationRequest, Long> {
+public class NotificationService {
 
     NotificationRepository notificationRepository;
     NotificationMapper notificationMapper;
@@ -46,7 +47,6 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
     ApplicationEventPublisher eventPublisher; //công cụ phát sự kiện,
 
 
-    @Override
     public boolean add(CreationNotificationRequest request) {
         NotificationEntity entity = notificationMapper.toNotificationEntity(request);
 
@@ -93,34 +93,34 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
     }
 
 
-    @Override
-    public NotificationResponse update(Long id, UpdationNotificationRequest request) {
-        NotificationEntity entity = notificationRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.NOTIFICATION_NOT_FOUND));
 
-        entity.setIsRead(true);
-        NotificationEntity savedEntity = notificationRepository.save(entity);
-
-        NotificationResponse response = new NotificationResponse();
-        response.setId(savedEntity.getId());
-        response.setMessage(savedEntity.getMessage());
-        response.setIsRead(savedEntity.getIsRead());
-        response.setTime(savedEntity.getTime());
-//        response.setDeleted(savedEntity.isDeleted());
-        response.setStatus(savedEntity.getStatus().name());
-
-//        if (savedEntity.getUser() != null) {
-//            response.setUsername(savedEntity.getUser().getUsername());
-//        }
-//        if (savedEntity.getOrder() != null) {
-//            response.setOrder(String.valueOf(savedEntity.getOrder().getOrderId()));
-//        }
-//        if (savedEntity.getReview() != null) {
-//            response.setReview(savedEntity.getReview().getReviewId());
-//        }
-
-        return response;
-    }
+//    public NotificationResponse update(Long id, UpdationNotificationRequest request) {
+//        NotificationEntity entity = notificationRepository.findById(id)
+//                .orElseThrow(() -> new AppException(ErrorCode.NOTIFICATION_NOT_FOUND));
+//
+//        entity.setIsRead(true);
+//        NotificationEntity savedEntity = notificationRepository.save(entity);
+//
+//        NotificationResponse response = new NotificationResponse();
+//        response.setId(savedEntity.getId());
+//        response.setMessage(savedEntity.getMessage());
+//        response.setIsRead(savedEntity.getIsRead());
+//        response.setTime(savedEntity.getTime());
+////        response.setDeleted(savedEntity.isDeleted());
+//        response.setStatus(savedEntity.getStatus().name());
+//
+////        if (savedEntity.getUser() != null) {
+////            response.setUsername(savedEntity.getUser().getUsername());
+////        }
+////        if (savedEntity.getOrder() != null) {
+////            response.setOrder(String.valueOf(savedEntity.getOrder().getOrderId()));
+////        }
+////        if (savedEntity.getReview() != null) {
+////            response.setReview(savedEntity.getReview().getReviewId());
+////        }
+//
+//        return response;
+//    }
 
     public Map<String, Object> getAllByUser(Long userId, int page, int size) {
         Sort sort = Sort.by(
@@ -166,38 +166,19 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
         );
     }
 
-    @Override
-    public String update(List<Long> id, String status) {
-        return "";
-    }
 
-    @Override
     public boolean delete(Long aLong) {
         notificationRepository.deleteById(aLong);
         return true;
     }
 
-    @Override
+
+
     public boolean delete(List<Long> longs) {
         return false;
     }
 
-    @Override
-    public boolean deleteTemporarily(Long aLong) {
-        return false;
-    }
 
-    @Override
-    public boolean restore(Long aLong) {
-        return false;
-    }
-
-    @Override
-    public NotificationResponse showDetail(Long aLong) {
-        return null;
-    }
-
-    @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         Sort sort = Sort.by(
                 Sort.Order.asc("isRead"),
@@ -239,17 +220,40 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
         );
     }
 
+    public void updateStatus(Long id) {
+        NotificationEntity entity = notificationRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.NOTIFICATION_NOT_FOUND));
+        entity.setIsRead(true);
+        notificationRepository.save(entity);
+    }
+
+
+
+    /*
+
+     */
+
     //số tin nhắn chưa đọc(admin)
     public long countMessageFeedbackIsNotRead() {
         return notificationRepository.countByIsReadAndOrderIsNull(false);
     }
 
-    public List<NotificationResponse> show() {
 
-        List<NotificationEntity> request = notificationRepository.findAllByOrderIsNull();
+    public List<NotificationResponse> showReview() {
 
+        Sort sort = Sort.by(
+                Sort.Order.asc("isRead"),
+                Sort.Order.desc("time")
+        );
+        Pageable pageable = PageRequest.of(0, 50, sort);
+
+        List<NotificationEntity> request = notificationRepository.findAllByOrderIsNull(pageable);
+
+        return getNotificationResponses(request);
+    }
+
+    @NotNull
+    private List<NotificationResponse> getNotificationResponses(List<NotificationEntity> request) {
         List<NotificationResponse> responses = new ArrayList<>();
-        System.out.println(request.getFirst().getTime());
         request.forEach(entity -> {
             NotificationResponse response = new NotificationResponse();
             response.setId(entity.getId());
@@ -257,14 +261,41 @@ public class NotificationService implements BaseService<NotificationResponse, Cr
             response.setIsRead(entity.getIsRead());
             response.setTime(entity.getTime());
             response.setSlugProduct(entity.getReview().getProduct().getSlug());
+            response.setImage(entity.getReview().getProduct().getThumbnail().getFirst());
             responses.add(response);
         });
         return responses;
     }
 
-
-    @Override
-    public Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
-        return Map.of();
+    @Transactional
+    public void deleteAllReviewNotification() {
+        notificationRepository.deleteAllByIsReadAndOrderIsNull(true);
     }
+
+    /*
+    orde
+     */
+
+    public long countMessageOrderIsNotRead() {
+        return notificationRepository.countByIsReadAndReviewIsNull(false);
+    }
+
+
+    public List<NotificationResponse> showOrder() {
+
+        Sort sort = Sort.by(
+                Sort.Order.asc("isRead"),
+                Sort.Order.desc("time")
+        );
+        List<NotificationEntity> request = notificationRepository.findAllByReviewIsNull(sort);
+
+
+        return getNotificationResponses(request);
+    }
+
+    @Transactional
+    public void deleteAllOrderNotification() {
+        notificationRepository.deleteAllByIsReadAndReviewIsNull(true);
+    }
+
 }

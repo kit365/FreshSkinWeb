@@ -19,7 +19,13 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity
 @ToString
-@Table(name = "Notification")
+@Table(name = "Notification",
+        indexes = {
+                @Index(name = "idx_notification_order_id", columnList = "order_id"),
+                @Index(name = "idx_notification_isread_time", columnList = "is_read, Created_at DESC"),
+                @Index(name = "idx_notification_deleted", columnList = "Deleted")
+        }
+)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class NotificationEntity {
 

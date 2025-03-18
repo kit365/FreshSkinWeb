@@ -40,6 +40,8 @@ public class NotificationResponse {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String status;
 
+    String image;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     Date time;
