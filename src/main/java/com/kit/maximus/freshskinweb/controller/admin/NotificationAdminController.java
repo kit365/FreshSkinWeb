@@ -20,14 +20,54 @@ public class NotificationAdminController {
 
     NotificationService notificationService;
 
-    @GetMapping("show")
-    public List<NotificationResponse> show() {
-        return notificationService.show();
+    @GetMapping("update/{id}")
+    public void update(@PathVariable("id") Long id) {
+        notificationService.updateStatus(id);
     }
 
-    @DeleteMapping("delete/{id}")
-    public void delete(@PathVariable Long id) {
+    /*
+    Thông báo cho feedback/review
+     */
+
+    //show danh sách thông báo review
+    @GetMapping("review")
+    public List<NotificationResponse> showReviewNotification() {
+        return notificationService.showReview();
+    }
+
+    //xóa 1 thông báo review
+    @DeleteMapping("review/delete/{id}")
+    public void deleteReviewNotification(@PathVariable Long id) {
         notificationService.delete(id);
     }
+
+    //xóa tất cả thông báo(chưa đọc) review
+    @DeleteMapping("review/deletedAll")
+    public void deleteAllReviewNotification() {
+        notificationService.deleteAllReviewNotification();
+    }
+
+    /// //////////////////////////////////////////////////////////
+
+    /*
+    Thông báo cho feedback/order
+     */
+    @GetMapping("order")
+    public List<NotificationResponse> showOrderNotification() {
+        return notificationService.showOrder();
+    }
+
+    //xóa 1 thông báo order
+    @DeleteMapping("order/delete/{id}")
+    public void deleteOrderNotification(@PathVariable Long id) {
+        notificationService.delete(id);
+    }
+
+    //xóa tất cả thông báo(chưa đọc) order
+    @DeleteMapping("order/deletedAll")
+    public void deleteAllOrderNotification() {
+        notificationService.deleteAllOrderNotification();
+    }
+
 
 }
