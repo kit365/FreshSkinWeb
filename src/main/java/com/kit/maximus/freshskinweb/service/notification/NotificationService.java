@@ -14,6 +14,7 @@ import com.kit.maximus.freshskinweb.repository.OrderRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.repository.review.ReviewRepository;
 import com.kit.maximus.freshskinweb.specification.NotificationSpecification;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -266,6 +267,7 @@ public class NotificationService {
         return responses;
     }
 
+    @Transactional
     public void deleteAllReviewNotification() {
         notificationRepository.deleteAllByIsReadAndOrderIsNull(true);
     }
@@ -291,6 +293,7 @@ public class NotificationService {
         return getNotificationResponses(request);
     }
 
+    @Transactional
     public void deleteAllOrderNotification() {
         notificationRepository.deleteAllByIsReadAndReviewIsNull(true);
     }
