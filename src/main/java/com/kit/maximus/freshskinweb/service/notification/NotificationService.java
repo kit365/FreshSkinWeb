@@ -310,10 +310,10 @@ public class NotificationService {
                 notificationRepository.deleteAllByIsRead(true);
                 break;
             case "quản lý sản phẩm":
-                notificationRepository.deleteAllByIsReadAndReviewIsNull(true);
+                notificationRepository.deleteAllByIsReadAndOrderIsNull(true);
                 break;
             case "quản lý đơn hàng":
-                notificationRepository.deleteAllByIsReadAndOrderIsNull(true);
+                notificationRepository.deleteAllByIsReadAndReviewIsNull(true);
                 break;
             default:
                 throw new AppException(ErrorCode.ROLE_ACCESS_DENIED);
