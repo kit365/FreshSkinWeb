@@ -285,10 +285,10 @@ public class NotificationService {
                     entityList = notificationRepository.findAllByOrderByIsReadAscTimeDesc();
                     break;
                 case "quản lý sản phẩm":
-                    entityList = notificationRepository.findAllByReviewIsNull(sort);
+                    entityList = notificationRepository.findAllByOrderIsNull(sort);
                     break;
                 case "quản lý đơn hàng":
-                    entityList = notificationRepository.findAllByOrderIsNull(sort);
+                    entityList = notificationRepository.findAllByReviewIsNull(sort);
                     break;
                 default:
                     throw new AppException(ErrorCode.ROLE_ACCESS_DENIED);
