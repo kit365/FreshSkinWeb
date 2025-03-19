@@ -272,6 +272,7 @@ public class NotificationService {
     }
 
     public List<NotificationResponse> showNotification(Long roleID) {
+        log.info(roleID.toString());
         try {
             RoleEntity role = roleService.getRoleEntityById(roleID);
             List<NotificationEntity> entityList;
@@ -304,6 +305,7 @@ public class NotificationService {
 
     @Transactional
     public void deleteAllReview(Long id) {
+        log.info(id.toString());
         RoleEntity role = roleService.getRoleEntityById(id);
         switch (role.getTitle().toLowerCase()) {
             case "quản trị viên":
