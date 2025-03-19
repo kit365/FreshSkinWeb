@@ -77,7 +77,7 @@ public class ReviewHomeController {
         try {
             return ResponseAPI.<Map<String,Object>>builder()
                     .code(HttpStatus.OK.value())
-                    .data(reviewService.getAllByProductSlug(page,size,sortKey,sortDirection,id))
+                    .data(reviewService.getAllByProductID(page,size,sortKey,sortDirection,id))
                     .build();
         } catch (Exception e) {
             log.error(e.getMessage());

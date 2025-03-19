@@ -221,7 +221,7 @@ public class ReviewService {
     }
 
 
-    public Map<String, Object> getAllByProductSlug(int page, int size, String sortKey, String sortDirection, long id) {
+    public Map<String, Object> getAllByProductID(int page, int size, String sortKey, String sortDirection, long id) {
         Map<String, Object> map = new HashMap<>();
 
         // Tính toán phân trang
@@ -238,6 +238,21 @@ public class ReviewService {
                 .map(this::convertToReviewResponse)
                 .toList();
 
+
+        //số review
+        Integer count = reviewRepository.countAllByParentIsNullAndProduct_Id(id);
+
+
+        //tổng rating
+        int sum = responses.stream()
+                .filter(r -> r.getRating() > 0 && r.getParent() == null)
+                .mapToInt(ReviewResponse::getRating)
+                .sum();
+
+        double result;
+        result = (sum > 0 && count > 0) ? Math.round((double) sum / count * 10.0) / 10.0 : 0.0;
+
+
         // Thêm kết quả vào Map để trả về
         Map<String, Object> pageMap = new HashMap<>();
         map.put("reviews", responses);
@@ -245,6 +260,7 @@ public class ReviewService {
         pageMap.put("totalItems", reviewEntities.getTotalElements());
         pageMap.put("totalPages", reviewEntities.getTotalPages());
         pageMap.put("pageSize", reviewEntities.getSize());
+        pageMap.put("rating", result);
         map.put("page", pageMap);
         return map;
     }
@@ -285,7 +301,7 @@ public class ReviewService {
     //dashboard data
 
     public long countReview() {
-        return  reviewRepository.count();
+        return reviewRepository.count();
     }
 
 

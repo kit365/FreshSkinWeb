@@ -160,6 +160,7 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         log.info("❌ Kết nối đóng từ cổng dashboard: {}", session.getId());
         sessions.remove(session);
+        previousData.clear();
     }
 
     @Scheduled(fixedRate = 5000) // Gửi mỗi 5s
