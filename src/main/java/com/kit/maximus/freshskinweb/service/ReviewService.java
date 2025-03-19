@@ -199,6 +199,8 @@ public class ReviewService {
         response.setUser(new UserResponseDTO()
                         .withAvatar(response.getUser().getAvatar())
                         .withUsername(response.getUser().getUsername())
+                        .withFirstName(response.getUser().getFirstName())
+                        .withLastName(response.getUser().getLastName())
                         .withUserID(response.getUser().getUserID())
 //                .withRole(response.getUser().getRole())
                         .withToken(response.getUser().getToken())
