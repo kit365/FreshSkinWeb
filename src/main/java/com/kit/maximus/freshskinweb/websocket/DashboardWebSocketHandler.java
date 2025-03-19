@@ -182,7 +182,7 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
                 String previousJson = objectMapper.writeValueAsString(previousData);
                 String newJson = objectMapper.writeValueAsString(data);
 
-                if (previousData == null || !previousJson.equals(newJson)) {
+                if (previousData.isEmpty() || !previousJson.equals(newJson)) {
                 // Nếu có thay đổi, gửi qua WebSocket
                 String jsonData = new ObjectMapper().writeValueAsString(data);
                 session.sendMessage(new TextMessage(jsonData));
