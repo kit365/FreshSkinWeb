@@ -485,7 +485,6 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         }
 
         // Xóa các trường không cần thiết trong BlogResponse
-        blogResponse.setBlogCategory(null);
         blogResponse.setDeleted(null);
         blogResponse.setStatus(null);
         blogResponse.setPosition(null);
