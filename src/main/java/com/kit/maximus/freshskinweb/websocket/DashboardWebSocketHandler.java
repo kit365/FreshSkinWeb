@@ -164,8 +164,12 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
 
     @Scheduled(fixedRate = 5000) // Gửi mỗi 5s
     public void sendPeriodicDataToClients() {
-        sessions.removeIf(session -> !session.isOpen());
-        sessions.parallelStream().forEach(this::sendDataDashBoard);
+        sessions.removeIf(session -> !session.isOpen()); // Loại bỏ session đã đóng
+        for (WebSocketSession session : sessions) {
+            if (session.isOpen()) {
+                sendDataDashBoard(session);
+            }
+        }
     }
 
     public void sendDataDashBoard(WebSocketSession session) {
@@ -182,7 +186,7 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
                 String previousJson = objectMapper.writeValueAsString(previousData);
                 String newJson = objectMapper.writeValueAsString(data);
 
-                if (previousData.isEmpty() || !previousJson.equals(newJson)) {
+                if (!previousJson.equals(newJson)) {
                 // Nếu có thay đổi, gửi qua WebSocket
                 String jsonData = new ObjectMapper().writeValueAsString(data);
                 session.sendMessage(new TextMessage(jsonData));
