@@ -159,7 +159,7 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
     }
 
 
-    private RoleEntity getRoleEntityById(Long id) {
+    public RoleEntity getRoleEntityById(Long id) {
         return roleRepository.findById(id).orElse(null);
     }
 

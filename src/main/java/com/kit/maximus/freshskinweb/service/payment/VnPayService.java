@@ -7,17 +7,22 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.kit.maximus.freshskinweb.config.VnPayConfig;
+import com.kit.maximus.freshskinweb.entity.NotificationEntity;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
+import com.kit.maximus.freshskinweb.service.notification.NotificationEvent;
+import com.kit.maximus.freshskinweb.service.notification.NotificationService;
 import com.kit.maximus.freshskinweb.service.order.OrderService;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
+import com.kit.maximus.freshskinweb.utils.PaymentMethod;
 import com.kit.maximus.freshskinweb.utils.PaymentStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
@@ -38,6 +43,8 @@ public class VnPayService implements PaymentService {
     VnPayConfig vnPayConfig;
 
     OrderService orderService;
+
+    ApplicationEventPublisher eventPublisher;
 
 
     private static String getRandomNumber(int len) {
@@ -184,6 +191,16 @@ public class VnPayService implements PaymentService {
             //thanh toán thành công -> chuyên status
             orderOpt.setPaymentStatus(PaymentStatus.PAID);
             orderService.saveOrder(orderOpt);
+
+            if(orderOpt.getPaymentMethod() != null && orderOpt.getPaymentMethod().equals(PaymentMethod.QR)) {
+                NotificationEntity notification = new NotificationEntity();
+                notification.setUser(orderOpt.getUser());
+                notification.setOrder(orderOpt);
+                notification.setMessage("Đặt hàng thành công");
+                eventPublisher.publishEvent(new NotificationEvent(this, notification));
+            }
+
+
             return orderId;
         } else {
             orderOpt.setPaymentStatus(PaymentStatus.FAILED);

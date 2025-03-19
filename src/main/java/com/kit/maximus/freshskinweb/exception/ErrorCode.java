@@ -74,6 +74,7 @@ public enum ErrorCode {
     //Role
     ROLE_NOT_FOUND(404, "Không tìm thấy vai trò"),
     ROLE_EXISTED(400, "Vai trò đã tồn tại"),
+    ROLE_ACCESS_DENIED(400, "Vai trò không được phép truy cập"),
 
     //ORDER
     ORDER_NOT_FOUND(404, "Không tìm thấy đơn hàng"),
@@ -191,8 +192,10 @@ public enum ErrorCode {
     VOUCHER_IS_USED_UP(400, "Voucher đã được sử dụng hết"),
     ORDER_NOT_ELIGIBLE(400, "Đơn hàng không đủ điều kiện để sử dụng voucher"),
     VOUCHER_INVALID(400, "Voucher không hợp lệ"),
-    ;
 
+
+    //system
+        INVALID_INPUT(400,"Tham số truyền vào không đúng");
 
 
 

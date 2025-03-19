@@ -2,13 +2,16 @@ package com.kit.maximus.freshskinweb.controller.admin;
 
 
 import com.kit.maximus.freshskinweb.dto.response.NotificationResponse;
+import com.kit.maximus.freshskinweb.entity.RoleEntity;
 import com.kit.maximus.freshskinweb.service.notification.NotificationService;
+import com.kit.maximus.freshskinweb.service.users.RoleService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -25,49 +28,22 @@ public class NotificationAdminController {
         notificationService.updateStatus(id);
     }
 
-    /*
-    Thông báo cho feedback/review
-     */
-
     //show danh sách thông báo review
-    @GetMapping("review")
-    public List<NotificationResponse> showReviewNotification() {
-        return notificationService.showReview();
+    @GetMapping("/{id}")
+    public List<NotificationResponse> showReviewNotification(@PathVariable("id") Long roleID) {
+        return notificationService.showNotification(roleID);
     }
 
-    //xóa 1 thông báo review
-    @DeleteMapping("review/delete/{id}")
-    public void deleteReviewNotification(@PathVariable Long id) {
+    //xóa 1 thông báo
+    @DeleteMapping("/delete/{id}")
+    public void deleteNotification(@PathVariable Long id) {
         notificationService.delete(id);
     }
 
-    //xóa tất cả thông báo(chưa đọc) review
-    @DeleteMapping("review/deleteAll")
-    public void deleteAllReviewNotification() {
-        notificationService.deleteAllReviewNotification();
+    //xóa tất cả thông báo(chưa đọc
+    @DeleteMapping("deleteAll/{id}")
+    public void deleteAllNotification(@PathVariable("id") Long roleID) {
+        notificationService.deleteAllReview(roleID);
     }
-
-    /// //////////////////////////////////////////////////////////
-
-    /*
-    Thông báo cho feedback/order
-     */
-    @GetMapping("order")
-    public List<NotificationResponse> showOrderNotification() {
-        return notificationService.showOrder();
-    }
-
-    //xóa 1 thông báo order
-    @DeleteMapping("order/delete/{id}")
-    public void deleteOrderNotification(@PathVariable Long id) {
-        notificationService.delete(id);
-    }
-
-    //xóa tất cả thông báo(chưa đọc) order
-    @DeleteMapping("order/deletedAll")
-    public void deleteAllOrderNotification() {
-        notificationService.deleteAllOrderNotification();
-    }
-
 
 }

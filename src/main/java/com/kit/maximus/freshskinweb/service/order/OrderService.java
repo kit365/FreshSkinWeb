@@ -13,6 +13,8 @@ import com.kit.maximus.freshskinweb.repository.ProductVariantRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.repository.VoucherRepository;
 import com.kit.maximus.freshskinweb.service.VoucherService;
+import com.kit.maximus.freshskinweb.service.notification.NotificationEvent;
+import com.kit.maximus.freshskinweb.service.notification.NotificationService;
 import com.kit.maximus.freshskinweb.service.users.EmailService;
 import com.kit.maximus.freshskinweb.specification.OrderSpecification;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
@@ -22,6 +24,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -48,6 +51,7 @@ public class OrderService {
     OrderItemMapper orderItemMapper;
     VoucherRepository voucherRepository;
     VoucherService voucherService;
+    ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public OrderIdResponse addOrder(OrderRequest orderRequest) {
@@ -140,7 +144,18 @@ public class OrderService {
             order.setVoucher(voucher);
         }
 
+
+
         OrderEntity savedOrder = orderRepository.save(order);
+
+        if(order.getPaymentMethod() != null && order.getPaymentMethod().equals(PaymentMethod.CASH)) {
+            NotificationEntity notification = new NotificationEntity();
+            notification.setUser(user);
+            notification.setOrder(order);
+            notification.setMessage("Đơn hàng " + order.getOrderId() + " đặt hàng thành công");
+            eventPublisher.publishEvent(new NotificationEvent(this, notification));
+        }
+
         return new OrderIdResponse(savedOrder.getOrderId());
     }
 

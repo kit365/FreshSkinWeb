@@ -4,6 +4,7 @@ import com.kit.maximus.freshskinweb.dto.request.notification.CreationNotificatio
 import com.kit.maximus.freshskinweb.dto.response.NotificationResponse;
 import com.kit.maximus.freshskinweb.entity.NotificationEntity;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
+import com.kit.maximus.freshskinweb.entity.RoleEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.entity.review.ReviewEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -13,6 +14,7 @@ import com.kit.maximus.freshskinweb.repository.NotificationRepository;
 import com.kit.maximus.freshskinweb.repository.OrderRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.repository.review.ReviewRepository;
+import com.kit.maximus.freshskinweb.service.users.RoleService;
 import com.kit.maximus.freshskinweb.specification.NotificationSpecification;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -27,8 +29,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.method.annotation.MethodArgumentConversionNotSupportedException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -45,7 +50,7 @@ public class NotificationService {
     OrderRepository orderRepository;
     ReviewRepository reviewRepository;
     ApplicationEventPublisher eventPublisher; //công cụ phát sự kiện,
-
+    RoleService roleService;
 
     public boolean add(CreationNotificationRequest request) {
         NotificationEntity entity = notificationMapper.toNotificationEntity(request);
@@ -93,7 +98,6 @@ public class NotificationService {
     }
 
 
-
 //    public NotificationResponse update(Long id, UpdationNotificationRequest request) {
 //        NotificationEntity entity = notificationRepository.findById(id)
 //                .orElseThrow(() -> new AppException(ErrorCode.NOTIFICATION_NOT_FOUND));
@@ -109,19 +113,19 @@ public class NotificationService {
 ////        response.setDeleted(savedEntity.isDeleted());
 //        response.setStatus(savedEntity.getStatus().name());
 //
-////        if (savedEntity.getUser() != null) {
-////            response.setUsername(savedEntity.getUser().getUsername());
-////        }
-////        if (savedEntity.getOrder() != null) {
-////            response.setOrder(String.valueOf(savedEntity.getOrder().getOrderId()));
-////        }
-////        if (savedEntity.getReview() != null) {
-////            response.setReview(savedEntity.getReview().getReviewId());
-////        }
+
+    /// /        if (savedEntity.getUser() != null) {
+    /// /            response.setUsername(savedEntity.getUser().getUsername());
+    /// /        }
+    /// /        if (savedEntity.getOrder() != null) {
+    /// /            response.setOrder(String.valueOf(savedEntity.getOrder().getOrderId()));
+    /// /        }
+    /// /        if (savedEntity.getReview() != null) {
+    /// /            response.setReview(savedEntity.getReview().getReviewId());
+    /// /        }
 //
 //        return response;
 //    }
-
     public Map<String, Object> getAllByUser(Long userId, int page, int size) {
         Sort sort = Sort.by(
                 Sort.Order.asc("isRead"),
@@ -171,7 +175,6 @@ public class NotificationService {
         notificationRepository.deleteById(aLong);
         return true;
     }
-
 
 
     public boolean delete(List<Long> longs) {
@@ -237,19 +240,6 @@ public class NotificationService {
         return notificationRepository.countByIsReadAndOrderIsNull(false);
     }
 
-
-    public List<NotificationResponse> showReview() {
-
-        Sort sort = Sort.by(
-                Sort.Order.asc("isRead"),
-                Sort.Order.desc("time")
-        );
-
-        List<NotificationEntity> request = notificationRepository.findAllByOrderIsNull(sort);
-
-        return getNotificationResponses(request);
-    }
-
     @NotNull
     private List<NotificationResponse> getNotificationResponses(List<NotificationEntity> request) {
         List<NotificationResponse> responses = new ArrayList<>();
@@ -259,8 +249,10 @@ public class NotificationService {
             response.setMessage(entity.getMessage());
             response.setIsRead(entity.getIsRead());
             response.setTime(entity.getTime());
-            response.setSlugProduct(entity.getReview().getProduct().getSlug());
-            response.setImage(entity.getReview().getProduct().getThumbnail().getFirst());
+            if (entity.getReview() != null) {
+                response.setSlugProduct(entity.getReview().getProduct().getSlug());
+                response.setImage(entity.getReview().getProduct().getThumbnail().getFirst());
+            }
             responses.add(response);
         });
         return responses;
@@ -279,17 +271,54 @@ public class NotificationService {
         return notificationRepository.countByIsReadAndReviewIsNull(false);
     }
 
+    public List<NotificationResponse> showNotification(Long roleID) {
+        try {
+            RoleEntity role = roleService.getRoleEntityById(roleID);
+            List<NotificationEntity> entityList;
+            Sort sort = Sort.by(
+                    Sort.Order.asc("isRead"),
+                    Sort.Order.desc("time")
+            );
 
-    public List<NotificationResponse> showOrder() {
+            switch (role.getTitle().toLowerCase()) {
+                case "quản trị viên":
+                    entityList = notificationRepository.findAllByOrderByIsReadAscTimeDesc();
+                    break;
+                case "quản lý sản phẩm":
+                    entityList = notificationRepository.findAllByReviewIsNull(sort);
+                    break;
+                case "quản lý đơn hàng":
+                    entityList = notificationRepository.findAllByOrderIsNull(sort);
+                    break;
+                default:
+                    throw new AppException(ErrorCode.ROLE_ACCESS_DENIED);
+            }
 
-        Sort sort = Sort.by(
-                Sort.Order.asc("isRead"),
-                Sort.Order.desc("time")
-        );
-        List<NotificationEntity> request = notificationRepository.findAllByReviewIsNull(sort);
+            return getNotificationResponses(entityList);
+        } catch (MethodArgumentTypeMismatchException e) {
+            throw new AppException(ErrorCode.INVALID_INPUT);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.NOTIFICATION_NOT_FOUND);
+        }
+    }
 
+    @Transactional
+    public void deleteAllReview(Long id) {
+        RoleEntity role = roleService.getRoleEntityById(id);
+        switch (role.getTitle().toLowerCase()) {
+            case "quản trị viên":
+                notificationRepository.deleteAllByIsRead(true);
+                break;
+            case "quản lý sản phẩm":
+                notificationRepository.deleteAllByIsReadAndReviewIsNull(true);
+                break;
+            case "quản lý đơn hàng":
+                notificationRepository.deleteAllByIsReadAndOrderIsNull(true);
+                break;
+            default:
+                throw new AppException(ErrorCode.ROLE_ACCESS_DENIED);
+        }
 
-        return getNotificationResponses(request);
     }
 
     @Transactional
