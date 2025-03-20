@@ -636,6 +636,6 @@ public class UserService {
 
     //dashboard data
     public long countUser() {
-        return userRepository.count();
+        return userRepository.countByStatusAndDeleted(Status.ACTIVE, false);
     }
 }

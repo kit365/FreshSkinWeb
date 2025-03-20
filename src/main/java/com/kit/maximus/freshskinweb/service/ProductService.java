@@ -1623,7 +1623,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     //data dashboard
     public long countProduct() {
-        return productRepository.count();
+        return productRepository.countByStatusAndDeleted(Status.ACTIVE, false);
     }
 
     //top sản phẩm bán chạy

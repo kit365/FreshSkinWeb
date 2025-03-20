@@ -49,4 +49,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
             "ORDER BY COUNT(oi) DESC")
     List<Long> findTop10SellingProducts(Pageable pageable);
 
+    long countByStatusAndDeleted(Status status, boolean b);
+
+
 }

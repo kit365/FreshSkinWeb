@@ -586,7 +586,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
     //data dashboard
     public long countBlogs() {
-        return blogRepository.count();
+        return blogRepository.countByStatusAndDeleted(Status.ACTIVE, false);
     }
 
 
