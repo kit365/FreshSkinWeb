@@ -4,6 +4,7 @@ import com.kit.maximus.freshskinweb.dto.request.discount.DiscountRequest;
 import com.kit.maximus.freshskinweb.dto.response.DiscountResponse;
 import com.kit.maximus.freshskinweb.entity.DiscountEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
+import com.kit.maximus.freshskinweb.entity.VoucherEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.DiscountMapper;
@@ -11,6 +12,7 @@ import com.kit.maximus.freshskinweb.mapper.ProductMapper;
 import com.kit.maximus.freshskinweb.repository.DiscountRepository;
 import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.specification.DiscountSpecification;
+import com.kit.maximus.freshskinweb.utils.DiscountType;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -235,7 +238,6 @@ public class DiscountService {
 
         return true;
     }
-
 
 
     public boolean removeDiscountFromProducts(String id, List<Long> productIds) {

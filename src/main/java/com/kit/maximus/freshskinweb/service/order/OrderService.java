@@ -17,6 +17,7 @@ import com.kit.maximus.freshskinweb.service.notification.NotificationEvent;
 import com.kit.maximus.freshskinweb.service.notification.NotificationService;
 import com.kit.maximus.freshskinweb.service.users.EmailService;
 import com.kit.maximus.freshskinweb.specification.OrderSpecification;
+import com.kit.maximus.freshskinweb.utils.DiscountType;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
 import jakarta.transaction.Transactional;
@@ -60,7 +61,6 @@ public class OrderService {
         UserEntity user = userRepository.findById(orderRequest.getUserId()).orElse(null);
 
 
-        
         order.setUser(user);
 
         // Tạo orderId duy nhất
@@ -70,10 +70,10 @@ public class OrderService {
 
         // Set payment method safely
         if (orderRequest.getPaymentMethod() != null) {
-            System.out.println(orderRequest.getPaymentMethod() );
+            System.out.println(orderRequest.getPaymentMethod());
             try {
                 order.setPaymentMethod(PaymentMethod.valueOf(String.valueOf(orderRequest.getPaymentMethod())));
-                System.out.println(order.getPaymentMethod() );
+                System.out.println(order.getPaymentMethod());
 
             } catch (IllegalArgumentException e) {
                 log.error("Invalid payment method: {}", orderRequest.getPaymentMethod());
@@ -89,28 +89,48 @@ public class OrderService {
             ProductVariantEntity variant = productVariantRepository.findById(itemRequest.getProductVariantId())
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
 
-//            BigDecimal discountPrice = variant.getPrice();
-//            if (variant.getProduct().getDiscountPercent() != null && variant.getProduct().getDiscountPercent() > 0) {
-//                BigDecimal discountAmount = variant.getPrice()
-//                        .multiply(BigDecimal.valueOf(variant.getProduct().getDiscountPercent()))
-//                        .divide(BigDecimal.valueOf(100));
-//                discountPrice = variant.getPrice().subtract(discountAmount);
-//            }
+
             OrderItemEntity orderItem = new OrderItemEntity();
-//            orderItem.setDiscountPrice(discountPrice);
             orderItem.setProductVariant(variant);
             orderItem.setQuantity(itemRequest.getQuantity());
 
-            if(variant.getProduct().getDiscountPercent() != null && variant.getProduct().getDiscountPercent() > 0) {
-                BigDecimal percent = variant.getPrice()
-                        .multiply(BigDecimal.valueOf(variant.getProduct().getDiscountPercent()))
-                        .divide(BigDecimal.valueOf(100));
-                BigDecimal discount = variant.getPrice().subtract(percent);
-                BigDecimal subtotal = discount.multiply(BigDecimal.valueOf(orderItem.getQuantity()));
-                orderItem.setSubtotal(subtotal);
-            } else {
-                orderItem.setSubtotal(variant.getPrice().multiply(BigDecimal.valueOf(itemRequest.getQuantity())));
+//            if(variant.getProduct().getDiscountPercent() != null && variant.getProduct().getDiscountPercent() > 0) {
+//                BigDecimal percent = variant.getPrice()
+//                        .multiply(BigDecimal.valueOf(variant.getProduct().getDiscountPercent()))
+//                        .divide(BigDecimal.valueOf(100));
+//                BigDecimal discount = variant.getPrice().subtract(percent);
+//                BigDecimal subtotal = discount.multiply(BigDecimal.valueOf(orderItem.getQuantity()));
+//                orderItem.setSubtotal(subtotal);
+//            } else {
+//                orderItem.setSubtotal(variant.getPrice().multiply(BigDecimal.valueOf(itemRequest.getQuantity())));
+//            }
+
+            BigDecimal discountAmount = BigDecimal.ZERO;
+
+            if (variant.getProduct().getDiscount() != null) {
+                DiscountEntity discount = variant.getProduct().getDiscount();
+
+                if (discount.getDiscountType() == DiscountType.PERCENTAGE && discount.getDiscountPercentage() != null) {
+                    discountAmount = variant.getPrice()
+                            .multiply(BigDecimal.valueOf(discount.getDiscountPercentage()))
+                            .divide(BigDecimal.valueOf(100));
+
+                    // Áp dụng giới hạn giảm giá tối đa (nếu có)
+                    if (discount.getMaxDiscount() != null && discountAmount.compareTo(BigDecimal.valueOf(discount.getMaxDiscount())) > 0) {
+                        discountAmount = BigDecimal.valueOf(discount.getMaxDiscount());
+                    }
+                } else if (discount.getDiscountType() == DiscountType.FIXED_AMOUNT && discount.getDiscountAmount() != null) {
+                    discountAmount = BigDecimal.valueOf(discount.getDiscountAmount());
+                }
             }
+
+// Tính giá sau giảm
+            BigDecimal discountedPrice = variant.getPrice().subtract(discountAmount);
+
+// Tính tổng tiền cho số lượng sản phẩm
+            BigDecimal subtotal = discountedPrice.multiply(BigDecimal.valueOf(orderItem.getQuantity()));
+            orderItem.setSubtotal(subtotal);
+
 
             orderItem.setOrder(order);
             orderItems.add(orderItem);
@@ -145,10 +165,9 @@ public class OrderService {
         }
 
 
-
         OrderEntity savedOrder = orderRepository.save(order);
 
-        if(order.getPaymentMethod() != null && order.getPaymentMethod().equals(PaymentMethod.CASH)) {
+        if (order.getPaymentMethod() != null && order.getPaymentMethod().equals(PaymentMethod.CASH)) {
             NotificationEntity notification = new NotificationEntity();
             notification.setUser(user);
             notification.setOrder(order);
@@ -577,11 +596,6 @@ public class OrderService {
 
         return currencyFormat.format(totalRevenue.setScale(0, RoundingMode.HALF_UP).doubleValue());
     }
-
-
-
-
-
 
 
 }
