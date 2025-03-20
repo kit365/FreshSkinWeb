@@ -31,7 +31,7 @@ import java.util.List;
         @Index(name = "idx_first_last_name", columnList = "FirstName,LastName"),
         @Index(name = "idx_updated_at", columnList = "Update_at")
 })
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "order"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "user"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderEntity extends AbstractEntity {
 
