@@ -29,15 +29,16 @@ public class DiscountController {
     DiscountService discountService;
 
     @PostMapping("create")
-    public ResponseAPI<Boolean> create(@RequestBody DiscountRequest request){
+    public ResponseAPI<DiscountResponse> create(@RequestBody DiscountRequest request){
         String message = "Tạo mã giảm giá thành công";
        var result =  discountService.addDiscount(request);
-       if(!result){
+       if(result == null){
            message = "Tạo mã giảm giá thất bại";
        }
-    return ResponseAPI.<Boolean>builder()
+    return ResponseAPI.<DiscountResponse>builder()
             .code(HttpStatus.OK.value())
             .message(message)
+            .data(result)
             .build();
     }
 

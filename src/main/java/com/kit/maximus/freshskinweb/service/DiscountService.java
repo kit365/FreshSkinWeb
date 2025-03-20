@@ -11,6 +11,7 @@ import com.kit.maximus.freshskinweb.mapper.ProductMapper;
 import com.kit.maximus.freshskinweb.repository.DiscountRepository;
 import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.specification.DiscountSpecification;
+import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,10 +20,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -35,10 +37,8 @@ public class DiscountService {
     ProductRepository productRepository;
     ProductMapper productMapper;
 
-    public boolean addDiscount(DiscountRequest request) {
-        if (request == null) {
-            return false;
-        }
+    public DiscountResponse addDiscount(DiscountRequest request) {
+
 
         // Kiểm tra xem mã giảm giá đã tồn tại chưa
         boolean exists = discountRepository.existsByName(request.getName());
@@ -52,7 +52,7 @@ public class DiscountService {
         // Lưu vào database
         discountRepository.save(entity);
 
-        return true;
+        return discountMapper.toDiscountResponseId(entity);
     }
 
 
@@ -122,22 +122,121 @@ public class DiscountService {
 //        return true;
 //    }
 
+//    public boolean applyDiscountToProducts(String id, List<Long> productIds) {
+//        var discount = discountRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_NOT_FOUND));
+//
+//        List<ProductEntity> products = productRepository.findAllById(productIds);
+//        if (products.isEmpty()) {
+//            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+//        }
+//
+//        for (ProductEntity product : products) {
+//            product.setDiscount(discount); // Gán discount cho từng product
+//            product.setDiscountPercent(discount.getDiscountPercentage());
+//        }
+//
+//        productRepository.saveAll(products); // Lưu danh sách product sau khi cập nhật
+//        return true;
+//    }
+
+//    public boolean applyDiscountToProducts(String id, List<Long> productIds) {
+//        var discount = discountRepository.findById(id)
+//                .orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_NOT_FOUND));
+//
+//        // 1. Kiểm tra trạng thái discount
+//        if (!discount.getStatus().equals(Status.ACTIVE)) {
+//            throw new AppException(ErrorCode.DISCOUNT_INACTIVE);
+//        }
+//
+//        // 2. Kiểm tra thời gian hiệu lực của discount
+//        Date now = new Timestamp(System.currentTimeMillis());
+//        if (discount.getStartDate().after(now)) {
+//            throw new AppException(ErrorCode.DISCOUNT_NOT_STARTED);
+//        }
+//        if (discount.getEndDate().before(now)) {
+//            throw new AppException(ErrorCode.DISCOUNT_EXPIRED);
+//        }
+//
+//        // 3. Kiểm tra số lần sử dụng (nếu có giới hạn)
+//        if (discount.getUsageLimit() != null && discount.getUsed() >= discount.getUsageLimit()) {
+//            System.out.println("Used: " + discount.getUsed() + " / Usage Limit: " + discount.getUsageLimit());
+//            throw new AppException(ErrorCode.DISCOUNT_LIMIT_EXCEEDED);
+//        }
+//
+//        List<ProductEntity> products = productRepository.findAllById(productIds);
+//        if (products.isEmpty()) {
+//            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+//        }
+//
+//        // 4. Kiểm tra sản phẩm đã có discount chưa (nếu không cho phép ghi đè)
+//        for (ProductEntity product : products) {
+//            if (product.getDiscount() != null) {
+//                throw new AppException(ErrorCode.PRODUCT_ALREADY_HAS_DISCOUNT);
+//            }
+//        }
+//
+//        // 5. Áp dụng discount cho sản phẩm và cập nhật số lần sử dụng
+//        for (ProductEntity product : products) {
+//            product.setDiscount(discount);
+//            product.setDiscountPercent(discount.getDiscountPercentage());
+//        }
+//
+//        // Tăng số lần sử dụng discount
+//        discount.setUsed(discount.getUsed() + products.size());
+//
+//        // Lưu vào database
+//        productRepository.saveAll(products);
+//        discountRepository.saveAndFlush(discount); // Cập nhật số lần sử dụng của discount
+//
+//        return true;
+//    }
+
+    @Transactional
     public boolean applyDiscountToProducts(String id, List<Long> productIds) {
-        var discount = discountRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_NOT_FOUND));
+        var discount = discountRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_NOT_FOUND));
+
+        if (!discount.getStatus().equals(Status.ACTIVE)) {
+            throw new AppException(ErrorCode.DISCOUNT_INACTIVE);
+        }
+
+        Date now = new Timestamp(System.currentTimeMillis());
+        if (discount.getStartDate().after(now)) {
+            throw new AppException(ErrorCode.DISCOUNT_NOT_STARTED);
+        }
+        if (discount.getEndDate().before(now)) {
+            throw new AppException(ErrorCode.DISCOUNT_EXPIRED);
+        }
 
         List<ProductEntity> products = productRepository.findAllById(productIds);
-        if (products.isEmpty()) {
+        if (products.size() != productIds.size()) {
             throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
+
         for (ProductEntity product : products) {
-            product.setDiscount(discount); // Gán discount cho từng product
+            if (product.getDiscount() != null) {
+                throw new AppException(ErrorCode.PRODUCT_ALREADY_HAS_DISCOUNT);
+            }
+        }
+
+        // **Cập nhật `used` trước khi áp dụng discount**
+        int updatedRows = discountRepository.incrementUsage(id, productIds.size());
+        if (updatedRows == 0) {
+            throw new AppException(ErrorCode.DISCOUNT_LIMIT_EXCEEDED);
+        }
+
+        for (ProductEntity product : products) {
+            product.setDiscount(discount);
             product.setDiscountPercent(discount.getDiscountPercentage());
         }
 
-        productRepository.saveAll(products); // Lưu danh sách product sau khi cập nhật
+        productRepository.saveAll(products);
+
         return true;
     }
+
+
 
     public boolean removeDiscountFromProducts(String id, List<Long> productIds) {
         var discount = discountRepository.findById(id)

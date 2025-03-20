@@ -135,7 +135,12 @@ public enum ErrorCode {
 
     //DISCOUNT
     DISCOUNT_NOT_FOUND(404, "Không tìm thấy mã giảm giá"),
+    DISCOUNT_NOT_STARTED(404, "Mã giảm giá chưa bắt đầu"),
     DISCOUNT_IS_EXISTED(404, "Mã giảm giá đã tồn tại trong hệ thống"),
+    DISCOUNT_LIMIT_EXCEEDED(404, "Số lần sử dụng mã giảm giá đã vượt quá giới hạn"),
+    PRODUCT_ALREADY_HAS_DISCOUNT(404, "Sản phẩm đã có mã giảm giá"),
+    DISCOUNT_EXPIRED(404, "Mã giảm giá đã hết hạn"),
+    DISCOUNT_INACTIVE(404, "Mã giảm giá không hoạt động"),
     WRONG_DISCOUNT_TYPE(400, "Loại giảm giá không đúng"),
     DISCOUNT_TYPE_NOT_BE_NULL(400, "Loại mã lỗi không được null"),
     DISCOUNT_NOT_NULL(400, "Mã giảm giá không được để trống"),

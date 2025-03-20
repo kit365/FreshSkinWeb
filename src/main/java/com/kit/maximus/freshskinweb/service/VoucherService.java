@@ -104,7 +104,6 @@ public class VoucherService {
         } else if (voucher.getType() == DiscountType.FIXED_AMOUNT) {
             discountAmount = voucher.getDiscountValue();
         }
-
         return orderTotal.subtract(discountAmount);
     }
 
