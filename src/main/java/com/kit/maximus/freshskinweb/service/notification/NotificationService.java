@@ -237,6 +237,24 @@ public class NotificationService {
         return notificationRepository.countByIsReadAndOrderIsNull(false);
     }
 
+    //số tin  nhắn chưa đọc
+    public long countMessageFeedback(long roleID) {
+        try {
+            RoleEntity role = roleService.getRoleEntityById(roleID);
+            long numberMessage = switch (role.getTitle().toLowerCase()) {
+                case "quản trị viên" -> notificationRepository.count();
+                case "quản lý sản phẩm" -> notificationRepository.countByIsReadAndOrderIsNull(false);
+                case "quản lý đơn hàng" -> notificationRepository.countByIsReadAndReviewIsNull(false);
+                default -> 0;
+            };
+            return numberMessage;
+        } catch (MethodArgumentTypeMismatchException e) {
+            throw new AppException(ErrorCode.INVALID_INPUT);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.NOTIFICATION_NOT_FOUND);
+        }
+    }
+
     @NotNull
     private List<NotificationResponse> getNotificationResponses(List<NotificationEntity> request) {
         List<NotificationResponse> responses = new ArrayList<>();
@@ -269,7 +287,6 @@ public class NotificationService {
     }
 
     public List<NotificationResponse> showNotification(Long roleID) {
-        log.info(roleID.toString());
         try {
             RoleEntity role = roleService.getRoleEntityById(roleID);
             List<NotificationEntity> entityList;

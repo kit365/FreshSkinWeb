@@ -34,13 +34,14 @@ public class NotificationListener {
         NotificationEntity notification = event.getNotification();
         System.out.println("nhận thông báo:" + notification.getMessage());
 
-        sendNotification(notification);
+        long userRole = notification.getUser().getRole().getRoleId();
+        sendNotification(notification, userRole);
         notificationRepository.save(notification);
 
     }
 
-    private void sendNotification(NotificationEntity notification) throws IOException {
-        notificationWebSocketHandler.sendNotification(notification.getMessage());
+    private void sendNotification(NotificationEntity notification, long roleId) throws IOException {
+        notificationWebSocketHandler.sendNotification(notification.getMessage(), roleId);
     }
 
 
