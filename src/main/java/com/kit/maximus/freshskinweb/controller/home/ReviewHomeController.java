@@ -2,7 +2,6 @@ package com.kit.maximus.freshskinweb.controller.home;
 
 import com.kit.maximus.freshskinweb.dto.request.review.ReviewCreateRequest;
 import com.kit.maximus.freshskinweb.dto.request.review.ReviewUpdateRequest;
-import com.kit.maximus.freshskinweb.dto.request.review.ReviewVoteRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.review.ReviewResponse;
 import com.kit.maximus.freshskinweb.service.ReviewService;
@@ -14,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -30,16 +28,6 @@ public class ReviewHomeController {
     public ResponseAPI<ReviewResponse> createReview(@Valid @RequestBody ReviewCreateRequest reviewCreateRequest) {
         String message = "Tạo đánh giá thành công";
         reviewService.addReview(reviewCreateRequest);
-        return ResponseAPI.<ReviewResponse>builder()
-                .code(HttpStatus.OK.value())
-                .message(message)
-                .build();
-    }
-
-    @PostMapping("/vote")
-    public ResponseAPI<ReviewResponse> voteReview(@Valid @RequestBody ReviewVoteRequest request) {
-        String message = "Vote thành công";
-        reviewService.addVote(request);
         return ResponseAPI.<ReviewResponse>builder()
                 .code(HttpStatus.OK.value())
                 .message(message)

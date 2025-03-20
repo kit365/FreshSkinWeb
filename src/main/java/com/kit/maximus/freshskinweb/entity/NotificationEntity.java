@@ -1,7 +1,5 @@
 package com.kit.maximus.freshskinweb.entity;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.kit.maximus.freshskinweb.entity.review.ReviewEntity;
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +7,6 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
 

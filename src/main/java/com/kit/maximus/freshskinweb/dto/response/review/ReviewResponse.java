@@ -29,11 +29,7 @@ public class ReviewResponse {
 
     String comment;
 
-    
     List<ReviewResponse> replies; // Danh sách phản hồi
-
-    int likeCount;   // Số lượt Like
-    int dislikeCount; // Số lượt Dislike
 
     @JsonIgnore
     Date createdAt;

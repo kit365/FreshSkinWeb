@@ -1,14 +1,9 @@
-package com.kit.maximus.freshskinweb.entity.review;
+package com.kit.maximus.freshskinweb.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.kit.maximus.freshskinweb.entity.AbstractEntity;
-import com.kit.maximus.freshskinweb.entity.ProductEntity;
-import com.kit.maximus.freshskinweb.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,11 +44,6 @@ public class ReviewEntity extends AbstractEntity {
 
     @Column(name = "Comment", columnDefinition = "TEXT")
     private String comment;
-
-    // Lưu vote (Like/Dislike)
-    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private List<ReviewVoteEntity> votes = new ArrayList<>();
 
     // Quản lý trả lời review
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

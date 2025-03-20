@@ -3,22 +3,18 @@ package com.kit.maximus.freshskinweb.service;
 
 import com.kit.maximus.freshskinweb.dto.request.review.ReviewCreateRequest;
 import com.kit.maximus.freshskinweb.dto.request.review.ReviewUpdateRequest;
-import com.kit.maximus.freshskinweb.dto.request.review.ReviewVoteRequest;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.review.ReviewResponse;
 import com.kit.maximus.freshskinweb.entity.NotificationEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
-import com.kit.maximus.freshskinweb.entity.review.ReviewEntity;
-import com.kit.maximus.freshskinweb.entity.review.ReviewVoteEntity;
+import com.kit.maximus.freshskinweb.entity.ReviewEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.ReviewMapper;
-import com.kit.maximus.freshskinweb.mapper.ReviewVoteMapper;
 import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.repository.review.ReviewRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
-import com.kit.maximus.freshskinweb.repository.review.ReviewVoteRepository;
 import com.kit.maximus.freshskinweb.service.notification.NotificationEvent;
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.transaction.Transactional;
@@ -45,38 +41,8 @@ public class ReviewService {
     UserRepository userRepository;
     ProductRepository productRepository;
     ReviewRepository reviewRepository;
-    ReviewVoteRepository reviewVoteRepository;
     ReviewMapper reviewMapper;
-    ReviewVoteMapper reviewVoteMapper;
     ApplicationEventPublisher eventPublisher;
-
-    @Transactional
-    public void addVote(ReviewVoteRequest request) {
-        // Tìm review
-        ReviewEntity review = reviewRepository.findById(request.getReviewId())
-                .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
-
-        // Tìm vote của user trong danh sách votes của review
-        ReviewVoteEntity existingVote = review.getVotes().stream()
-                .filter(v -> v.getUserId().equals(request.getUserId()))
-                .findFirst()
-                .orElse(null);
-
-        if (existingVote != null) {
-            // Nếu đã vote, cập nhật lại voteType
-            existingVote.setVoteType(request.getVoteType());
-            reviewVoteRepository.save(existingVote);
-        } else {
-            // Nếu chưa vote, tạo mới
-            ReviewVoteEntity reviewVoteEntity = new ReviewVoteEntity();
-            reviewVoteEntity.setReview(review);
-            reviewVoteEntity.setUserId(request.getUserId());
-            reviewVoteEntity.setVoteType(request.getVoteType());
-
-            reviewVoteRepository.save(reviewVoteEntity);
-
-        }
-    }
 
 
     @Transactional
@@ -160,21 +126,10 @@ public class ReviewService {
     }
 
     public ReviewResponse convertToReviewResponse(ReviewEntity reviewEntity) {
-        // Đếm số like/dislike riêng cho từng review (cha hoặc con)
-        int like = 0, dislike = 0;
-        for (ReviewVoteEntity vote : reviewEntity.getVotes()) {
-            if (vote.getVoteType() == -1) {
-                dislike++;
-            } else if (vote.getVoteType() == 1) {
-                like++;
-            }
-        }
 
         // Map dữ liệu chính cho review hiện tại
         ReviewResponse reviewResponse = reviewMapper.toReviewResponse(reviewEntity);
         reviewResponse.setProductId(reviewEntity.getProduct().getId());
-        reviewResponse.setLikeCount(like);
-        reviewResponse.setDislikeCount(dislike);
         setUserFields(reviewResponse);
 
         // Xử lý replies, đảm bảo mỗi reply cũng có số like/dislike riêng
@@ -224,44 +179,54 @@ public class ReviewService {
     public Map<String, Object> getAllByProductID(int page, int size, String sortKey, String sortDirection, long id) {
         Map<String, Object> map = new HashMap<>();
 
-        // Tính toán phân trang
         int p = (page > 0) ? page - 1 : 0;
         Sort.Direction direction = getSortDirection(sortDirection);
         Sort sort = Sort.by(direction, sortKey);
         Pageable pageable = PageRequest.of(p, size, sort);
 
-        // Truy vấn lại Reviews cho sản phẩm theo slug và các điều kiện
         Page<ReviewEntity> reviewEntities = reviewRepository.findAllByParentIsNullAndStatusAndDeletedAndProduct_Id(pageable, Status.ACTIVE, false, id);
 
-        // Chuyển các ReviewEntity thành ReviewResponse (DTO)
+
         List<ReviewResponse> responses = reviewEntities.stream()
                 .map(this::convertToReviewResponse)
                 .toList();
 
 
         //số review
-        Integer count = reviewRepository.countAllByParentIsNullAndProduct_Id(id);
+        int count = reviewRepository.countAllByParentIsNullAndProduct_Id(id);
+        double result = 0.0;
 
+        Map<String, Object> ratingDetail = new HashMap<>();
 
-        //tổng rating
-        int sum = responses.stream()
-                .filter(r -> r.getRating() > 0 && r.getParent() == null)
-                .mapToInt(ReviewResponse::getRating)
-                .sum();
+        int count1 = reviewRepository.countAllByParentIsNullAndProduct_IdAndRating(id, 1);
+        int count2 = reviewRepository.countAllByParentIsNullAndProduct_IdAndRating(id, 2);
+        int count3 = reviewRepository.countAllByParentIsNullAndProduct_IdAndRating(id, 3);
+        int count4 = reviewRepository.countAllByParentIsNullAndProduct_IdAndRating(id, 4);
+        int count5 = reviewRepository.countAllByParentIsNullAndProduct_IdAndRating(id, 5);
 
-        double result;
-        result = (sum > 0 && count > 0) ? Math.round((double) sum / count * 10.0) / 10.0 : 0.0;
+        int sum = count1 + (count2 * 2) + (count3 * 3) + (count4 * 4) + (count5 * 5);
 
+        result = (sum > 0 && count > 0) ? Math.round((double) sum / (double) count) : 0.0;
 
+        ratingDetail.put("rating1", count1);
+        ratingDetail.put("rating2", count2);
+        ratingDetail.put("rating3", count3);
+        ratingDetail.put("rating4", count4);
+        ratingDetail.put("rating5", count5);
+        ratingDetail.put("average", String.format("%.1f", result)); //cho no dinh dang %
+        map.put("ratingDetail", ratingDetail);
         // Thêm kết quả vào Map để trả về
         Map<String, Object> pageMap = new HashMap<>();
+
         map.put("reviews", responses);
         pageMap.put("currentPage", reviewEntities.getNumber() + 1);
         pageMap.put("totalItems", reviewEntities.getTotalElements());
         pageMap.put("totalPages", reviewEntities.getTotalPages());
         pageMap.put("pageSize", reviewEntities.getSize());
-        pageMap.put("rating", result);
+
+
         map.put("page", pageMap);
+
         return map;
     }
 

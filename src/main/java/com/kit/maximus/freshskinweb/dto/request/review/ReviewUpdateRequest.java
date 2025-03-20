@@ -1,10 +1,8 @@
 package com.kit.maximus.freshskinweb.dto.request.review;
 
 
-import com.kit.maximus.freshskinweb.entity.review.ReviewVoteEntity;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -25,6 +23,5 @@ public class ReviewUpdateRequest {
 
     String comment;
 
-    List<ReviewVoteEntity> votes;
 
 }

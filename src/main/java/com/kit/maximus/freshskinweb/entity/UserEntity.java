@@ -1,7 +1,6 @@
 package com.kit.maximus.freshskinweb.entity;
 
 import com.fasterxml.jackson.annotation.*;
-import com.kit.maximus.freshskinweb.entity.review.ReviewEntity;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.TypeUser;
 import jakarta.persistence.*;
