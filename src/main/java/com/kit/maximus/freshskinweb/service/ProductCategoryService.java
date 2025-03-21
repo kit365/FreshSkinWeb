@@ -572,7 +572,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     }
 
     @Transactional(readOnly = true)
-    @Cacheable("filteredCategories")
+    @Cacheable(value = "filteredCategories", key = "#titles + '-' + #limit + '-' + #lastUpdated()")
     //Hàm này dùng để lấy ra n danh mục tùy chọn, số lượng n sản phẩm
     public List<ProductCategoryResponse> getFilteredCategories(List<String> titles, int limit) {
         List<ProductCategoryResponse> result = new ArrayList<>();

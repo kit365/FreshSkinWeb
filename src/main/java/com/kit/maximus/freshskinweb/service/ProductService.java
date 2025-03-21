@@ -81,7 +81,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     @Lazy
     ReviewService reviewService; //giảm tỉ lệ bị vòng lap
 
-    @CacheEvict(value = {"productsFeature"},allEntries = true)
+    @CacheEvict(value = {"productsFeature", "filteredCategories"},allEntries = true)
     @Override
     public boolean add(CreateProductRequest request) {
         List<ProductCategoryEntity> productCategoryEntity = productCategoryRepository.findAllById(request.getCategoryId());
@@ -135,7 +135,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
 
     //noted: thêm set thumb vao entity sau khi update
-    @CacheEvict(value = {"productsFeature"},allEntries = true)
+    @CacheEvict(value = {"productsFeature","filteredCategories"},allEntries = true)
     @Override
     public ProductResponseDTO update(Long id, UpdateProductRequest request) {
         if (StringUtils.hasLength(request.getStatus())) {
@@ -274,7 +274,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     }
 
     //thay doi thanh String de quan lý message
-    @CacheEvict(value = {"productsFeature"},allEntries = true)
+    @CacheEvict(value = {"productsFeature","filteredCategories"},allEntries = true)
     @Override
     public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
@@ -305,7 +305,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
        input: long id
        output: boolean
      */
-    @CacheEvict(value = {"productsFeature"},allEntries = true)
+    @CacheEvict(value = {"productsFeature","filteredCategories"},allEntries = true)
     @Override
     public boolean delete(Long id) {
         ProductEntity productEntity = getProductEntityById(id);
@@ -330,7 +330,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
      input: List<long> id
      output: boolean
    */
-    @CacheEvict(value = {"productsFeature"},allEntries = true)
+    @CacheEvict(value = {"productsFeature","filteredCategories"},allEntries = true)
     @Override
     public boolean delete(List<Long> longs) {
         List<ProductEntity> productEntities = productRepository.findAllById(longs);
@@ -358,7 +358,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
      input: long id
      output: boolean
    */
-    @CacheEvict(value = {"productsFeature"},allEntries = true)
+    @CacheEvict(value = {"productsFeature","filteredCategories"},allEntries = true)
     @Override
     public boolean deleteTemporarily(Long id) {
         ProductEntity productEntity = getProductEntityById(id);
@@ -376,7 +376,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
      input: long id
      output: boolean
    */
-    @CacheEvict(value = {"productsFeature"},allEntries = true)
+    @CacheEvict(value = {"productsFeature","filteredCategories"},allEntries = true)
     @Override
     public boolean restore(Long id) {
         ProductEntity productEntity = getProductEntityById(id);
@@ -456,6 +456,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         }
         return productCategoryResponses;
     }
+
 
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
