@@ -20,8 +20,8 @@ public class OrderSpecification {
             if (keyword == null || keyword.trim().isEmpty()) return null;
             String searchTerm = "%" + keyword.toLowerCase() + "%";
             return criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("userFirstName")), searchTerm),
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("userLastName")), searchTerm)
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), searchTerm),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), searchTerm)
             );
         };
     }
