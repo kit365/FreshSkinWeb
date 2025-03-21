@@ -196,24 +196,22 @@ public class ReviewService {
         int count = reviewRepository.countAllByParentIsNullAndProduct_Id(id);
         double result = 0.0;
 
-        Map<String, Object> ratingDetail = new HashMap<>();
+        Map<String, Integer> ratingDetail = new HashMap<>();
 
         int count1 = reviewRepository.countAllByParentIsNullAndProduct_IdAndRating(id, 1);
         int count2 = reviewRepository.countAllByParentIsNullAndProduct_IdAndRating(id, 2);
         int count3 = reviewRepository.countAllByParentIsNullAndProduct_IdAndRating(id, 3);
         int count4 = reviewRepository.countAllByParentIsNullAndProduct_IdAndRating(id, 4);
         int count5 = reviewRepository.countAllByParentIsNullAndProduct_IdAndRating(id, 5);
-
-        int sum = count1 + (count2 * 2) + (count3 * 3) + (count4 * 4) + (count5 * 5);
-
-        result = (sum > 0 && count > 0) ? Math.round((double) sum / (double) count) : 0.0;
+        int totalComment=reviewRepository.countByProduct_Id(id);
 
         ratingDetail.put("rating1", count1);
         ratingDetail.put("rating2", count2);
         ratingDetail.put("rating3", count3);
         ratingDetail.put("rating4", count4);
         ratingDetail.put("rating5", count5);
-        ratingDetail.put("average", String.format("%.1f", result)); //cho no dinh dang %
+        ratingDetail.put("totalComment", totalComment);
+
         map.put("ratingDetail", ratingDetail);
         // Thêm kết quả vào Map để trả về
         Map<String, Object> pageMap = new HashMap<>();

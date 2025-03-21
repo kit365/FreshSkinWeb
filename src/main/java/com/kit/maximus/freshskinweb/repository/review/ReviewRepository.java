@@ -31,4 +31,6 @@ public interface ReviewRepository extends JpaRepository<ReviewEntity, Long> {
 
     @EntityGraph(attributePaths = {"product"})
     Integer countAllByParentIsNullAndProduct_IdAndRating(Long productId, int rating);
+
+    int countByProduct_Id(long id);
 }
