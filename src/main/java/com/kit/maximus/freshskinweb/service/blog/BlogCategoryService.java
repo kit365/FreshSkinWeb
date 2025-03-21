@@ -21,6 +21,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,6 +56,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
 
     BlogCategorySearchRepository blogCategorySearchRepository;
 
+    @CacheEvict(value = {"featuredBlogCategories"}, allEntries = true)
     @Override
     public boolean add(CreateBlogCategoryRequest request) {
         log.info("Request JSON: {}", request);
@@ -90,6 +93,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         return blogCategoryMapper.toBlogCateroiesResponseDTO(blogCategoryRepository.findAll());
     }
 
+    @CacheEvict(value = {"featuredBlogCategories"}, allEntries = true)
     @Override
     public BlogCategoryResponse update(Long id, UpdateBlogCategoryRequest request) {
         BlogCategoryEntity blogCategoryEntity = getBlogCategoryEntityById(id);
@@ -137,6 +141,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         return blogCategoryMapper.toBlogCategoryResponse(blogCategoryRepository.save(blogCategoryEntity));
     }
 
+    @CacheEvict(value = {"featuredBlogCategories"}, allEntries = true)
     @Override
     public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
@@ -163,6 +168,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
 //        return null;
 //    }
 
+    @CacheEvict(value = {"featuredBlogCategories"}, allEntries = true)
     @Override
     public boolean delete(Long id) {
         BlogCategoryEntity blogCategoryEntity = getBlogCategoryEntityById(id);
@@ -186,6 +192,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         return true;
     }
 
+    @CacheEvict(value = {"featuredBlogCategories"}, allEntries = true)
     @Override
     public boolean delete(List<Long> longs) {
         List<BlogCategoryEntity> blogCategoryEntities = blogCategoryRepository.findAllById(longs);
@@ -207,6 +214,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         return true;
     }
 
+    @CacheEvict(value = {"featuredBlogCategories"}, allEntries = true)
     @Override
     public boolean deleteTemporarily(Long id) {
         BlogCategoryEntity blogCategoryEntity = getBlogCategoryEntityById(id);
@@ -226,6 +234,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
     }
 
 
+    @CacheEvict(value = {"featuredBlogCategories"}, allEntries = true)
     @Override
     public boolean restore(Long aLong) {
         BlogCategoryEntity blogCategoryEntity = getBlogCategoryEntityById(aLong);
@@ -243,6 +252,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         blogCategoryRepository.save(blogCategoryEntity);
         return true;
     }
+
 
     @Override
     public BlogCategoryResponse showDetail(Long id) {
@@ -420,6 +430,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
      */
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "featuredBlogCategories")
     public List<BlogCategoryResponse> getFeaturedBlogCategories() {
         List<BlogCategoryEntity> blogCategoryEntities = blogCategoryRepository.findTop4ByStatusAndDeletedAndFeatured(Status.ACTIVE, false, true, Sort.by(Sort.Direction.DESC, "position"));
         List<BlogCategoryResponse> blogCategoryResponses = mapToCategoryResponse(blogCategoryEntities);

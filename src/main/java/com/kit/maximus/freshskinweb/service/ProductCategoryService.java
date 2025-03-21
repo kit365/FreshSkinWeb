@@ -17,6 +17,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -47,6 +49,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
     Cloudinary cloudinary;
 
+    @CacheEvict(value = {"featuredProductCategory", "allCategory", "filteredCategories"}, allEntries = true)
     @Override
     public boolean add(CreateProductCategoryRequest request) {
         System.out.println(request);
@@ -116,13 +119,10 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return responses;
     }
 
+    @CacheEvict(value = {"featuredProductCategory", "allCategory","filteredCategories"}, allEntries = true)
     @Override
     public ProductCategoryResponse update(Long id, UpdateProductCategoryRequest request) {
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
-
-
-
-
 
 
         if (StringUtils.hasLength(request.getStatus())) {
@@ -166,6 +166,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryRepository.save(productCategoryEntity));
     }
 
+    @CacheEvict(value = {"featuredProductCategory", "allCategory","filteredCategories"}, allEntries = true)
     @Override
     public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
@@ -190,6 +191,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     //trước mắt về logic:
     //Khi xóa 1 danh mục cha => các danh mục khác sẽ mồ côi
     //khi xóa 1 danh mục có chứa product trong đó => hủy liên kết với product
+    @CacheEvict(value = {"featuredProductCategory", "allCategory","filteredCategories"}, allEntries = true)
     @Override
     public boolean delete(Long id) {
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
@@ -221,7 +223,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         productCategoryRepository.delete(productCategoryEntity);
         return true;
     }
-
+    @CacheEvict(value = {"featuredProductCategory", "allCategory","filteredCategories"}, allEntries = true)
     @Override
     public boolean delete(List<Long> id) {
         List<ProductCategoryEntity> list = productCategoryRepository.findAllById(id);
@@ -256,7 +258,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         productCategoryRepository.deleteAll(list);
         return true;
     }
-
+    @CacheEvict(value = {"featuredProductCategory", "allCategory","filteredCategories"}, allEntries = true)
     @Override
     public boolean deleteTemporarily(Long id) {
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
@@ -271,7 +273,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return true;
     }
 
-
+    @CacheEvict(value = {"featuredProductCategory", "allCategory","filteredCategories"}, allEntries = true)
     @Override
     public boolean restore(Long id) {
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
@@ -312,6 +314,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return productCategoryResponse;
     }
 
+    @Cacheable(value = "allCategory")
     @Transactional(readOnly = true)
     public List<ProductCategoryResponse> showALL() {
         List<ProductCategoryEntity> list = productCategoryRepository.findAll();
@@ -534,6 +537,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
      */
     //Hàm này dùng để lấy ra top 8 danh mục nổi bật(Bao gồm chứa Product)
 
+    @Cacheable("featuredProductCategory")
     public List<ProductCategoryResponse> getFeaturedProductCategories() {
         List<ProductCategoryEntity> categories = productCategoryRepository.findTop8ByStatusAndDeletedAndFeatured(
                 Status.ACTIVE, false, true, Sort.by(Sort.Direction.DESC, "position")
@@ -568,6 +572,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     }
 
     @Transactional(readOnly = true)
+    @Cacheable("filteredCategories")
     //Hàm này dùng để lấy ra n danh mục tùy chọn, số lượng n sản phẩm
     public List<ProductCategoryResponse> getFilteredCategories(List<String> titles, int limit) {
         List<ProductCategoryResponse> result = new ArrayList<>();
