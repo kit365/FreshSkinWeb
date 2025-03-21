@@ -58,11 +58,13 @@ public class OrderService {
     public OrderIdResponse addOrder(OrderRequest orderRequest) {
         OrderEntity order = orderMapper.toOrderEntity(orderRequest);
 
-        UserEntity user = userRepository.findById(orderRequest.getUserId()).orElse(null);
-
-
-        order.setUser(user);
-
+        UserEntity user = null;
+        if(orderRequest.getUserId() != null){
+            user = userRepository.findById(orderRequest.getUserId()).orElse(null);
+            order.setUser(user);
+        } else {
+            order.setUser(user);
+        }
         // Tạo orderId duy nhất
         String orderId = generateOrderCode();
         order.setOrderId(orderId);
@@ -167,7 +169,7 @@ public class OrderService {
 
         OrderEntity savedOrder = orderRepository.save(order);
 
-        if (order.getPaymentMethod() != null && order.getPaymentMethod().equals(PaymentMethod.CASH)) {
+        if (user != null && order.getPaymentMethod() != null && order.getPaymentMethod().equals(PaymentMethod.CASH)) {
             NotificationEntity notification = new NotificationEntity();
             notification.setUser(user);
             notification.setOrder(order);
