@@ -1,5 +1,7 @@
 package com.kit.maximus.freshskinweb.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kit.maximus.freshskinweb.security.OAuth2AuthenticationSuccessHandler;
 import com.kit.maximus.freshskinweb.service.users.AuthenticationService;
 import com.kit.maximus.freshskinweb.service.users.CustomOAuth2UserService;
 import lombok.AccessLevel;
@@ -42,7 +44,7 @@ public class SecurityConfig {
 
     CustomOAuth2UserService customOAuth2UserService;
 
-
+OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
     OAuth2Config oAuth2Config;
 
 
@@ -66,11 +68,16 @@ public class SecurityConfig {
                         .requestMatchers("/**").permitAll()
                         .anyRequest().authenticated()
                 )
+//                .oauth2Login(oauth2 -> oauth2
+//                        .loginPage("/login")
+//                                .defaultSuccessUrl("https://project-swp391-n9j6.onrender.com", true)
+////                        .authorizationEndpoint(auth -> auth.baseUri("/oauth2/authorization"))
+////                        .redirectionEndpoint(redir -> redir.baseUri("/oauth2/callback/*"))
+//                        .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService()))
+//                )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
-                                .defaultSuccessUrl("https://project-swp391-n9j6.onrender.com", true)
-//                        .authorizationEndpoint(auth -> auth.baseUri("/oauth2/authorization"))
-//                        .redirectionEndpoint(redir -> redir.baseUri("/oauth2/callback/*"))
+                        .successHandler(oauth2AuthenticationSuccessHandler) // Thêm handler
                         .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService()))
                 )
                 .userDetailsService(authenticationService)

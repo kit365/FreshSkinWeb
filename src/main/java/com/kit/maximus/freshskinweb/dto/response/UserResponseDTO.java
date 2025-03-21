@@ -50,6 +50,10 @@ public class UserResponseDTO implements Serializable {
     String typeUser;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String skinType;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    String provider;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    String providerId;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Boolean deleted;
     @JsonFormat(pattern = "yyyy-MM-dd")

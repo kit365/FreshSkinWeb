@@ -101,7 +101,7 @@ public class AuthenticationService implements UserDetailsService {
 
 
 
-    private String generateToken(String username) {
+    public String generateToken(String username) {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()

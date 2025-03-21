@@ -25,18 +25,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oauth2User = super.loadUser(userRequest);
-        String registrationId = userRequest.getClientRegistration().getRegistrationId(); // Xác định provider
+        String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
         if ("google".equalsIgnoreCase(registrationId)) {
-            return processGoogleUser(oauth2User);
+            processGoogleUser(oauth2User);
         } else if ("facebook".equalsIgnoreCase(registrationId)) {
-            return processFacebookUser(oauth2User);
+            processFacebookUser(oauth2User);
         } else {
             throw new OAuth2AuthenticationException("Unsupported OAuth2 provider: " + registrationId);
         }
+        return oauth2User;
     }
 
-    private OAuth2User processGoogleUser(OAuth2User oauth2User) {
+    private void processGoogleUser(OAuth2User oauth2User) {
         String email = oauth2User.getAttribute("email");
         String name = oauth2User.getAttribute("name");
         String providerId = oauth2User.getAttribute("sub");
@@ -46,15 +47,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if (userEntity == null) {
             UserEntity user = new UserEntity();
             user.setPassword(UUID.randomUUID().toString());
-            user.setUsername(UUID.randomUUID().toString());
+            user.setUsername(email); // Sử dụng email làm username
             user.setEmail(email);
-            user.setFirstName(name); // tạm thời
+            user.setFirstName(name);
             user.setProvider("GOOGLE");
             user.setProviderId(providerId);
             userRepository.save(user);
-            log.info("Saved user from GG login: " + user);
+            log.info("Saved user from Google login: " + user);
         }
-        return oauth2User;
     }
 
     private OAuth2User processFacebookUser(OAuth2User oauth2User) {
