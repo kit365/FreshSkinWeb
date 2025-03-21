@@ -55,7 +55,7 @@ public class ProductBrandController {
 
     @GetMapping()
     public ResponseAPI<Map<String, Object>> getAllProductBrand(@RequestParam(defaultValue = "1") int page,
-                                                               @RequestParam(defaultValue = "4") int size,
+                                                               @RequestParam(defaultValue = "8") int size,
                                                                @RequestParam(defaultValue = "position") String sortKey,
                                                                @RequestParam(defaultValue = "desc") String sortValue,
                                                                @RequestParam(defaultValue = "ALL") String status,
