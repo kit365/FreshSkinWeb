@@ -593,9 +593,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         result.forEach(category -> {
             category.setDescription(null);
 
-
-
-
             List<ProductResponseDTO> limitedProducts = category.getProducts()
                     .stream()
                     .sorted(Comparator.comparing(ProductResponseDTO::getPosition,

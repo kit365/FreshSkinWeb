@@ -85,6 +85,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     @Override
     public boolean add(CreateProductRequest request) {
         List<ProductCategoryEntity> productCategoryEntity = productCategoryRepository.findAllById(request.getCategoryId());
+
         ProductBrandEntity productBrandEntity = productBrandRepository.findById(request.getBrandId()).orElse(null);
         ProductEntity productEntity = productMapper.productToProductEntity(request);
 
@@ -105,7 +106,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         }
 
 
-        if (productCategoryEntity.isEmpty()) {
+        if (productCategoryEntity != null) {
             productEntity.setCategory(productCategoryEntity);
         }
 
