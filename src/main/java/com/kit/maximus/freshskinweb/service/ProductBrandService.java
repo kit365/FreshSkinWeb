@@ -17,6 +17,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +49,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
 
     Cloudinary cloudinary;
 
+    @CacheEvict(value = {"top10ProductBrands", "allProductBrands", "trashProductBrands","fullBrands"}, allEntries = true)
     @Override
     public boolean add(CreateProductBrandRequest request) {
         log.info("Request JSON: {}", request);
@@ -79,6 +82,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "fullBrands")
     public List<ProductBrandResponse> getAll() {
         List<ProductBrandResponse> list =  productBrandMapper.toProductBrandsResponseDTO(productBrandRepository.findAll());
 
@@ -97,6 +101,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "top10ProductBrands")
     public List<ProductBrandResponse> getTop10() {
         List<ProductBrandResponse> list =  productBrandMapper.toProductBrandsResponseDTO(productBrandRepository.findTop10ByStatusAndDeleted(Status.ACTIVE,false));
 
@@ -114,6 +119,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         return list;
     }
 
+    @CacheEvict(value = {"top10ProductBrands", "allProductBrands", "trashProductBrands", "fullBrands"}, allEntries = true)
     @Override
     public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
@@ -134,6 +140,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         return "Cập nhật thương hiệu sản phẩm thất bại";
     }
 
+    @CacheEvict(value = {"top10ProductBrands", "allProductBrands", "trashProductBrands", "fullBrands"}, allEntries = true)
     @Override
     public ProductBrandResponse update(Long id, UpdateProductBrandRequest request) {
         ProductBrandEntity brandEntity = getBrandById(id);
@@ -174,6 +181,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         return productBrandMapper.productBrandToProductBrandResponseDTO(productBrandRepository.save(brandEntity));
     }
 
+    @CacheEvict(value = {"top10ProductBrands", "allProductBrands", "trashProductBrands", "fullBrands"}, allEntries = true)
     @Override
     public boolean delete(Long id) {
         ProductBrandEntity brandEntity = getBrandById(id);
@@ -194,6 +202,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         return true;
     }
 
+    @CacheEvict(value = {"top10ProductBrands", "allProductBrands", "trashProductBrands", "fullBrands"}, allEntries = true)
     @Override
     public boolean delete(List<Long> id) {
         List<ProductBrandEntity> list = productBrandRepository.findAllById(id);
@@ -216,6 +225,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         return true;
     }
 
+    @CacheEvict(value = {"top10ProductBrands", "allProductBrands", "trashProductBrands", "fullBrands"}, allEntries = true)
     @Override
     public boolean deleteTemporarily(Long id) {
         ProductBrandEntity brandEntity = getBrandById(id);
@@ -230,6 +240,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         return true;
     }
 
+    @CacheEvict(value = {"top10ProductBrands", "allProductBrands", "trashProductBrands", "fullBrands"}, allEntries = true)
     @Override
     public boolean restore(Long id) {
         ProductBrandEntity brandEntity = getBrandById(id);
@@ -259,7 +270,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         return productIds;
     }
 
-
+    @Cacheable(value = "allProductBrands", key = "#page + '-' + #size + '-' + #sortKey + '-' + #sortDirection + '-' + #status + '-' + #keyword")
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         Map<String, Object> map = new HashMap<>();
@@ -305,6 +316,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         return map;
     }
 
+    @Cacheable(value = "trashProductBrands", key = "#page + '-' + #size + '-' + #sortKey + '-' + #sortDirection + '-' + #status + '-' + #keyword")
     @Override
     public Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         Map<String, Object> map = new HashMap<>();
