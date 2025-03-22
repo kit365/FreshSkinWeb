@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
+import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserPasswordRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
@@ -299,7 +300,7 @@ public class UserService {
     }
 
 
-    public boolean updatePassword(Long userId, UpdateUserRequest request) {
+    public boolean updateAccountPassword(Long userId, UpdateUserRequest request) {
         UserEntity userEntity = getUserEntityById(userId);
         if (StringUtils.hasLength(request.getPassword())) {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
@@ -308,6 +309,26 @@ public class UserService {
             return true;
         }
         return false;
+    }
+
+    public boolean updateUserPassword(Long userId, UpdateUserPasswordRequest request) {
+        UserEntity userEntity = getUserEntityById(userId);
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+
+        // Kiểm tra mật khẩu cũ
+        if (!passwordEncoder.matches(request.getOldPassword(), userEntity.getPassword())) {
+            throw new AppException(ErrorCode.INVALID_OLD_PASSWORD);
+        }
+
+        // Kiểm tra mật khẩu mới và xác nhận mật khẩu mới có khớp không
+        if (!StringUtils.hasLength(request.getPassword()) || !request.getPassword().equals(request.getConfirmPassword())) {
+            throw new AppException(ErrorCode.PASSWORDS_DO_NOT_MATCH);
+        }
+
+        // Cập nhật mật khẩu mới
+        userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
+        userRepository.save(userEntity);
+        return true;
     }
 
     public UserResponseDTO update(Long id, UpdateUserRequest userRequestDTO) {

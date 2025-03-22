@@ -107,7 +107,7 @@ public class AccountAdminController {
     @PatchMapping("change-password/{id}")
     public ResponseAPI<Boolean> updateAccountPassword(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest request) {
         String message = "Cập nhật mật khẩu thành công";
-        userService.updatePassword(id, request);
+        userService.updateAccountPassword(id, request);
         return ResponseAPI.<Boolean>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 

@@ -51,6 +51,10 @@ public enum ErrorCode {
     THIS_USER_NOT_ALLOWED_TO_UPDATE(400, "Đây là tài khoản của khách hàng, không được cập nhật"),
     THIS_ACCOUNT_CAN_NOT_SHOW(400, "Đây là tài khoản của khách hàng, không thể xem"),
 
+    INVALID_OLD_PASSWORD(400, "Mật khẩu cũ không chính xác"),
+    INVALID_NEW_PASSWORD(400, "Mật khẩu mới không hợp lệ"),
+    PASSWORDS_DO_NOT_MATCH(400, "Mật khẩu không khớp"),
+
     //Authentication
     UNAUTHENTICATED(401, "Chưa xác thực"),
     PASSWORD_INCORRECT(400, "Mật khẩu không chính xác"),
