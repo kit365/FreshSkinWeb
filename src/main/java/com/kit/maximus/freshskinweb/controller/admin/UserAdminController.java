@@ -3,6 +3,7 @@ package com.kit.maximus.freshskinweb.controller.admin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
+import com.kit.maximus.freshskinweb.dto.request.user.UpdatePasswordWithTokenRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserPasswordRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
@@ -147,6 +148,19 @@ public class UserAdminController {
         String message = "Cập nhật tài khoản thành công";
         var result = userService.update(id, userRequestDTO);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+    }
+
+    @PatchMapping("update-password-by-token")
+    public ResponseAPI<Boolean> updateAccountPasswordWithToken(@RequestBody @Valid UpdatePasswordWithTokenRequest request) {
+        String message = "Cập nhật mật khẩu thành công";
+        try {
+            boolean result = userService.updateAccountPasswordWithToken(request.getToken(), request.getNewPassword(), request.getConfirmPassword());
+            return ResponseAPI.<Boolean>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+        } catch (AppException e) {
+            return ResponseAPI.<Boolean>builder().code(HttpStatus.BAD_REQUEST.value()).message(e.getMessage()).build();
+        } catch (Exception e) {
+            return ResponseAPI.<Boolean>builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).message("Có lỗi xảy ra khi cập nhật mật khẩu.").build();
+        }
     }
 
     @PatchMapping("change-multi")

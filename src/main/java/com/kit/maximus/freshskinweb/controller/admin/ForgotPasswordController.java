@@ -40,14 +40,14 @@ public class ForgotPasswordController {
     }
 
     @PostMapping("/verify")
-    public ResponseAPI<Boolean> verifyOtp(@RequestBody @Valid ForgotPasswordRequest request) {
+    public ResponseAPI<String> verifyOtp(@RequestBody @Valid ForgotPasswordRequest request) {
         log.info("Request to verify OTP for email: {}", request.getEmail());
-        boolean result = forgotPasswordService.verifyOtp(request.getEmail(), request.getOTP());
+        String token = forgotPasswordService.verifyOtp(request.getEmail(), request.getOTP());
 
-        return ResponseAPI.<Boolean>builder()
+        return ResponseAPI.<String>builder()
                 .code(HttpStatus.OK.value())
                 .message("Xác thực OTP thành công")
-                .data(result)
+                .data(token)
                 .build();
     }
 

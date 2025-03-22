@@ -22,11 +22,17 @@ import com.kit.maximus.freshskinweb.specification.UserSpecification;
 import com.kit.maximus.freshskinweb.utils.Status;
 
 import com.kit.maximus.freshskinweb.utils.TypeUser;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.SignedJWT;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +46,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.text.Normalizer;
+import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -50,6 +57,10 @@ import java.util.*;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService {
+
+    @NonFinal
+    @Value("${jwt.signerKey}")
+    String SIGNER_KEY;
 
     UserRepository userRepository;
 
@@ -309,6 +320,39 @@ public class UserService {
             return true;
         }
         return false;
+    }
+
+    public UserResponseDTO getUserByToken(String token) throws ParseException, JOSEException {
+        JWSVerifier jwsVerifier = new MACVerifier(SIGNER_KEY.getBytes());
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
+        var verify = signedJWT.verify(jwsVerifier);
+        if(verify && expirationDate.after(new Date())) {
+            String username = signedJWT.getJWTClaimsSet().getSubject();
+            UserEntity user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+            return userMapper.toUserResponseDTO(user);
+        }
+        return null;
+    }
+
+    public boolean updateAccountPasswordWithToken(String token, String newPassword, String confirmPassword) throws ParseException, JOSEException {
+        UserResponseDTO userResponseDTO = getUserByToken(token);
+        if (userResponseDTO == null) {
+            throw new AppException(ErrorCode.INVALID_TOKEN);
+        }
+        UserEntity userEntity = userRepository.findById(userResponseDTO.getUserID())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+
+        // Check if the new password and confirm password match
+        if (!StringUtils.hasLength(newPassword) || !newPassword.equals(confirmPassword)) {
+            throw new AppException(ErrorCode.PASSWORDS_DO_NOT_MATCH);
+        }
+
+        // Update the new password
+        userEntity.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(userEntity);
+        return true;
     }
 
     public boolean updateUserPassword(Long userId, UpdateUserPasswordRequest request) {
