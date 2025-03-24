@@ -1,13 +1,11 @@
-package com.kit.maximus.freshskinweb.service;
+package com.kit.maximus.freshskinweb.service.skintest;
 
 import com.kit.maximus.freshskinweb.dto.request.skin_type.CreateSkinTypeRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_type.UpdateSkinTypeRequest;
 import com.kit.maximus.freshskinweb.dto.response.SkinTypeResponse;
-import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
-import com.kit.maximus.freshskinweb.mapper.BlogCategoryMapper;
 import com.kit.maximus.freshskinweb.mapper.SkinTypeMapper;
 import com.kit.maximus.freshskinweb.repository.SkinTypeRepository;
 import lombok.AccessLevel;

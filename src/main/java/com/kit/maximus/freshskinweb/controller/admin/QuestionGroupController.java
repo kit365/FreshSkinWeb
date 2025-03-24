@@ -4,18 +4,15 @@ import com.kit.maximus.freshskinweb.dto.request.question_group.CreationQuestionG
 import com.kit.maximus.freshskinweb.dto.response.QuestionGroupResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.entity.QuestionGroupEntity;
-import com.kit.maximus.freshskinweb.service.QuestionGroupService;
+import com.kit.maximus.freshskinweb.service.skintest.QuestionGroupService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
-import org.opensearch.client.opensearch.nodes.Http;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 //@CrossOrigin(origins = "*")

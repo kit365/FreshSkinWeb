@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.service;
+package com.kit.maximus.freshskinweb.service.product;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
@@ -12,6 +12,7 @@ import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.ProductCategoryMapper;
 import com.kit.maximus.freshskinweb.repository.ProductCategoryRepository;
 import com.kit.maximus.freshskinweb.repository.search.ProductCategorySearchRepository;
+import com.kit.maximus.freshskinweb.service.BaseService;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

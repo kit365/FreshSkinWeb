@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.service;
+package com.kit.maximus.freshskinweb.service.product;
 
 import com.kit.maximus.freshskinweb.dto.request.voucher.VoucherRequest;
 import com.kit.maximus.freshskinweb.dto.response.VoucherResponse;

@@ -4,7 +4,7 @@ import com.kit.maximus.freshskinweb.dto.request.voucher.VoucherRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.VoucherResponse;
 import com.kit.maximus.freshskinweb.entity.VoucherEntity;
-import com.kit.maximus.freshskinweb.service.VoucherService;
+import com.kit.maximus.freshskinweb.service.product.VoucherService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

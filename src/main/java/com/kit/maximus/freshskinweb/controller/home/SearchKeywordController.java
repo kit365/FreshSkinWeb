@@ -4,7 +4,7 @@ package com.kit.maximus.freshskinweb.controller.home;
 
 import com.kit.maximus.freshskinweb.dto.request.search_keyword.KeywordRequest;
 import com.kit.maximus.freshskinweb.dto.response.*;
-import com.kit.maximus.freshskinweb.service.SearchKeywordService;
+import com.kit.maximus.freshskinweb.service.home.SearchKeywordService;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

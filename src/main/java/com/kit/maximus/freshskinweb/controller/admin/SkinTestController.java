@@ -3,9 +3,8 @@ package com.kit.maximus.freshskinweb.controller.admin;
 import com.kit.maximus.freshskinweb.dto.request.skin_test.SkinTestRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.SkinTestResponse;
-import com.kit.maximus.freshskinweb.service.SkinTestService;
+import com.kit.maximus.freshskinweb.service.skintest.SkinTestService;
 
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.service;
+package com.kit.maximus.freshskinweb.service.product;
 
 
 import com.cloudinary.Cloudinary;
@@ -15,6 +15,8 @@ import com.kit.maximus.freshskinweb.repository.ProductCategoryRepository;
 import com.kit.maximus.freshskinweb.repository.ProductRepository;
 import com.kit.maximus.freshskinweb.repository.SkinTypeRepository;
 import com.kit.maximus.freshskinweb.repository.search.ProductSearchRepository;
+import com.kit.maximus.freshskinweb.service.BaseService;
+import com.kit.maximus.freshskinweb.service.ReviewService;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.EntityManager;

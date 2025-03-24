@@ -3,6 +3,7 @@ package com.kit.maximus.freshskinweb.service;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.service.blog.BlogService;
 import com.kit.maximus.freshskinweb.service.order.OrderService;
+import com.kit.maximus.freshskinweb.service.product.ProductService;
 import com.kit.maximus.freshskinweb.service.users.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

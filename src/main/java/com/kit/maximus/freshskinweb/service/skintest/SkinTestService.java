@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.service;
+package com.kit.maximus.freshskinweb.service.skintest;
 
 import com.kit.maximus.freshskinweb.dto.request.skin_test.SkinTestRequest;
 //import com.kit.maximus.freshskinweb.dto.request.skin_test.SkinResultSearchRequest;
@@ -10,7 +10,6 @@ import com.kit.maximus.freshskinweb.mapper.SkinTestMapper;
 import com.kit.maximus.freshskinweb.repository.*;
 //import com.kit.maximus.freshskinweb.specification.SkinTestSpecification;
 import com.kit.maximus.freshskinweb.utils.SkinType;
-import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

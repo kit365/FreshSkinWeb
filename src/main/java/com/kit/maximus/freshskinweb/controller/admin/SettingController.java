@@ -4,7 +4,7 @@ package com.kit.maximus.freshskinweb.controller.admin;
 import com.kit.maximus.freshskinweb.dto.request.setting.SettingRequestDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.SettingResponse;
-import com.kit.maximus.freshskinweb.service.SettingService;
+import com.kit.maximus.freshskinweb.service.home.SettingService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

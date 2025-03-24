@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.service;
+package com.kit.maximus.freshskinweb.service.skintest;
 
 import com.kit.maximus.freshskinweb.dto.request.question_group.CreationQuestionGroupRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_answer.CreationSkinAnswerRequest;

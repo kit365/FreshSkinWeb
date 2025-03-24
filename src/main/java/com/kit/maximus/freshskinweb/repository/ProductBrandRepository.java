@@ -1,7 +1,6 @@
 package com.kit.maximus.freshskinweb.repository;
 
 import com.kit.maximus.freshskinweb.entity.ProductBrandEntity;
-import com.kit.maximus.freshskinweb.service.ProductService;
 import com.kit.maximus.freshskinweb.utils.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

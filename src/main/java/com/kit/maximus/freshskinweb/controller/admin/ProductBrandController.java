@@ -9,7 +9,7 @@ import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
-import com.kit.maximus.freshskinweb.service.ProductBrandService;
+import com.kit.maximus.freshskinweb.service.product.ProductBrandService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

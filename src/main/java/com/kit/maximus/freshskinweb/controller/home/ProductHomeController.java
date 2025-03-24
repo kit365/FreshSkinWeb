@@ -1,8 +1,8 @@
 package com.kit.maximus.freshskinweb.controller.home;
 
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
-import com.kit.maximus.freshskinweb.service.ProductCategoryService;
-import com.kit.maximus.freshskinweb.service.ProductService;
+import com.kit.maximus.freshskinweb.service.product.ProductCategoryService;
+import com.kit.maximus.freshskinweb.service.product.ProductService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

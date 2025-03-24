@@ -1,4 +1,4 @@
-package com.kit.maximus.freshskinweb.service;
+package com.kit.maximus.freshskinweb.service.home;
 
 
 import com.kit.maximus.freshskinweb.dto.request.setting.SettingRequestDTO;

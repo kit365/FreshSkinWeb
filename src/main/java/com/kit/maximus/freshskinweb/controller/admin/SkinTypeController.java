@@ -3,7 +3,7 @@ import com.kit.maximus.freshskinweb.dto.request.skin_type.CreateSkinTypeRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_type.UpdateSkinTypeRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.SkinTypeResponse;
-import com.kit.maximus.freshskinweb.service.SkinTypeService;
+import com.kit.maximus.freshskinweb.service.skintest.SkinTypeService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

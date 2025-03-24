@@ -2,9 +2,9 @@ package com.kit.maximus.freshskinweb.controller.home;
 
 import com.kit.maximus.freshskinweb.dto.response.*;
 import com.kit.maximus.freshskinweb.service.blog.BlogCategoryService;
-import com.kit.maximus.freshskinweb.service.ProductBrandService;
-import com.kit.maximus.freshskinweb.service.ProductCategoryService;
-import com.kit.maximus.freshskinweb.service.ProductService;
+import com.kit.maximus.freshskinweb.service.product.ProductBrandService;
+import com.kit.maximus.freshskinweb.service.product.ProductCategoryService;
+import com.kit.maximus.freshskinweb.service.product.ProductService;
 import com.kit.maximus.freshskinweb.service.home.HomeService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 //@CrossOrigin(origins = "*")
 @Slf4j
