@@ -22,6 +22,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -120,7 +121,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return responses;
     }
 
-    @CacheEvict(value = {"featuredProductCategory", "allCategory","filteredCategories"}, allEntries = true)
+    @CacheEvict(value = {"featuredProductCategory", "allCategory", "filteredCategories"}, allEntries = true)
     @Override
     public ProductCategoryResponse update(Long id, UpdateProductCategoryRequest request) {
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
@@ -167,7 +168,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryRepository.save(productCategoryEntity));
     }
 
-    @CacheEvict(value = {"featuredProductCategory", "allCategory","filteredCategories"}, allEntries = true)
+    @CacheEvict(value = {"featuredProductCategory", "allCategory", "filteredCategories"}, allEntries = true)
     @Override
     public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
@@ -192,11 +193,11 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     //trước mắt về logic:
     //Khi xóa 1 danh mục cha => các danh mục khác sẽ mồ côi
     //khi xóa 1 danh mục có chứa product trong đó => hủy liên kết với product
-    @CacheEvict(value = {"featuredProductCategory", "allCategory","filteredCategories"}, allEntries = true)
+    @CacheEvict(value = {"featuredProductCategory", "allCategory", "filteredCategories"}, allEntries = true)
     @Override
     public boolean delete(Long id) {
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
-            productCategorySearchRepository.delete(id);
+        productCategorySearchRepository.delete(id);
         if (productCategoryEntity.getChild() != null) {
             productCategoryEntity.getChild().forEach(productCategoryEntity1 -> productCategoryEntity1.setParent(null));
             productCategoryRepository.saveAll(productCategoryEntity.getChild());
@@ -224,13 +225,14 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         productCategoryRepository.delete(productCategoryEntity);
         return true;
     }
-    @CacheEvict(value = {"featuredProductCategory", "allCategory","filteredCategories"}, allEntries = true)
+
+    @CacheEvict(value = {"featuredProductCategory", "allCategory", "filteredCategories"}, allEntries = true)
     @Override
     public boolean delete(List<Long> id) {
         List<ProductCategoryEntity> list = productCategoryRepository.findAllById(id);
 
         for (ProductCategoryEntity productCategoryEntity : list) {
-                productCategorySearchRepository.delete(productCategoryEntity.getId());
+            productCategorySearchRepository.delete(productCategoryEntity.getId());
             if (productCategoryEntity.getChild() != null) {
                 productCategoryEntity.getChild().forEach(productCategoryEntity1 -> productCategoryEntity1.setParent(null));
             }
@@ -259,7 +261,8 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         productCategoryRepository.deleteAll(list);
         return true;
     }
-    @CacheEvict(value = {"featuredProductCategory", "allCategory","filteredCategories"}, allEntries = true)
+
+    @CacheEvict(value = {"featuredProductCategory", "allCategory", "filteredCategories"}, allEntries = true)
     @Override
     public boolean deleteTemporarily(Long id) {
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
@@ -274,7 +277,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return true;
     }
 
-    @CacheEvict(value = {"featuredProductCategory", "allCategory","filteredCategories"}, allEntries = true)
+    @CacheEvict(value = {"featuredProductCategory", "allCategory", "filteredCategories"}, allEntries = true)
     @Override
     public boolean restore(Long id) {
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
@@ -556,7 +559,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         List<ProductCategoryResponse> productCategoryFeature = mapToCategoryResponse(categories);
 
 
-
         productCategoryFeature.forEach(category -> {
             if (category.getProducts() != null) {
                 category.getProducts().removeIf(product ->
@@ -566,7 +568,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                 category.getProducts().forEach(product -> product.setDescription(null));
             }
         });
-
 
 
         return productCategoryFeature;
@@ -756,6 +757,13 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         List<ProductCategoryResponse> responseDTOS = productCategoryMapper.toProductCateroiesResponseDTO(productCategoryEntities);
         responseDTOS.forEach(productCategorySearchRepository::indexProductCategory);
         return false;
+    }
+
+    //dashboard
+    //5 danh mục có nhiều sản phẩm nhất
+    public List<ProductCategoryResponse> list5CategoryHaveTopProduct() {
+        List<ProductCategoryEntity> categoryEntities = productCategoryRepository.findTop5CategoriesWithMostProducts(PageRequest.of(0, 5));
+        return mapToCategoryResponse(categoryEntities);
     }
 
 }

@@ -1,8 +1,10 @@
 package com.kit.maximus.freshskinweb.service;
 
+import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.service.blog.BlogService;
 import com.kit.maximus.freshskinweb.service.order.OrderService;
+import com.kit.maximus.freshskinweb.service.product.ProductCategoryService;
 import com.kit.maximus.freshskinweb.service.product.ProductService;
 import com.kit.maximus.freshskinweb.service.users.UserService;
 import lombok.AccessLevel;
@@ -26,6 +28,7 @@ public class DashboardService {
     ReviewService reviewService;
     UserService userService;
     ProductService productService;
+    ProductCategoryService productCategoryService;
 
     @Async
     public CompletableFuture<String> getTotalRevenue() {
@@ -77,6 +80,15 @@ public class DashboardService {
     public  CompletableFuture<List<ProductResponseDTO>> getTop10SellingProducts() {
         return CompletableFuture.completedFuture(productService.top10SellingProducts());
     }
+
+    @Async
+    public CompletableFuture<List<ProductCategoryResponse>> getTop5CategoryHaveTopProduct() {
+        return CompletableFuture.completedFuture(productCategoryService.list5CategoryHaveTopProduct());
+    }
+
+ 
+
+
 
 
 }

@@ -70,7 +70,6 @@ public class BlogAdminController {
                                                        @RequestParam(defaultValue = "ALL") String status,
                                                        @RequestParam(name = "keyword", required = false) String keyword) {
         String message = "Tim thay List Blog";
-        log.info("GET ALL BLOGS");
         Map<String, Object> result = blogService.getAll(page, size,sortKey, sortValue,status,keyword);
         return ResponseAPI.<Map<String, Object>>builder().code(HttpStatus.OK.value()).data(result).build();
     }

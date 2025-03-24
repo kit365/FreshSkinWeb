@@ -24,6 +24,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -49,6 +51,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     BlogSearchRepository blogSearchRepository;
     UserRepository userRepository;
 
+    @CacheEvict(value = {"totalBlogs", "blogCategoryHome","blogListAdmin"}, allEntries = true)
     @Override
     public boolean add(BlogCreationRequest request) {
         BlogEntity blogEntity = blogMapper.toBlogEntity(request);
@@ -98,7 +101,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     }
 
 
-
+    @CacheEvict(value = {"totalBlogs", "blogCategoryHome", "blogListAdmin"}, allEntries = true)
     @Override
     public BlogResponse update(Long id, BlogUpdateRequest request) {
         BlogEntity blogEntity = getBlogEntityById(id);
@@ -181,6 +184,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
     //Cập nhật trạng thái, xóa mềm, khôi phục cho All ID được chọn
     //Dùng khi user tích vào nhiều ô phẩn tử, sau đó chọn thao tác, ẩn, xóa mềm, khôi phục
+    @CacheEvict(value = {"totalBlogs", "blogCategoryHome","blogListAdmin"}, allEntries = true)
     @Override
     public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
@@ -210,6 +214,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
 
     //XÓA CỨNG 1 BLOG
+    @CacheEvict(value = {"totalBlogs", "blogCategoryHome","blogListAdmin"}, allEntries = true)
     @Override
     public boolean delete(Long id) {
         BlogEntity blogEntity = getBlogEntityById(id);
@@ -233,6 +238,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     }
 
     //XÓA CỨNG NHIỀU BLOG
+    @CacheEvict(value = {"totalBlogs", "blogCategoryHome","blogListAdmin"}, allEntries = true)
     @Override
     public boolean delete(List<Long> longs) {
         List<BlogEntity> blogEntities = blogRepository.findAllById(longs);
@@ -255,6 +261,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     }
 
     //XÓA MỀM 1 BLOG
+    @CacheEvict(value = {"totalBlogs", "blogCategoryHome","blogListAdmin"}, allEntries = true)
     @Override
     public boolean deleteTemporarily(Long id) {
         BlogEntity blogEntity = getBlogEntityById(id);
@@ -269,6 +276,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
 
     @Override
+    @CacheEvict(value = {"totalBlogs", "blogCategoryHome","blogListAdmin"}, allEntries = true)
     public boolean restore(Long id) {
         BlogEntity blogEntity = getBlogEntityById(id);
         if (blogEntity == null) {
@@ -293,7 +301,8 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         return blogResponse;
     }
 
-
+    @Cacheable(value = "blogListAdmin",
+            key = "#page + '_' + #size + '_' + (#sortKey ?: 'none') + '_' + (#sortDirection ?: 'none') + '_' + (#status ?: 'none') + '_' + (#keyword ?: 'none')")
     @Override
     public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
         Map<String, Object> map = new HashMap<>();
@@ -501,6 +510,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     }
 
 
+    @Cacheable(value = "blogCategoryHome", key = "#page + '_' + #size + '_' + #slug")
     public Map<String, Object> getBlogCategories(int page, int size, String slug) {
         int p = (page > 0) ? page - 1 : 0;
 
@@ -545,12 +555,6 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     }
 
 
-
-
-
-
-
-
     public boolean indexBlogs() {
         // Lấy tất cả các BlogEntity từ cơ sở dữ liệu
         List<BlogEntity> blogEntities = blogRepository.findAll();
@@ -585,6 +589,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     }
 
     //data dashboard
+    @Cacheable(value = "totalBlogs")
     public long countBlogs() {
         return blogRepository.countByStatusAndDeleted(Status.ACTIVE, false);
     }
