@@ -15,6 +15,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -77,12 +78,12 @@ public class DashboardService {
 
 
     @Async
-    public  CompletableFuture<List<ProductResponseDTO>> getTop10SellingProducts() {
-        return CompletableFuture.completedFuture(productService.top10SellingProducts());
+    public  CompletableFuture<Map<String, Object>> getTop10SellingProducts() {
+        return CompletableFuture.completedFuture(productService.top10SellingProductsDashBoard());
     }
 
     @Async
-    public CompletableFuture<List<ProductCategoryResponse>> getTop5CategoryHaveTopProduct() {
+    public CompletableFuture<Map<String, Object>> getTop5CategoryHaveTopProduct() {
         return CompletableFuture.completedFuture(productCategoryService.list5CategoryHaveTopProduct());
     }
 

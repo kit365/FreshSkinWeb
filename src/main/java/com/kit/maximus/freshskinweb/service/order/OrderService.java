@@ -584,7 +584,6 @@ public class OrderService {
     public String countRevenue() {
         BigDecimal totalRevenue = orderRepository.sumTotalPriceByOrderStatus(OrderStatus.COMPLETED);
 
-        // Kiểm tra nếu không có dữ liệu trả về (tránh NullPointerException)
         if (totalRevenue == null) {
             totalRevenue = BigDecimal.ZERO;
         }

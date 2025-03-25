@@ -568,8 +568,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                 category.getProducts().forEach(product -> product.setDescription(null));
             }
         });
-
-
         return productCategoryFeature;
     }
 
@@ -759,11 +757,19 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return false;
     }
 
-    //dashboard
-    //5 danh mục có nhiều sản phẩm nhất
-    public List<ProductCategoryResponse> list5CategoryHaveTopProduct() {
-        List<ProductCategoryEntity> categoryEntities = productCategoryRepository.findTop5CategoriesWithMostProducts(PageRequest.of(0, 5));
-        return mapToCategoryResponse(categoryEntities);
+    public Map<String, Object> list5CategoryHaveTopProduct() {
+        List<Object[]> results = productCategoryRepository.findTop5CategoriesWithProductCount(PageRequest.of(0, 5));
+
+        List<Map<String, Object>> data = new ArrayList<>();
+
+        for (Object[] row : results) {
+            data.add(Map.of(
+                    "title", (String) row[0],
+                    "total", ((Number) row[1]).intValue()
+            ));
+        }
+
+        return Map.of("data", data);
     }
 
 }

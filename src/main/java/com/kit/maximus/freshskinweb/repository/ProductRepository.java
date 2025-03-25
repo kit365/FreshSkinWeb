@@ -49,6 +49,14 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
             "ORDER BY COUNT(oi) DESC")
     List<Long> findTop10SellingProducts(Pageable pageable);
 
+    @Query("SELECT p.id, p.title, COUNT(oi) " +
+            "FROM ProductEntity p " +
+            "JOIN p.variants pv " +
+            "JOIN OrderItemEntity oi ON oi.productVariant.id = pv.id " +
+            "GROUP BY p.id " +
+            "ORDER BY COUNT(oi) DESC")
+    List<Object[]> findTop10SellingProductsDashBoard(Pageable pageable);
+
     long countByStatusAndDeleted(Status status, boolean b);
 
 

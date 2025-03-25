@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -39,24 +40,11 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
     List<ProductCategoryEntity> findTop8ByStatusAndDeletedAndFeatured(Status status, boolean deleted, boolean featured, Sort position);
 
 
-    List<ProductCategoryEntity> findAllByStatusAndDeleted(Status status, boolean b);
 
-
-
-    List<ProductCategoryEntity> findAllByStatusAndDeletedAndTitleContainingIgnoreCase(Status status, boolean b, String title);
-
-    Page<ProductCategoryEntity> findAllByStatusAndDeletedAndId(Status status, boolean b, Pageable pageable, Long id);
-
-    List<ProductCategoryEntity> findByParentId(Long parentId);
-
-    List<ProductCategoryEntity> findAllByParentId(Long id);
-    Page<ProductCategoryEntity> findAllByParentId(Long id, Pageable pageable);
-
-    ProductCategoryEntity findBySlug(String slug);
-
-    @Query("SELECT pc FROM ProductCategoryEntity pc " +
+    @Query("SELECT pc.title, COUNT(p) FROM ProductCategoryEntity pc " +
             "LEFT JOIN pc.products p " +
-            "GROUP BY pc " +
+            "GROUP BY pc.title " +
             "ORDER BY COUNT(p) DESC")
-    List<ProductCategoryEntity> findTop5CategoriesWithMostProducts(Pageable pageable);
+    List<Object[]> findTop5CategoriesWithProductCount(Pageable pageable);
+
 }

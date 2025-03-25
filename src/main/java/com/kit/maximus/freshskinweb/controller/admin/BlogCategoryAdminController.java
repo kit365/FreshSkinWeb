@@ -136,7 +136,7 @@ public class BlogCategoryAdminController {
 /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MY CODE HERE =>
     @PatchMapping("change-multi")
-    public ResponseAPI<String> updataBlogCategory(@RequestBody Map<String,Object> requestBlogCategory) {
+    public ResponseAPI<String> updateBlogCategory(@RequestBody Map<String,Object> requestBlogCategory) {
 
         if(!requestBlogCategory.containsKey("id")) {
             log.warn("Request does not contain 'id' key");

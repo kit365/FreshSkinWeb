@@ -8,6 +8,7 @@ import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.service.product.ProductCategoryService;
+import com.kit.maximus.freshskinweb.service.product.ProductService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,6 +30,8 @@ import java.util.Map;
 public class ProductCategoryAdminController {
 
     ProductCategoryService productCategoryService;
+
+    ProductService productService;
 
     @PostMapping(value = "create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseAPI<ProductCategoryResponse> createProductCategory(@RequestPart String request,
@@ -208,6 +211,11 @@ public class ProductCategoryAdminController {
     public ResponseAPI< ProductCategoryResponse> getProductCategory(@PathVariable("id") Long id) {
        ProductCategoryResponse result  =  productCategoryService.showDetail(id);
         return ResponseAPI.<ProductCategoryResponse> builder().code(HttpStatus.OK.value()).data(result).build();
+    }
+
+    @GetMapping("test")
+    public Map<String, Object> test() {
+        return productService.top10SellingProductsDashBoard();
     }
 
 

@@ -1648,6 +1648,38 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         });
         return responseDTOS;
     }
+
+    public Map<String, Object> top10SellingProductsDashBoard() {
+        Pageable pageRequest = PageRequest.of(0, 10);
+        List<Object[]> result = productRepository.findTop10SellingProductsDashBoard(pageRequest);
+
+        // Sắp xếp theo soldQuantity giảm dần
+        result.sort((a, b) -> Long.compare((Long) b[2], (Long) a[2]));
+
+        List<Map<String, Object>> data = new ArrayList<>();
+
+        for (Object[] row : result) {
+            data.add(Map.of(
+                    "id", (Long) row[0],
+                    "title", (String) row[1],
+                    "soldQuantity", (Long) row[2]
+            ));
+        }
+
+        return Map.of("data", data);
+    }
+
+//    //dashboard
+//    //5 danh mục có nhiều sản phẩm nhất
+//    public Map<String, Object> list5CategoryHaveTopProduct() {
+//        List<Object[]> results = productCategoryRepository.findTop5CategoriesWithProductCount(PageRequest.of(0, 5));
+//
+//        return results.stream()
+//                .collect(Collectors.toMap(
+//                        result -> (String) result[0],   // categorytitle
+//                        result -> ((Number) result[1]).intValue()  // productCount
+//                ));
+//    }
 }
 
 
