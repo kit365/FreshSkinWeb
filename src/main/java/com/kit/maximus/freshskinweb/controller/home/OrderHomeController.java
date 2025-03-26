@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 //@CrossOrigin(origins = "*")
@@ -74,6 +75,8 @@ public class OrderHomeController {
     }
 
     // TRA CỨU ĐƠN HÀNG
+
+    //Tra cứu theo mã order
     @GetMapping("/{orderId}")
     public ResponseAPI<OrderResponse> trackOrder(@PathVariable String orderId) {
         var order = orderService.getOrderById(orderId);
@@ -83,4 +86,29 @@ public class OrderHomeController {
                 .data(order)
                 .build();
     }
+
+
+    //Tra cứu order theo sđt
+    @GetMapping()
+    public ResponseAPI<List<OrderResponse>> trackOrderByPhoneOrEmailOrBoth(
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "email", required = false) String email)
+    {
+        List<OrderResponse> order = orderService.getOrdersByEmailAndPhoneNumber(email, phone);
+
+        if(order == null) {
+            return ResponseAPI.<List<OrderResponse>>builder()
+                    .code(HttpStatus.NOT_FOUND.value())
+                    .message("Không tìm thấy đơn hàng")
+                    .data(order)
+                    .build();
+        }
+
+        return ResponseAPI.<List<OrderResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Tra cứu đơn hàng thành công")
+                .data(order)
+                .build();
+    }
+
 }

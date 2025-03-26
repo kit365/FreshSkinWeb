@@ -269,6 +269,68 @@ public class OrderService {
     }
 
 
+    //Tra cứu đơn hàng theo SĐT or Email or Both
+    public List<OrderResponse> getOrdersByEmailAndPhoneNumber(String email, String phone) {
+        List<OrderEntity> orders = null;
+
+        if (email != null && phone != null) {
+            orders = orderRepository.findAllByEmailAndPhoneNumber(email, phone, Sort.by(Sort.Direction.DESC, "updatedAt"));
+        } else if (email != null) {
+            orders = orderRepository.findAllByEmail(email);
+        } else if (phone != null) {
+            orders = orderRepository.findAllByPhoneNumber(phone);
+        }
+
+        if (orders == null || orders.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Sort orders by updatedAt
+        orders.sort(Comparator.comparing(OrderEntity::getUpdatedAt).reversed());
+
+        return orders.stream().map(order -> {
+            OrderResponse orderResponse = orderMapper.toOrderResponse(order);
+
+            if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
+                List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+
+                for (OrderItemEntity orderItemEntity : order.getOrderItems()) {
+                    OrderItemResponse orderItemResponse = new OrderItemResponse();
+                    orderItemResponse.setOrderItemId(orderItemEntity.getOrderItemId());
+                    orderItemResponse.setQuantity(orderItemEntity.getQuantity());
+                    orderItemResponse.setSubtotal(orderItemEntity.getSubtotal());
+
+                    if (orderItemEntity.getProductVariant() != null) {
+                        ProductVariantResponse productVariantResponse = new ProductVariantResponse();
+                        productVariantResponse.setId(orderItemEntity.getProductVariant().getId());
+                        productVariantResponse.setPrice(orderItemEntity.getProductVariant().getPrice());
+                        productVariantResponse.setUnit(orderItemEntity.getProductVariant().getUnit());
+                        productVariantResponse.setVolume(orderItemEntity.getProductVariant().getVolume());
+
+                        if (orderItemEntity.getProductVariant().getProduct() != null) {
+                            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+                            productResponseDTO.setTitle(orderItemEntity.getProductVariant().getProduct().getTitle());
+                            productResponseDTO.setThumbnail(orderItemEntity.getProductVariant().getProduct().getThumbnail());
+                            productResponseDTO.setDiscountPercent(orderItemEntity.getProductVariant().getProduct().getDiscountPercent());
+                            productResponseDTO.setSlug(orderItemEntity.getProductVariant().getProduct().getSlug());
+                            productResponseDTO.setId(orderItemEntity.getProductVariant().getProduct().getId());
+                            productVariantResponse.setProduct(productResponseDTO);
+                        }
+
+                        orderItemResponse.setProductVariant(productVariantResponse);
+                    }
+
+                    orderItemResponses.add(orderItemResponse);
+                }
+
+                orderResponse.setOrderItems(orderItemResponses);
+            }
+
+            return orderResponse;
+        }).collect(Collectors.toList());
+    }
+
+
 //    public ProductResponseDTO getProductByVariant(Long id) {
 //        ProductVariantEntity varirant = productVariantRepository.findById(id).orElse(null);
 //        ProductEntity product = varirant.getProduct();
