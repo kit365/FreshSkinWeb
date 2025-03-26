@@ -58,7 +58,7 @@ public class OrderService {
         OrderEntity order = orderMapper.toOrderEntity(orderRequest);
 
         UserEntity user = null;
-        if(orderRequest.getUserId() != null){
+        if (orderRequest.getUserId() != null) {
             user = userRepository.findById(orderRequest.getUserId()).orElse(null);
             order.setUser(user);
         } else {
@@ -108,21 +108,18 @@ public class OrderService {
 
             BigDecimal discountAmount = BigDecimal.ZERO;
 
-            if (variant.getProduct().getDiscount() != null) {
-                DiscountEntity discount = variant.getProduct().getDiscount();
-
-                if (discount.getDiscountType() == DiscountType.PERCENTAGE && discount.getDiscountPercentage() != null) {
-                    discountAmount = variant.getPrice()
-                            .multiply(BigDecimal.valueOf(discount.getDiscountPercentage()))
-                            .divide(BigDecimal.valueOf(100));
-
-                    // Áp dụng giới hạn giảm giá tối đa (nếu có)
-                    if (discount.getMaxDiscount() != null && discountAmount.compareTo(BigDecimal.valueOf(discount.getMaxDiscount())) > 0) {
-                        discountAmount = BigDecimal.valueOf(discount.getMaxDiscount());
-                    }
-                } else if (discount.getDiscountType() == DiscountType.FIXED_AMOUNT && discount.getDiscountAmount() != null) {
-                    discountAmount = BigDecimal.valueOf(discount.getDiscountAmount());
-                }
+            if (variant.getProduct().getDiscountPercent() != null) {
+                discountAmount = variant.getPrice()
+                        .multiply(BigDecimal.valueOf(variant.getProduct().getDiscountPercent())
+                        .divide(BigDecimal.valueOf(100)));
+//                if (discount.getDiscountPercentage() != null) {
+//
+//
+//                    // Áp dụng giới hạn giảm giá tối đa (nếu có)
+//                    if (discount.getMaxDiscount() != null && discountAmount.compareTo(BigDecimal.valueOf(discount.getMaxDiscount())) > 0) {
+//                        discountAmount = BigDecimal.valueOf(discount.getMaxDiscount());
+//                    }
+//                }
             }
 
 // Tính giá sau giảm
