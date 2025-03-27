@@ -3,13 +3,18 @@ package com.kit.maximus.freshskinweb.service.users;
 
 import com.kit.maximus.freshskinweb.dto.request.authentication.AuthenticationRequest;
 import com.kit.maximus.freshskinweb.dto.request.authentication.IntrospectRequest;
+import com.kit.maximus.freshskinweb.dto.request.productcomparison.ProductComparisonDTO;
 import com.kit.maximus.freshskinweb.dto.response.AuthenticationResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.IntrospectResponse;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
+import com.kit.maximus.freshskinweb.dto.response.productcomparison.ProductComparisonResponseDTO;
+import com.kit.maximus.freshskinweb.entity.ProductComparisonEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.UserMapper;
+import com.kit.maximus.freshskinweb.repository.ProductComparisonRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.utils.Status;
 import com.nimbusds.jose.*;
@@ -35,7 +40,9 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -43,6 +50,8 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationService implements UserDetailsService {
     UserRepository userRepository;
+
+    ProductComparisonRepository productComparisonRepository;
 
     UserMapper userMapper;
 
@@ -80,7 +89,23 @@ public class AuthenticationService implements UserDetailsService {
 
 
         Long productComparisonId = userRepository.findProductComparisonIdByUserId(user.getUserID());
-        userResponseDTO.setProductComparisonId(productComparisonId);
+
+        if (productComparisonId != null) {
+            ProductComparisonEntity productComparison = productComparisonRepository.findById(productComparisonId).orElse(null);
+            ProductComparisonResponseDTO productComparisonDTO = new ProductComparisonResponseDTO();
+            productComparisonDTO.setId(productComparisonId);
+            List<ProductResponseDTO> productResponseDTOS = new ArrayList<>();
+            if (productComparison.getProducts() != null) {
+                productComparison.getProducts().forEach(product -> {
+                    ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+                    productResponseDTO.setId(product.getId());
+                    productResponseDTOS.add(productResponseDTO);
+                });
+            }
+            productComparisonDTO.setProducts(productResponseDTOS);
+            userResponseDTO.setProductComparisonId(productComparisonDTO);
+        }
+
 
         return userResponseDTO;
     }

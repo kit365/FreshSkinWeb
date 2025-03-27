@@ -3,6 +3,8 @@ package com.kit.maximus.freshskinweb.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.kit.maximus.freshskinweb.dto.request.productcomparison.ProductComparisonDTO;
+import com.kit.maximus.freshskinweb.dto.response.productcomparison.ProductComparisonResponseDTO;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import lombok.*;
@@ -62,7 +64,9 @@ public class UserResponseDTO implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Date updatedAt;
-   Long productComparisonId;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    ProductComparisonResponseDTO productComparisonId;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<UserDiscountUsageResponse> userDiscountUsageResponses;
