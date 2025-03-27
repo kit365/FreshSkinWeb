@@ -20,10 +20,12 @@ public interface UserMapper {
 
     @Mapping(target = "orders", source = "orders")
     @Mapping(target = "role", source = "role")
+    @Mapping(target = "productComparisonId", ignore = true)
     UserResponseDTO toUserResponseDTO(UserEntity userEntity);
 
 
     @Mapping(target = "role", ignore = true)
+    @Mapping(target = "productComparisonId", ignore = true)
     List<UserResponseDTO> toUserResponseDTO(List<UserEntity> userEntities);
 
 //    @Named("mapPermission")

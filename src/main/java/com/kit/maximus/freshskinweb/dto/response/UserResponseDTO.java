@@ -62,6 +62,7 @@ public class UserResponseDTO implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Date updatedAt;
+   Long productComparisonId;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<UserDiscountUsageResponse> userDiscountUsageResponses;

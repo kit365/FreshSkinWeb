@@ -40,4 +40,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
     Optional<UserEntity> findByProviderId(String providerId);
 
     long countByStatusAndDeleted(Status status, boolean b);
+
+    @Query("SELECT pc.id FROM ProductComparisonEntity pc WHERE pc.user.userID = :userId")
+    Long findProductComparisonIdByUserId(@Param("userId") Long userId);
 }

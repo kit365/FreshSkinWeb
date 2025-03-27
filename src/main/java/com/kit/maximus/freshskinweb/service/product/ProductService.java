@@ -59,6 +59,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     SkinTypeRepository skinTypeRepository;
 
 
+
     Cloudinary cloudinary;
 
     ProductSearchRepository productSearchRepository;
@@ -1374,7 +1375,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     //hàm nay để map riêng vào searchPublic
 
     // Hàm Map danh sách ProductResponseDTO từ danh sách ProductEntity
-    private List<ProductResponseDTO> mapProductIndexResponsesDTO(List<ProductEntity> productEntities) {
+    public List<ProductResponseDTO> mapProductIndexResponsesDTO(List<ProductEntity> productEntities) {
         List<ProductResponseDTO> productResponseDTOs = productMapper.productToProductResponsesDTO(productEntities);
 
         IntStream.range(0, productEntities.size()).forEach(i -> {

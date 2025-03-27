@@ -1,7 +1,6 @@
 package com.kit.maximus.freshskinweb.service.users;
 
 
-
 import com.kit.maximus.freshskinweb.dto.request.authentication.AuthenticationRequest;
 import com.kit.maximus.freshskinweb.dto.request.authentication.IntrospectRequest;
 import com.kit.maximus.freshskinweb.dto.response.AuthenticationResponseDTO;
@@ -51,17 +50,39 @@ public class AuthenticationService implements UserDetailsService {
     @Value("${jwt.signerKey}")
     String SIGNER_KEY;
 
+//    public UserResponseDTO getUserByToken(String token) throws ParseException, JOSEException {
+//        JWSVerifier jwsVerifier = new MACVerifier(SIGNER_KEY.getBytes());
+//        SignedJWT signedJWT = SignedJWT.parse(token);
+//        Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
+//        var verify = signedJWT.verify(jwsVerifier);
+//        if(verify && expirationDate.after(new Date())) {
+//            String username = signedJWT.getJWTClaimsSet().getSubject();
+//            UserEntity user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+//            return userMapper.toUserResponseDTO(user);
+//        }
+//        return null;
+//    }
+
     public UserResponseDTO getUserByToken(String token) throws ParseException, JOSEException {
         JWSVerifier jwsVerifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
         Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
-        var verify = signedJWT.verify(jwsVerifier);
-        if(verify && expirationDate.after(new Date())) {
-            String username = signedJWT.getJWTClaimsSet().getSubject();
-            UserEntity user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-            return userMapper.toUserResponseDTO(user);
+
+        if (!signedJWT.verify(jwsVerifier) || expirationDate.before(new Date())) {
+            throw new AppException(ErrorCode.INVALID_TOKEN);
         }
-        return null;
+
+        String username = signedJWT.getJWTClaimsSet().getSubject();
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        UserResponseDTO userResponseDTO = userMapper.toUserResponseDTO(user);
+
+
+        Long productComparisonId = userRepository.findProductComparisonIdByUserId(user.getUserID());
+        userResponseDTO.setProductComparisonId(productComparisonId);
+
+        return userResponseDTO;
     }
 
     public IntrospectResponse introspect(IntrospectRequest introspectRequest) throws JOSEException, ParseException {
@@ -95,10 +116,6 @@ public class AuthenticationService implements UserDetailsService {
                 .authenticated(authenticated)
                 .build();
     }
-
-
-
-
 
 
     public String generateToken(String username) {

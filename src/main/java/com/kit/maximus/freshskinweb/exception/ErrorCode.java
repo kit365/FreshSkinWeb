@@ -76,6 +76,10 @@ public enum ErrorCode {
     //ProductBrand
     PRODUCT_BRAND_NOT_FOUND(404, "Không tìm thấy thương hiệu sản phẩm"),
 
+    //ProductCompare
+    PRODUCT_COMPARISON_NOT_FOUND(404, "Không tìm thấy bảng so sánh"),
+    PRODUCT_NOT_IN_COMPARISON(404, "Sảh phẩm không nằm trong bảng so sánh này"),
+
     //Role
     ROLE_NOT_FOUND(404, "Không tìm thấy vai trò"),
     ROLE_EXISTED(400, "Vai trò đã tồn tại"),
