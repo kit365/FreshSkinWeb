@@ -10,14 +10,9 @@ import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.ProductMapper;
-import com.kit.maximus.freshskinweb.repository.ProductBrandRepository;
-import com.kit.maximus.freshskinweb.repository.ProductCategoryRepository;
-import com.kit.maximus.freshskinweb.repository.ProductRepository;
-import com.kit.maximus.freshskinweb.repository.SkinTypeRepository;
+import com.kit.maximus.freshskinweb.repository.*;
 import com.kit.maximus.freshskinweb.repository.search.ProductSearchRepository;
 import com.kit.maximus.freshskinweb.service.BaseService;
-import com.kit.maximus.freshskinweb.service.ReviewService;
-import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -26,9 +21,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -65,6 +58,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     SkinTypeRepository skinTypeRepository;
 
+
     Cloudinary cloudinary;
 
     ProductSearchRepository productSearchRepository;
@@ -81,7 +75,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     //+ Thực thi native SQL queries
     //+ Cache các entity
 
-    @CacheEvict(value = {"productsFeature","filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash" ,"productGetAll"},allEntries = true)
+    @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     @Override
     public boolean add(CreateProductRequest request) {
         List<ProductCategoryEntity> productCategoryEntity = productCategoryRepository.findAllById(request.getCategoryId());
@@ -136,7 +130,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
 
     //noted: thêm set thumb vao entity sau khi update
-    @CacheEvict(value = {"productsFeature","filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash" ,"productGetAll"},allEntries = true)
+    @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     @Override
     public ProductResponseDTO update(Long id, UpdateProductRequest request) {
         if (StringUtils.hasLength(request.getStatus())) {
@@ -239,7 +233,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 if (currentList.containsKey(listUpdate.getVolume())) {
                     ProductVariantEntity productVariantEntity = currentList.get(listUpdate.getVolume());
                     //tương lai sẽ vứt loi
-                    if (productVariantEntity.getPrice().compareTo(BigDecimal.ZERO) < 0) productVariantEntity.setPrice(BigDecimal.ZERO);
+                    if (productVariantEntity.getPrice().compareTo(BigDecimal.ZERO) < 0)
+                        productVariantEntity.setPrice(BigDecimal.ZERO);
                     productVariantEntity.setPrice(listUpdate.getPrice());
                 } else {
                     listProduct.createProductVariant(listUpdate);
@@ -275,26 +270,25 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     }
 
     //thay doi thanh String de quan lý message
-    @CacheEvict(value = {"productsFeature","filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash" ,"productGetAll"},allEntries = true)
+    @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     @Override
     public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
         List<ProductEntity> productEntities = productRepository.findAllById(id);
         if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
             productEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
-            List<ProductResponseDTO> productResponseDTO = mapProductIndexResponsesDTO(productRepository.saveAll(productEntities));
-            productResponseDTO.forEach(productSearchRepository::updateProduct);
-
+            productRepository.saveAll(productEntities);
+            id.forEach(ids -> productSearchRepository.update(ids, status));
             return "Cập nhật trạng thái sản phẩm thành công";
         } else if (statusEnum == Status.SOFT_DELETED) {
             productEntities.forEach(productEntity -> productEntity.setDeleted(true));
-            List<ProductResponseDTO> productResponseDTO = mapProductIndexResponsesDTO(productRepository.saveAll(productEntities));
-            productResponseDTO.forEach(productSearchRepository::updateProduct);
+            productRepository.saveAll(productEntities);
+            id.forEach(ids -> productSearchRepository.update(ids, true));
             return "Xóa mềm thành công";
         } else if (statusEnum == Status.RESTORED) {
             productEntities.forEach(productEntity -> productEntity.setDeleted(false));
-            List<ProductResponseDTO> productResponseDTO = mapProductIndexResponsesDTO(productRepository.saveAll(productEntities));
-            productResponseDTO.forEach(productSearchRepository::updateProduct);
+            productRepository.saveAll(productEntities);
+            id.forEach(ids -> productSearchRepository.update(ids, false));
             return "Phục hồi thành công";
         }
         return "Cập nhật thất bại";
@@ -306,7 +300,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
        input: long id
        output: boolean
      */
-    @CacheEvict(value = {"productsFeature","filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash" ,"productGetAll"},allEntries = true)
+    @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     @Override
     public boolean delete(Long id) {
         ProductEntity productEntity = getProductEntityById(id);
@@ -331,7 +325,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
      input: List<long> id
      output: boolean
    */
-    @CacheEvict(value = {"productsFeature","filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash" ,"productGetAll"},allEntries = true)
+    @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     @Override
     public boolean delete(List<Long> longs) {
         List<ProductEntity> productEntities = productRepository.findAllById(longs);
@@ -359,14 +353,14 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
      input: long id
      output: boolean
    */
-    @CacheEvict(value = {"productsFeature","filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash" ,"productGetAll"},allEntries = true)
+    @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     @Override
     public boolean deleteTemporarily(Long id) {
         ProductEntity productEntity = getProductEntityById(id);
 
         log.info("Delete temporarily : {}", id);
         productEntity.setDeleted(true);
-        productRepository.save(productEntity);
+        productSearchRepository.update(id, true);
         return true;
     }
 
@@ -377,13 +371,25 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
      input: long id
      output: boolean
    */
-    @CacheEvict(value = {"productsFeature","filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash" ,"productGetAll"},allEntries = true)
+    @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     @Override
     public boolean restore(Long id) {
+        long start = System.currentTimeMillis();
+
+        long dbStart = System.currentTimeMillis();
         ProductEntity productEntity = getProductEntityById(id);
+        long dbEnd = System.currentTimeMillis();
+        log.info("⏳ Database fetch time: {} ms", (dbEnd - dbStart));
 
         productEntity.setDeleted(false);
-        productRepository.save(productEntity);
+
+        long searchStart = System.currentTimeMillis();
+        productSearchRepository.update(id, false);
+        long searchEnd = System.currentTimeMillis();
+        log.info("⏳ OpenSearch update time: {} ms", (searchEnd - searchStart));
+
+        long end = System.currentTimeMillis();
+        log.info("🚀 Total restore time: {} ms", (end - start));
 
         return true;
     }
@@ -739,7 +745,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             });
         }
 
-        if(!top7BestSellers.isEmpty()) {
+        if (!top7BestSellers.isEmpty()) {
             top7BestSellers.forEach(productResponseDTO -> {
                 clearUnnecessaryFields(productResponseDTO);
                 productResponseDTO.setCategory(null);
@@ -772,14 +778,14 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     public List<ProductResponseDTO> getProductsFeature() {
 //        List<ProductEntity> productEntities = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status.ACTIVE, false, true);
 
-        List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status.ACTIVE, false,PageRequest.of(0, 3));
+        List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status.ACTIVE, false, PageRequest.of(0, 3));
 
         List<ProductResponseDTO> productResponseDTO = new ArrayList<>();
         list.forEach(productEntity -> {
             productResponseDTO.add(productSearchRepository.getProductById(productEntity));
         });
 
-        if(!productResponseDTO.isEmpty()) {
+        if (!productResponseDTO.isEmpty()) {
             productResponseDTO.forEach(productResponseDTO1 -> {
                 productResponseDTO1.setCategory(null);
                 productResponseDTO1.setSkinTypes(null);
@@ -789,7 +795,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         return productResponseDTO;
     }
-
 
 
     //Tìm chi tiết Product bằng Slug
@@ -1445,6 +1450,14 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                         })
                         .collect(Collectors.toList()));
             }
+
+//
+//            if(product.getDiscount() != null) {
+//                dto.setD
+//                dto.setDiscountPercent(product.getDiscountPercent());
+//            }
+
+
         });
 
         return productResponseDTOs;
@@ -1668,6 +1681,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         return Map.of("data", data);
     }
+
 
 //    //dashboard
 //    //5 danh mục có nhiều sản phẩm nhất

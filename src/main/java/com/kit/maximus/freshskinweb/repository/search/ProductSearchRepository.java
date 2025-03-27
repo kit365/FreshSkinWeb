@@ -16,6 +16,7 @@ import org.opensearch.client.opensearch._types.query_dsl.*;
 import org.opensearch.client.opensearch.core.*;
 import org.opensearch.client.opensearch.core.search.Hit;
 import org.opensearch.client.opensearch.core.termvectors.Term;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -69,10 +70,12 @@ public class ProductSearchRepository {
     public boolean updateProduct(ProductResponseDTO productResponseDTO) {
         try {
             // Tạo UpdateRequest để cập nhật sản phẩm với kiểu dữ liệu rõ ràng
+            log.debug("Updating product with data: {}", productResponseDTO);
             UpdateRequest<ProductResponseDTO, ProductResponseDTO> updateRequest = new UpdateRequest.Builder<ProductResponseDTO, ProductResponseDTO>()
-                    .index("products")  // Chỉ định index
-                    .id(String.valueOf(productResponseDTO.getId()))  // Chỉ định ID của sản phẩm
-                    .doc(productResponseDTO) // Thông tin cập nhật (dữ liệu mới)
+                    .index("products")
+                    .id(String.valueOf(productResponseDTO.getId()))
+                    .doc(productResponseDTO)
+                    .retryOnConflict(3)
                     .build();
 
             // Thực hiện yêu cầu cập nhật
@@ -87,6 +90,70 @@ public class ProductSearchRepository {
         } catch (IOException e) {
             log.error("Error while updating product", e);
             return false;
+        }
+    }
+
+    public void update(Long productId, String status) {
+        try {
+            if (productId == null  || status == null || status.isEmpty()) {
+                log.error("Invalid input: productId or status is null/empty");
+                return;
+            }
+
+            log.debug("Updating product with ID: {}, status: {}", productId, status);
+
+            // Chỉ cập nhật field cụ thể
+            ProductResponseDTO updateFields = new ProductResponseDTO();
+            updateFields.setStatus(status);
+
+            UpdateRequest<ProductResponseDTO, ProductResponseDTO> updateRequest =
+                    new UpdateRequest.Builder<ProductResponseDTO, ProductResponseDTO>()
+                            .index("products")
+                            .id(String.valueOf(productId))
+                            .doc(updateFields)
+                            .retryOnConflict(3)
+                            .build();
+
+            // Thực hiện update
+            openSearchClient.update(updateRequest, ProductResponseDTO.class);
+
+        } catch (IOException e) {
+            log.error("Error while updating product: {}", e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Unexpected error while updating product: {}", e.getMessage(), e);
+        }
+    }
+
+
+
+    public void update(Long productId, boolean deleted) {
+        try {
+            if (productId == null) {
+                log.error("Invalid input: productId is null/empty");
+                return;
+            }
+
+            log.debug("Updating product with ID: {}, deleted: {}", productId, deleted);
+
+            // Chỉ cập nhật field deleted
+            ProductResponseDTO updateFields = new ProductResponseDTO();
+            updateFields.setDeleted(deleted);
+
+            UpdateRequest<ProductResponseDTO, ProductResponseDTO> updateRequest =
+                    new UpdateRequest.Builder<ProductResponseDTO, ProductResponseDTO>()
+                            .index("products")
+                            .id(String.valueOf(productId))
+                            .doc(updateFields)
+                            .retryOnConflict(3)
+                            .build();
+
+            // Thực hiện update
+            openSearchClient.update(updateRequest, ProductResponseDTO.class);
+
+        } catch (IOException e) {
+            log.error("Error while updating product: {}", e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Unexpected error while updating product: {}", e.getMessage(), e);
         }
     }
 

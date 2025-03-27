@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 //@CrossOrigin(origins = "*")
 @Slf4j
@@ -138,13 +139,17 @@ public class ProductAdminController {
             throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
         }
 
-        List<Long> ids = (List<Long>) productRequestDTO.get("id");
+        // Chuyển đổi List<Integer> sang List<Long>
+        List<Long> ids = ((List<?>) productRequestDTO.get("id"))
+                .stream()
+                .map(id -> ((Number) id).longValue())  // Chuyển Integer -> Long
+                .collect(Collectors.toList());
+
         String status = productRequestDTO.get("status").toString();
 
         var result = productService.update(ids, status);
         return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
-
 
     @DeleteMapping("delete/{id}")
     public ResponseAPI<String> deleteProduct(@PathVariable("id") Long id) {
@@ -161,8 +166,8 @@ public class ProductAdminController {
 
     @PatchMapping("deleteT/{id}")
     public ResponseAPI<String> deleteProductT(@PathVariable("id") Long id) {
-        String message_succed = "Delete Product successfull";
-        String message_failed = "Delete Product failed";
+        String message_succed = "Xóa sản phẩm thành công";
+        String message_failed = "Xóa sản phẩm thất bại";
         boolean result = productService.deleteTemporarily(id);
         if (result) {
             log.info("Product deleted successfully");
