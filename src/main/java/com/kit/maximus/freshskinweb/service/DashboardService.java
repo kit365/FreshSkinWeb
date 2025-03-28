@@ -87,6 +87,11 @@ public class DashboardService {
         return CompletableFuture.completedFuture(productCategoryService.list5CategoryHaveTopProduct());
     }
 
+    @Async
+    public CompletableFuture<List<Map<String, Object>>> getRatingStatsByDate() {
+        return CompletableFuture.completedFuture(reviewService.getRatingStatsByDate());
+    }
+
  
 
 

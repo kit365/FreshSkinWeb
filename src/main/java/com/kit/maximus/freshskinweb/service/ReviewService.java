@@ -267,5 +267,40 @@ public class ReviewService {
         return reviewRepository.count();
     }
 
+    public List<Map<String, Object>> getRatingStatsByDate() {
+        List<Object[]> totalRatings = reviewRepository.findTotalRatingByDate();
+        List<Object[]> totalReviews = reviewRepository.findTotalReviewsByDate();
+
+        Map<String, Map<String, Object>> resultMap = new HashMap<>();
+
+        // Process total rating points per day
+        for (Object[] row : totalRatings) {
+            String date = row[0].toString();
+            int total = ((Number) row[1]).intValue();
+
+            resultMap.putIfAbsent(date, new HashMap<>());
+            resultMap.get(date).put("date", date);
+            resultMap.get(date).put("total", total);
+        }
+
+        // Process total number of reviews per day and calculate average rating
+        for (Object[] row : totalReviews) {
+            String date = row[0].toString();
+            int totalReviewss = ((Number) row[1]).intValue();
+
+            if (resultMap.containsKey(date)) {
+                int total = (int) resultMap.get(date).getOrDefault("total", 0);
+                double avr = totalReviewss == 0 ? 0 : (double) total / totalReviewss;
+                resultMap.get(date).put("avr", avr); // Store average rating
+            }
+        }
+
+        // Remove "total" field, keeping only "date" and "avr"
+        for (Map<String, Object> data : resultMap.values()) {
+            data.remove("total");
+        }
+
+        return new ArrayList<>(resultMap.values());
+    }
 
 }

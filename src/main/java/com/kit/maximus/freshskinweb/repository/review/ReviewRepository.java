@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -33,4 +34,11 @@ public interface ReviewRepository extends JpaRepository<ReviewEntity, Long> {
     Integer countAllByParentIsNullAndProduct_IdAndRating(Long productId, int rating);
 
     int countByProduct_Id(long id);
+
+    @Query("SELECT DATE(r.createdAt), SUM(r.rating) FROM ReviewEntity r WHERE r.parent IS NULL AND r.rating > 0 GROUP BY DATE(r.createdAt)")
+    List<Object[]> findTotalRatingByDate();
+
+    @Query("SELECT DATE(r.createdAt), COUNT(r.rating) FROM ReviewEntity r WHERE r.parent IS NULL AND r.rating > 0 GROUP BY DATE(r.createdAt)")
+    List<Object[]> findTotalReviewsByDate();
+
 }
