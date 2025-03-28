@@ -17,6 +17,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -81,6 +82,11 @@ public class EmailService {
             }
             context.setVariable("createdAtFormatted", formattedDate);
 
+            // Add image
+            ClassPathResource imageResource = new ClassPathResource("static/images/img.png");
+            helper.addInline("logo", imageResource);
+
+
             String content = templateEngine.process("order-confirmation", context);
             helper.setText(content, true);
             mailSender.send(message);
@@ -95,26 +101,29 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            SettingEntity settingEntity = settingRepository.findById(1L)
-                    .orElseThrow(() -> new AppException(ErrorCode.SETTING_NOT_FOUND));
+            // Set email metadata
+            helper.setTo(to);
+            helper.setSubject("Mã xác thực OTP");
 
-            String websiteName = settingEntity.getWebsiteName();
-
+            // Set template variables
             Context context = new Context();
             context.setVariable("otp", otp);
             context.setVariable("expireTime", "1 phút");
-            context.setVariable("websiteName", websiteName);
+            context.setVariable("websiteName", "Fresh Skin Web");
 
-            helper.setFrom(new InternetAddress(mailConfig.getMailUsername(), mailConfig.getMailPersonal()));
-            helper.setTo(to);
-            helper.setSubject("Mã xác thực OTP");
-            helper.setText(templateEngine.process("forgot-password", context), true);
+            // Process template
+            String htmlContent = templateEngine.process("forgot-password", context);
+            helper.setText(htmlContent, true);
 
+            // Add image
+            ClassPathResource imageResource = new ClassPathResource("static/images/img.png");
+            helper.addInline("logo", imageResource);
+
+            // Send email
             mailSender.send(message);
-            log.info("Sent OTP email to: {}", to);
+
         } catch (Exception e) {
-            log.error("Error sending OTP email: {}", e.getMessage());
-            throw new AppException(ErrorCode.EMAIL_SEND_ERROR);
+            throw new AppException(ErrorCode.EMAIL_NOT_FOUND);
         }
     }
 }
