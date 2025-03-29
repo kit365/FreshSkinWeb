@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.SkinCareRountineRequest;
+import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.SkinCareRountineResponse;
 import com.kit.maximus.freshskinweb.entity.SkinCareRoutineEntity;
 import com.kit.maximus.freshskinweb.service.product.ProductService;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,21 +26,42 @@ public class SkinCareRountineController {
     ProductService productService;
 
     @PostMapping("create")
-    public ResponseEntity<Boolean> addSkinCareRoutine(@RequestBody SkinCareRountineRequest request) {
+    public ResponseAPI<Boolean> addSkinCareRoutine(@RequestBody SkinCareRountineRequest request) {
         boolean result = skinCareRountineService.add(request);
-        return ResponseEntity.ok(result);
+        String message ="Thêm lộ trình da thành công";
+        if(!result){
+            message = "Thêm lộ trình da thất bại";
+        }
+        return ResponseAPI .<Boolean>builder()
+                .code(HttpStatus.OK.value())
+                .message(message)
+                .build();
     }
 
     @PutMapping("edit/{id}")
-    public ResponseEntity<SkinCareRountineResponse> updateSkinCareRoutine(@PathVariable Long id, @RequestBody SkinCareRountineRequest request) {
+    public ResponseAPI<SkinCareRountineResponse> updateSkinCareRoutine(@PathVariable Long id, @RequestBody SkinCareRountineRequest request) {
         SkinCareRountineResponse response = skinCareRountineService.update(id, request);
-        return ResponseEntity.ok(response);
+        String message = "Cập nhật lộ trinình da thành công";
+        if(response == null){
+            message = "Cập nhật lộ trinình da thất bại";
+        }
+        return ResponseAPI.<SkinCareRountineResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message(message)
+                .build();
     }
 
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<Boolean> deleteSkinCareRoutine(@PathVariable Long id) {
+    public ResponseAPI<Boolean> deleteSkinCareRoutine(@PathVariable Long id) {
         boolean result = skinCareRountineService.delete(id);
-        return ResponseEntity.ok(result);
+        String message ="Xóa lộ trình da thành công";
+        if(!result){
+            message = "Xóa lộ trình da thất bại";
+        }
+        return ResponseAPI .<Boolean>builder()
+                .code(HttpStatus.OK.value())
+                .message(message)
+                .build();
     }
 
     @GetMapping("/{id}")
