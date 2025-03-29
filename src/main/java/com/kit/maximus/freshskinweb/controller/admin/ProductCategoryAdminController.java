@@ -216,13 +216,9 @@ public class ProductCategoryAdminController {
     }
 
     @GetMapping("test")
-    public List<OrderResponse> test() {
-
-        return orderService.getRevenueByDate();
+    public Map<String, Object> test() {
+            return productCategoryService.getRevenueByCategories();
     }
-
-
-
 
 
 

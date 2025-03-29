@@ -216,7 +216,8 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
                 dashboardService.getTop10SellingProducts(),
                 dashboardService.getTop5CategoryHaveTopProduct(),
                 dashboardService.getRatingStatsByDate(),
-                dashboardService.getRevenueByDate()
+                dashboardService.getRevenueByDate(),
+                dashboardService.getRevenueByCategories()
         ).thenApply(v -> { //co ket qua, bien doi cac data duoc thuc hien trong CompletableFuture thanh map
             try {
                 Map<String, Object> data = new HashMap<>();
@@ -233,6 +234,7 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
                 data.put("Top5CategoryHaveTopProduct", dashboardService.getTop5CategoryHaveTopProduct().join());
                 data.put("ratingStartsByDate", dashboardService.getRatingStatsByDate().join());
                 data.put("revenueByDate", dashboardService.getRevenueByDate().join());
+                data.put("revenueByCategories", dashboardService.getRevenueByCategories().join());
                 return data;
             } catch (Exception e) {
                 log.error("⚠️ Lỗi khi lấy dữ liệu dashboard: ", e);

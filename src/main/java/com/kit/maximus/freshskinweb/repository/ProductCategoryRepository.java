@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -40,11 +41,28 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
     List<ProductCategoryEntity> findTop8ByStatusAndDeletedAndFeatured(Status status, boolean deleted, boolean featured, Sort position);
 
 
-
     @Query("SELECT pc.title, COUNT(p) FROM ProductCategoryEntity pc " +
             "LEFT JOIN pc.products p " +
             "GROUP BY pc.title " +
             "ORDER BY COUNT(p) DESC")
     List<Object[]> findTop5CategoriesWithProductCount(Pageable pageable);
 
+
+    @Query(value = """
+            
+                   SELECT
+               DATE(o.created_at) AS order_date,
+                c.title AS category_name,
+               SUM(o.total_price) AS total_revenue
+              FROM `order` o
+               JOIN order_item oi ON o.order_id = oi.order_id
+               JOIN product_variant pv ON oi.product_variant_id = pv.product_variant_id
+            JOIN product p ON pv.productid = p.product_id
+            JOIN product_category pc ON p.product_id = pc.productID
+            JOIN category c ON pc.categoryID = c.id
+            WHERE o.order_status = 'COMPLETED'
+             GROUP BY DATE(o.created_at), c.title
+               ORDER BY order_date DESC, total_revenue DESC;
+            """, nativeQuery = true)
+    List<Object[]> findCategoriesRevenueGroupByDate();
 }

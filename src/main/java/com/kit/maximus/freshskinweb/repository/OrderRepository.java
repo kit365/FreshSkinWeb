@@ -59,5 +59,6 @@ public interface OrderRepository extends JpaRepository<OrderEntity, String>, Jpa
             "WHERE x.orderStatus = :orderStatus GROUP BY Date(x.createdAt)")
     List<Object[]> getTotalPriceByDate(@Param("orderStatus") OrderStatus orderStatus);
 
+
 //    OrderResponse findById(String orderId);
 }

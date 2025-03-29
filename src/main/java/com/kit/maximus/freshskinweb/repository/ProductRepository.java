@@ -59,5 +59,4 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
 
     long countByStatusAndDeleted(Status status, boolean b);
 
-
 }

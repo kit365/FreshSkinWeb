@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.text.Normalizer;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -771,5 +772,24 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
         return Map.of("data", data);
     }
+
+  public Map<String, Object> getRevenueByCategories() {
+      List<Object[]> results = productCategoryRepository.findCategoriesRevenueGroupByDate();
+
+      List<Map<String, Object>> data = new ArrayList<>();
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+      for (Object[] row : results) {
+          data.add(Map.of(
+                  "date", dateFormat.format((Date) row[0]),
+                  "category", (String) row[1],
+                  "revenue", ((Number) row[2]).doubleValue()
+          ));
+      }
+
+        return Map.of("data", data);
+    }
+
+
 
 }
