@@ -5,6 +5,7 @@ import com.kit.maximus.freshskinweb.dto.response.SkinCareRountineResponse;
 import com.kit.maximus.freshskinweb.entity.SkinCareRoutineEntity;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
 import com.kit.maximus.freshskinweb.mapper.SkinCareRoutineMapper;
+import com.kit.maximus.freshskinweb.mapper.SkinTypeMapper;
 import com.kit.maximus.freshskinweb.repository.SkinCareRountineRepository;
 import com.kit.maximus.freshskinweb.repository.SkinTypeRepository;
 import com.kit.maximus.freshskinweb.specification.SkinCareRoutineSpecification;
@@ -27,6 +28,7 @@ public class SkinCareRountineService {
     SkinCareRountineRepository skinCareRountineRepository;
     SkinCareRoutineMapper skinCareRoutineMapper;
     SkinTypeRepository skinTypeRepository;
+    SkinTypeMapper skinTypeMapper;
 
     public boolean add(SkinCareRountineRequest request) {
 
@@ -78,26 +80,39 @@ public class SkinCareRountineService {
         return null;
     }
 
-    public Page<SkinCareRoutineEntity> getFilteredSkinCareRoutines(Status status, String keyword, Pageable pageable) {
+    public SkinCareRountineResponse toResponse(SkinCareRoutineEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        SkinCareRountineResponse response = new SkinCareRountineResponse();
+        response.setId(entity.getId());
+        response.setRountine(entity.getRountine());
+        response.setSkinTypeEntity( skinTypeMapper.toSkinTypeResponse(entity.getSkinType()));
+        // Các trường khác
+        return response;
+    }
+
+    public Page<SkinCareRountineResponse> getFilteredSkinCareRoutines(Status status, String keyword, Pageable pageable) {
         Specification<SkinCareRoutineEntity> spec = Specification.where(null);
 
-        // Add status filter if provided
         if (status != null) {
             spec = spec.and(SkinCareRoutineSpecification.filterByStatus(status));
         }
 
-        // Add keyword filter if provided
         if (keyword != null && !keyword.trim().isEmpty()) {
             spec = spec.and(SkinCareRoutineSpecification.filterByKeyword(keyword.trim()));
         }
 
-        // Always apply sorting by updatedAt
         spec = spec.and(SkinCareRoutineSpecification.sortByUpdatedAt());
-
-        // Always filter out deleted items
         spec = spec.and(SkinCareRoutineSpecification.isNotDeleted());
 
-        return skinCareRountineRepository.findAll(spec, pageable);
+        Page<SkinCareRoutineEntity> entities = skinCareRountineRepository.findAll(spec, pageable);
+        return entities.map(entity -> {
+            if (entity.getSkinType() == null) {
+                entity.setSkinType(new SkinTypeEntity()); // Hoặc giá trị mặc định khác
+            }
+            return toResponse(entity);
+        });
     }
 }
 

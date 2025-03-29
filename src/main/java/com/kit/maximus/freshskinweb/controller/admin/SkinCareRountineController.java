@@ -71,13 +71,17 @@ public class SkinCareRountineController {
     }
 
     @GetMapping
-    public Page<SkinCareRoutineEntity> getFilteredSkinCareRoutines(
+    public ResponseAPI<Page<SkinCareRountineResponse>> getFilteredSkinCareRoutines(
             @RequestParam(required = false) Status status,
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return skinCareRountineService.getFilteredSkinCareRoutines(status, keyword, PageRequest.of(page, size));
+        return ResponseAPI.<Page<SkinCareRountineResponse>>builder()
+
+                .data(skinCareRountineService.getFilteredSkinCareRoutines(status, keyword, PageRequest.of(page, size)))
+                .build();
+
     }
 
 }
