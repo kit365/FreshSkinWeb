@@ -26,6 +26,7 @@ public interface OrderRepository extends JpaRepository<OrderEntity, String>, Jpa
     List<OrderEntity> findAllByEmailAndPhoneNumber(String email, String phoneNumber, Sort sort);
 
     boolean existsByFirstName(String firstName);
+
     boolean existsByLastName(String lastName);
 
     boolean existsByEmail(String email);
@@ -52,6 +53,11 @@ public interface OrderRepository extends JpaRepository<OrderEntity, String>, Jpa
 
     @Query("SELECT SUM(o.totalPrice) FROM OrderEntity o WHERE o.orderStatus = :orderStatus")
     BigDecimal sumTotalPriceByOrderStatus(@Param("orderStatus") OrderStatus orderStatus);
+
+
+    @Query("SELECT SUM(x.totalPrice), Date(x.createdAt) FROM OrderEntity x " +
+            "WHERE x.orderStatus = :orderStatus GROUP BY Date(x.createdAt)")
+    List<Object[]> getTotalPriceByDate(@Param("orderStatus") OrderStatus orderStatus);
 
 //    OrderResponse findById(String orderId);
 }

@@ -3,10 +3,12 @@ package com.kit.maximus.freshskinweb.controller.admin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.CreateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.UpdateProductCategoryRequest;
+import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
+import com.kit.maximus.freshskinweb.service.order.OrderService;
 import com.kit.maximus.freshskinweb.service.product.ProductCategoryService;
 import com.kit.maximus.freshskinweb.service.product.ProductService;
 import lombok.AccessLevel;
@@ -31,7 +33,7 @@ public class ProductCategoryAdminController {
 
     ProductCategoryService productCategoryService;
 
-    ProductService productService;
+    OrderService orderService;
 
     @PostMapping(value = "create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseAPI<ProductCategoryResponse> createProductCategory(@RequestPart String request,
@@ -214,8 +216,9 @@ public class ProductCategoryAdminController {
     }
 
     @GetMapping("test")
-    public Map<String, Object> test() {
-        return productService.top10SellingProductsDashBoard();
+    public List<OrderResponse> test() {
+
+        return orderService.getRevenueByDate();
     }
 
 

@@ -1,5 +1,6 @@
 package com.kit.maximus.freshskinweb.service;
 
+import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.service.blog.BlogService;
@@ -34,6 +35,11 @@ public class DashboardService {
     @Async
     public CompletableFuture<String> getTotalRevenue() {
         return CompletableFuture.completedFuture(orderService.countRevenue());
+    }
+
+    @Async
+    public CompletableFuture<List<OrderResponse>> getRevenueByDate() {
+        return CompletableFuture.completedFuture(orderService.getRevenueByDate());
     }
 
     @Async
@@ -91,6 +97,8 @@ public class DashboardService {
     public CompletableFuture<List<Map<String, Object>>> getRatingStatsByDate() {
         return CompletableFuture.completedFuture(reviewService.getRatingStatsByDate());
     }
+
+
 
  
 

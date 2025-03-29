@@ -656,5 +656,25 @@ public class OrderService {
         return currencyFormat.format(totalRevenue.setScale(0, RoundingMode.HALF_UP).doubleValue());
     }
 
+    public List<OrderResponse> getRevenueByDate() {
+        List<Object[]> results = orderRepository.getTotalPriceByDate(OrderStatus.COMPLETED);
+        List<OrderResponse> responses = new ArrayList<>();
+
+        for (Object[] result : results) {
+            BigDecimal totalPriceDecimal = (BigDecimal) result[0];
+            Long totalPrice = totalPriceDecimal.longValue();
+            Date date = (Date) result[1];
+
+            OrderResponse response = OrderResponse.builder()
+                    .totalAmount(totalPrice)
+                    .orderDate(date)
+                    .build();
+
+            responses.add(response);
+        }
+
+        return responses;
+    }
+
 
 }
