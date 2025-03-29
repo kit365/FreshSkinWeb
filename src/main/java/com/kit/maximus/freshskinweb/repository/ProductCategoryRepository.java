@@ -65,4 +65,6 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
                ORDER BY order_date DESC, total_revenue DESC;
             """, nativeQuery = true)
     List<Object[]> findCategoriesRevenueGroupByDate();
+
+    List<ProductCategoryEntity> findAllByOrderByPosition();
 }

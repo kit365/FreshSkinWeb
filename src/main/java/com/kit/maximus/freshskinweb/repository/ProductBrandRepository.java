@@ -21,5 +21,6 @@ public interface ProductBrandRepository extends JpaRepository<ProductBrandEntity
 
     ProductBrandEntity findBySlug(String slug);
 
-    List<ProductBrandEntity> findTop10ByStatusAndDeleted(Status status, boolean b);
+
+    List<ProductBrandEntity> findTop10ByStatusAndDeletedOrderByPosition(Status status, boolean b);
 }

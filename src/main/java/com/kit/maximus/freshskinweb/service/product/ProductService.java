@@ -61,7 +61,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     SkinTypeRepository skinTypeRepository;
 
 
-
     Cloudinary cloudinary;
 
     ProductSearchRepository productSearchRepository;
@@ -727,7 +726,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     //## 7 sản phẩm có lượt mua cao nhất
     public List<ProductResponseDTO> findTop7FlashSale() {
-        List<Long> productIds = productRepository.findTop7ProductIdsByStatusAndDeleted(Status.ACTIVE, false, PageRequest.of(0, 7));
+     List<Long> productIds = productRepository.findTop7ProductIdsByStatusAndDeleted(Status.ACTIVE, false, PageRequest.of(0, 7, Sort.by(Sort.Direction.DESC, "position")));
         List<ProductResponseDTO> top7BestSellers = new ArrayList<>();
 
         if (!productIds.isEmpty()) {
@@ -769,7 +768,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     public List<ProductResponseDTO> getProductsFeature() {
 //        List<ProductEntity> productEntities = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status.ACTIVE, false, true);
 
-        List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status.ACTIVE, false, PageRequest.of(0, 3));
+List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status.ACTIVE, false, PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "position")));
 
         List<ProductResponseDTO> productResponseDTO = new ArrayList<>();
         list.forEach(productEntity -> {
@@ -1167,7 +1166,13 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         int p = (page > 0) ? page - 1 : 0;
 
         //Tìm kiếm danh sách sản phẩm
-        CompletableFuture<List<ProductResponseDTO>> productsFuture = CompletableFuture.supplyAsync(() -> productSearchRepository.searchByTitle(keyword, p, size));
+//        CompletableFuture<List<ProductResponseDTO>> productsFuture = CompletableFuture.supplyAsync(() -> productSearchRepository.searchByTitle(keyword, p, size));
+        CompletableFuture<List<ProductResponseDTO>> productsFuture = CompletableFuture.supplyAsync(() ->
+                productSearchRepository.searchByTitle(keyword, p, size)
+                        .stream()
+                        .sorted(Comparator.comparingInt(ProductResponseDTO::getPosition).reversed())
+                        .collect(Collectors.toList())
+        );
 
         //Tìm kiếm tổng số sản phẩm
         CompletableFuture<Integer> totalItemsFuture = CompletableFuture.supplyAsync(() -> productSearchRepository.searchByTitle(keyword, 0, 50).size());
@@ -1639,7 +1644,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     //top sản phẩm bán chạy
 
     public List<ProductResponseDTO> top10SellingProducts() {
-        PageRequest pageRequest = PageRequest.of(0, 10);
+    PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "position"));
         List<Long> result = productRepository.findTop10SellingProducts(pageRequest);
         List<ProductResponseDTO> responseDTOS = new ArrayList<>();
         result.forEach(productId -> {
@@ -1653,40 +1658,40 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return responseDTOS;
     }
 
-  public Map<String, Object> top10SellingProductsDashBoard() {
-    Pageable pageRequest = PageRequest.of(0, 10);
-    List<Object[]> result = productRepository.findTop10SellingProductsDashBoard(pageRequest);
+    public Map<String, Object> top10SellingProductsDashBoard() {
+        Pageable pageRequest = PageRequest.of(0, 10);
+        List<Object[]> result = productRepository.findTop10SellingProductsDashBoard(pageRequest);
 
-    // Sắp xếp theo soldQuantity giảm dần
-    result.sort((a, b) -> Long.compare((Long) b[2], (Long) a[2]));
+        // Sắp xếp theo soldQuantity giảm dần
+        result.sort((a, b) -> Long.compare((Long) b[2], (Long) a[2]));
 
-    List<Map<String, Object>> data = new ArrayList<>();
+        List<Map<String, Object>> data = new ArrayList<>();
 
-    for (Object[] row : result) {
-        Long productId = (Long) row[0];
-        List<ProductVariantEntity> variants = productVariantRepository.findAllByProduct_Id(productId);
+        for (Object[] row : result) {
+            Long productId = (Long) row[0];
+            List<ProductVariantEntity> variants = productVariantRepository.findAllByProduct_Id(productId);
 
-        Map<String, Object> productData = new HashMap<>();
-        productData.put("id", productId);
-        productData.put("title", (String) row[1]);
-        productData.put("soldQuantity", (Long) row[2]);
+            Map<String, Object> productData = new HashMap<>();
+            productData.put("id", productId);
+            productData.put("title", (String) row[1]);
+            productData.put("soldQuantity", (Long) row[2]);
 
-        List<Map<String, Object>> variantData = new ArrayList<>();
-        for (ProductVariantEntity variant : variants) {
-            variantData.add(Map.of(
-                "id", variant.getId(),
-                "volume", variant.getVolume(),
-                "unit", variant.getUnit(),
-                "price", variant.getPrice()
-            ));
+            List<Map<String, Object>> variantData = new ArrayList<>();
+            for (ProductVariantEntity variant : variants) {
+                variantData.add(Map.of(
+                        "id", variant.getId(),
+                        "volume", variant.getVolume(),
+                        "unit", variant.getUnit(),
+                        "price", variant.getPrice()
+                ));
+            }
+            productData.put("variants", variantData);
+
+            data.add(productData);
         }
-        productData.put("variants", variantData);
 
-        data.add(productData);
+        return Map.of("data", data);
     }
-
-    return Map.of("data", data);
-}
 
 //    //dashboard
 //    //5 danh mục có nhiều sản phẩm nhất

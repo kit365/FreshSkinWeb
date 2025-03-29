@@ -322,7 +322,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     @Cacheable(value = "allCategory")
     @Transactional(readOnly = true)
     public List<ProductCategoryResponse> showALL() {
-        List<ProductCategoryEntity> list = productCategoryRepository.findAll();
+        List<ProductCategoryEntity> list = productCategoryRepository.findAllByOrderByPosition();
         List<ProductCategoryResponse> result = new ArrayList<>();
         list.forEach(productCategoryEntity -> {
             ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
@@ -581,6 +581,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         Specification<ProductCategoryEntity> specification = findCategoryByTitle(titles)
                 .and(filterByStatus(Status.ACTIVE))
                 .and(isNotDeleted());
+
 
         List<ProductCategoryEntity> categories = productCategoryRepository.findAll(specification);
 

@@ -103,7 +103,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
     @Transactional(readOnly = true)
     @Cacheable(value = "top10ProductBrands")
     public List<ProductBrandResponse> getTop10() {
-        List<ProductBrandResponse> list =  productBrandMapper.toProductBrandsResponseDTO(productBrandRepository.findTop10ByStatusAndDeleted(Status.ACTIVE,false));
+        List<ProductBrandResponse> list =  productBrandMapper.toProductBrandsResponseDTO(productBrandRepository.findTop10ByStatusAndDeletedOrderByPosition(Status.ACTIVE,false));
 
         list.forEach(productBrandResponse -> {
             productBrandResponse.setStatus(null);
