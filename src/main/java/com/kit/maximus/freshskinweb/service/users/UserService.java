@@ -587,6 +587,7 @@ public class UserService {
             );
         }
 
+
         Page<UserEntity> userEntityPage = userRepository.findAll(spec, pageable);
 
         if (userEntityPage.isEmpty()) {
