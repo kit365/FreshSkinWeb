@@ -37,7 +37,7 @@ public class UserResponseDTO implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String lastName;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    List<OrderEntity> orders;
+    List<OrderResponse> orders;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String email;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
