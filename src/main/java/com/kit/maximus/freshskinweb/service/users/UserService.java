@@ -6,6 +6,7 @@ import com.kit.maximus.freshskinweb.dto.request.order.OrderRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserPasswordRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
+import com.kit.maximus.freshskinweb.dto.response.RoleResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.entity.RoleEntity;
@@ -33,10 +34,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -50,6 +48,7 @@ import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -182,8 +181,9 @@ public class UserService {
 
     public Map<String, Object> getAllUser(int page, int size, String sortKey, String sortDirection, String status, String type, String keyword) {
         // Tạo Pageable với sắp xếp mặc định theo updatedAt
+        int p = (page > 0) ? page - 1 : 0;
         Pageable pageable = PageRequest.of(
-                page,
+                p,
                 size,
                 Sort.by(Sort.Direction.fromString(sortDirection.toLowerCase()), sortKey)
         );
@@ -599,7 +599,33 @@ public class UserService {
             return emptyResponse;
         }
 
-        Page<UserResponseDTO> userDTOPage = userEntityPage.map(userMapper::toUserResponseDTO);
+        List<UserResponseDTO> userDtoList = userEntityPage.getContent().stream()
+                .map(user -> {
+                    UserResponseDTO dto = new UserResponseDTO();
+                    dto.setUserID(user.getUserID());
+                    dto.setUsername(user.getUsername());
+                    dto.setEmail(user.getEmail());
+                    dto.setFirstName(user.getFirstName());
+                    dto.setLastName(user.getLastName());
+                    dto.setStatus(user.getStatus().toString());
+                    dto.setTypeUser(user.getTypeUser().toString());
+                    dto.setAvatar(user.getAvatar());
+                    dto.setDeleted(user.isDeleted());
+                    dto.setCreatedAt(user.getCreatedAt());
+                    dto.setUpdatedAt(user.getUpdatedAt());
+                    dto.setToken(user.getToken());
+                    if (user.getRole() != null) {
+                        RoleResponseDTO roleDto = new RoleResponseDTO();
+                        roleDto.setRoleId(user.getRole().getRoleId());
+                        roleDto.setTitle(user.getRole().getTitle());
+                        roleDto.setPermission(user.getRole().getPermission());
+                        dto.setRole(roleDto);
+                    }
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        Page<UserResponseDTO> userDTOPage = new PageImpl<>(userDtoList, pageable, userEntityPage.getTotalElements());
 
         Map<String, Object> response = new HashMap<>();
         response.put("accounts", userDTOPage.getContent());

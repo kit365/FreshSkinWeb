@@ -25,6 +25,7 @@ import java.util.UUID;
 @Table(name = "User")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@With
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "reviews", "orders"})
 public class UserEntity extends AbstractEntity implements UserDetails {
     @Id
