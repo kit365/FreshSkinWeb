@@ -109,6 +109,7 @@ public enum ErrorCode {
     //SKIN TYPE
     SKIN_TYPE_NOT_FOUND(404, "Không tìm thấy loại da"),
     INVALID_SKIN_TYPE(404, "Loại da không hợp lệ"),
+    SEND_EMAIL_SKIN_TYPE_ERROR(404, "Lỗi gửi email kết quả phân tích da"),
 
     //SKIN TEST
     SKIN_TEST_NOT_FOUND(404, "Không tìm thấy bài đánh giá loại da nào"),

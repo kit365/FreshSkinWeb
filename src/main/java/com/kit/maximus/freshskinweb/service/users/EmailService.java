@@ -27,6 +27,7 @@ import org.thymeleaf.context.Context;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -124,6 +125,35 @@ public class EmailService {
 
         } catch (Exception e) {
             throw new AppException(ErrorCode.EMAIL_NOT_FOUND);
+        }
+    }
+
+    @Async
+    public void sendSkinTypeResult(String to, String userName, String skinTypeName,
+                                   String skinTypeDescription, List<String> recommendations) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(to);
+            helper.setSubject("Kết quả phân tích loại da - Fresh Skin Web");
+
+            Context context = new Context();
+            context.setVariable("userName", userName);
+            context.setVariable("skinTypeName", skinTypeName);
+            context.setVariable("skinTypeDescription", skinTypeDescription);
+            context.setVariable("recommendations", recommendations);
+
+            String htmlContent = templateEngine.process("skin-type-result", context);
+            helper.setText(htmlContent, true);
+
+            // Add logo
+            ClassPathResource imageResource = new ClassPathResource("static/images/logo.png");
+            helper.addInline("logo", imageResource);
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.SEND_EMAIL_SKIN_TYPE_ERROR);
         }
     }
 }

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Kết quả phân tích loại da</title>
+  <style>
+    :root {
+      --primary-color: #4CAF50;
+      --primary-light: #81C784;
+      --primary-dark: #388E3C;
+      --accent-color: #E8F5E9;
+      --text-color: #2c3e50;
+      --text-light: #546e7a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--text-color);
+      background-color: #f8f9fa;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: 40px auto;
+      padding: 40px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 35px;
+      padding: 20px;
+      background: linear-gradient(to right, var(--accent-color), #ffffff);
+      border-radius: 12px;
+    }
+
+    .header img {
+      width: 180px;
+      height: auto;
+      margin-bottom: 25px;
+      transition: transform 0.3s ease;
+    }
+
+    .header img:hover {
+      transform: scale(1.05);
+    }
+
+    .header h2 {
+      color: var(--primary-dark);
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .content {
+      padding: 25px;
+    }
+
+    .content > p {
+      color: var(--text-color);
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+
+    .skin-type-box {
+      background: linear-gradient(145deg, #fff, var(--accent-color));
+      border-radius: 12px;
+      padding: 30px;
+      margin: 25px 0;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      border: 2px solid var(--primary-color);
+    }
+
+    .skin-type-name {
+      font-size: 24px;
+      color: var(--primary-dark);
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .skin-type-description {
+      font-size: 16px;
+      color: var(--text-color);
+      margin-bottom: 20px;
+      text-align: left;
+      line-height: 1.8;
+    }
+
+    .recommendations {
+      background: var(--accent-color);
+      padding: 25px;
+      border-radius: 12px;
+      margin-top: 30px;
+      border: 1px solid var(--primary-light);
+    }
+
+    .recommendations h3 {
+      color: var(--primary-dark);
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
+    .recommendations ul {
+      list-style-type: none;
+      padding-left: 0;
+      margin-bottom: 25px;
+    }
+
+    .recommendations li {
+      margin-bottom: 12px;
+      padding-left: 25px;
+      position: relative;
+      color: var(--text-color);
+    }
+
+    .recommendations li:before {
+      content: "•";
+      color: var(--primary-color);
+      font-weight: bold;
+      position: absolute;
+      left: 8px;
+    }
+
+    .view-more-container {
+      text-align: center;
+      margin-top: 25px;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .view-more-link {
+      display: inline-block;
+      padding: 12px 28px;
+      background: var(--primary-color);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      font-size: 16px;
+    }
+
+    .view-more-link:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+    }
+
+    .footer {
+      margin-top: 35px;
+      padding-top: 25px;
+      border-top: 2px solid var(--accent-color);
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-light);
+    }
+
+    .brand-name {
+      color: var(--primary-dark);
+      font-weight: 700;
+      font-size: 16px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        margin: 20px;
+        padding: 25px;
+      }
+
+      .header img {
+        width: 140px;
+      }
+
+      .header h2 {
+        font-size: 24px;
+      }
+
+      .view-more-link {
+        padding: 10px 20px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <img th:src="@{cid:logo}" alt="Logo">
+    <h2>Kết Quả Phân Tích Loại Da</h2>
+  </div>
+
+  <div class="content">
+    <p>Xin chào <span th:text="${userName}">người dùng</span>,</p>
+    <p>Dựa trên bài kiểm tra da của bạn, chúng tôi đã phân tích và xác định được loại da của bạn như sau:</p>
+
+    <div class="skin-type-box">
+      <div class="skin-type-name" th:text="${skinTypeName}">Loại da</div>
+      <div class="skin-type-description" th:text="${skinTypeDescription}">Mô tả loại da</div>
+    </div>
+
+    <div class="recommendations">
+      <h3>Khuyến nghị chăm sóc da:</h3>
+      <ul th:each="recommendation : ${recommendations}">
+        <li th:text="${recommendation}"></li>
+      </ul>
+      <div class="view-more-container">
+        <a href="https://project-swp391-n9j6.onrender.com" class="view-more-link">
+          Xem chi tiết lộ trình chăm sóc da của bạn →
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Trân trọng,</p>
+    <p class="brand-name">Fresh Skin Web</p>
+  </div>
+</div>
+</body>
+</html>
