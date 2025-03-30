@@ -483,7 +483,6 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
             blogCategoryEntity.getBlog().forEach(blogEntity -> {
                 BlogResponse blogResponse = new BlogResponse();
                 blogResponse.setId(blogEntity.getId());
-                blogResponse.setAuthor(blogEntity.getAuthor());
                 blogResponse.setThumbnail(blogEntity.getThumbnail());
                 blogResponse.setTitle(blogEntity.getTitle());
                 blogResponse.setSlug(blogEntity.getSlug());
@@ -499,8 +498,6 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
 
         return blogCategoryResponses;
     }
-
-
 
 
     public boolean indexBlogCategory() {

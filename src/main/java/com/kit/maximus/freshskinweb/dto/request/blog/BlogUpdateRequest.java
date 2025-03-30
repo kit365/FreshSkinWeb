@@ -22,12 +22,11 @@ public class BlogUpdateRequest implements Serializable {
     String title;
     String content;
     Long user;
-    //    List<MultipartFile> thumbnail;
-    Integer position;
+    List<MultipartFile> newImg;
+    List<String> thumbnail;
+//    Integer position;
     boolean featured;
-    String status;
-    boolean deleted;
-    String author;
-//    BlogCategoryResponse blogCategory;
+//    String status;
+    //    BlogCategoryResponse blogCategory;
     Long categoryID;
 }

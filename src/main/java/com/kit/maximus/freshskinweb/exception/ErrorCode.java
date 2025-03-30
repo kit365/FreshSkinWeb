@@ -14,6 +14,7 @@ public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized Exception"),
     STATUS_INVALID(400, "Trạng thái chỉ được là 'ACTIVE' hoặc 'INACTIVE"),
     SKINTYPE_INVALID(400, "SkinType Invalid"),
+    IMAGE_UPLOAD_FAILED(400,"Lỗi upload hình"),
 
     //User
     USER_NOT_FOUND(404, "Không tìm thấy tên người dùng"),

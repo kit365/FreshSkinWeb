@@ -51,7 +51,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     BlogSearchRepository blogSearchRepository;
     UserRepository userRepository;
 
-    @CacheEvict(value = {"totalBlogs", "blogCategoryHome","blogListAdmin"}, allEntries = true)
+    @CacheEvict(value = {"totalBlogs", "blogCategoryHome", "blogListAdmin"}, allEntries = true)
     @Override
     public boolean add(BlogCreationRequest request) {
         BlogEntity blogEntity = blogMapper.toBlogEntity(request);
@@ -92,6 +92,8 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         blogEntity.setSlug(getSlug(request.getTitle()));
 
         BlogResponse blogResponse = blogMapper.toBlogResponse(blogRepository.save(blogEntity));
+        UserEntity user = blogEntity.getUser();
+        blogResponse.setAuthor(mapAuthor(user));
         blogSearchRepository.indexBlog(blogResponse);
         return true;
     }
@@ -99,7 +101,6 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     public List<BlogResponse> getAll() {
         return blogMapper.toBlogsResponseDTO(blogRepository.findAll());
     }
-
 
     @CacheEvict(value = {"totalBlogs", "blogCategoryHome", "blogListAdmin"}, allEntries = true)
     @Override
@@ -127,36 +128,70 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
             blogEntity.setSlug(getSlug(request.getTitle()));
         }
 
-//        if (request.getThumbnail() != null && !request.getThumbnail().isEmpty()) {
-//            int count = 0;
-//            List<String> images = new ArrayList<>();
-//            for (String file : blogCategoryEntity.getImage()) {
-//                try {
-//                    deleteImageFromCloudinary(file);
-//                } catch (IOException e) {
-//                    log.error(e.getMessage());
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//
-//            for (MultipartFile file : request.getThumbnail()) {
-//                String slug = getSlug(request.getTitle());
-//
-//                if (!StringUtils.hasLength(slug)) {
-//                    slug = getSlug(request.getTitle());
-//                }
-//                try {
-//                    String url = uploadImageFromFile(file, slug, count++);
-//                } catch (IOException e) {
-//                    log.error(e.getMessage());
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//            blogCategoryEntity.setImage(images);
-//        }
+
+        if ((request.getNewImg() != null && !request.getNewImg().isEmpty()) ||
+                (request.getThumbnail() != null && !request.getThumbnail().isEmpty())) {
+
+            // Lấy danh sách ảnh cũ từ blogEntity
+            List<String> oldImages = blogEntity.getThumbnail() != null ?
+                    new ArrayList<>(blogEntity.getThumbnail()) : new ArrayList<>();
+
+            // Danh sách ảnh mới từ FE
+            List<String> newThumbnails = request.getThumbnail() != null ?
+                    request.getThumbnail() : new ArrayList<>();
+
+            // Xóa ảnh không còn trong danh sách mới
+            for (String oldUrl : oldImages) {
+                if (!newThumbnails.contains(oldUrl)) {
+                    try {
+                        deleteImageFromCloudinary(oldUrl); // Xóa khỏi Cloudinary
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                    }
+                }
+            }
+
+            // Danh sách mới giữ lại các ảnh chưa bị xóa
+            List<String> updatedThumbnails = new ArrayList<>(newThumbnails);
+
+            // Thêm ảnh mới nếu có
+            if (request.getNewImg() != null && !request.getNewImg().isEmpty()) {
+                int count = 0;
+                for (MultipartFile file : request.getNewImg()) {
+                    if (file != null && !file.isEmpty()) {
+                        try {
+                            String url = uploadImageFromFile(file, getSlug(request.getTitle()), count++);
+                            updatedThumbnails.add(url);
+                        } catch (IOException e) {
+                            log.error("Failed to upload image: {}", e.getMessage());
+                            throw new AppException(ErrorCode.IMAGE_UPLOAD_FAILED);
+                        }
+                    }
+                }
+            }
+
+            // Cập nhật lại danh sách ảnh trong blogEntity
+            blogEntity.setThumbnail(updatedThumbnails);
+
+        } else {
+            // Nếu FE không gửi gì => Xóa hết ảnh
+            if (blogEntity.getThumbnail() != null && !blogEntity.getThumbnail().isEmpty()) {
+                for (String oldUrl : blogEntity.getThumbnail()) {
+                    try {
+                        deleteImageFromCloudinary(oldUrl); // Xóa toàn bộ hình ảnh
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                    }
+                }
+            }
+            blogEntity.setThumbnail(null); // Xóa danh sách ảnh trong DB
+        }
+
 
         blogMapper.updateBlogEntity(blogEntity, request);
         BlogResponse blogResponse = blogMapper.toBlogResponse(blogRepository.save(blogEntity));
+        blogResponse.setAuthor(mapAuthor(blogEntity.getUser()));
+        blogSearchRepository.update(blogResponse);
 
         //Chỉ trả về 2 fields là ID và Title của thằng con, không trả hết
         BlogCategoryResponse blogCategoryResponse = new BlogCategoryResponse();
@@ -166,14 +201,8 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
             blogResponse.setBlogCategory(blogCategoryResponse);
         }
 
-        //Chỉ trả về 2 fields là ID và First và Last Name của thằng con, không trả hết
-        UserResponseDTO userResponseDTO = new UserResponseDTO();
-        if (blogEntity.getUser() != null) {
-            userResponseDTO.setUserID(blogEntity.getUser().getUserID());
-            userResponseDTO.setFirstName(blogEntity.getUser().getFirstName());
-            userResponseDTO.setLastName(blogEntity.getUser().getLastName());
-//            blogResponse.setUser(userResponseDTO);
-        }
+
+
         return blogResponse;
     }
 
@@ -184,7 +213,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
     //Cập nhật trạng thái, xóa mềm, khôi phục cho All ID được chọn
     //Dùng khi user tích vào nhiều ô phẩn tử, sau đó chọn thao tác, ẩn, xóa mềm, khôi phục
-    @CacheEvict(value = {"totalBlogs", "blogCategoryHome","blogListAdmin"}, allEntries = true)
+    @CacheEvict(value = {"totalBlogs", "blogCategoryHome", "blogListAdmin"}, allEntries = true)
     @Override
     public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
@@ -192,33 +221,68 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
 
         //CẬP NHẬT TRẠNG THÁI BLOG
         if (statusEnum == Status.INACTIVE || statusEnum == Status.ACTIVE) {
-            blogEntities.forEach(blogEntity -> blogEntity.setStatus(statusEnum));
+            blogEntities.forEach(blogEntity -> {
+                blogEntity.setStatus(statusEnum);
+                blogSearchRepository.update(blogEntity.getId(), status);
+            });
             blogRepository.saveAll(blogEntities);
             return "Cập nhật trạng thái thành công";
 
             //CẬP NHẬT XÓA MỀM BLOG
         } else if (statusEnum == Status.SOFT_DELETED) {
-            blogEntities.forEach(blogEntity -> blogEntity.setDeleted(true));
+            blogEntities.forEach(blogEntity -> {
+                blogEntity.setDeleted(true);
+                blogSearchRepository.update(blogEntity.getId(), true);
+            });
 
             //CẬP NHẬT KHÔI PHỤC BLOG
             blogRepository.saveAll(blogEntities);
             return "Xóa mềm thành công";
         } else if (statusEnum == Status.RESTORED) {
-            blogEntities.forEach(blogEntity -> blogEntity.setDeleted(false));
-
+            blogEntities.forEach(blogEntity -> {
+                blogEntity.setDeleted(false);
+                blogSearchRepository.update(blogEntity.getId(), false);
+            });
             blogRepository.saveAll(blogEntities);
             return "Phục hồi thành công";
         }
-        return "Cập nhật hất bại";
+        return "Cập nhật Thất bại";
     }
 
+    public String update(long id, String status, Integer position, String statusEdit) {
+        BlogEntity blogEntity = blogRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.BLOG_NOT_FOUND));
+
+        System.out.println("status: " + status + ", position: " + position + ", statusEdit: " + statusEdit);
+
+        if ("editStatus".equalsIgnoreCase(statusEdit)) {
+            if (status != null) { // Kiểm tra nếu status không bị null
+                Status statusEnum = getStatus(status);
+                blogEntity.setStatus(statusEnum);
+                blogRepository.save(blogEntity);
+                blogSearchRepository.update(id, status);
+                return "Cập nhật trạng thái thành công";
+            }
+            return "Trạng thái không được để trống!";
+        } else if ("editPosition".equalsIgnoreCase(statusEdit)) {
+            if (position != 0) { // Kiểm tra null trước khi gán
+                blogEntity.setPosition(position);
+                blogRepository.save(blogEntity);
+                blogSearchRepository.update(id, position);
+                return "Cập nhật vị trí thành công";
+            }
+            return "Vị trí không được để trống!";
+        }
+
+        return "Cập nhật thất bại";
+    }
 
     //XÓA CỨNG 1 BLOG
-    @CacheEvict(value = {"totalBlogs", "blogCategoryHome","blogListAdmin"}, allEntries = true)
+    @CacheEvict(value = {"totalBlogs", "blogCategoryHome", "blogListAdmin"}, allEntries = true)
     @Override
     public boolean delete(Long id) {
         BlogEntity blogEntity = getBlogEntityById(id);
-        blogSearchRepository.deleteBlogs(id);
+
         if (blogEntity == null) {
             throw new AppException(ErrorCode.BLOG_NOT_FOUND);
         }
@@ -234,11 +298,12 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         }
         log.info("Delete: {}", id);
         blogRepository.delete(blogEntity);
+        blogSearchRepository.deleteBlogs(id);
         return true;
     }
 
     //XÓA CỨNG NHIỀU BLOG
-    @CacheEvict(value = {"totalBlogs", "blogCategoryHome","blogListAdmin"}, allEntries = true)
+    @CacheEvict(value = {"totalBlogs", "blogCategoryHome", "blogListAdmin"}, allEntries = true)
     @Override
     public boolean delete(List<Long> longs) {
         List<BlogEntity> blogEntities = blogRepository.findAllById(longs);
@@ -261,7 +326,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     }
 
     //XÓA MỀM 1 BLOG
-    @CacheEvict(value = {"totalBlogs", "blogCategoryHome","blogListAdmin"}, allEntries = true)
+    @CacheEvict(value = {"totalBlogs", "blogCategoryHome", "blogListAdmin"}, allEntries = true)
     @Override
     public boolean deleteTemporarily(Long id) {
         BlogEntity blogEntity = getBlogEntityById(id);
@@ -271,12 +336,13 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         log.info("Delete temporarily : {}", id);
         blogEntity.setDeleted(true);
         blogRepository.save(blogEntity);
+        blogSearchRepository.update(id, true);
         return true;
     }
 
 
     @Override
-    @CacheEvict(value = {"totalBlogs", "blogCategoryHome","blogListAdmin"}, allEntries = true)
+    @CacheEvict(value = {"totalBlogs", "blogCategoryHome", "blogListAdmin"}, allEntries = true)
     public boolean restore(Long id) {
         BlogEntity blogEntity = getBlogEntityById(id);
         if (blogEntity == null) {
@@ -285,6 +351,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         log.info("Delete temporarily : {}", id);
         blogEntity.setDeleted(false);
         blogRepository.save(blogEntity);
+        blogSearchRepository.update(id, false);
         return true;
     }
 
@@ -481,8 +548,13 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         // Nếu BlogEntity và UserEntity không null, thiết lập tác giả cho BlogResponse
         if (blogEntity != null) {
             if (blogEntity.getUser() != null) {
-                blogResponse.setAuthor(blogEntity.getUser().getUsername());
+                String firstName = blogEntity.getUser().getFirstName() != null ? blogEntity.getUser().getFirstName() : "";
+                String lastName = blogEntity.getUser().getLastName() != null ? blogEntity.getUser().getLastName() : "";
+                blogResponse.setAuthor((firstName + " " + lastName).trim());
+            } else {
+                blogResponse.setAuthor("Unknown");
             }
+
 
             // Thiết lập ngày tạo và ngày cập nhật
 //            if (blogEntity.getCreatedAt() != null) {
@@ -519,11 +591,11 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         // Lấy danh sách blog từ OpenSearch hoặc cơ sở dữ liệu
         List<BlogResponse> blogResponsesPage = getBlogsByCategorySlug(slug, "ACTIVE", false, p, size);
 
-        BlogCategoryResponse cateogry = blogResponsesPage.getFirst().getBlogCategory();
+        BlogCategoryResponse category = blogResponsesPage.getFirst().getBlogCategory();
         BlogCategoryResponse blogCategoryResponse = new BlogCategoryResponse();
-        blogCategoryResponse.setSlug(cateogry.getSlug());
-        blogCategoryResponse.setId(cateogry.getId());
-        blogCategoryResponse.setTitle(cateogry.getTitle());
+        blogCategoryResponse.setSlug(category.getSlug());
+        blogCategoryResponse.setId(category.getId());
+        blogCategoryResponse.setTitle(category.getTitle());
 
 
         blogResponsesPage.forEach(blogResponse -> {
@@ -554,6 +626,15 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         return map;
     }
 
+    private String mapAuthor(UserEntity user) {
+        if (user == null) {
+            return "Unknown";
+        }
+        String firstName = Optional.ofNullable(user.getFirstName()).orElse("");
+        String lastName = Optional.ofNullable(user.getLastName()).orElse("");
+        return String.join(" ", firstName, lastName).trim();
+    }
+
 
     public boolean indexBlogs() {
         // Lấy tất cả các BlogEntity từ cơ sở dữ liệu
@@ -569,18 +650,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
                     BlogResponse blogResponse = responseDTOS.get(i);
 
                     // Thiết lập tác giả
-                    UserEntity user = blogEntity.getUser();
-                    if (user != null) {
-                        blogResponse.setAuthor(user.getUsername());
-                    }
-
-                    // Thiết lập ngày tạo và ngày cập nhật (nếu có)
-//                    if (blogEntity.getCreatedAt() != null) {
-//                        blogResponse.setCreatedAt(blogEntity.getCreatedAt());
-//                    }
-//                    if (blogEntity.getUpdatedAt() != null) {
-//                        blogResponse.setUpdatedAt(blogEntity.getUpdatedAt());
-//                    }
+                    blogResponse.setAuthor(mapAuthor(blogEntity.getUser()));
                 });
 
         // Index tất cả blog responses vào Elasticsearch hoặc hệ thống tìm kiếm của bạn

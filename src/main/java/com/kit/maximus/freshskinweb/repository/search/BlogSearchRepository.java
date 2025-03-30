@@ -1,6 +1,5 @@
 package com.kit.maximus.freshskinweb.repository.search;
 
-import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import lombok.AccessLevel;
@@ -43,26 +42,6 @@ public class BlogSearchRepository {
         }
     }
 
-    public BlogResponse getBlogstById(Long id) {
-        try {
-            GetRequest getRequest = new GetRequest.Builder()
-                    .index("blogs")
-                    .id(String.valueOf(id))
-                    .build();
-
-            GetResponse<BlogResponse> getResponse = openSearchClient.get(getRequest, BlogResponse.class);
-
-            if (getResponse.found()) {
-                return getResponse.source();
-            } else {
-                return null;
-            }
-        } catch (IOException e) {
-            log.error("Error while fetching blog by ID", e);
-            return null;
-        }
-    }
-
 
     public boolean deleteBlogs(Long id) {
         try {
@@ -89,43 +68,6 @@ public class BlogSearchRepository {
         }
     }
 
-
-
-
-    public List<BlogResponse> searchByTitle(String title, int size) {
-        try {
-
-            MatchQuery matchQuery = new MatchQuery.Builder()
-                    .field("title") // Chỉ định trường "title"
-                    .query(FieldValue.of(title))
-                    .fuzziness("auto")
-                    .operator(Operator.And) // Cấu hình để tất cả các từ đều phải xuất hiện
-                    .build();
-
-            // Xây dựng truy vấn với MatchQuery
-            Query searchQuery = new Query.Builder()
-                    .match(matchQuery)
-                    .build();
-
-            SearchRequest searchRequest = new SearchRequest.Builder()
-                    .index("blogs") // Chỉ định index
-                    .query(searchQuery) // Thêm truy vấn vào request
-                    .size(size) // Số lượng kết quả trả về
-                    .build();
-
-            // Gửi yêu cầu tìm kiếm
-            SearchResponse<BlogResponse> response = openSearchClient.search(searchRequest, BlogResponse.class);
-
-
-            return response.hits().hits().stream()
-                    .map(Hit::source)
-                    .collect(Collectors.toList());
-
-        } catch (IOException e) {
-            log.error("Lỗi khi tìm kiếm sản phẩm trên OpenSearch", e);
-            return Collections.emptyList();
-        }
-    }
 
     public BlogResponse searchBySlug(String slug) {
         try {
@@ -161,87 +103,6 @@ public class BlogSearchRepository {
         }
     }
 
-    public List<BlogResponse> getBlogsByCategoryId(long categoryId, String status, boolean deleted) {
-        try {
-            // Xây dựng query
-            Query query = new Query.Builder()
-                    .bool(b -> b
-                            .must(m -> m.term(t -> t
-                                    .field("blogCategory.id") // Kiểm tra xem có cần .keyword không
-                                    .value(FieldValue.of(categoryId)) // Nếu là số, không cần chuyển String
-                            ))
-                            .filter(f -> f.term(t -> t
-                                    .field("status.keyword")
-                                    .value(FieldValue.of(status))
-                            ))
-                            .filter(f -> f.term(t -> t
-                                    .field("deleted")
-                                    .value(FieldValue.of(deleted))
-                            ))
-                    )
-                    .build();
-
-            // Tạo request
-            SearchRequest searchRequest = new SearchRequest.Builder()
-                    .index("blogs") // Tên index trong Elasticsearch
-                    .query(query)
-                    .size(300) // Số lượng kết quả tối đa
-                    .build();
-
-            // Gửi request đến OpenSearch
-            SearchResponse<BlogResponse> response = openSearchClient.search(searchRequest, BlogResponse.class);
-
-            // Trả về danh sách BlogResponse
-            return response.hits().hits().stream()
-                    .map(Hit::source)
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            log.error("Error while fetching blogs by categoryId", e);
-            return Collections.emptyList();
-        }
-    }
-
-    public List<BlogResponse> getBlogsByCategoryId(long categoryId, String status, boolean deleted, int page, int size) {
-        try {
-            // Xây dựng query
-            Query query = new Query.Builder()
-                    .bool(b -> b
-                            .must(m -> m.term(t -> t
-                                    .field("blogCategory.id") // Kiểm tra xem có cần .keyword không
-                                    .value(FieldValue.of(categoryId)) // Nếu là số, không cần chuyển String
-                            ))
-                            .filter(f -> f.term(t -> t
-                                    .field("status.keyword")
-                                    .value(FieldValue.of(status))
-                            ))
-                            .filter(f -> f.term(t -> t
-                                    .field("deleted")
-                                    .value(FieldValue.of(deleted))
-                            ))
-                    )
-                    .build();
-
-
-            // Tạo request
-            SearchRequest searchRequest = new SearchRequest.Builder()
-                    .index("blogs") // Tên index trong Elasticsearch
-                    .query(query)
-                    .from(page * size)
-                    .size(size) // Số lượng kết quả tối đa
-                    .build();
-
-            // Gửi request đến OpenSearch
-            SearchResponse<BlogResponse> response = openSearchClient.search(searchRequest, BlogResponse.class);
-
-            // Trả về danh sách BlogResponse
-            return response.hits().hits().stream()
-                    .map(Hit::source)
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            log.error("Error while fetching blogs by categoryId", e);
-            return Collections.emptyList();
-        }
-    }
 
     public List<BlogResponse> getBlogsByCategorySlug(String categorySlug, String status, boolean deleted, int page, int size) {
         try {
@@ -324,89 +185,124 @@ public class BlogSearchRepository {
         }
     }
 
-
-    public List<BlogResponse> getBlogsByCategoryIds(List<Long> categoryIds, String status, boolean deleted) {
+    public void update(Long id, boolean deleted) {
         try {
-            Query query = new Query.Builder()
-                    .bool(b -> b
-                            .must(m -> m
-                                    .terms(t -> t
-                                            .field("blogCategory.id")
-                                            .terms(v -> v.value(categoryIds.stream()
-                                                    .map(FieldValue::of)
-                                                    .collect(Collectors.toList())))
-                                    )
-                            )
-                            .filter(f -> f
-                                    .term(t -> t.field("status.keyword").value(FieldValue.of(status)))
-                            )
-                            .filter(f -> f
-                                    .term(t -> t.field("deleted").value(FieldValue.of(deleted)))
-                            )
-                    )
-                    .build();
+            if (id == null) {
+                log.error("Invalid input: blogsID is null/empty");
+                return;
+            }
 
-            SearchRequest searchRequest = new SearchRequest.Builder()
-                    .index("blogs")
-                    .query(query)
-                    .size(100) // Số lượng blog tối đa trả về
-                    .build();
+            log.debug("Updating blogs with ID: {}, deleted: {}", id, deleted);
 
-            SearchResponse<BlogResponse> response = openSearchClient.search(searchRequest, BlogResponse.class);
+            // Chỉ cập nhật field deleted
+            BlogResponse updateFields = new BlogResponse();
+            updateFields.setDeleted(deleted);
 
-            return response.hits().hits().stream()
-                    .map(Hit::source) // Lấy danh sách blog
-                    .collect(Collectors.toList());
+            UpdateRequest<BlogResponse, BlogResponse> updateRequest =
+                    new UpdateRequest.Builder<BlogResponse, BlogResponse>()
+                            .index("blogs")
+                            .id(String.valueOf(id))
+                            .doc(updateFields)
+                            .retryOnConflict(3)
+                            .build();
+
+            // Thực hiện update
+            openSearchClient.update(updateRequest, BlogResponse.class);
+
         } catch (IOException e) {
-            log.error("Error while fetching blogs by category IDs", e);
-            return Collections.emptyList();
+            log.error("Error while updating blogs: {}", e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Unexpected error while updating blogs: {}", e.getMessage(), e);
         }
     }
 
-
-
-
-
-
-
-
-
-    public List<BlogResponse> getBlogsByCategoryIDs(List<Long> cateIDs, String status, boolean deleted, int page, int size) {
+    public void update(Long id, String status) {
         try {
-            Query query = new Query.Builder()
-                    .bool(b -> b
-                            .must(m -> m
-                                    .terms(t -> t
-                                            .field("blogCategory.id")
-                                            .terms(v -> v.value(cateIDs.stream()
-                                                    .map(FieldValue::of)
-                                                    .collect(Collectors.toList()))))
-                            )
-                            .filter(f -> f.term(t -> t.field("status.keyword").value(FieldValue.of(status))))
-                            .filter(f -> f.term(t -> t.field("deleted").value(FieldValue.of(deleted))))
-                    )
-                    .build();
+            if (id == null) {
+                log.error("Invalid input: blogsID is null/empty");
+                return;
+            }
 
-            SearchRequest searchRequest = new SearchRequest.Builder()
-                    .index("blogs")
-                    .query(query)
-                    .from(page * size) // Phân trang: vị trí bắt đầu
-                    .size(size) // Số lượng blog trên mỗi trang
-                    .build();
+            log.debug("Updating blogs with ID: {}, deleted: {}", id, status);
 
-            SearchResponse<BlogResponse> response = openSearchClient.search(searchRequest, BlogResponse.class);
+            // Chỉ cập nhật field deleted
+            BlogResponse updateFields = new BlogResponse();
+            updateFields.setStatus(status);
 
-            return response.hits().hits().stream()
-                    .map(Hit::source)
-                    .collect(Collectors.toList());
+            UpdateRequest<BlogResponse, BlogResponse> updateRequest =
+                    new UpdateRequest.Builder<BlogResponse, BlogResponse>()
+                            .index("blogs")
+                            .id(String.valueOf(id))
+                            .doc(updateFields)
+                            .retryOnConflict(3)
+                            .build();
+
+            // Thực hiện update
+            openSearchClient.update(updateRequest, BlogResponse.class);
+
         } catch (IOException e) {
-            log.error("Error while fetching paginated blogs by category IDs", e);
-            return Collections.emptyList();
+            log.error("Error while updating blogs: {}", e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Unexpected error while updating blogs: {}", e.getMessage(), e);
         }
     }
 
+    public void update(Long id, int position) {
+        try {
+            if (id == null) {
+                log.error("Invalid input: blogsID is null/empty");
+                return;
+            }
 
+            log.debug("Updating blogs with ID: {}, deleted: {}", id, position);
 
+            // Chỉ cập nhật field deleted
+            BlogResponse updateFields = new BlogResponse();
+            updateFields.setPosition(position);
+
+            UpdateRequest<BlogResponse, BlogResponse> updateRequest =
+                    new UpdateRequest.Builder<BlogResponse, BlogResponse>()
+                            .index("blogs")
+                            .id(String.valueOf(id))
+                            .doc(updateFields)
+                            .retryOnConflict(3)
+                            .build();
+
+            // Thực hiện update
+            openSearchClient.update(updateRequest, BlogResponse.class);
+
+        } catch (IOException e) {
+            log.error("Error while updating blogs: {}", e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Unexpected error while updating blogs: {}", e.getMessage(), e);
+        }
+    }
+
+    public boolean update(BlogResponse blogResponse) {
+        try {
+            // Tạo UpdateRequest để cập nhật sản phẩm với kiểu dữ liệu rõ ràng
+            log.debug("Updating product with data: {}", blogResponse);
+            UpdateRequest<BlogResponse, BlogResponse> updateRequest = new UpdateRequest.Builder<BlogResponse, BlogResponse>()
+                    .index("blogs")
+                    .id(String.valueOf(blogResponse.getId()))
+                    .doc(blogResponse)
+                    .retryOnConflict(3)
+                    .build();
+
+            // Thực hiện yêu cầu cập nhật
+            UpdateResponse<BlogResponse> updateResponse = openSearchClient.update(updateRequest, BlogResponse.class);
+
+            InlineGet<BlogResponse> get = updateResponse.get();
+            if (get != null && get.source() != null) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (IOException e) {
+            log.error("Error while updating product", e);
+            return false;
+        }
+    }
 
 
     public List<BlogResponse> showAll() {
@@ -468,9 +364,6 @@ public class BlogSearchRepository {
             return Collections.emptyList();
         }
     }
-
-
-
 
 
 }
