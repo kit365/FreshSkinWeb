@@ -25,7 +25,7 @@ public class VoucherEntity {
     @Column(name = "VoucherId")
     String voucherId;
 
-    @Column(name = "Name",nullable = false, unique = true)
+    @Column(name = "Name",nullable = false)
     String name; // Mã voucher
 
     @Enumerated(EnumType.STRING)

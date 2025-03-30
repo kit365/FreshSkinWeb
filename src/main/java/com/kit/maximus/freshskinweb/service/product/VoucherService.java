@@ -45,14 +45,14 @@ public class VoucherService {
 
         return true;
     }
-    public VoucherResponse getVoucher(String name) {
-        System.out.println("Name: " + name);
-        VoucherEntity voucher = voucherRepository.findByName(name).orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
+    public VoucherResponse getVoucher(String id) {
+        System.out.println("Name: " + id);
+        VoucherEntity voucher = voucherRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
         return voucherMapper.toVoucherResponse(voucher);
     }
 
-    public void updateVoucher(String name, VoucherRequest voucherRequest) {
-        VoucherEntity voucher = voucherRepository.findByName(name).orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
+    public void updateVoucher(String id, VoucherRequest voucherRequest) {
+        VoucherEntity voucher = voucherRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
         voucherMapper.updateVoucher(voucher, voucherRequest);
         voucherRepository.save(voucher);
     }
@@ -61,8 +61,8 @@ public class VoucherService {
         return voucherRepository.findAll();
     }
 
-    public boolean deleteVoucher(String name) {
-        VoucherEntity voucher = voucherRepository.findByName(name).orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
+    public boolean deleteVoucher(String id) {
+        VoucherEntity voucher = voucherRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
         voucherRepository.delete(voucher);
         return true;
     }

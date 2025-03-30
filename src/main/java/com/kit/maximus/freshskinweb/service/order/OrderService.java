@@ -94,32 +94,13 @@ public class OrderService {
             OrderItemEntity orderItem = new OrderItemEntity();
             orderItem.setProductVariant(variant);
             orderItem.setQuantity(itemRequest.getQuantity());
-
-//            if(variant.getProduct().getDiscountPercent() != null && variant.getProduct().getDiscountPercent() > 0) {
-//                BigDecimal percent = variant.getPrice()
-//                        .multiply(BigDecimal.valueOf(variant.getProduct().getDiscountPercent()))
-//                        .divide(BigDecimal.valueOf(100));
-//                BigDecimal discount = variant.getPrice().subtract(percent);
-//                BigDecimal subtotal = discount.multiply(BigDecimal.valueOf(orderItem.getQuantity()));
-//                orderItem.setSubtotal(subtotal);
-//            } else {
-//                orderItem.setSubtotal(variant.getPrice().multiply(BigDecimal.valueOf(itemRequest.getQuantity())));
-//            }
-
             BigDecimal discountAmount = BigDecimal.ZERO;
 
             if (variant.getProduct().getDiscountPercent() != null) {
                 discountAmount = variant.getPrice()
                         .multiply(BigDecimal.valueOf(variant.getProduct().getDiscountPercent())
                         .divide(BigDecimal.valueOf(100)));
-//                if (discount.getDiscountPercentage() != null) {
-//
-//
-//                    // Áp dụng giới hạn giảm giá tối đa (nếu có)
-//                    if (discount.getMaxDiscount() != null && discountAmount.compareTo(BigDecimal.valueOf(discount.getMaxDiscount())) > 0) {
-//                        discountAmount = BigDecimal.valueOf(discount.getMaxDiscount());
-//                    }
-//                }
+
             }
 
 // Tính giá sau giảm

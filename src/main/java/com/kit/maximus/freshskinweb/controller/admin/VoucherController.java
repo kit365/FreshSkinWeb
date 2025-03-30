@@ -30,31 +30,31 @@ public class VoucherController {
         return ResponseAPI.<VoucherResponse>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
-    @GetMapping("/search/{name}")
-    public ResponseAPI<VoucherResponse> getVoucher(@PathVariable String name) {
+    @GetMapping("/{id}")
+    public ResponseAPI<VoucherResponse> getVoucher(@PathVariable String id) {
         String message = "Lấy voucher thành công";
-        VoucherResponse voucherResponse = voucherService.getVoucher(name);
+        VoucherResponse voucherResponse = voucherService.getVoucher(id);
         return ResponseAPI.<VoucherResponse>builder().code(HttpStatus.OK.value()).message(message).data(voucherResponse).build();
     }
 
-    @PatchMapping("/update/{name}")
-    public ResponseAPI<VoucherResponse> updateVoucher(@PathVariable String name, @RequestBody VoucherRequest voucherRequest) {
+    @PatchMapping("/update/{id}")
+    public ResponseAPI<VoucherResponse> updateVoucher(@PathVariable String id, @RequestBody VoucherRequest voucherRequest) {
         String message = "Cập nhật voucher thành công";
-        voucherService.updateVoucher(name, voucherRequest);
+        voucherService.updateVoucher(id, voucherRequest);
         return ResponseAPI.<VoucherResponse>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
-    @GetMapping("/show")
+    @GetMapping()
     public ResponseAPI<List<VoucherEntity>> getAllVouchers() {
         String message = "Lấy danh sách voucher thành công";
         return ResponseAPI.<List<VoucherEntity>>builder().code(HttpStatus.OK.value()).message(message).data(voucherService.getAllVouchers()).build();
     }
 
-    @DeleteMapping("/delete/{name}")
-    public ResponseAPI<VoucherResponse> deleteVoucher(@PathVariable String name) {
+    @DeleteMapping("/delete/{id}")
+    public ResponseAPI<VoucherResponse> deleteVoucher(@PathVariable String id) {
         String message = "Xóa voucher thành công";
-        VoucherResponse voucherResponse = voucherService.getVoucher(name);
-        voucherService.deleteVoucher(name);
+        VoucherResponse voucherResponse = voucherService.getVoucher(id);
+        voucherService.deleteVoucher(id);
         return ResponseAPI.<VoucherResponse>builder().code(HttpStatus.OK.value()).message(message).data(voucherResponse).build();
     }
 }
