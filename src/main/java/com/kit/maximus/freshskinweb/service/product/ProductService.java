@@ -768,7 +768,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     public List<ProductResponseDTO> getProductsFeature() {
 //        List<ProductEntity> productEntities = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status.ACTIVE, false, true);
 
-List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status.ACTIVE, false, PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "position")));
+List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status.ACTIVE, false, PageRequest.of(0, 9, Sort.by(Sort.Direction.DESC, "position")));
 
         List<ProductResponseDTO> productResponseDTO = new ArrayList<>();
         list.forEach(productEntity -> {

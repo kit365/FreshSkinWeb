@@ -60,7 +60,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         String token = authenticationService.generateToken(email);
 
         // Redirect FE với token
-        String redirectUrl = "https://project-swp391-n9j6.onrender.com?token=" + token;
+        String redirectUrl = "http://localhost:3000?token=" + token;
         response.sendRedirect(redirectUrl);
     }
 }

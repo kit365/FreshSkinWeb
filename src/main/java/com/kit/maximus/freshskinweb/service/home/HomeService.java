@@ -56,7 +56,7 @@ public class HomeService {
 
     @Async()
     public CompletableFuture<List<ProductCategoryResponse>> getBeautyTrendsList() {
-        List<ProductCategoryResponse> categoryResponses = productCategoryService.getFilteredCategories(beautyTrendsList, 5);
+        List<ProductCategoryResponse> categoryResponses = productCategoryService.getFilteredCategories(beautyTrendsList, 7);
         return CompletableFuture.completedFuture(categoryResponses);
     }
 

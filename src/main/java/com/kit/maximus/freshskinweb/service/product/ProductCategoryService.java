@@ -583,7 +583,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                 .and(isNotDeleted());
 
 
-        List<ProductCategoryEntity> categories = productCategoryRepository.findAll(specification);
+      List<ProductCategoryEntity> categories = productCategoryRepository.findAll(specification, Sort.by(Sort.Direction.DESC, "position"));
 
         result = mapToCategoryResponse(categories);
 
@@ -652,6 +652,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
             productCategoryEntity.getProducts().forEach(productEntity -> {
                 ProductResponseDTO productResponseDTO = new ProductResponseDTO();
                 productResponseDTO.setId(productEntity.getId());
+                productResponseDTO.setPosition(productEntity.getPosition());
                 productResponseDTO.setTitle(productEntity.getTitle());
                 productResponseDTO.setSlug(productEntity.getSlug());
                 productResponseDTO.setDescription(productEntity.getDescription());
