@@ -74,8 +74,12 @@ public class SkinCareRountineService {
 
     public SkinCareRountineResponse get(Long id) {
         SkinCareRoutineEntity skinCareRoutineEntity = skinCareRountineRepository.findById(id).orElse(null);
-        if(skinCareRoutineEntity != null) {
-            return skinCareRoutineMapper.toResponse(skinCareRoutineEntity);
+        if (skinCareRoutineEntity != null) {
+            SkinCareRountineResponse response = skinCareRoutineMapper.toResponse(skinCareRoutineEntity);
+            if (skinCareRoutineEntity.getSkinType() != null) {
+                response.setSkinTypeEntity(skinTypeMapper.toSkinTypeResponse(skinCareRoutineEntity.getSkinType()));
+            }
+            return response;
         }
         return null;
     }
