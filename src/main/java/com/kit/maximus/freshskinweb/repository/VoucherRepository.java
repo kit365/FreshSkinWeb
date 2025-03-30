@@ -12,4 +12,6 @@ public interface VoucherRepository extends JpaRepository<VoucherEntity, String> 
     Optional<VoucherEntity> findByName(String name);
 
     boolean existsByName(String name);
+
+    boolean existsByNameAndVoucherIdNot(String name, String voucherId);
 }

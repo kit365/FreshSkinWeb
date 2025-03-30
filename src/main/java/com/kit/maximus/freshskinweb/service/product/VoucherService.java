@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -52,9 +53,21 @@ public class VoucherService {
     }
 
     public void updateVoucher(String id, VoucherRequest voucherRequest) {
-        VoucherEntity voucher = voucherRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
+        VoucherEntity voucher = voucherRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
+
+        boolean nameExists = voucherRepository.existsByNameAndVoucherIdNot(voucherRequest.getName(), id);
+        if (nameExists) {
+            throw new AppException(ErrorCode.VOUCHER_IS_EXISTED);
+        }
+
         voucherMapper.updateVoucher(voucher, voucherRequest);
-        voucherRepository.save(voucher);
+
+        try {
+            voucherRepository.save(voucher);
+        } catch (DataIntegrityViolationException e) {
+            throw new AppException(ErrorCode.VOUCHER_IS_EXISTED);
+        }
     }
 
     public List<VoucherEntity> getAllVouchers() {
