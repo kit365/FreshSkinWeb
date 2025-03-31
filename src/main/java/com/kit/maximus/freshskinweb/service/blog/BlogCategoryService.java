@@ -13,6 +13,7 @@ import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.BlogCategoryMapper;
 import com.kit.maximus.freshskinweb.repository.BlogCategoryRepository;
 import com.kit.maximus.freshskinweb.repository.search.BlogCategorySearchRepository;
+import com.kit.maximus.freshskinweb.repository.search.BlogSearchRepository;
 import com.kit.maximus.freshskinweb.service.BaseService;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
@@ -50,7 +51,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
 
     BlogCategoryMapper blogCategoryMapper;
 
-    BlogService blogService;
+   BlogSearchRepository blogSearchRepository;
 
     Cloudinary cloudinary;
 
@@ -93,6 +94,34 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         return blogCategoryMapper.toBlogCateroiesResponseDTO(blogCategoryRepository.findAll());
     }
 
+    public String update(long id, String status, Integer position, String statusEdit) {
+        BlogCategoryEntity blogCategoryEntity = blogCategoryRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.BLOG_NOT_FOUND));
+
+        System.out.println("status: " + status + ", position: " + position + ", statusEdit: " + statusEdit);
+
+        if ("editStatus".equalsIgnoreCase(statusEdit)) {
+            if (status != null) { // Kiểm tra nếu status không bị null
+                Status statusEnum = getStatus(status);
+                blogCategoryEntity.setStatus(statusEnum);
+                blogCategoryRepository.save(blogCategoryEntity);
+                blogCategorySearchRepository.update(id, status);
+                return "Cập nhật trạng thái thành công";
+            }
+            return "Trạng thái không được để trống!";
+        } else if ("editPosition".equalsIgnoreCase(statusEdit)) {
+            if (position != 0) { // Kiểm tra null trước khi gán
+                blogCategoryEntity.setPosition(position);
+                blogCategoryRepository.save(blogCategoryEntity);
+                blogCategorySearchRepository.update(id, position);
+                return "Cập nhật vị trí thành công";
+            }
+            return "Vị trí không được để trống!";
+        }
+
+        return "Cập nhật thất bại";
+    }
+
     @CacheEvict(value = {"featuredBlogCategories"}, allEntries = true)
     @Override
     public BlogCategoryResponse update(Long id, UpdateBlogCategoryRequest request) {
@@ -101,44 +130,74 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
             throw new AppException(ErrorCode.BLOG_CATEGORY_NOT_FOUND);
         }
 
-        if (StringUtils.hasLength(request.getStatus())) {
-            blogCategoryEntity.setStatus(getStatus(request.getStatus()));
-        }
-
         if (StringUtils.hasLength(request.getTitle())) {
             blogCategoryEntity.setSlug(getSlug(request.getTitle()));
         }
 
-        if (request.getImage() != null && !request.getImage().isEmpty()) {
-            for (String requests : blogCategoryEntity.getImage()) {
-                try {
-                    deleteImageFromCloudinary(requests);
-                } catch (IOException e) {
-                    log.error(e.getMessage());
-                    throw new RuntimeException(e);
+
+        if ((request.getNewImg() != null && !request.getNewImg().isEmpty()) ||
+                (request.getThumbnail() != null && !request.getThumbnail().isEmpty())) {
+
+            // Lấy danh sách ảnh cũ từ blogEntity
+            List<String> oldImages = blogCategoryEntity.getImage() != null ?
+                    new ArrayList<>(blogCategoryEntity.getImage()) : new ArrayList<>();
+
+            // Danh sách ảnh mới từ FE
+            List<String> newThumbnails = request.getThumbnail() != null ?
+                    request.getThumbnail() : new ArrayList<>();
+
+            // Xóa ảnh không còn trong danh sách mới
+            for (String oldUrl : oldImages) {
+                if (!newThumbnails.contains(oldUrl)) {
+                    try {
+                        deleteImageFromCloudinary(oldUrl); // Xóa khỏi Cloudinary
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                    }
                 }
             }
 
-            int count = 0;
-            List<String> images = new ArrayList<>();
-            for (MultipartFile requests : request.getImage()) {
-                String slug = getSlug(blogCategoryEntity.getTitle());
+            // Danh sách mới giữ lại các ảnh chưa bị xóa
+            List<String> updatedThumbnails = new ArrayList<>(newThumbnails);
 
-                if (StringUtils.hasLength(request.getTitle())) {
-                    slug = getSlug(request.getTitle());
-                }
-
-                try {
-                    String url = uploadImageFromFile(requests, slug, count++);
-                    images.add(url);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+            // Thêm ảnh mới nếu có
+            if (request.getNewImg() != null && !request.getNewImg().isEmpty()) {
+                int count = 0;
+                for (MultipartFile file : request.getNewImg()) {
+                    if (file != null && !file.isEmpty()) {
+                        try {
+                            String url = uploadImageFromFile(file, getSlug(request.getTitle()), count++);
+                            updatedThumbnails.add(url);
+                        } catch (IOException e) {
+                            log.error("Failed to upload image: {}", e.getMessage());
+                            throw new AppException(ErrorCode.IMAGE_UPLOAD_FAILED);
+                        }
+                    }
                 }
             }
-            blogCategoryEntity.setImage(images);
+
+            // Cập nhật lại danh sách ảnh trong blogEntity
+            blogCategoryEntity.setImage(updatedThumbnails);
+
+        } else {
+            // Nếu FE không gửi gì => Xóa hết ảnh
+            if (blogCategoryEntity.getImage() != null && !blogCategoryEntity.getImage().isEmpty()) {
+                for (String oldUrl : blogCategoryEntity.getImage()) {
+                    try {
+                        deleteImageFromCloudinary(oldUrl); // Xóa toàn bộ hình ảnh
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                    }
+                }
+            }
+            blogCategoryEntity.setImage(null); // Xóa danh sách ảnh trong DB
         }
+
         blogCategoryMapper.updateBlogCategory(blogCategoryEntity, request);
-        return blogCategoryMapper.toBlogCategoryResponse(blogCategoryRepository.save(blogCategoryEntity));
+        BlogCategoryResponse blogCategoryResponse= blogCategoryMapper.toBlogCategoryResponse(blogCategoryRepository.save(blogCategoryEntity));
+        blogCategorySearchRepository.update(blogCategoryResponse);
+        return blogCategoryResponse;
+
     }
 
     @CacheEvict(value = {"featuredBlogCategories"}, allEntries = true)
@@ -149,14 +208,17 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
             blogCategoryEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
             blogCategoryRepository.saveAll(blogCategoryEntities);
+           id.forEach(idN -> blogCategorySearchRepository.update(idN, status));
             return "Cặp nhật trạng thái thành công";
         } else if (statusEnum == Status.SOFT_DELETED) {
             blogCategoryEntities.forEach(productEntity -> productEntity.setDeleted(true));
             blogCategoryRepository.saveAll(blogCategoryEntities);
+            id.forEach(idN -> blogCategorySearchRepository.update(idN, true));
             return "Xóa mềm danh mục blog thành công";
         } else if (statusEnum == Status.RESTORED) {
             blogCategoryEntities.forEach(productEntity -> productEntity.setDeleted(false));
             blogCategoryRepository.saveAll(blogCategoryEntities);
+            id.forEach(idN -> blogCategorySearchRepository.update(idN, false));
             return "Phục hồi danh mục blog thành công";
         }
 
@@ -230,6 +292,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
             blogEntity.setStatus(Status.INACTIVE);
         }
         blogCategoryRepository.save(blogCategoryEntity);
+        blogCategorySearchRepository.update(id, true);
         return true;
     }
 
@@ -250,6 +313,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
         }
 
         blogCategoryRepository.save(blogCategoryEntity);
+        blogCategorySearchRepository.update(aLong, false);
         return true;
     }
 

@@ -18,9 +18,7 @@ import java.util.List;
 public class UpdateBlogCategoryRequest implements Serializable {
     String title;
     String description;
-    Integer position;
+    List<MultipartFile> newImg;
+    List<String> thumbnail;
     boolean featured;
-    List<MultipartFile> image;
-    String status;
-    boolean deleted;
 }

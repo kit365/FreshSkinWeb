@@ -249,6 +249,8 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         return "Cập nhật Thất bại";
     }
 
+
+    @CacheEvict(value = {"totalBlogs", "blogCategoryHome", "blogListAdmin"}, allEntries = true)
     public String update(long id, String status, Integer position, String statusEdit) {
         BlogEntity blogEntity = blogRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.BLOG_NOT_FOUND));
