@@ -7,6 +7,7 @@ import com.kit.maximus.freshskinweb.service.blog.BlogService;
 import com.kit.maximus.freshskinweb.service.order.OrderService;
 import com.kit.maximus.freshskinweb.service.product.ProductCategoryService;
 import com.kit.maximus.freshskinweb.service.product.ProductService;
+import com.kit.maximus.freshskinweb.service.skintest.SkinTestService;
 import com.kit.maximus.freshskinweb.service.users.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class DashboardService {
     UserService userService;
     ProductService productService;
     ProductCategoryService productCategoryService;
+    SkinTestService skinTestService;
 
     @Async
     public CompletableFuture<String> getTotalRevenue() {
@@ -101,6 +103,11 @@ public class DashboardService {
     @Async
     public CompletableFuture<Map<String, Object>> getRevenueByCategories() {
         return CompletableFuture.completedFuture(productCategoryService.getRevenueByCategories());
+    }
+
+    @Async
+    public CompletableFuture<Map<String, Object>> getStatisticSkinTest() {
+        return CompletableFuture.completedFuture(skinTestService.getSkinTypeStatistics());
     }
 
 

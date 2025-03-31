@@ -3,8 +3,10 @@ package com.kit.maximus.freshskinweb.controller.admin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
+import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
 import com.kit.maximus.freshskinweb.dto.request.product_brand.CreateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.request.product_brand.UpdateProductBrandRequest;
+import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -83,6 +85,17 @@ public class ProductBrandController {
         return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
+    @PatchMapping("update/{id}")
+    public ResponseAPI<String> updateProductBrand(@PathVariable("id") int id,
+                                          @RequestBody Map<String, Object> request) {
+
+        String statusEdit = (String) request.get("statusEdit");
+        String status = (String) request.get("status");
+        int position = request.containsKey("position") ? (int) request.get("position") : 0;
+
+        String result = productBrandService.update(id, status, position, statusEdit);
+        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
+    }
 
     @GetMapping("show")
     public ResponseAPI<List<ProductBrandResponse>> getListProductBrand() {
@@ -113,22 +126,59 @@ public class ProductBrandController {
 //        }
 //    }
 
-    @PatchMapping(value = "edit/{id}")
-    public ResponseAPI<ProductBrandResponse> updateProduct(@PathVariable("id") Long id,
-                                                           @RequestBody UpdateProductBrandRequest updateProductBrandRequest) {
+//    @PatchMapping(value = "edit/{id}")
+//    public ResponseAPI<ProductBrandResponse> updateProduct(@PathVariable("id") Long id,
+//                                                           @RequestBody UpdateProductBrandRequest updateProductBrandRequest) {
+//
+//        String message_succed = "Cập nhật thương hiệu sản phẩm thành công";
+//        String message_failed = "Cập nhật thương hiệu sản phẩm thất bại";
+//        try {
+//            ProductBrandResponse result = productBrandService.update(id, updateProductBrandRequest);
+//            log.info("ProductBrand updated successfully");
+//            return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
+//        } catch (Exception e) {
+//            log.info("ProductBrand update failed");
+//            log.error(e.getMessage());
+//            return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+//        }
+//    }
 
-        String message_succed = "Cập nhật thương hiệu sản phẩm thành công";
-        String message_failed = "Cập nhật thương hiệu sản phẩm thất bại";
+    @PatchMapping(value = "/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseAPI<ProductBrandResponse> editBlog(
+            @PathVariable("id") Long id,
+            @RequestPart("request") String requestJson,
+            @RequestPart(value = "newImg", required = false) List<MultipartFile> newImg) {
+
+        log.info("requestJson:{}", requestJson);
+        log.info("images:{}", newImg);
+        String message_succed = "Cập nhập thương hiệu thành công";
+        String message_failed = "Cập nhập thương hiệu thất bại";
         try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            UpdateProductBrandRequest updateProductBrandRequest = objectMapper.readValue(requestJson, UpdateProductBrandRequest.class);
+            if (newImg != null) {
+                updateProductBrandRequest.setNewImg(newImg);
+            }
+
             ProductBrandResponse result = productBrandService.update(id, updateProductBrandRequest);
-            log.info("ProductBrand updated successfully");
-            return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
+
+            log.info("UPDATE BRAND REQUEST SUCCESS");
+            return ResponseAPI.<ProductBrandResponse>builder()
+                    .code(HttpStatus.OK.value())
+                    .data(result)
+                    .message(message_succed)
+                    .build();
+
         } catch (Exception e) {
-            log.info("ProductBrand update failed");
-            log.error(e.getMessage());
-            return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+            log.error(e.getMessage(), e);
+            log.error("UPDATE BRAND ERROR: " + e.getMessage());
+            return ResponseAPI.<ProductBrandResponse>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message(message_failed)
+                    .build();
         }
     }
+
 
 
 

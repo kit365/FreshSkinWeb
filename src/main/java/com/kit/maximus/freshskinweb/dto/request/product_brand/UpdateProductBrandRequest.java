@@ -18,13 +18,11 @@ public class UpdateProductBrandRequest implements Serializable {
 
     String title;
 
-    List<MultipartFile> image;
+    List<MultipartFile> newImg;
+
+    List<String> image;
 
     String description;
-
-    Integer position;
-
-    String status;
 
     boolean featured;
 }

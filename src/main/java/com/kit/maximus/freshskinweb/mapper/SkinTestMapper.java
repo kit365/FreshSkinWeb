@@ -5,6 +5,7 @@ import com.kit.maximus.freshskinweb.dto.request.skin_test.SkinTestRequest;
 import com.kit.maximus.freshskinweb.dto.response.SkinTestResponse;
 import com.kit.maximus.freshskinweb.entity.SkinTestEntity;
 import org.mapstruct.*;
+import org.springframework.data.jpa.repository.Query;
 
 @Mapper(componentModel = "spring")
 public interface SkinTestMapper  {

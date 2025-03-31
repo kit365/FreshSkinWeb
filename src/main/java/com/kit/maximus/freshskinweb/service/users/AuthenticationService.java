@@ -4,10 +4,7 @@ package com.kit.maximus.freshskinweb.service.users;
 import com.kit.maximus.freshskinweb.dto.request.authentication.AuthenticationRequest;
 import com.kit.maximus.freshskinweb.dto.request.authentication.IntrospectRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcomparison.ProductComparisonDTO;
-import com.kit.maximus.freshskinweb.dto.response.AuthenticationResponseDTO;
-import com.kit.maximus.freshskinweb.dto.response.IntrospectResponse;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
-import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
+import com.kit.maximus.freshskinweb.dto.response.*;
 import com.kit.maximus.freshskinweb.dto.response.productcomparison.ProductComparisonResponseDTO;
 import com.kit.maximus.freshskinweb.entity.ProductComparisonEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
@@ -99,6 +96,11 @@ public class AuthenticationService implements UserDetailsService {
                 productComparison.getProducts().forEach(product -> {
                     ProductResponseDTO productResponseDTO = new ProductResponseDTO();
                     productResponseDTO.setId(product.getId());
+                    productResponseDTO.setSlug(product.getSlug());
+                    productResponseDTO.setThumbnail(product.getThumbnail());
+                    ProductBrandResponse productBrandResponse = new ProductBrandResponse();
+                    productBrandResponse.setTitle(product.getBrand().getTitle());
+                    productResponseDTO.setBrand(productBrandResponse);
                     productResponseDTOS.add(productResponseDTO);
                 });
             }
