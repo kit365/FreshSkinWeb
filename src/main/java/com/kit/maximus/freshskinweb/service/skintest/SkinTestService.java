@@ -16,6 +16,11 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Service
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -132,5 +137,20 @@ public class SkinTestService {
 //        // Chuyển đổi kết quả sang DTO
 //        return skinTests.map(skinTestMapper::toSkinTestResponse);
 //    }
+
+    public Map<String, Object> getSkinTypeStatistics() {
+        List<Object[]> statistics = skinTestRepository.countBySkinTypes();
+
+        List<Map<String, Object>> data = new ArrayList<>();
+
+        for (Object[] row : statistics) {
+            data.add(Map.of(
+                    "skinType", (String) row[0],
+                    "count", ((Number) row[1]).longValue()
+            ));
+        }
+
+        return Map.of("data", data);
+    }
 
 }
