@@ -96,6 +96,7 @@ public class AuthenticationService implements UserDetailsService {
                 productComparison.getProducts().forEach(product -> {
                     ProductResponseDTO productResponseDTO = new ProductResponseDTO();
                     productResponseDTO.setId(product.getId());
+                    productResponseDTO.setTitle(product.getTitle());
                     productResponseDTO.setSlug(product.getSlug());
                     productResponseDTO.setThumbnail(product.getThumbnail());
                     ProductBrandResponse productBrandResponse = new ProductBrandResponse();

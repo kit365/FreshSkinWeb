@@ -24,21 +24,22 @@ public class SkinTestController {
     SkinTestService skinTestService;
 
     @PostMapping("/create")
-    public ResponseAPI<SkinTestResponse> create(@RequestBody SkinTestRequest request) {
+    public ResponseAPI<String> create(@RequestBody SkinTestRequest request) {
         String message = "Tạo bài test da thành công";
         var result = skinTestService.add(request);
-        if(!result){
+        if(result == null){
             message = "Tạo bài test da thất bại";
-            return ResponseAPI.<SkinTestResponse>builder()
+            return ResponseAPI.<String>builder()
                     .code(HttpStatus.BAD_REQUEST.value())
                     .message(message)
                     .build();
         }
         log.info("CREATE QUESTION REQUEST SUCCESS");
 
-        return ResponseAPI.<SkinTestResponse>builder()
+        return ResponseAPI.<String>builder()
                 .code(HttpStatus.OK.value())
                 .message(message)
+                .data(result)
                 .build();
     }
 
