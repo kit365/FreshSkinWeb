@@ -112,6 +112,27 @@ public class ProductSpecification {
         };
     }
 
+    public static Specification<ProductEntity> findTopSellingProducts() {
+        return (root, query, criteriaBuilder) -> {
+            // JOIN với ProductVariantEntity và OrderItemEntity
+            Join<ProductEntity, ProductVariantEntity> productVariantJoin = root.join("variants", JoinType.LEFT);
+            Join<ProductVariantEntity, OrderItemEntity> orderItemJoin = productVariantJoin.join("orderItems", JoinType.LEFT);
+
+            // Đếm số lượng đơn hàng chứa sản phẩm này
+            Expression<Long> orderCount = criteriaBuilder.count(orderItemJoin.get("id"));
+
+            // SELECT tất cả các cột của ProductEntity + COUNT(orderItem)
+            query.multiselect(root, orderCount);
+
+            // GROUP BY tất cả các cột của ProductEntity
+            query.groupBy(root);
+
+            // ORDER BY số lượng bán giảm dần
+            query.orderBy(criteriaBuilder.desc(orderCount));
+
+            return criteriaBuilder.conjunction();
+        };
+    }
 
     public static Specification<ProductEntity> findByBrandSlug(String slug) {
         if (slug.isBlank()) {

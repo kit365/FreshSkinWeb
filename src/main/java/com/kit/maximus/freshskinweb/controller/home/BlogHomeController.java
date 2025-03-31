@@ -21,8 +21,6 @@ import java.util.Map;
 @RequestMapping("/home/blogs")
 public class BlogHomeController {
 
-    BlogCategoryService blogCategoryService;
-
     BlogService blogService;
 
     @GetMapping("/category/{slug}")

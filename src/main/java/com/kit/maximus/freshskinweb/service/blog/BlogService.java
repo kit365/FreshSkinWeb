@@ -362,10 +362,11 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         BlogEntity blogEntity = getBlogEntityById(aLong);
         BlogResponse blogResponse = blogMapper.toBlogResponse(getBlogEntityById(aLong));
         if (blogEntity.getBlogCategory() != null) {
-            blogResponse.setTitle(blogEntity.getBlogCategory().getTitle());
-            blogResponse.setId(blogEntity.getBlogCategory().getId());
+            BlogCategoryResponse blogCategoryResponse = new BlogCategoryResponse();
+            blogCategoryResponse.setTitle(blogEntity.getBlogCategory().getTitle());
+            blogCategoryResponse.setId(blogEntity.getBlogCategory().getId());
+            blogResponse.setBlogCategory(blogCategoryResponse);
         }
-
 
         return blogResponse;
     }

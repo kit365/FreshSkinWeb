@@ -823,82 +823,6 @@ List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status
         return data;
     }
 
-//    //Tìm chi tiết Product bằng Slug
-//    public List<Map<String, Object>> getProductBySlug(String slug) {
-//
-//
-//        List<Map<String, Object>> data = new ArrayList<>();
-//        Map<String, Object> map = new HashMap<>();
-//
-//        // Lấy sản phẩm theo slug
-//        ProductEntity productEntity = productRepository.findBySlug(slug);
-//
-//        if (productEntity == null || productEntity.isDeleted() || productEntity.getStatus() != Status.ACTIVE) {
-//            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-//        }
-//
-//        List<ProductCategoryResponse> productCategoryResponses = new ArrayList<>();
-//
-//
-//        productEntity.getCategory().forEach(productCategoryEntity -> {
-//            ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
-//            productCategoryResponse.setId(productCategoryEntity.getId());
-//            productCategoryResponse.setTitle(productCategoryEntity.getTitle());
-//            productCategoryResponse.setSlug(productCategoryEntity.getSlug());
-//
-//            if (productCategoryEntity.getParent() != null) {
-//                ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
-//                parentCategoryResponse.setId(productCategoryEntity.getParent().getId());
-//                parentCategoryResponse.setTitle(productCategoryEntity.getParent().getTitle());
-//                parentCategoryResponse.setSlug(productCategoryEntity.getParent().getSlug());
-//                productCategoryResponse.setParent(parentCategoryResponse);
-//            }
-//
-//
-//            productCategoryResponses.add(productCategoryResponse);
-//
-//
-//        });
-//        ProductResponseDTO response = mapProductResponseDTO(productEntity);
-//        response.setCategory(productCategoryResponses);
-//        List<ProductVariantResponse> productVariantResponses = new ArrayList<>();
-//        productEntity.getVariants().forEach(variant -> {
-//            ProductVariantResponse variantResponse = new ProductVariantResponse();
-//            variantResponse.setId(variant.getId());
-//            variantResponse.setPrice(variant.getPrice());
-//            variantResponse.setVolume(variant.getVolume());
-//            variantResponse.setUnit(variant.getUnit());
-//            productVariantResponses.add(variantResponse);
-//        });
-//        response.setVariants(productVariantResponses);
-//        // Nhét sản phẩm chính vào map (bọc vào List)
-//        map.put("productDetail", response);
-//
-//        // Tìm id của các category
-//        List<Long> ids = new ArrayList<>();
-//
-//        productEntity.getCategory().forEach(productCategoryEntity -> ids.add(productCategoryEntity.getId()));
-//
-//
-//        List<ProductEntity> productEntities = productRepository.findTop10ByCategory_IdIn(ids);
-//
-//
-//        productEntities.removeIf(productEntity1 -> productEntity1.getId().equals(productEntity.getId()));
-//
-//
-//        List<ProductResponseDTO> productRelatedResponses = mapProductResponsesDTO(productEntities);
-//        productRelatedResponses.forEach(productRelatedResponse -> {
-//            productRelatedResponse.setCategory(null);
-//            productRelatedResponse.setSkinTypes(null);
-//            productRelatedResponse.setBrand(null);
-//            clearUnnecessaryFields(productRelatedResponse);
-//        });
-//        map.put("productsRelated", productRelatedResponses);
-//        data.add(map);
-//        return data;
-//    }
-
-    //hàm này là con của hàm getProductCategoryBySlug => có giới hạn sản phẩm được trả ra
 
     private Map<String, Object> getLimitProductByCategorySlug(int maxSize, int size, int page, String sortValue, String sortDirection, String slug, List<String> brand, List<String> category, List<String> skinTypes, double minPrice, double maxPrice) {
         Map<Long, ProductCategoryResponse> productCategoryResponseMap = new HashMap<>();
@@ -906,11 +830,21 @@ List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status
         Map<Long, SkinTypeResponse> skinTypeResponseMap = new HashMap<>();
 
         Pageable limitPageable = PageRequest.of(0, maxSize);
+        Specification<ProductEntity> filterValues;
+        List<ProductEntity> productValues = new ArrayList<>();
+        if(!slug.equals("top-ban-chay")) {
+            filterValues = findByParentCategorySlug(slug)
+                    .and(isNotDeleted())
+                    .and(filterByStatus(Status.ACTIVE));
+            productValues = productRepository.findAll(filterValues, limitPageable).getContent();
+        }
 
-        Specification<ProductEntity> filterValues = findByParentCategorySlug(slug)
-                .and(isNotDeleted())
-                .and(filterByStatus(Status.ACTIVE));
-        List<ProductEntity> productValues = productRepository.findAll(filterValues, limitPageable).getContent();
+        if(slug.equals("top-ban-chay")){
+            filterValues = findTopSellingProducts()
+                    .and(isNotDeleted())
+                    .and(filterByStatus(Status.ACTIVE));
+            productValues = productRepository.findAll(filterValues, limitPageable).getContent();
+        }
 
         productValues.forEach(productEntity -> {
             if (productEntity.getCategory() != null) {
@@ -938,9 +872,20 @@ List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status
         });
 
 
-        Specification<ProductEntity> specification = findByParentCategorySlug(slug)
-                .and(isNotDeleted())
-                .and(filterByStatus(Status.ACTIVE));
+
+
+        Specification<ProductEntity> specification = null;
+        if(!slug.equals("top-ban-chay")) {
+            specification = findByParentCategorySlug(slug)
+                    .and(isNotDeleted())
+                    .and(filterByStatus(Status.ACTIVE));
+        }
+
+        if(slug.equals("top-ban-chay")){
+            specification = findTopSellingProducts()
+                    .and(isNotDeleted())
+                    .and(filterByStatus(Status.ACTIVE));
+        }
 
         if (brand != null) {
             specification = specification.and(filterByBrand(brand));
@@ -1011,6 +956,8 @@ List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status
             map.put("title", "Sản Phẩm Mới");
         } else if (slug.equals("khuyen-mai-hot")) {
             map.put("title", "Khuyến Mãi Hot");
+        } else if(slug.equals("top-ban-chay")){
+            map.put("title", "Top Bán Chạy");
         }
 
         map.put("products", productResponseDTOs);
@@ -1034,8 +981,12 @@ List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status
             maxSize = 30;
         }
 
+        if(slug.equals("top-ban-chay")) {
+            maxSize = 12;
+        }
 
-        if (slug.equals("san-pham-moi") || slug.equals("khuyen-mai-hot")) {
+
+        if (slug.equals("san-pham-moi") || slug.equals("khuyen-mai-hot") || slug.equals("top-ban-chay")) {
             return getLimitProductByCategorySlug(maxSize, size, page, sortValue, sortDirection, slug, brand, category, skinTypes, minPrice, maxPrice);
         }
 
