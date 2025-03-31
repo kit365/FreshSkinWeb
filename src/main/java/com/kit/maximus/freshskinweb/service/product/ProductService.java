@@ -3,8 +3,10 @@ package com.kit.maximus.freshskinweb.service.product;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
+import com.kit.maximus.freshskinweb.dto.request.product_brand.UpdateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.response.*;
 import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -25,8 +27,13 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -130,81 +137,43 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return true;
     }
 
+    @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
+    public String update(long id, String status, Integer position, String statusEdit) {
+        ProductEntity productEntity = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        System.out.println("status: " + status + ", position: " + position + ", statusEdit: " + statusEdit);
+
+        if ("editStatus".equalsIgnoreCase(statusEdit)) {
+            if (status != null) { // Kiểm tra nếu status không bị null
+                Status statusEnum = getStatus(status);
+                productEntity.setStatus(statusEnum);
+                productRepository.save(productEntity);
+                productSearchRepository.update(id, status);
+                return "Cập nhật trạng thái thành công";
+            }
+            return "Trạng thái không được để trống!";
+        } else if ("editPosition".equalsIgnoreCase(statusEdit)) {
+            if (position != 0) { // Kiểm tra null trước khi gán
+                productEntity.setPosition(position);
+                productRepository.save(productEntity);
+                productSearchRepository.update(id, position);
+                return "Cập nhật vị trí thành công";
+            }
+            return "Vị trí không được để trống!";
+        }
+
+        return "Cập nhật thất bại";
+    }
+
+
 
     //noted: thêm set thumb vao entity sau khi update
     @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     @Override
     public ProductResponseDTO update(Long id, UpdateProductRequest request) {
-        if (StringUtils.hasLength(request.getStatus())) {
-            request.setStatus(request.getStatus().toUpperCase());
-            getStatus(request.getStatus());
-        }
-
         ProductEntity listProduct = getProductEntityById(id);
 
-        if (request.getThumbnail() != null) {
-            listProduct.getThumbnail().forEach(thumbnail -> {
-                try {
-                    deleteImageFromCloudinary(thumbnail);
-                } catch (IOException e) {
-                    log.error("Delete thumbnail error", e);
-                    throw new RuntimeException(e);
-                }
-            });
-            int count = 0;
-            List<String> newThumbnails = new ArrayList<>();
-            for (MultipartFile file : request.getThumbnail()) {
-                try {
-                    String url = uploadImageFromFile(file, getSlug(request.getTitle()), count++);
-                    newThumbnails.add(url);
-                } catch (IOException e) {
-                    log.error("Upload thumbnail error", e);
-                    throw new RuntimeException(e);
-                }
-            }
-            listProduct.setThumbnail(newThumbnails);
-        }
-//        //Upload hinh => Xoa hinh cu, add hinh moi
-//        if (request.getThumbnail() != null) {
-//
-//            List<String> oldThumbnails = listProduct.getThumbnail();
-//            List<MultipartFile> newThumbnails = request.getThumbnail();
-//            List<String> updatedThumbnails = new ArrayList<>();
-
-//           String thumbnailBytes =  IOUtils.readFileToString( request.getThumbnail());
-
-
-//            //Xóa hình khi không có trong request
-//            for (String oldThumbnail : oldThumbnails) {
-//                if (!newThumbnails.contains(oldThumbnail)) {
-//                    try {
-//                        long start = System.currentTimeMillis();
-//                        deleteImageFromCloudinary(oldThumbnail);
-//                        long end = System.currentTimeMillis();
-//                        log.info("Thời gian xóa ảnh {}: {}ms", oldThumbnail, (end - start));
-//                    } catch (IOException e) {
-//                        log.error("delete image error: {}", oldThumbnail);
-//                        throw new RuntimeException(e);
-//                    }
-//                } else {
-//                    updatedThumbnails.add(oldThumbnail);
-//                }
-//            }
-//
-//            //Cập nhập lại hình mới
-//            for (MultipartFile newThumbnail : newThumbnails) {
-//                if (!oldThumbnails.contains(newThumbnail)) {
-//                    try {
-//                        String img = uploadImage(newThumbnail);
-//                        updatedThumbnails.add(img);
-//                    } catch (IOException e) {
-//                        log.error("delete image error: {}", newThumbnail);
-//                        throw new RuntimeException(e);
-//                    }
-//                }
-//            }
-//            listProduct.setThumbnail(updatedThumbnails);
-//        }
 
         if (StringUtils.hasLength(request.getTitle())) {
             listProduct.setSlug(getSlug(request.getTitle()));
@@ -249,6 +218,70 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 }
             }
         }
+
+
+        if ((request.getImage() != null && !request.getImage().isEmpty()) ||
+                (request.getThumbnail() != null && !request.getThumbnail().isEmpty())) {
+
+            // Lấy danh sách ảnh cũ từ listProduct
+            List<String> oldImages = listProduct.getThumbnail() != null ?
+                    new ArrayList<>(listProduct.getThumbnail()) : new ArrayList<>();
+
+            // Lấy danh sách tên file mới từ request
+            List<String> newThumbnails = request.getThumbnail() != null ?
+                    request.getThumbnail().stream().map(MultipartFile::getOriginalFilename).toList() :
+                    new ArrayList<>();
+
+            // Xóa ảnh cũ không còn trong danh sách mới
+            for (String oldUrl : oldImages) {
+                if (!newThumbnails.contains(oldUrl)) {
+                    try {
+                        deleteImageFromCloudinary(oldUrl); // Xóa khỏi Cloudinary
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                    }
+                }
+            }
+
+            // Danh sách mới giữ lại các ảnh chưa bị xóa
+            List<String> updatedThumbnails = new ArrayList<>(newThumbnails);
+
+            // Thêm ảnh mới nếu có
+            if (request.getThumbnail() != null && !request.getThumbnail().isEmpty()) {
+                int count = 0;
+                for (MultipartFile file : request.getThumbnail()) {
+                    if (file != null && !file.isEmpty()) {
+                        try {
+                            String url = uploadImageFromFile(file, getSlug(request.getTitle()), count++);
+                            updatedThumbnails.add(url);
+                        } catch (IOException e) {
+                            log.error("Failed to upload image: {}", e.getMessage());
+                            throw new AppException(ErrorCode.IMAGE_UPLOAD_FAILED);
+                        }
+                    }
+                }
+            }
+
+            // Cập nhật lại danh sách ảnh trong listProduct
+            listProduct.setThumbnail(updatedThumbnails);
+
+        } else {
+            // Nếu không có ảnh mới từ FE => Xóa hết ảnh cũ
+            if (listProduct.getThumbnail() != null && !listProduct.getThumbnail().isEmpty()) {
+                for (String oldUrl : listProduct.getThumbnail()) {
+                    try {
+                        deleteImageFromCloudinary(oldUrl); // Xóa toàn bộ hình ảnh
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                    }
+                }
+            }
+            listProduct.setThumbnail(null); // Xóa danh sách ảnh trong DB
+        }
+
+
+
+
 
 
         productMapper.updateProduct(listProduct, request);

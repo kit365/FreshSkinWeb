@@ -361,10 +361,9 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
         if (productCategoryEntity.getParent() != null) {
             ProductCategoryEntity parent = productCategoryEntity.getParent();
-
             ProductCategoryResponse parentID = new ProductCategoryResponse();
             parentID.setTitle(parent.getTitle());
-
+            parentID.setId(parent.getId());
             productCategoryResponse.setParent(parentID);
 
         }

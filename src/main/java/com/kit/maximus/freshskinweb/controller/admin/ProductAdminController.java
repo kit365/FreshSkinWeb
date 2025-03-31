@@ -3,6 +3,7 @@ package com.kit.maximus.freshskinweb.controller.admin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
+import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ProductRoutineDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
@@ -77,28 +78,17 @@ public class ProductAdminController {
         }
     }
 
-//    @PatchMapping(value = "edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public ResponseAPI<ProductResponseDTO> updateProduct(@PathVariable("id") Long id,
-//                                                         @RequestPart(value = "request") String requestJson,
-//                                                         @RequestPart(value = "thumbnail", required = false) List<MultipartFile> images) {
-//
-//        log.info("requestJson:{}", requestJson);
-//        log.info("images:{}", images);
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        String message_succed = "Cập nhật sản phẩm thành công";
-//        String message_failed = "Cập nhật sản phẩm thất bại";
-//        try {
-//            UpdateProductRequest request = objectMapper.readValue(requestJson, UpdateProductRequest.class);
-//            request.setThumbnail(images);
-//            ProductResponseDTO result = productService.update(id, request);
-//            log.info("Product updated successfully");
-//            return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
-//        } catch (JsonProcessingException e) {
-//            log.info("Product update failed");
-//            log.error(e.getMessage());
-//            return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
-//        }
-//    }
+    @PatchMapping("update/{id}")
+    public ResponseAPI<String> updateProduct(@PathVariable("id") int id,
+                                                  @RequestBody Map<String, Object> request) {
+
+        String statusEdit = (String) request.get("statusEdit");
+        String status = (String) request.get("status");
+        int position = request.containsKey("position") ? (int) request.get("position") : 0;
+
+        String result = productService.update(id, status, position, statusEdit);
+        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
+    }
 
     @PatchMapping(value = "edit/{id}")
     public ResponseAPI<ProductResponseDTO> updateProduct(@RequestBody UpdateProductRequest request, @PathVariable Long id) {
@@ -115,6 +105,43 @@ public class ProductAdminController {
             return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
         }
     }
+
+    @PatchMapping(value = "/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseAPI<ProductResponseDTO> editProduct(
+            @PathVariable("id") Long id,
+            @RequestPart("request") String requestJson,
+            @RequestPart(value = "newImg", required = false) List<MultipartFile> newImg) {
+
+        log.info("requestJson:{}", requestJson);
+        log.info("images:{}", newImg);
+        String message_succed = "Cập nhập sản phẩm thành công";
+        String message_failed = "Cập nhập sản phẩm thất bại";
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            UpdateProductRequest request = objectMapper.readValue(requestJson, UpdateProductRequest.class);
+            if (newImg != null) {
+                request.setThumbnail(newImg);
+            }
+
+            ProductResponseDTO result = productService.update(id, request);
+
+            log.info("UPDATE product REQUEST SUCCESS");
+            return ResponseAPI.<ProductResponseDTO>builder()
+                    .code(HttpStatus.OK.value())
+                    .data(result)
+                    .message(message_succed)
+                    .build();
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            log.error("UPDATE product ERROR: " + e.getMessage());
+            return ResponseAPI.<ProductResponseDTO>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message(message_failed)
+                    .build();
+        }
+    }
+
 
 
     @GetMapping()

@@ -103,45 +103,6 @@ public class ProductBrandController {
         return ResponseAPI.<List<ProductBrandResponse>>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
-//    @PatchMapping(value = "edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public ResponseAPI<ProductBrandResponse> updateProduct(@PathVariable("id") Long id,
-//                                                           @RequestPart(value = "request") String requestJson,
-//                                                           @RequestPart(value = "thumbnail", required = false) List<MultipartFile> images) {
-//
-//        log.info("requestJson:{}", requestJson);
-//        log.info("images:{}", images);
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        String message_succed = "Cập nhật thương hiệu sản phẩm thành công";
-//        String message_failed = "Cập nhật thương hiệu sản phẩm thất bại";
-//        try {
-//            UpdateProductBrandRequest request = objectMapper.readValue(requestJson, UpdateProductBrandRequest.class);
-//            request.setImage(images);
-//            ProductBrandResponse result = productBrandService.update(id, request);
-//            log.info("ProductBrand updated successfully");
-//            return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
-//        } catch (JsonProcessingException e) {
-//            log.info("ProductBrand update failed");
-//            log.error(e.getMessage());
-//            return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
-//        }
-//    }
-
-//    @PatchMapping(value = "edit/{id}")
-//    public ResponseAPI<ProductBrandResponse> updateProduct(@PathVariable("id") Long id,
-//                                                           @RequestBody UpdateProductBrandRequest updateProductBrandRequest) {
-//
-//        String message_succed = "Cập nhật thương hiệu sản phẩm thành công";
-//        String message_failed = "Cập nhật thương hiệu sản phẩm thất bại";
-//        try {
-//            ProductBrandResponse result = productBrandService.update(id, updateProductBrandRequest);
-//            log.info("ProductBrand updated successfully");
-//            return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
-//        } catch (Exception e) {
-//            log.info("ProductBrand update failed");
-//            log.error(e.getMessage());
-//            return ResponseAPI.<ProductBrandResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
-//        }
-//    }
 
     @PatchMapping(value = "/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseAPI<ProductBrandResponse> editBlog(

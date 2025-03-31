@@ -25,19 +25,16 @@ public class UpdateProductRequest implements Serializable {
     String title;
     String description;
     List<MultipartFile> thumbnail;
+    List<String> image;
     List<ProductVariantEntity> variants;
     List<Long> skinTypeId;
 //    DiscountEntity discountEntity;
     int discountPercent;
-    Integer position;
-    /// ////////////////////////////////////////////
     String origin;
     String ingredients;
     String usageInstructions;
     String benefits;
     String skinIssues;
-    /// ////////////////////////////////////////////
     boolean featured;
-    String status;
 
 }
