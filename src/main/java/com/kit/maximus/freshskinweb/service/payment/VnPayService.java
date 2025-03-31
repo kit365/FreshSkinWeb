@@ -190,6 +190,7 @@ public class VnPayService implements PaymentService {
         if ("00".equals(transactionStatus)) {
             //thanh toán thành công -> chuyên status
             orderOpt.setPaymentStatus(PaymentStatus.PAID);
+            orderOpt.setOrderStatus(OrderStatus.COMPLETED);
             orderService.saveOrder(orderOpt);
 
             if(orderOpt.getPaymentMethod() != null && orderOpt.getPaymentMethod().equals(PaymentMethod.QR)) {
