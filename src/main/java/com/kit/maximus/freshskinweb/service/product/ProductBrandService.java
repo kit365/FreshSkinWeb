@@ -5,6 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import com.kit.maximus.freshskinweb.dto.request.product_brand.CreateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.request.product_brand.UpdateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductBrandResponse;
+import com.kit.maximus.freshskinweb.entity.BlogEntity;
 import com.kit.maximus.freshskinweb.entity.ProductBrandEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -145,39 +146,97 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
         ProductBrandEntity brandEntity = getBrandById(id);
 
 
-        if (StringUtils.hasLength(request.getStatus())) {
-            brandEntity.setStatus(getStatus(request.getStatus()));
-        }
-
         if (StringUtils.hasLength(request.getTitle())) {
             brandEntity.setSlug(getSlug(request.getTitle()));
         }
 
-        if (request.getImage() != null) {
-            brandEntity.getImage().forEach(thumbnail -> {
-                try {
-                    deleteImageFromCloudinary(thumbnail);
-                } catch (IOException e) {
-                    log.error("Delete thumbnail error", e);
-                    throw new RuntimeException(e);
-                }
-            });
-            int count = 0;
-            List<String> newThumbnails = new ArrayList<>();
-            for (MultipartFile file : request.getImage()) {
-                try {
-                    String url = uploadImageFromFile(file, getSlug(request.getTitle()), count++);
-                    newThumbnails.add(url);
-                } catch (IOException e) {
-                    log.error("Upload thumbnail error", e);
-                    throw new RuntimeException(e);
+        if ((request.getNewImg() != null && !request.getNewImg().isEmpty()) ||
+                (request.getImage() != null && !request.getImage().isEmpty())) {
+
+            // Lấy danh sách ảnh cũ từ blogEntity
+            List<String> oldImages = brandEntity.getImage() != null ?
+                    new ArrayList<>(brandEntity.getImage()) : new ArrayList<>();
+
+            // Danh sách ảnh mới từ FE
+            List<String> newThumbnails = request.getImage() != null ?
+                    request.getImage() : new ArrayList<>();
+
+            // Xóa ảnh không còn trong danh sách mới
+            for (String oldUrl : oldImages) {
+                if (!newThumbnails.contains(oldUrl)) {
+                    try {
+                        deleteImageFromCloudinary(oldUrl); // Xóa khỏi Cloudinary
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                    }
                 }
             }
-            brandEntity.setImage(newThumbnails);
+
+            // Danh sách mới giữ lại các ảnh chưa bị xóa
+            List<String> updatedThumbnails = new ArrayList<>(newThumbnails);
+
+            // Thêm ảnh mới nếu có
+            if (request.getNewImg() != null && !request.getNewImg().isEmpty()) {
+                int count = 0;
+                for (MultipartFile file : request.getNewImg()) {
+                    if (file != null && !file.isEmpty()) {
+                        try {
+                            String url = uploadImageFromFile(file, getSlug(request.getTitle()), count++);
+                            updatedThumbnails.add(url);
+                        } catch (IOException e) {
+                            log.error("Failed to upload image: {}", e.getMessage());
+                            throw new AppException(ErrorCode.IMAGE_UPLOAD_FAILED);
+                        }
+                    }
+                }
+            }
+
+            // Cập nhật lại danh sách ảnh trong blogEntity
+            brandEntity.setImage(updatedThumbnails);
+
+        } else {
+            // Nếu FE không gửi gì => Xóa hết ảnh
+            if (brandEntity.getImage() != null && !brandEntity.getImage().isEmpty()) {
+                for (String oldUrl : brandEntity.getImage()) {
+                    try {
+                        deleteImageFromCloudinary(oldUrl); // Xóa toàn bộ hình ảnh
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                    }
+                }
+            }
+            brandEntity.setImage(null); // Xóa danh sách ảnh trong DB
         }
 
         productBrandMapper.updateProductBrand(brandEntity, request);
         return productBrandMapper.productBrandToProductBrandResponseDTO(productBrandRepository.save(brandEntity));
+    }
+
+    @CacheEvict(value = {"top10ProductBrands", "allProductBrands", "trashProductBrands", "fullBrands"}, allEntries = true)
+    public String update(long id, String status, Integer position, String statusEdit) {
+        ProductBrandEntity productBrandEntity = productBrandRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.BLOG_NOT_FOUND));
+
+        System.out.println("status: " + status + ", position: " + position + ", statusEdit: " + statusEdit);
+
+        if ("editStatus".equalsIgnoreCase(statusEdit)) {
+            if (status != null) { // Kiểm tra nếu status không bị null
+                Status statusEnum = getStatus(status);
+                productBrandEntity.setStatus(statusEnum);
+                productBrandRepository.save(productBrandEntity);
+                return "Cập nhật trạng thái thành công";
+            }
+            return "Trạng thái không được để trống!";
+        } else if ("editPosition".equalsIgnoreCase(statusEdit)) {
+            if (position != 0) { // Kiểm tra null trước khi gán
+                productBrandEntity.setPosition(position);
+                productBrandRepository.save(productBrandEntity);
+                return "Cập nhật vị trí thành công";
+            }
+            return "Vị trí không được để trống!";
+        }
+
+        return "Cập nhật thất bại";
     }
 
     @CacheEvict(value = {"top10ProductBrands", "allProductBrands", "trashProductBrands", "fullBrands"}, allEntries = true)
