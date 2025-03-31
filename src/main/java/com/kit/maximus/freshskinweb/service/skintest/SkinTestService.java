@@ -65,7 +65,7 @@ public class SkinTestService {
         return result;
     }
 
-    public boolean add(SkinTestRequest request) {
+    public String add(SkinTestRequest request) {
         log.info("Processing request: {}", request);
 
         UserEntity user = userRepository.findById(request.getUser())
@@ -104,7 +104,7 @@ public class SkinTestService {
 
         // Save test result
         skinTestRepository.save(skinTest);
-        return true;
+        return skinTest.getSkinType().getType();
     }
 
     public SkinTestResponse getDetail(Long id){
