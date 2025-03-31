@@ -122,6 +122,6 @@ public class VoucherService {
     }
 
     public List<VoucherResponse> get4Voucher(){
-        return voucherRepository.findTop4ByUsageCount().stream().map(voucherMapper::toVoucherResponse).collect(Collectors.toList());
+        return voucherRepository.findTop4PercentageVouchers().stream().map(voucherMapper::toVoucherResponse).collect(Collectors.toList());
     }
 }
