@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.SkinCareRountineRequest;
+import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.UpdationSkinCareRountineRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.SkinCareRountineResponse;
 import com.kit.maximus.freshskinweb.entity.SkinCareRoutineEntity;
@@ -38,14 +39,14 @@ public class SkinCareRountineController {
                 .build();
     }
 
-    @PutMapping("edit/{id}")
-    public ResponseAPI<SkinCareRountineResponse> updateSkinCareRoutine(@PathVariable Long id, @RequestBody SkinCareRountineRequest request) {
-        SkinCareRountineResponse response = skinCareRountineService.update(id, request);
-        String message = "Cập nhật lộ trinình da thành công";
-        if(response == null){
-            message = "Cập nhật lộ trinình da thất bại";
+    @PatchMapping("edit/{id}")
+    public ResponseAPI<Boolean> updateSkinCareRoutine(@PathVariable Long id, @RequestBody UpdationSkinCareRountineRequest request) {
+        Boolean response = skinCareRountineService.update(id, request);
+        String message = "Cập nhật lộ trình da thành công";
+        if(!response){
+            message = "Cập nhật lộ trình da thất bại";
         }
-        return ResponseAPI.<SkinCareRountineResponse>builder()
+        return ResponseAPI.<Boolean>builder()
                 .code(HttpStatus.OK.value())
                 .message(message)
                 .build();

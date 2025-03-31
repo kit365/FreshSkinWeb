@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.service.skintest;
 
 import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.SkinCareRountineRequest;
+import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.UpdationSkinCareRountineRequest;
 import com.kit.maximus.freshskinweb.dto.response.SkinCareRountineResponse;
 import com.kit.maximus.freshskinweb.entity.SkinCareRoutineEntity;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
@@ -45,9 +46,10 @@ public class SkinCareRountineService {
         return true;
     }
 
-    public SkinCareRountineResponse update(Long id, SkinCareRountineRequest request) {
+    public Boolean update(Long id, UpdationSkinCareRountineRequest request) {
+        log.info(request.toString());
         SkinCareRoutineEntity skinCareRountineEntity = skinCareRountineRepository.findById(id).orElse(null);
-        SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(request.getSkinTypeEntity()).orElse(null);
+        SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(id).orElse(null);
 
         if(skinTypeEntity != null) {
             skinCareRountineEntity.setSkinType(skinTypeEntity);
@@ -56,10 +58,12 @@ public class SkinCareRountineService {
         }
 
         if(skinCareRountineEntity != null) {
-            skinCareRoutineMapper.updateEntity(request , skinCareRountineEntity);
-            return skinCareRoutineMapper.toResponse(skinCareRountineEntity);
+            skinCareRountineEntity.setRountine(request.getRountine());
+            log.info(skinCareRountineEntity.toString());
+            skinCareRountineRepository.save(skinCareRountineEntity);
+            return true;
         }
-        return null;
+        return false;
     }
 
     public boolean delete(Long id) {

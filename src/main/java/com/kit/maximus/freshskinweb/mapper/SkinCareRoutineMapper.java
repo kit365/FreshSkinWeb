@@ -1,6 +1,7 @@
 package com.kit.maximus.freshskinweb.mapper;
 
 import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.SkinCareRountineRequest;
+import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.UpdationSkinCareRountineRequest;
 import com.kit.maximus.freshskinweb.dto.response.SkinCareRountineResponse;
 import com.kit.maximus.freshskinweb.entity.SkinCareRoutineEntity;
 import org.mapstruct.*;
@@ -18,5 +19,5 @@ public interface SkinCareRoutineMapper {
 
     @Mapping(target = "skinType", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntity(SkinCareRountineRequest request, @MappingTarget SkinCareRoutineEntity entity);
+    void updateEntity(UpdationSkinCareRountineRequest request, @MappingTarget SkinCareRoutineEntity entity);
 }
