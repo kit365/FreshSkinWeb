@@ -45,6 +45,10 @@ public class SkinCareRountineController {
         String message = "Cập nhật lộ trình da thành công";
         if(!response){
             message = "Cập nhật lộ trình da thất bại";
+            return ResponseAPI.<Boolean>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message(message)
+                    .build();
         }
         return ResponseAPI.<Boolean>builder()
                 .code(HttpStatus.OK.value())

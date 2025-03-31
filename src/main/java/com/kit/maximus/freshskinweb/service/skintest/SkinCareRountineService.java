@@ -47,19 +47,10 @@ public class SkinCareRountineService {
     }
 
     public Boolean update(Long id, UpdationSkinCareRountineRequest request) {
-        log.info(request.toString());
         SkinCareRoutineEntity skinCareRountineEntity = skinCareRountineRepository.findById(id).orElse(null);
-        SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(id).orElse(null);
-
-        if(skinTypeEntity != null) {
-            skinCareRountineEntity.setSkinType(skinTypeEntity);
-        } else {
-            skinCareRountineEntity.setSkinType(skinCareRountineEntity.getSkinType());
-        }
 
         if(skinCareRountineEntity != null) {
-            skinCareRountineEntity.setRountine(request.getRountine());
-            log.info(skinCareRountineEntity.toString());
+            skinCareRoutineMapper.updateEntity(request , skinCareRountineEntity);
             skinCareRountineRepository.save(skinCareRountineEntity);
             return true;
         }
