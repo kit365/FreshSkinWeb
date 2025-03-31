@@ -327,7 +327,7 @@ public class UserService {
         SignedJWT signedJWT = SignedJWT.parse(token);
         Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
         var verify = signedJWT.verify(jwsVerifier);
-        if(verify && expirationDate.after(new Date())) {
+        if (verify && expirationDate.after(new Date())) {
             String username = signedJWT.getJWTClaimsSet().getSubject();
             UserEntity user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
             return userMapper.toUserResponseDTO(user);
@@ -705,6 +705,22 @@ public class UserService {
         } catch (IllegalArgumentException e) {
             return e.getMessage(); // Hiển thị lỗi rõ ràng hơn
         }
+    }
+
+    public List<UserResponseDTO> getUsersWithPostManagerRole() {
+        List<String> roleName = List.of("Quản lý bài viết");
+
+        List<UserEntity> list = userRepository.findAllByRole_TitleIn(roleName);
+
+        List<UserResponseDTO> userResponseDTOS = new ArrayList<>();
+        list.forEach(userEntity -> {
+            UserResponseDTO userResponseDTO = new UserResponseDTO();
+            userResponseDTO.setFirstName(userEntity.getFirstName());
+            userResponseDTO.setLastName(userEntity.getLastName());
+            userResponseDTO.setUserID(userEntity.getUserID());
+            userResponseDTOS.add(userResponseDTO);
+        });
+        return userResponseDTOS;
     }
 
     public boolean deleteSelectedAccount(List<Long> id) {

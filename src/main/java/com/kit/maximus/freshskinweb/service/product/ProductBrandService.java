@@ -32,10 +32,7 @@ import java.io.IOException;
 import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -105,6 +102,9 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
     public List<ProductBrandResponse> getTop10() {
         List<ProductBrandResponse> list =  productBrandMapper.toProductBrandsResponseDTO(productBrandRepository.findTop10ByStatusAndDeletedOrderByPosition(Status.ACTIVE,false));
 
+
+        list.sort(Comparator.comparing(ProductBrandResponse::getPosition).reversed());
+
         list.forEach(productBrandResponse -> {
             productBrandResponse.setStatus(null);
             productBrandResponse.setCreatedAt(null);
@@ -112,7 +112,6 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
             productBrandResponse.setDescription(null);
             productBrandResponse.setImage(null);
             productBrandResponse.setImage(null);
-            productBrandResponse.setPosition(null);
             productBrandResponse.setFeatured(null);
         });
 

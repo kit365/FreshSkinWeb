@@ -68,6 +68,13 @@ public class AccountAdminController {
         }
     }
 
+    @GetMapping("/post-managers")
+    public ResponseAPI<List<UserResponseDTO>> getPostManagers() {
+        String message = "Lấy danh sách quản lý bài viết thành công";
+        var result = userService.getUsersWithPostManagerRole();
+        return ResponseAPI.<List<UserResponseDTO>>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+    }
+
     @GetMapping("{id}")
     public ResponseAPI<UserResponseDTO> showDetailAccount(@PathVariable Long id) {
         String message = "Lấy dữ liệu thành công";
