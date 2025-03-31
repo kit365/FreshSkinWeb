@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -70,8 +71,8 @@ public class VoucherService {
         }
     }
 
-    public List<VoucherEntity> getAllVouchers() {
-        return voucherRepository.findAll();
+    public List<VoucherResponse> getAllVouchers() {
+        return voucherRepository.findAll().stream().map(voucherMapper::toVoucherResponse).collect(Collectors.toList());
     }
 
     public boolean deleteVoucher(String id) {
@@ -120,5 +121,7 @@ public class VoucherService {
         return orderTotal.subtract(discountAmount);
     }
 
-
+    public List<VoucherResponse> get4Voucher(){
+        return voucherRepository.findTop4ByUsageCount().stream().map(voucherMapper::toVoucherResponse).collect(Collectors.toList());
+    }
 }

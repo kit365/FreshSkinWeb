@@ -18,17 +18,17 @@ public class UpdateProductCategoryRequest implements Serializable {
 
     String title;
 
-    List<MultipartFile> image;
+    List<MultipartFile> newImg;
+
+    List<String> thumbnail;
 
     String description;
-
-    Integer position;
-
-    String status;
 
     Long parentID;
 
     List<ChildCategoryDTO> child;
 
-    boolean featured;
+    Boolean featured;
+
+
 }

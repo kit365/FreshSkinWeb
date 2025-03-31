@@ -26,10 +26,11 @@ public class CreateProductCategoryRequest implements Serializable {
 
     List<ChildCategoryDTO> child;
 
-    long parentID;
+    Long parentID;
 
     String status ;
 
-    boolean featured;
+    Boolean featured;
+
 
 }

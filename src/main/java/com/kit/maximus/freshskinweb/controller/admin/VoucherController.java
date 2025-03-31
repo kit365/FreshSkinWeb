@@ -45,9 +45,9 @@ public class VoucherController {
     }
 
     @GetMapping()
-    public ResponseAPI<List<VoucherEntity>> getAllVouchers() {
+    public ResponseAPI<List<VoucherResponse>> getAllVouchers() {
         String message = "Lấy danh sách voucher thành công";
-        return ResponseAPI.<List<VoucherEntity>>builder().code(HttpStatus.OK.value()).message(message).data(voucherService.getAllVouchers()).build();
+        return ResponseAPI.<List<VoucherResponse>>builder().code(HttpStatus.OK.value()).message(message).data(voucherService.getAllVouchers()).build();
     }
 
     @DeleteMapping("/delete/{id}")
@@ -57,4 +57,12 @@ public class VoucherController {
         voucherService.deleteVoucher(id);
         return ResponseAPI.<VoucherResponse>builder().code(HttpStatus.OK.value()).message(message).data(voucherResponse).build();
     }
+
+    @GetMapping("/get")
+    public ResponseAPI<List<VoucherResponse>> get4Voucher() {
+        String message = "Xóa voucher thành công";
+        List<VoucherResponse> voucher = voucherService.get4Voucher();
+        return ResponseAPI.<List<VoucherResponse>>builder().code(HttpStatus.OK.value()).message(message).data(voucher).build();
+    }
+
 }

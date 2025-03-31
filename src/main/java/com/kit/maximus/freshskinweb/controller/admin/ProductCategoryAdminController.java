@@ -1,8 +1,10 @@
 package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.CreateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.UpdateProductCategoryRequest;
+import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
 import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
@@ -114,22 +116,52 @@ public class ProductCategoryAdminController {
 //        }
 //    }
 
-    @PatchMapping(value = "edit/{id}")
-    public ResponseAPI<ProductCategoryResponse> updateProduct(@PathVariable("id") Long id,
-                                                             @RequestBody UpdateProductCategoryRequest updateProductCategoryRequest) {
+    @PatchMapping(value = "edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseAPI<ProductCategoryResponse> editBlog(
+            @PathVariable("id") Long id,
+            @RequestPart("request") String requestJson,
+            @RequestPart(value = "newImg", required = false) List<MultipartFile> newImg) {
 
-
-        String message_succed = "Cập nhật danh mục sản phẩm thành công";
-        String message_failed = "Cập nhật danh mục sản phẩm thất bại";
+        log.info("requestJson:{}", requestJson);
+        log.info("images:{}", newImg);
+        String message_succed = "Cập nhập danh mục sản phẩm thành công";
+        String message_failed = "Cập nhập danh mục sản phẩm thất bại";
         try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            UpdateProductCategoryRequest updateProductCategoryRequest = objectMapper.readValue(requestJson, UpdateProductCategoryRequest.class);
+            if (newImg != null) {
+                updateProductCategoryRequest.setNewImg(newImg);
+            }
+
             ProductCategoryResponse result = productCategoryService.update(id, updateProductCategoryRequest);
-            log.info("ProductCategory updated successfully");
-            return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
+
+            log.info("UPDATE PRODUCT CATEGORY REQUEST SUCCESS");
+            return ResponseAPI.<ProductCategoryResponse>builder()
+                    .code(HttpStatus.OK.value())
+                    .data(result)
+                    .message(message_succed)
+                    .build();
+
         } catch (Exception e) {
-            log.info("ProductCategory update failed");
-            log.error(e.getMessage());
-            return ResponseAPI.<ProductCategoryResponse>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
+            log.error(e.getMessage(), e);
+            log.error("UPDATE PRODUCT CATEGORY ERROR: " + e.getMessage());
+            return ResponseAPI.<ProductCategoryResponse>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message(message_failed)
+                    .build();
         }
+    }
+
+    @PatchMapping("update/{id}")
+    public ResponseAPI<String> updateProductCategory(@PathVariable("id") int id,
+                                          @RequestBody Map<String, Object> request) {
+
+        String statusEdit = (String) request.get("statusEdit");
+        String status = (String) request.get("status");
+        int position = request.containsKey("position") ? (int) request.get("position") : 0;
+
+        String result = productCategoryService.update(id, status, position, statusEdit);
+        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
     @PatchMapping("change-multi")
@@ -219,6 +251,7 @@ public class ProductCategoryAdminController {
     public Map<String, Object> test() {
             return productCategoryService.getRevenueByCategories();
     }
+
 
 
 

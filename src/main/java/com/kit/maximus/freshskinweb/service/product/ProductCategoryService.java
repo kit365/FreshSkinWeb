@@ -5,6 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.CreateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.productcategory.UpdateProductCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.response.*;
+import com.kit.maximus.freshskinweb.entity.BlogEntity;
 import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -128,9 +129,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
 
 
-        if (StringUtils.hasLength(request.getStatus())) {
-            productCategoryEntity.setStatus(getStatus(request.getStatus()));
-        }
 
         if (StringUtils.hasLength(request.getTitle())) {
             productCategoryEntity.setSlug(getSlug(request.getTitle()));
@@ -142,31 +140,93 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
             productCategoryEntity.setParent(parentCategory);
         }
 
-        if (request.getImage() != null) {
-            productCategoryEntity.getImage().forEach(thumbnail -> {
-                try {
-                    deleteImageFromCloudinary(thumbnail);
-                } catch (IOException e) {
-                    log.error("Delete thumbnail error", e);
-                    throw new RuntimeException(e);
-                }
-            });
-            int count = 0;
-            List<String> newThumbnails = new ArrayList<>();
-            for (MultipartFile file : request.getImage()) {
-                try {
-                    String url = uploadImageFromFile(file, getSlug(request.getTitle()), count++);
-                    newThumbnails.add(url);
-                } catch (IOException e) {
-                    log.error("Upload thumbnail error", e);
-                    throw new RuntimeException(e);
+        if ((request.getNewImg() != null && !request.getNewImg().isEmpty()) ||
+                (request.getThumbnail() != null && !request.getThumbnail().isEmpty())) {
+
+            // Lấy danh sách ảnh cũ từ productCategoryEntity
+            List<String> oldImages = productCategoryEntity.getImage() != null ?
+                    new ArrayList<>(productCategoryEntity.getImage()) : new ArrayList<>();
+
+            // Danh sách ảnh mới từ FE
+            List<String> newThumbnails = request.getThumbnail() != null ?
+                    request.getThumbnail() : new ArrayList<>();
+
+            // Xóa ảnh không còn trong danh sách mới
+            for (String oldUrl : oldImages) {
+                if (!newThumbnails.contains(oldUrl)) {
+                    try {
+                        deleteImageFromCloudinary(oldUrl); // Xóa khỏi Cloudinary
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                    }
                 }
             }
-            productCategoryEntity.setImage(newThumbnails);
+
+            // Danh sách mới giữ lại các ảnh chưa bị xóa
+            List<String> updatedThumbnails = new ArrayList<>(newThumbnails);
+
+            // Thêm ảnh mới nếu có
+            if (request.getNewImg() != null && !request.getNewImg().isEmpty()) {
+                int count = 0;
+                for (MultipartFile file : request.getNewImg()) {
+                    if (file != null && !file.isEmpty()) {
+                        try {
+                            String url = uploadImageFromFile(file, getSlug(request.getTitle()), count++);
+                            updatedThumbnails.add(url);
+                        } catch (IOException e) {
+                            log.error("Failed to upload image: {}", e.getMessage());
+                            throw new AppException(ErrorCode.IMAGE_UPLOAD_FAILED);
+                        }
+                    }
+                }
+            }
+
+            // Cập nhật lại danh sách ảnh trong blogEntity
+            productCategoryEntity.setImage(updatedThumbnails);
+
+        } else {
+            // Nếu FE không gửi gì => Xóa hết ảnh
+            if (productCategoryEntity.getImage() != null && !productCategoryEntity.getImage().isEmpty()) {
+                for (String oldUrl : productCategoryEntity.getImage()) {
+                    try {
+                        deleteImageFromCloudinary(oldUrl); // Xóa toàn bộ hình ảnh
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                    }
+                }
+            }
+            productCategoryEntity.setImage(null); // Xóa danh sách ảnh trong DB
         }
 
         productCategoryMapper.updateProductCategory(productCategoryEntity, request);
         return productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryRepository.save(productCategoryEntity));
+    }
+
+    @CacheEvict(value = {"featuredProductCategory", "allCategory", "filteredCategories"}, allEntries = true)
+    public String update(long id, String status, Integer position, String statusEdit) {
+        ProductCategoryEntity productCategoryEntity = productCategoryRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND));
+
+        System.out.println("status: " + status + ", position: " + position + ", statusEdit: " + statusEdit);
+
+        if ("editStatus".equalsIgnoreCase(statusEdit)) {
+            if (status != null) { // Kiểm tra nếu status không bị null
+                Status statusEnum = getStatus(status);
+                productCategoryEntity.setStatus(statusEnum);
+                productCategoryRepository.save(productCategoryEntity);
+                return "Cập nhật trạng thái thành công";
+            }
+            return "Trạng thái không được để trống!";
+        } else if ("editPosition".equalsIgnoreCase(statusEdit)) {
+            if (position != 0) { // Kiểm tra null trước khi gán
+                productCategoryEntity.setPosition(position);
+                productCategoryRepository.save(productCategoryEntity);
+                return "Cập nhật vị trí thành công";
+            }
+            return "Vị trí không được để trống!";
+        }
+
+        return "Cập nhật thất bại";
     }
 
     @CacheEvict(value = {"featuredProductCategory", "allCategory", "filteredCategories"}, allEntries = true)
@@ -791,6 +851,8 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
         return Map.of("data", data);
     }
+
+
 
 
 
