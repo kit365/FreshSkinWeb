@@ -106,6 +106,8 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     @Override
     public BlogResponse update(Long id, BlogUpdateRequest request) {
         BlogEntity blogEntity = getBlogEntityById(id);
+
+
         if (blogEntity == null) {
             throw new AppException(ErrorCode.BLOG_NOT_FOUND);
         }
@@ -219,6 +221,10 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         Status statusEnum = getStatus(status);
         List<BlogEntity> blogEntities = blogRepository.findAllById(id);
 
+        if(blogEntities.isEmpty()) {
+            throw new AppException(ErrorCode.BLOG_NOT_FOUND);
+        }
+
         //CẬP NHẬT TRẠNG THÁI BLOG
         if (statusEnum == Status.INACTIVE || statusEnum == Status.ACTIVE) {
             blogEntities.forEach(blogEntity -> {
@@ -226,6 +232,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
                 blogSearchRepository.update(blogEntity.getId(), status);
             });
             blogRepository.saveAll(blogEntities);
+
             return "Cập nhật trạng thái thành công";
 
             //CẬP NHẬT XÓA MỀM BLOG

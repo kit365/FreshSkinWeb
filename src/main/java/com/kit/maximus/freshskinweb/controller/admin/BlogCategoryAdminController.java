@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 //@CrossOrigin(origins = "*")
@@ -95,8 +96,6 @@ public class BlogCategoryAdminController {
             @RequestPart("request") String requestJson,
             @RequestPart(value = "newImg", required = false) List<MultipartFile> newImg) {
 
-        log.info("requestJson:{}", requestJson);
-        log.info("images:{}", newImg);
         String message_succed = "Cập nhập danh mục bài viết thành công";
         String message_failed = "Cập nhập danh mục bài viết thất bại";
         try {
@@ -194,11 +193,15 @@ public class BlogCategoryAdminController {
 
         if (!requestBlogCategory.containsKey("id")) {
             log.warn("Request does not contain 'id' key");
-            //sua lai thong bao loi
             throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
         }
 
-        List<Long> ids = (List<Long>) requestBlogCategory.get("id");
+        // Lấy danh sách ID dưới dạng List<Integer>
+        List<Integer> intIds = (List<Integer>) requestBlogCategory.get("id");
+
+        // Chuyển đổi sang List<Long>
+        List<Long> ids = intIds.stream().map(Long::valueOf).collect(Collectors.toList());
+
         String status = requestBlogCategory.get("status").toString();
 
         var result = blogCategoryService.update(ids, status);

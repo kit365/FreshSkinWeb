@@ -205,6 +205,12 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
     public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
         List<BlogCategoryEntity> blogCategoryEntities = blogCategoryRepository.findAllById(id);
+
+        if (blogCategoryEntities.isEmpty()) {
+            return "Không tìm thấy tất cả danh mục blog";
+        }
+
+
         if (statusEnum == Status.ACTIVE || statusEnum == Status.INACTIVE) {
             blogCategoryEntities.forEach(productEntity -> productEntity.setStatus(statusEnum));
             blogCategoryRepository.saveAll(blogCategoryEntities);
