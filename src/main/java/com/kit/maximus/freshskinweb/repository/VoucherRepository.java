@@ -18,6 +18,6 @@ public interface VoucherRepository extends JpaRepository<VoucherEntity, String> 
     boolean existsByNameAndVoucherIdNot(String name, String voucherId);
 
     @Query(value = "SELECT * FROM vouchers WHERE type = 'PERCENTAGE' ORDER BY usage_limit DESC LIMIT 4", nativeQuery = true)
-    List<VoucherEntity> findTop4PercentageVouchers();
+    List<VoucherEntity> findTopFourPercentageVouchers();
 
 }
