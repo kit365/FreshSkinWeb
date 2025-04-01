@@ -104,9 +104,9 @@ public class ProductEntity extends AbstractEntity {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "product")
     List<ReviewEntity> reviews = new ArrayList<>();
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "discountId")
-    DiscountEntity discount;
+//    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    @JoinColumn(name = "discountId")
+//    DiscountEntity discount;
 
     public void createProductVariant(ProductVariantEntity productVariantEntity) {
         variants.add(productVariantEntity);
