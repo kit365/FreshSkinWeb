@@ -80,18 +80,21 @@ public class ProductComparisonService {
     }
 
     public ProductComparisonResponseDTO findByID(Long id, Long userId) {
-        ProductComparisonEntity productComparison = productComparisonRepository.findById(id)
+        ProductComparisonEntity productComparison = productComparisonRepository.findByIdWithProducts(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_COMPARISON_NOT_FOUND));
 
-        // Kiểm tra userID có khớp không
+
         if (!productComparison.getUser().getUserID().equals(userId)) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
 
+
         ProductComparisonResponseDTO productComparisonResponseDTO = new ProductComparisonResponseDTO();
         productComparisonResponseDTO.setUserID(productComparison.getUser().getUserID());
+
         List<ProductResponseDTO> productResponseDTOS = productService.mapProductIndexResponsesDTO(productComparison.getProducts());
         productComparisonResponseDTO.setProducts(productResponseDTOS);
+
 
         return productComparisonResponseDTO;
     }

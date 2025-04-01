@@ -1353,95 +1353,175 @@ List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status
 
     //hàm nay để map riêng vào searchPublic
 
-    // Hàm Map danh sách ProductResponseDTO từ danh sách ProductEntity
-    public List<ProductResponseDTO> mapProductIndexResponsesDTO(List<ProductEntity> productEntities) {
-        List<ProductResponseDTO> productResponseDTOs = productMapper.productToProductResponsesDTO(productEntities);
-
-        IntStream.range(0, productEntities.size()).forEach(i -> {
-            ProductEntity product = productEntities.get(i);
-            ProductResponseDTO dto = productResponseDTOs.get(i);
-
-            // Map thương hiệu
-            if (product.getBrand() != null) {
-                ProductBrandResponse brandResponse = new ProductBrandResponse();
-                brandResponse.setId(product.getBrand().getId());
-                brandResponse.setTitle(product.getBrand().getTitle());
-                brandResponse.setSlug(product.getBrand().getSlug());
-                dto.setBrand(brandResponse);
-            }
-
-//            if(product.getDiscount() != null) {
-//                DiscountResponse discountResponse = new DiscountResponse();
-//                discountResponse.getDiscountType();
-//            }
-
-//            if (product.getReviews() != null) {
-//                List<ReviewResponse> reviewResponses = product.getReviews().stream()
-//                        .filter(review -> review.getParent() == null) // Chỉ lấy root reviews
-//                        .map(reviewService::convertToReviewResponse) // Chuyển đổi từng review
-//                        .collect(Collectors.toList());
+//    // Hàm Map danh sách ProductResponseDTO từ danh sách ProductEntity
+//    public List<ProductResponseDTO> mapProductIndexResponsesDTO(List<ProductEntity> productEntities) {
+//        List<ProductResponseDTO> productResponseDTOs = productMapper.productToProductResponsesDTO(productEntities);
 //
-//                dto.setReviews(reviewResponses); // Gán vào DTO
-//            }
-
-            // Map danh mục sản phẩm
-            if (product.getCategory() != null) {
-                dto.setCategory(product.getCategory().stream().map(category -> {
-                    ProductCategoryResponse categoryResponse = new ProductCategoryResponse();
-                    categoryResponse.setId(category.getId());
-                    categoryResponse.setTitle(category.getTitle());
-                    categoryResponse.setSlug(category.getSlug());
-
-                    if (category.getParent() != null) {
-                        ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
-                        parentCategoryResponse.setId(category.getParent().getId());
-                        parentCategoryResponse.setTitle(category.getParent().getTitle());
-                        parentCategoryResponse.setSlug(category.getParent().getSlug());
-                        categoryResponse.setParent(parentCategoryResponse);
-                    }
-
-
-                    return categoryResponse;
-                }).collect(Collectors.toList()));
-            }
-
-            // Map loại da của Product
-            if (product.getSkinTypes() != null) {
-                dto.setSkinTypes(product.getSkinTypes().stream()
-                        .map(skinType -> {
-                            SkinTypeResponse response = new SkinTypeResponse();
-                            response.setId(skinType.getId());
-                            response.setType(skinType.getType());
-                            return response;
-                        })
-                        .collect(Collectors.toList()));
-            }
-
-            // Map danh sách biến thể của Product
-            if (product.getVariants() != null) {
-                dto.setVariants(product.getVariants().stream()
-                        .map(variant -> {
-                            ProductVariantResponse variantResponse = new ProductVariantResponse();
-                            variantResponse.setId(variant.getId());
-                            variantResponse.setPrice(variant.getPrice());
-                            variantResponse.setVolume(variant.getVolume());
-                            variantResponse.setUnit(variant.getUnit());
-                            return variantResponse;
-                        })
-                        .collect(Collectors.toList()));
-            }
-
+//        IntStream.range(0, productEntities.size()).forEach(i -> {
+//            ProductEntity product = productEntities.get(i);
+//            ProductResponseDTO dto = productResponseDTOs.get(i);
 //
-//            if(product.getDiscount() != null) {
-//                dto.setD
-//                dto.setDiscountPercent(product.getDiscountPercent());
+//            // Map thương hiệu
+//            if (product.getBrand() != null) {
+//                ProductBrandResponse brandResponse = new ProductBrandResponse();
+//                brandResponse.setId(product.getBrand().getId());
+//                brandResponse.setTitle(product.getBrand().getTitle());
+//                brandResponse.setSlug(product.getBrand().getSlug());
+//                dto.setBrand(brandResponse);
 //            }
+//
+////            if(product.getDiscount() != null) {
+////                DiscountResponse discountResponse = new DiscountResponse();
+////                discountResponse.getDiscountType();
+////            }
+//
+////            if (product.getReviews() != null) {
+////                List<ReviewResponse> reviewResponses = product.getReviews().stream()
+////                        .filter(review -> review.getParent() == null) // Chỉ lấy root reviews
+////                        .map(reviewService::convertToReviewResponse) // Chuyển đổi từng review
+////                        .collect(Collectors.toList());
+////
+////                dto.setReviews(reviewResponses); // Gán vào DTO
+////            }
+//
+//            // Map danh mục sản phẩm
+//            if (product.getCategory() != null) {
+//                dto.setCategory(product.getCategory().stream().map(category -> {
+//                    ProductCategoryResponse categoryResponse = new ProductCategoryResponse();
+//                    categoryResponse.setId(category.getId());
+//                    categoryResponse.setTitle(category.getTitle());
+//                    categoryResponse.setSlug(category.getSlug());
+//
+//                    if (category.getParent() != null) {
+//                        ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
+//                        parentCategoryResponse.setId(category.getParent().getId());
+//                        parentCategoryResponse.setTitle(category.getParent().getTitle());
+//                        parentCategoryResponse.setSlug(category.getParent().getSlug());
+//                        categoryResponse.setParent(parentCategoryResponse);
+//                    }
+//
+//
+//                    return categoryResponse;
+//                }).collect(Collectors.toList()));
+//            }
+//
+//            // Map loại da của Product
+//            if (product.getSkinTypes() != null) {
+//                dto.setSkinTypes(product.getSkinTypes().stream()
+//                        .map(skinType -> {
+//                            SkinTypeResponse response = new SkinTypeResponse();
+//                            response.setId(skinType.getId());
+//                            response.setType(skinType.getType());
+//                            return response;
+//                        })
+//                        .collect(Collectors.toList()));
+//            }
+//
+//            // Map danh sách biến thể của Product
+//            if (product.getVariants() != null) {
+//                dto.setVariants(product.getVariants().stream()
+//                        .map(variant -> {
+//                            ProductVariantResponse variantResponse = new ProductVariantResponse();
+//                            variantResponse.setId(variant.getId());
+//                            variantResponse.setPrice(variant.getPrice());
+//                            variantResponse.setVolume(variant.getVolume());
+//                            variantResponse.setUnit(variant.getUnit());
+//                            return variantResponse;
+//                        })
+//                        .collect(Collectors.toList()));
+//            }
+//
+////
+////            if(product.getDiscount() != null) {
+////                dto.setD
+////                dto.setDiscountPercent(product.getDiscountPercent());
+////            }
+//
+//
+//        });
+//
+//        return productResponseDTOs;
+//    }
 
 
-        });
 
-        return productResponseDTOs;
-    }
+public List<ProductResponseDTO> mapProductIndexResponsesDTO(List<ProductEntity> productEntities) {
+    return productEntities.stream()  // Sử dụng stream thay vì parallelStream
+            .map(product -> {
+                ProductResponseDTO dto = productMapper.productToProductResponseDTO(product);
+
+                // Map thương hiệu
+                if (product.getBrand() != null) {
+                    ProductBrandResponse brandResponse = new ProductBrandResponse();
+                    brandResponse.setId(product.getBrand().getId());
+                    brandResponse.setTitle(product.getBrand().getTitle());
+                    brandResponse.setSlug(product.getBrand().getSlug());
+                    dto.setBrand(brandResponse);
+                }
+
+                // Map danh mục sản phẩm
+                if (product.getCategory() != null) {
+                    List<ProductCategoryResponse> categoryResponses = product.getCategory().stream()
+                            .map(category -> {
+                                ProductCategoryResponse categoryResponse = new ProductCategoryResponse();
+                                categoryResponse.setId(category.getId());
+                                categoryResponse.setTitle(category.getTitle());
+                                categoryResponse.setSlug(category.getSlug());
+
+                                // Map cha của danh mục (nếu có)
+                                if (category.getParent() != null) {
+                                    ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
+                                    parentCategoryResponse.setId(category.getParent().getId());
+                                    parentCategoryResponse.setTitle(category.getParent().getTitle());
+                                    parentCategoryResponse.setSlug(category.getParent().getSlug());
+                                    categoryResponse.setParent(parentCategoryResponse);
+                                }
+
+                                return categoryResponse;
+                            }).collect(Collectors.toList());
+
+                    dto.setCategory(categoryResponses);
+                }
+
+                // Map loại da
+                if (product.getSkinTypes() != null) {
+                    List<SkinTypeResponse> skinTypeResponses = product.getSkinTypes().stream()
+                            .map(skinType -> {
+                                SkinTypeResponse response = new SkinTypeResponse();
+                                response.setId(skinType.getId());
+                                response.setType(skinType.getType());
+                                return response;
+                            }).collect(Collectors.toList());
+
+                    dto.setSkinTypes(skinTypeResponses);
+                }
+
+                // Map danh sách biến thể
+                if (product.getVariants() != null) {
+                    List<ProductVariantResponse> variantResponses = product.getVariants().stream()
+                            .map(variant -> {
+                                ProductVariantResponse variantResponse = new ProductVariantResponse();
+                                variantResponse.setId(variant.getId());
+                                variantResponse.setPrice(variant.getPrice());
+                                variantResponse.setVolume(variant.getVolume());
+                                variantResponse.setUnit(variant.getUnit());
+                                return variantResponse;
+                            }).collect(Collectors.toList());
+
+                    dto.setVariants(variantResponses);
+                }
+
+
+                return dto;
+            })
+            .collect(Collectors.toList());
+}
+
+
+
+
+
+
 
     private ProductResponseDTO mapProductIndexResponsesDTO(ProductEntity product) {
         ProductResponseDTO dto = productMapper.productToProductResponseDTO(product);

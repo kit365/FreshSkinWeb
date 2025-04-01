@@ -25,13 +25,12 @@ public class ProductComparisonEntity {
     private UserEntity user;
 
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "comparison_products",
             joinColumns = @JoinColumn(name = "comparison_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
     private List<ProductEntity> products;
-
 
 }
