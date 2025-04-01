@@ -201,7 +201,8 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
 //        });
 //    }
 
-//    @Scheduled(fixedRate = 5000) // Gửi mỗi 5s
+
+    //    @Scheduled(fixedRate = 5000) // Gửi mỗi 5s
 //    public void sendPeriodicDataToClients() {
 //        sessions.removeIf(session -> !session.isOpen()); // Loại bỏ session đã đóng
 //        for (WebSocketSession session : sessions) {
@@ -210,6 +211,34 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
 //            }
 //        }
 //    }
+//
+//    public void sendDataDashBoard(WebSocketSession session) {
+//        CompletableFuture<Map<String, Object>> futureData = fetchDataFromService();
+//
+//        futureData.thenAcceptAsync(data -> {
+//            if (session == null || !session.isOpen()) {
+//                log.warn("⚠️ Session đã đóng, không gửi được dữ liệu.");
+//                return;
+//            }
+//
+//            try {
+//                ObjectMapper objectMapper = new ObjectMapper();
+//                String previousJson = objectMapper.writeValueAsString(previousData);
+//                String newJson = objectMapper.writeValueAsString(data);
+//
+//                if (!previousJson.equals(newJson)) {
+//                    String jsonData = objectMapper.writeValueAsString(data);
+//                    session.sendMessage(new TextMessage(jsonData));
+//
+//                    // Cập nhật dữ liệu cũ
+//                    previousData = new HashMap<>(data);
+//                }
+//            } catch (Exception e) {
+//                log.error("⚠️ Lỗi khi gửi dữ liệu WebSocket: ", e);
+//            }
+//        }, executorService); // Chạy `thenAcceptAsync` với thread pool riêng
+//    }
+
 
     @Scheduled(fixedRate = 5000) // Gửi mỗi 5s
     public void sendPeriodicDataToClients() {
@@ -221,7 +250,9 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
                 futures.add(CompletableFuture.runAsync(() -> sendDataDashBoard(session), executorService));
             }
         }
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join(); // Đảm bảo tất cả data đã được gửi trước khi tiếp tục
+
+        // Đảm bảo tất cả dữ liệu đã được gửi trước khi tiếp tục
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
     }
 
     public void sendDataDashBoard(WebSocketSession session) {
@@ -248,9 +279,8 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
             } catch (Exception e) {
                 log.error("⚠️ Lỗi khi gửi dữ liệu WebSocket: ", e);
             }
-        }, executorService); // Chạy `thenAcceptAsync` với thread pool riêng
+        }, executorService); // Sử dụng thread pool riêng cho each task
     }
-
 
 
     //nhan data tu dashboardService
