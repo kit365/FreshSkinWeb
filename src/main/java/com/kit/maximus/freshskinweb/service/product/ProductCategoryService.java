@@ -19,6 +19,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
@@ -127,7 +128,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
     @Override
     public ProductCategoryResponse update(Long id, UpdateProductCategoryRequest request) {
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
-
 
 
         if (StringUtils.hasLength(request.getTitle())) {
@@ -361,10 +361,9 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
         if (productCategoryEntity.getParent() != null) {
             ProductCategoryEntity parent = productCategoryEntity.getParent();
-
             ProductCategoryResponse parentID = new ProductCategoryResponse();
             parentID.setTitle(parent.getTitle());
-
+            parentID.setId(parent.getId());
             productCategoryResponse.setParent(parentID);
 
         }
@@ -602,20 +601,16 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
      */
     //Hàm này dùng để lấy ra top 8 danh mục nổi bật(Bao gồm chứa Product)
 
+    @Transactional(readOnly = true)
     @Cacheable("featuredProductCategory")
     public List<ProductCategoryResponse> getFeaturedProductCategories() {
+
         List<ProductCategoryEntity> categories = productCategoryRepository.findTop8ByStatusAndDeletedAndFeatured(
                 Status.ACTIVE, false, true, Sort.by(Sort.Direction.DESC, "position")
         );
 
+        categories.forEach(this::initializeLazyCollections);
 
-//        categories.forEach(productCategoryEntity -> {
-//            productCategoryEntity.getProducts().removeIf(productEntity ->
-//            {
-//                boolean b = productEntity.isDeleted() || productEntity.getStatus() != Status.ACTIVE;
-//                return b;
-//            });
-//        });
 
         List<ProductCategoryResponse> productCategoryFeature = mapToCategoryResponse(categories);
 
@@ -626,10 +621,44 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                         Boolean.TRUE.equals(product.isDeleted()) || getStatus(product.getStatus()) == Status.INACTIVE
                 );
 
+
                 category.getProducts().forEach(product -> product.setDescription(null));
             }
         });
+
         return productCategoryFeature;
+    }
+
+    private void initializeLazyCollections(ProductCategoryEntity category) {
+        if (category.getChild() != null) {
+            Hibernate.initialize(category.getChild());
+        }
+
+
+        // Nếu có products, cũng khởi tạo chúng
+        if (category.getProducts() != null) {
+            Hibernate.initialize(category.getProducts());
+
+            category.getProducts().forEach(product -> {
+                if (product.getVariants() != null) {
+                    Hibernate.initialize(product.getVariants());
+                }
+
+                if (product.getThumbnail() != null) {
+                    Hibernate.initialize(product.getThumbnail());
+                }
+            });
+        }
+
+
+        if (category.getImage() != null) {
+            Hibernate.initialize(category.getImage());
+        }
+
+        if (category.getParent() != null) {
+            Hibernate.initialize(category.getParent());
+        }
+
     }
 
     @Transactional(readOnly = true)
@@ -643,7 +672,10 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                 .and(isNotDeleted());
 
 
-      List<ProductCategoryEntity> categories = productCategoryRepository.findAll(specification, Sort.by(Sort.Direction.DESC, "position"));
+        List<ProductCategoryEntity> categories = productCategoryRepository.findAll(specification, Sort.by(Sort.Direction.DESC, "position"));
+
+        categories.forEach(this::initializeLazyCollections);
+
 
         result = mapToCategoryResponse(categories);
 
@@ -835,25 +867,22 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return Map.of("data", data);
     }
 
-  public Map<String, Object> getRevenueByCategories() {
-      List<Object[]> results = productCategoryRepository.findCategoriesRevenueGroupByDate();
+    public Map<String, Object> getRevenueByCategories() {
+        List<Object[]> results = productCategoryRepository.findCategoriesRevenueGroupByDate();
 
-      List<Map<String, Object>> data = new ArrayList<>();
-      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        List<Map<String, Object>> data = new ArrayList<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-      for (Object[] row : results) {
-          data.add(Map.of(
-                  "date", dateFormat.format((Date) row[0]),
-                  "category", (String) row[1],
-                  "revenue", ((Number) row[2]).doubleValue()
-          ));
-      }
+        for (Object[] row : results) {
+            data.add(Map.of(
+                    "date", dateFormat.format((Date) row[0]),
+                    "category", (String) row[1],
+                    "revenue", ((Number) row[2]).doubleValue()
+            ));
+        }
 
         return Map.of("data", data);
     }
-
-
-
 
 
 }

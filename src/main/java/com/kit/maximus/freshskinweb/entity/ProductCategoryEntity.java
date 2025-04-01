@@ -40,11 +40,11 @@ public class ProductCategoryEntity extends AbstractEntity {
     boolean featured;
 
     @Column(name = "image")
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     List<String> image;
 
 
-    @ManyToMany(mappedBy = "category", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "category", fetch = FetchType.LAZY)
     List<ProductEntity> products = new ArrayList<>();
 
 
@@ -56,7 +56,7 @@ public class ProductCategoryEntity extends AbstractEntity {
 
 
     @JsonManagedReference
-    @OneToMany(fetch = FetchType.EAGER,
+    @OneToMany(fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
             mappedBy = "parent")
     List<ProductCategoryEntity> child = new ArrayList<>();

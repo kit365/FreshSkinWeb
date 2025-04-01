@@ -61,7 +61,7 @@ public class VNPayPaymentController {
         if ("00".equals(transactionStatus)) {
             orderService.processOrder(id);
             return ResponseEntity.status(HttpStatus.FOUND)
-                    .location(URI.create("https://project-swp391-n9j6.onrender.com/order/success/"+id))
+                    .location(URI.create("http://localhost:3000/order/success/"+id))
                     .build();
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Thanh toán thất bại!");

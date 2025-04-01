@@ -124,6 +124,37 @@ public class ProductSearchRepository {
         }
     }
 
+    public void update(Long productId, int position) {
+        try {
+            if (productId == null) {
+                log.error("Invalid input: productId or status is null/empty");
+                return;
+            }
+
+            log.debug("Updating product with ID: {}, status: {}", productId, position);
+
+            // Chỉ cập nhật field cụ thể
+            ProductResponseDTO updateFields = new ProductResponseDTO();
+            updateFields.setPosition(position);
+
+            UpdateRequest<ProductResponseDTO, ProductResponseDTO> updateRequest =
+                    new UpdateRequest.Builder<ProductResponseDTO, ProductResponseDTO>()
+                            .index("products")
+                            .id(String.valueOf(productId))
+                            .doc(updateFields)
+                            .retryOnConflict(3)
+                            .build();
+
+            // Thực hiện update
+            openSearchClient.update(updateRequest, ProductResponseDTO.class);
+
+        } catch (IOException e) {
+            log.error("Error while updating product: {}", e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Unexpected error while updating product: {}", e.getMessage(), e);
+        }
+    }
+
 
 
     public void update(Long productId, boolean deleted) {

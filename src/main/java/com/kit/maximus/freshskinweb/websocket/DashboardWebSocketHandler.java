@@ -135,9 +135,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.*;
 
 @Slf4j
 @Component
@@ -148,6 +146,7 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
 
     private final Set<WebSocketSession> sessions = new CopyOnWriteArraySet<>();
     private Map<String, Object> previousData = new ConcurrentHashMap<>();
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
@@ -163,12 +162,51 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
         previousData.clear();
     }
 
+//    @Scheduled(fixedRate = 5000) // Gửi mỗi 5s
+//    public void sendPeriodicDataToClients() {
+//        sessions.removeIf(session -> !session.isOpen()); // Loại bỏ session đã đóng
+//        for (WebSocketSession session : sessions) {
+//            if (session.isOpen()) {
+//                sendDataDashBoard(session);
+//            }
+//        }
+//    }
+//
+//
+//    public void sendDataDashBoard(WebSocketSession session) {
+//        CompletableFuture<Map<String, Object>> futureData = fetchDataFromService();
+//
+//        futureData.thenAcceptAsync(data -> {
+//            if (session == null || !session.isOpen()) {
+//                log.warn("⚠️ Session đã đóng, không gửi được dữ liệu.");
+//                return;
+//            }
+//
+//            try {
+//                ObjectMapper objectMapper = new ObjectMapper();
+//                String previousJson = objectMapper.writeValueAsString(previousData);
+//                String newJson = objectMapper.writeValueAsString(data);
+//
+//                if (!previousJson.equals(newJson)) {
+//                // Nếu có thay đổi, gửi qua WebSocket
+//                String jsonData = new ObjectMapper().writeValueAsString(data);
+//                session.sendMessage(new TextMessage(jsonData));
+//
+//                // Cập nhật dữ liệu cũ
+//                previousData = new HashMap<>(data);
+//            }
+//            } catch (Exception e) {
+//                log.error("⚠️ Lỗi khi gửi dữ liệu WebSocket: ", e);
+//            }
+//        });
+//    }
+
     @Scheduled(fixedRate = 5000) // Gửi mỗi 5s
     public void sendPeriodicDataToClients() {
         sessions.removeIf(session -> !session.isOpen()); // Loại bỏ session đã đóng
         for (WebSocketSession session : sessions) {
             if (session.isOpen()) {
-                sendDataDashBoard(session);
+                executorService.submit(() -> sendDataDashBoard(session)); // Chạy hàm gửi dữ liệu trong thread riêng
             }
         }
     }
@@ -188,18 +226,19 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
                 String newJson = objectMapper.writeValueAsString(data);
 
                 if (!previousJson.equals(newJson)) {
-                // Nếu có thay đổi, gửi qua WebSocket
-                String jsonData = new ObjectMapper().writeValueAsString(data);
-                session.sendMessage(new TextMessage(jsonData));
+                    String jsonData = objectMapper.writeValueAsString(data);
+                    session.sendMessage(new TextMessage(jsonData));
 
-                // Cập nhật dữ liệu cũ
-                previousData = new HashMap<>(data);
-            }
+                    // Cập nhật dữ liệu cũ
+                    previousData = new HashMap<>(data);
+                }
             } catch (Exception e) {
                 log.error("⚠️ Lỗi khi gửi dữ liệu WebSocket: ", e);
             }
-        });
+        }, executorService); // Chạy `thenAcceptAsync` với thread pool riêng
     }
+
+
 
     //nhan data tu dashboardService
     private CompletableFuture<Map<String, Object>> fetchDataFromService() {
@@ -218,7 +257,8 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
                 dashboardService.getRatingStatsByDate(),
                 dashboardService.getRevenueByDate(),
                 dashboardService.getRevenueByCategories(),
-                dashboardService.getStatisticSkinTest()
+                dashboardService.getStatisticSkinTest(),
+                dashboardService.getDiscountStatistics()
         ).thenApply(v -> { //co ket qua, bien doi cac data duoc thuc hien trong CompletableFuture thanh map
             try {
                 Map<String, Object> data = new HashMap<>();
@@ -237,6 +277,7 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
                 data.put("revenueByDate", dashboardService.getRevenueByDate().join());
                 data.put("revenueByCategories", dashboardService.getRevenueByCategories().join());
                 data.put("statisticSkinTest", dashboardService.getStatisticSkinTest().join());
+                data.put("discountDetail", dashboardService.getDiscountStatistics().join());
                 return data;
             } catch (Exception e) {
                 log.error("⚠️ Lỗi khi lấy dữ liệu dashboard: ", e);

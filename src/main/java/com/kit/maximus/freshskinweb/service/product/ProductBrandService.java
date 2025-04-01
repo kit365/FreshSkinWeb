@@ -215,7 +215,7 @@ public class ProductBrandService implements BaseService<ProductBrandResponse, Cr
     @CacheEvict(value = {"top10ProductBrands", "allProductBrands", "trashProductBrands", "fullBrands"}, allEntries = true)
     public String update(long id, String status, Integer position, String statusEdit) {
         ProductBrandEntity productBrandEntity = productBrandRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.BLOG_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_BRAND_NOT_FOUND));
 
         System.out.println("status: " + status + ", position: " + position + ", statusEdit: " + statusEdit);
 

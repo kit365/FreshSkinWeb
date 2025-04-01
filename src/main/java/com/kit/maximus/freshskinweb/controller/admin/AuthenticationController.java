@@ -66,7 +66,6 @@ public class AuthenticationController {
         String message = "Lấy dữ liệu user thành công";
         UserResponseDTO result = authenticationService.getUserByToken(request.getToken());
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
-
     }
 
 

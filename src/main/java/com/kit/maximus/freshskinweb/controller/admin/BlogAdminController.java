@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -94,7 +95,13 @@ public class BlogAdminController {
             throw new AppException(ErrorCode.INVALID_REQUEST_BLOGID);
         }
 
-        List<Long> ids = (List<Long>) blogRequest.get("id");
+        // Lấy danh sách ID dưới dạng List<Integer>
+        List<Integer> intIds = (List<Integer>) blogRequest.get("id");
+
+        // Chuyển đổi sang List<Long>
+        List<Long> ids = intIds.stream().map(Long::valueOf).collect(Collectors.toList());
+
+
         String status = blogRequest.get("status").toString();
 
         var result = blogService.update(ids, status);
@@ -108,9 +115,7 @@ public class BlogAdminController {
             @RequestPart("request") String requestJson,
             @RequestPart(value = "newImg", required = false) List<MultipartFile> newImg) {
 
-        log.info("requestJson:{}", requestJson);
-        log.info("images:{}", newImg);
-        String message_succed = "Cập nhập bài viết thành công";
+        String message_succeed = "Cập nhập bài viết thành công";
         String message_failed = "Cập nhập bài viết thất bại";
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -125,7 +130,7 @@ public class BlogAdminController {
             return ResponseAPI.<BlogResponse>builder()
                     .code(HttpStatus.OK.value())
                     .data(result)
-                    .message(message_succed)
+                    .message(message_succeed)
                     .build();
 
         } catch (Exception e) {

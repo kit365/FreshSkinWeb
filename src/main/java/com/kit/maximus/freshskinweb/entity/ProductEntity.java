@@ -21,7 +21,7 @@ import java.util.List;
         @Index(name = "idx_slug", columnList = "Slug"),
         @Index(name = "idx_brand", columnList = "brandID"),
 })
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "category", "variants", "skinTypes", "reviews"})
+//@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "category", "variants", "skinTypes", "reviews"})
 public class ProductEntity extends AbstractEntity {
 
     @Id
@@ -34,7 +34,7 @@ public class ProductEntity extends AbstractEntity {
 //    DiscoundEntity discount;
 
 
-    @ManyToMany(fetch = FetchType.EAGER,
+    @ManyToMany(fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
     @JoinTable(
             name = "Product_Category",
@@ -48,11 +48,11 @@ public class ProductEntity extends AbstractEntity {
     @OnDelete(action = OnDeleteAction.SET_NULL)
     ProductBrandEntity brand;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @OrderBy("price ASC")
     List<ProductVariantEntity> variants = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "ProductSkinType",
             joinColumns = @JoinColumn(name = "product_id", nullable = true),
@@ -72,7 +72,7 @@ public class ProductEntity extends AbstractEntity {
 //    @ElementCollection // Lưu danh sách ảnh trong một bảng riêng
 //     List<String> thumbnail;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @Column(name = "Thumbnail")
     List<String> thumbnail;
 
@@ -101,10 +101,10 @@ public class ProductEntity extends AbstractEntity {
     @Column(name = "SkinIssues", columnDefinition = "MEDIUMTEXT")
     String skinIssues;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "product")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "product")
     List<ReviewEntity> reviews = new ArrayList<>();
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "discountId")
     DiscountEntity discount;
 
@@ -118,24 +118,4 @@ public class ProductEntity extends AbstractEntity {
         productVariantEntity.setProduct(null);
     }
 
-    @Override
-    public String toString() {
-        return "ProductEntity{" +
-                "id=" + id +
-                ", variants=" + variants +
-                ", title='" + title + '\'' +
-                ", slug='" + slug + '\'' +
-                ", description='" + description + '\'' +
-                ", thumbnail='" + thumbnail + '\'' +
-                ", discountPercent=" + discountPercent +
-                ", position=" + position +
-                ", featured=" + featured +
-                ", origin='" + origin + '\'' +
-                ", ingredients='" + ingredients + '\'' +
-                ", usageInstructions='" + usageInstructions + '\'' +
-                ", benefits='" + benefits + '\'' +
-                ", skinIssues='" + skinIssues + '\'' +
-                ", discountEntity='" + discount + '\'' +
-                '}';
-    }
 }

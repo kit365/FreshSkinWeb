@@ -3,8 +3,10 @@ package com.kit.maximus.freshskinweb.service.product;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
+import com.kit.maximus.freshskinweb.dto.request.product_brand.UpdateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.response.*;
 import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -25,8 +27,13 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -130,81 +137,43 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return true;
     }
 
+    @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
+    public String update(long id, String status, Integer position, String statusEdit) {
+        ProductEntity productEntity = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        System.out.println("status: " + status + ", position: " + position + ", statusEdit: " + statusEdit);
+
+        if ("editStatus".equalsIgnoreCase(statusEdit)) {
+            if (status != null) { // Kiểm tra nếu status không bị null
+                Status statusEnum = getStatus(status);
+                productEntity.setStatus(statusEnum);
+                productRepository.save(productEntity);
+                productSearchRepository.update(id, status);
+                return "Cập nhật trạng thái thành công";
+            }
+            return "Trạng thái không được để trống!";
+        } else if ("editPosition".equalsIgnoreCase(statusEdit)) {
+            if (position != 0) { // Kiểm tra null trước khi gán
+                productEntity.setPosition(position);
+                productRepository.save(productEntity);
+                productSearchRepository.update(id, position);
+                return "Cập nhật vị trí thành công";
+            }
+            return "Vị trí không được để trống!";
+        }
+
+        return "Cập nhật thất bại";
+    }
+
+
 
     //noted: thêm set thumb vao entity sau khi update
     @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     @Override
     public ProductResponseDTO update(Long id, UpdateProductRequest request) {
-        if (StringUtils.hasLength(request.getStatus())) {
-            request.setStatus(request.getStatus().toUpperCase());
-            getStatus(request.getStatus());
-        }
-
         ProductEntity listProduct = getProductEntityById(id);
 
-        if (request.getThumbnail() != null) {
-            listProduct.getThumbnail().forEach(thumbnail -> {
-                try {
-                    deleteImageFromCloudinary(thumbnail);
-                } catch (IOException e) {
-                    log.error("Delete thumbnail error", e);
-                    throw new RuntimeException(e);
-                }
-            });
-            int count = 0;
-            List<String> newThumbnails = new ArrayList<>();
-            for (MultipartFile file : request.getThumbnail()) {
-                try {
-                    String url = uploadImageFromFile(file, getSlug(request.getTitle()), count++);
-                    newThumbnails.add(url);
-                } catch (IOException e) {
-                    log.error("Upload thumbnail error", e);
-                    throw new RuntimeException(e);
-                }
-            }
-            listProduct.setThumbnail(newThumbnails);
-        }
-//        //Upload hinh => Xoa hinh cu, add hinh moi
-//        if (request.getThumbnail() != null) {
-//
-//            List<String> oldThumbnails = listProduct.getThumbnail();
-//            List<MultipartFile> newThumbnails = request.getThumbnail();
-//            List<String> updatedThumbnails = new ArrayList<>();
-
-//           String thumbnailBytes =  IOUtils.readFileToString( request.getThumbnail());
-
-
-//            //Xóa hình khi không có trong request
-//            for (String oldThumbnail : oldThumbnails) {
-//                if (!newThumbnails.contains(oldThumbnail)) {
-//                    try {
-//                        long start = System.currentTimeMillis();
-//                        deleteImageFromCloudinary(oldThumbnail);
-//                        long end = System.currentTimeMillis();
-//                        log.info("Thời gian xóa ảnh {}: {}ms", oldThumbnail, (end - start));
-//                    } catch (IOException e) {
-//                        log.error("delete image error: {}", oldThumbnail);
-//                        throw new RuntimeException(e);
-//                    }
-//                } else {
-//                    updatedThumbnails.add(oldThumbnail);
-//                }
-//            }
-//
-//            //Cập nhập lại hình mới
-//            for (MultipartFile newThumbnail : newThumbnails) {
-//                if (!oldThumbnails.contains(newThumbnail)) {
-//                    try {
-//                        String img = uploadImage(newThumbnail);
-//                        updatedThumbnails.add(img);
-//                    } catch (IOException e) {
-//                        log.error("delete image error: {}", newThumbnail);
-//                        throw new RuntimeException(e);
-//                    }
-//                }
-//            }
-//            listProduct.setThumbnail(updatedThumbnails);
-//        }
 
         if (StringUtils.hasLength(request.getTitle())) {
             listProduct.setSlug(getSlug(request.getTitle()));
@@ -249,6 +218,70 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 }
             }
         }
+
+
+        if ((request.getImage() != null && !request.getImage().isEmpty()) ||
+                (request.getThumbnail() != null && !request.getThumbnail().isEmpty())) {
+
+            // Lấy danh sách ảnh cũ từ listProduct
+            List<String> oldImages = listProduct.getThumbnail() != null ?
+                    new ArrayList<>(listProduct.getThumbnail()) : new ArrayList<>();
+
+            // Lấy danh sách tên file mới từ request
+            List<String> newThumbnails = request.getThumbnail() != null ?
+                    request.getThumbnail().stream().map(MultipartFile::getOriginalFilename).toList() :
+                    new ArrayList<>();
+
+            // Xóa ảnh cũ không còn trong danh sách mới
+            for (String oldUrl : oldImages) {
+                if (!newThumbnails.contains(oldUrl)) {
+                    try {
+                        deleteImageFromCloudinary(oldUrl); // Xóa khỏi Cloudinary
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                    }
+                }
+            }
+
+            // Danh sách mới giữ lại các ảnh chưa bị xóa
+            List<String> updatedThumbnails = new ArrayList<>(newThumbnails);
+
+            // Thêm ảnh mới nếu có
+            if (request.getThumbnail() != null && !request.getThumbnail().isEmpty()) {
+                int count = 0;
+                for (MultipartFile file : request.getThumbnail()) {
+                    if (file != null && !file.isEmpty()) {
+                        try {
+                            String url = uploadImageFromFile(file, getSlug(request.getTitle()), count++);
+                            updatedThumbnails.add(url);
+                        } catch (IOException e) {
+                            log.error("Failed to upload image: {}", e.getMessage());
+                            throw new AppException(ErrorCode.IMAGE_UPLOAD_FAILED);
+                        }
+                    }
+                }
+            }
+
+            // Cập nhật lại danh sách ảnh trong listProduct
+            listProduct.setThumbnail(updatedThumbnails);
+
+        } else {
+            // Nếu không có ảnh mới từ FE => Xóa hết ảnh cũ
+            if (listProduct.getThumbnail() != null && !listProduct.getThumbnail().isEmpty()) {
+                for (String oldUrl : listProduct.getThumbnail()) {
+                    try {
+                        deleteImageFromCloudinary(oldUrl); // Xóa toàn bộ hình ảnh
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                    }
+                }
+            }
+            listProduct.setThumbnail(null); // Xóa danh sách ảnh trong DB
+        }
+
+
+
+
 
 
         productMapper.updateProduct(listProduct, request);
@@ -823,82 +856,6 @@ List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status
         return data;
     }
 
-//    //Tìm chi tiết Product bằng Slug
-//    public List<Map<String, Object>> getProductBySlug(String slug) {
-//
-//
-//        List<Map<String, Object>> data = new ArrayList<>();
-//        Map<String, Object> map = new HashMap<>();
-//
-//        // Lấy sản phẩm theo slug
-//        ProductEntity productEntity = productRepository.findBySlug(slug);
-//
-//        if (productEntity == null || productEntity.isDeleted() || productEntity.getStatus() != Status.ACTIVE) {
-//            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-//        }
-//
-//        List<ProductCategoryResponse> productCategoryResponses = new ArrayList<>();
-//
-//
-//        productEntity.getCategory().forEach(productCategoryEntity -> {
-//            ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
-//            productCategoryResponse.setId(productCategoryEntity.getId());
-//            productCategoryResponse.setTitle(productCategoryEntity.getTitle());
-//            productCategoryResponse.setSlug(productCategoryEntity.getSlug());
-//
-//            if (productCategoryEntity.getParent() != null) {
-//                ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
-//                parentCategoryResponse.setId(productCategoryEntity.getParent().getId());
-//                parentCategoryResponse.setTitle(productCategoryEntity.getParent().getTitle());
-//                parentCategoryResponse.setSlug(productCategoryEntity.getParent().getSlug());
-//                productCategoryResponse.setParent(parentCategoryResponse);
-//            }
-//
-//
-//            productCategoryResponses.add(productCategoryResponse);
-//
-//
-//        });
-//        ProductResponseDTO response = mapProductResponseDTO(productEntity);
-//        response.setCategory(productCategoryResponses);
-//        List<ProductVariantResponse> productVariantResponses = new ArrayList<>();
-//        productEntity.getVariants().forEach(variant -> {
-//            ProductVariantResponse variantResponse = new ProductVariantResponse();
-//            variantResponse.setId(variant.getId());
-//            variantResponse.setPrice(variant.getPrice());
-//            variantResponse.setVolume(variant.getVolume());
-//            variantResponse.setUnit(variant.getUnit());
-//            productVariantResponses.add(variantResponse);
-//        });
-//        response.setVariants(productVariantResponses);
-//        // Nhét sản phẩm chính vào map (bọc vào List)
-//        map.put("productDetail", response);
-//
-//        // Tìm id của các category
-//        List<Long> ids = new ArrayList<>();
-//
-//        productEntity.getCategory().forEach(productCategoryEntity -> ids.add(productCategoryEntity.getId()));
-//
-//
-//        List<ProductEntity> productEntities = productRepository.findTop10ByCategory_IdIn(ids);
-//
-//
-//        productEntities.removeIf(productEntity1 -> productEntity1.getId().equals(productEntity.getId()));
-//
-//
-//        List<ProductResponseDTO> productRelatedResponses = mapProductResponsesDTO(productEntities);
-//        productRelatedResponses.forEach(productRelatedResponse -> {
-//            productRelatedResponse.setCategory(null);
-//            productRelatedResponse.setSkinTypes(null);
-//            productRelatedResponse.setBrand(null);
-//            clearUnnecessaryFields(productRelatedResponse);
-//        });
-//        map.put("productsRelated", productRelatedResponses);
-//        data.add(map);
-//        return data;
-//    }
-
-    //hàm này là con của hàm getProductCategoryBySlug => có giới hạn sản phẩm được trả ra
 
     private Map<String, Object> getLimitProductByCategorySlug(int maxSize, int size, int page, String sortValue, String sortDirection, String slug, List<String> brand, List<String> category, List<String> skinTypes, double minPrice, double maxPrice) {
         Map<Long, ProductCategoryResponse> productCategoryResponseMap = new HashMap<>();
@@ -906,11 +863,21 @@ List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status
         Map<Long, SkinTypeResponse> skinTypeResponseMap = new HashMap<>();
 
         Pageable limitPageable = PageRequest.of(0, maxSize);
+        Specification<ProductEntity> filterValues;
+        List<ProductEntity> productValues = new ArrayList<>();
+        if(!slug.equals("top-ban-chay")) {
+            filterValues = findByParentCategorySlug(slug)
+                    .and(isNotDeleted())
+                    .and(filterByStatus(Status.ACTIVE));
+            productValues = productRepository.findAll(filterValues, limitPageable).getContent();
+        }
 
-        Specification<ProductEntity> filterValues = findByParentCategorySlug(slug)
-                .and(isNotDeleted())
-                .and(filterByStatus(Status.ACTIVE));
-        List<ProductEntity> productValues = productRepository.findAll(filterValues, limitPageable).getContent();
+        if(slug.equals("top-ban-chay")){
+            filterValues = findTopSellingProducts()
+                    .and(isNotDeleted())
+                    .and(filterByStatus(Status.ACTIVE));
+            productValues = productRepository.findAll(filterValues, limitPageable).getContent();
+        }
 
         productValues.forEach(productEntity -> {
             if (productEntity.getCategory() != null) {
@@ -938,9 +905,20 @@ List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status
         });
 
 
-        Specification<ProductEntity> specification = findByParentCategorySlug(slug)
-                .and(isNotDeleted())
-                .and(filterByStatus(Status.ACTIVE));
+
+
+        Specification<ProductEntity> specification = null;
+        if(!slug.equals("top-ban-chay")) {
+            specification = findByParentCategorySlug(slug)
+                    .and(isNotDeleted())
+                    .and(filterByStatus(Status.ACTIVE));
+        }
+
+        if(slug.equals("top-ban-chay")){
+            specification = findTopSellingProducts()
+                    .and(isNotDeleted())
+                    .and(filterByStatus(Status.ACTIVE));
+        }
 
         if (brand != null) {
             specification = specification.and(filterByBrand(brand));
@@ -1011,6 +989,8 @@ List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status
             map.put("title", "Sản Phẩm Mới");
         } else if (slug.equals("khuyen-mai-hot")) {
             map.put("title", "Khuyến Mãi Hot");
+        } else if(slug.equals("top-ban-chay")){
+            map.put("title", "Top Bán Chạy");
         }
 
         map.put("products", productResponseDTOs);
@@ -1034,8 +1014,12 @@ List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status
             maxSize = 30;
         }
 
+        if(slug.equals("top-ban-chay")) {
+            maxSize = 12;
+        }
 
-        if (slug.equals("san-pham-moi") || slug.equals("khuyen-mai-hot")) {
+
+        if (slug.equals("san-pham-moi") || slug.equals("khuyen-mai-hot") || slug.equals("top-ban-chay")) {
             return getLimitProductByCategorySlug(maxSize, size, page, sortValue, sortDirection, slug, brand, category, skinTypes, minPrice, maxPrice);
         }
 
@@ -1369,95 +1353,175 @@ List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status
 
     //hàm nay để map riêng vào searchPublic
 
-    // Hàm Map danh sách ProductResponseDTO từ danh sách ProductEntity
-    public List<ProductResponseDTO> mapProductIndexResponsesDTO(List<ProductEntity> productEntities) {
-        List<ProductResponseDTO> productResponseDTOs = productMapper.productToProductResponsesDTO(productEntities);
-
-        IntStream.range(0, productEntities.size()).forEach(i -> {
-            ProductEntity product = productEntities.get(i);
-            ProductResponseDTO dto = productResponseDTOs.get(i);
-
-            // Map thương hiệu
-            if (product.getBrand() != null) {
-                ProductBrandResponse brandResponse = new ProductBrandResponse();
-                brandResponse.setId(product.getBrand().getId());
-                brandResponse.setTitle(product.getBrand().getTitle());
-                brandResponse.setSlug(product.getBrand().getSlug());
-                dto.setBrand(brandResponse);
-            }
-
-//            if(product.getDiscount() != null) {
-//                DiscountResponse discountResponse = new DiscountResponse();
-//                discountResponse.getDiscountType();
-//            }
-
-//            if (product.getReviews() != null) {
-//                List<ReviewResponse> reviewResponses = product.getReviews().stream()
-//                        .filter(review -> review.getParent() == null) // Chỉ lấy root reviews
-//                        .map(reviewService::convertToReviewResponse) // Chuyển đổi từng review
-//                        .collect(Collectors.toList());
+//    // Hàm Map danh sách ProductResponseDTO từ danh sách ProductEntity
+//    public List<ProductResponseDTO> mapProductIndexResponsesDTO(List<ProductEntity> productEntities) {
+//        List<ProductResponseDTO> productResponseDTOs = productMapper.productToProductResponsesDTO(productEntities);
 //
-//                dto.setReviews(reviewResponses); // Gán vào DTO
-//            }
-
-            // Map danh mục sản phẩm
-            if (product.getCategory() != null) {
-                dto.setCategory(product.getCategory().stream().map(category -> {
-                    ProductCategoryResponse categoryResponse = new ProductCategoryResponse();
-                    categoryResponse.setId(category.getId());
-                    categoryResponse.setTitle(category.getTitle());
-                    categoryResponse.setSlug(category.getSlug());
-
-                    if (category.getParent() != null) {
-                        ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
-                        parentCategoryResponse.setId(category.getParent().getId());
-                        parentCategoryResponse.setTitle(category.getParent().getTitle());
-                        parentCategoryResponse.setSlug(category.getParent().getSlug());
-                        categoryResponse.setParent(parentCategoryResponse);
-                    }
-
-
-                    return categoryResponse;
-                }).collect(Collectors.toList()));
-            }
-
-            // Map loại da của Product
-            if (product.getSkinTypes() != null) {
-                dto.setSkinTypes(product.getSkinTypes().stream()
-                        .map(skinType -> {
-                            SkinTypeResponse response = new SkinTypeResponse();
-                            response.setId(skinType.getId());
-                            response.setType(skinType.getType());
-                            return response;
-                        })
-                        .collect(Collectors.toList()));
-            }
-
-            // Map danh sách biến thể của Product
-            if (product.getVariants() != null) {
-                dto.setVariants(product.getVariants().stream()
-                        .map(variant -> {
-                            ProductVariantResponse variantResponse = new ProductVariantResponse();
-                            variantResponse.setId(variant.getId());
-                            variantResponse.setPrice(variant.getPrice());
-                            variantResponse.setVolume(variant.getVolume());
-                            variantResponse.setUnit(variant.getUnit());
-                            return variantResponse;
-                        })
-                        .collect(Collectors.toList()));
-            }
-
+//        IntStream.range(0, productEntities.size()).forEach(i -> {
+//            ProductEntity product = productEntities.get(i);
+//            ProductResponseDTO dto = productResponseDTOs.get(i);
 //
-//            if(product.getDiscount() != null) {
-//                dto.setD
-//                dto.setDiscountPercent(product.getDiscountPercent());
+//            // Map thương hiệu
+//            if (product.getBrand() != null) {
+//                ProductBrandResponse brandResponse = new ProductBrandResponse();
+//                brandResponse.setId(product.getBrand().getId());
+//                brandResponse.setTitle(product.getBrand().getTitle());
+//                brandResponse.setSlug(product.getBrand().getSlug());
+//                dto.setBrand(brandResponse);
 //            }
+//
+////            if(product.getDiscount() != null) {
+////                DiscountResponse discountResponse = new DiscountResponse();
+////                discountResponse.getDiscountType();
+////            }
+//
+////            if (product.getReviews() != null) {
+////                List<ReviewResponse> reviewResponses = product.getReviews().stream()
+////                        .filter(review -> review.getParent() == null) // Chỉ lấy root reviews
+////                        .map(reviewService::convertToReviewResponse) // Chuyển đổi từng review
+////                        .collect(Collectors.toList());
+////
+////                dto.setReviews(reviewResponses); // Gán vào DTO
+////            }
+//
+//            // Map danh mục sản phẩm
+//            if (product.getCategory() != null) {
+//                dto.setCategory(product.getCategory().stream().map(category -> {
+//                    ProductCategoryResponse categoryResponse = new ProductCategoryResponse();
+//                    categoryResponse.setId(category.getId());
+//                    categoryResponse.setTitle(category.getTitle());
+//                    categoryResponse.setSlug(category.getSlug());
+//
+//                    if (category.getParent() != null) {
+//                        ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
+//                        parentCategoryResponse.setId(category.getParent().getId());
+//                        parentCategoryResponse.setTitle(category.getParent().getTitle());
+//                        parentCategoryResponse.setSlug(category.getParent().getSlug());
+//                        categoryResponse.setParent(parentCategoryResponse);
+//                    }
+//
+//
+//                    return categoryResponse;
+//                }).collect(Collectors.toList()));
+//            }
+//
+//            // Map loại da của Product
+//            if (product.getSkinTypes() != null) {
+//                dto.setSkinTypes(product.getSkinTypes().stream()
+//                        .map(skinType -> {
+//                            SkinTypeResponse response = new SkinTypeResponse();
+//                            response.setId(skinType.getId());
+//                            response.setType(skinType.getType());
+//                            return response;
+//                        })
+//                        .collect(Collectors.toList()));
+//            }
+//
+//            // Map danh sách biến thể của Product
+//            if (product.getVariants() != null) {
+//                dto.setVariants(product.getVariants().stream()
+//                        .map(variant -> {
+//                            ProductVariantResponse variantResponse = new ProductVariantResponse();
+//                            variantResponse.setId(variant.getId());
+//                            variantResponse.setPrice(variant.getPrice());
+//                            variantResponse.setVolume(variant.getVolume());
+//                            variantResponse.setUnit(variant.getUnit());
+//                            return variantResponse;
+//                        })
+//                        .collect(Collectors.toList()));
+//            }
+//
+////
+////            if(product.getDiscount() != null) {
+////                dto.setD
+////                dto.setDiscountPercent(product.getDiscountPercent());
+////            }
+//
+//
+//        });
+//
+//        return productResponseDTOs;
+//    }
 
 
-        });
 
-        return productResponseDTOs;
-    }
+public List<ProductResponseDTO> mapProductIndexResponsesDTO(List<ProductEntity> productEntities) {
+    return productEntities.stream()  // Sử dụng stream thay vì parallelStream
+            .map(product -> {
+                ProductResponseDTO dto = productMapper.productToProductResponseDTO(product);
+
+                // Map thương hiệu
+                if (product.getBrand() != null) {
+                    ProductBrandResponse brandResponse = new ProductBrandResponse();
+                    brandResponse.setId(product.getBrand().getId());
+                    brandResponse.setTitle(product.getBrand().getTitle());
+                    brandResponse.setSlug(product.getBrand().getSlug());
+                    dto.setBrand(brandResponse);
+                }
+
+                // Map danh mục sản phẩm
+                if (product.getCategory() != null) {
+                    List<ProductCategoryResponse> categoryResponses = product.getCategory().stream()
+                            .map(category -> {
+                                ProductCategoryResponse categoryResponse = new ProductCategoryResponse();
+                                categoryResponse.setId(category.getId());
+                                categoryResponse.setTitle(category.getTitle());
+                                categoryResponse.setSlug(category.getSlug());
+
+                                // Map cha của danh mục (nếu có)
+                                if (category.getParent() != null) {
+                                    ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
+                                    parentCategoryResponse.setId(category.getParent().getId());
+                                    parentCategoryResponse.setTitle(category.getParent().getTitle());
+                                    parentCategoryResponse.setSlug(category.getParent().getSlug());
+                                    categoryResponse.setParent(parentCategoryResponse);
+                                }
+
+                                return categoryResponse;
+                            }).collect(Collectors.toList());
+
+                    dto.setCategory(categoryResponses);
+                }
+
+                // Map loại da
+                if (product.getSkinTypes() != null) {
+                    List<SkinTypeResponse> skinTypeResponses = product.getSkinTypes().stream()
+                            .map(skinType -> {
+                                SkinTypeResponse response = new SkinTypeResponse();
+                                response.setId(skinType.getId());
+                                response.setType(skinType.getType());
+                                return response;
+                            }).collect(Collectors.toList());
+
+                    dto.setSkinTypes(skinTypeResponses);
+                }
+
+                // Map danh sách biến thể
+                if (product.getVariants() != null) {
+                    List<ProductVariantResponse> variantResponses = product.getVariants().stream()
+                            .map(variant -> {
+                                ProductVariantResponse variantResponse = new ProductVariantResponse();
+                                variantResponse.setId(variant.getId());
+                                variantResponse.setPrice(variant.getPrice());
+                                variantResponse.setVolume(variant.getVolume());
+                                variantResponse.setUnit(variant.getUnit());
+                                return variantResponse;
+                            }).collect(Collectors.toList());
+
+                    dto.setVariants(variantResponses);
+                }
+
+
+                return dto;
+            })
+            .collect(Collectors.toList());
+}
+
+
+
+
+
+
 
     private ProductResponseDTO mapProductIndexResponsesDTO(ProductEntity product) {
         ProductResponseDTO dto = productMapper.productToProductResponseDTO(product);
