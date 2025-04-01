@@ -53,7 +53,7 @@ public class VoucherService {
     @Scheduled(cron = "0 0 0 * * TUE")
     public void autoCreateVoucherOnTuesDay() {
         // Kiểm tra voucher tên TUESDAYVOUCHER đã tồn tại chưa
-        String voucherName = "TUESDAYVOUCHER";
+        String voucherName = "TUESDAYFRESH";
         VoucherRequest voucherRequest = new VoucherRequest();
         voucherRequest.setUsageLimit(100);
         voucherRequest.setMaxDiscount(BigDecimal.valueOf(50000));
@@ -100,7 +100,7 @@ public class VoucherService {
     @Scheduled(cron = "0 0 0 1 * *") // Chạy vào 00:00 ngày 1 mỗi tháng
     public void autoCreateVoucherInAMonth() {
         // Kiểm tra voucher tên MONTHVOUCHER đã tồn tại chưa
-        String voucherName = "MONTHVOUCHER";
+        String voucherName = "MONTHFRESH";
         VoucherRequest voucherRequest = new VoucherRequest();
         voucherRequest.setUsageLimit(100);
         voucherRequest.setMaxDiscount(BigDecimal.valueOf(50000));
