@@ -94,6 +94,7 @@ public enum ErrorCode {
     TOTAL_PRICE_INVALID(400, "Tổng giá trị đơn hàng phải lớn hơn 0"),
     PAYMENT_METHOD_NOT_NULL(400, "Phương thức thanh toán không được để trống"),
     ORDER_DATE_NOT_NUL(400, "Ngày đặt hàng không được để trống"),
+    ORDER_INVALID(400, "Đơn hàng không hợp lệ"),
 
     //BLOG CATEGORY
     BLOG_CATEGORY_NAME_EXISTED(404, "Tên danh mục blog đã tồn tại"),
@@ -140,6 +141,7 @@ public enum ErrorCode {
 
     //ORDERSTATUS
     ORDER_STATUS_INVALID(400, "Không tìm thấy trạng thái đơn hàng"),
+
 
     //PAYMENT METHOD
     INVALID_PAYMENT_METHOD(404,"Phương thức thanh toán không hợp lệ"),

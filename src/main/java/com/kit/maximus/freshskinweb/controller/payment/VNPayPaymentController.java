@@ -64,7 +64,9 @@ public class VNPayPaymentController {
                     .location(URI.create("http://localhost:3000/order/success/"+id))
                     .build();
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Thanh toán thất bại!");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .location(URI.create("http://localhost:3000/order/fail"))
+                    .build();
         }
     }
 
