@@ -201,14 +201,27 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
 //        });
 //    }
 
+//    @Scheduled(fixedRate = 5000) // Gửi mỗi 5s
+//    public void sendPeriodicDataToClients() {
+//        sessions.removeIf(session -> !session.isOpen()); // Loại bỏ session đã đóng
+//        for (WebSocketSession session : sessions) {
+//            if (session.isOpen()) {
+//                executorService.submit(() -> sendDataDashBoard(session)); // Chạy hàm gửi dữ liệu trong thread riêng
+//            }
+//        }
+//    }
+
     @Scheduled(fixedRate = 5000) // Gửi mỗi 5s
     public void sendPeriodicDataToClients() {
         sessions.removeIf(session -> !session.isOpen()); // Loại bỏ session đã đóng
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+
         for (WebSocketSession session : sessions) {
             if (session.isOpen()) {
-                executorService.submit(() -> sendDataDashBoard(session)); // Chạy hàm gửi dữ liệu trong thread riêng
+                futures.add(CompletableFuture.runAsync(() -> sendDataDashBoard(session), executorService));
             }
         }
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join(); // Đảm bảo tất cả data đã được gửi trước khi tiếp tục
     }
 
     public void sendDataDashBoard(WebSocketSession session) {
