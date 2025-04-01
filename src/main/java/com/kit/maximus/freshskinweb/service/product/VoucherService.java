@@ -51,7 +51,7 @@ public class VoucherService {
     }
 
     @Scheduled(cron = "0 0 0 * * TUE")
-    public void autoCreateVoucher() {
+    public void autoCreateVoucherOnTuesDay() {
         // Kiểm tra voucher tên TUESDAYVOUCHER đã tồn tại chưa
         String voucherName = "TUESDAYVOUCHER";
         VoucherRequest voucherRequest = new VoucherRequest();
@@ -97,16 +97,46 @@ public class VoucherService {
         return voucherRepository.existsByName(name);
     }
 
-//    // Tạo tên voucher duy nhất bằng cách thêm số vào tên
-//    public String generateUniqueVoucherName(String baseName) {
-//        int suffix = 1;
-//        String uniqueName = baseName + suffix;
-//        while (isVoucherNameExist(uniqueName)) {
-//            suffix++;
-//            uniqueName = baseName + suffix;
-//        }
-//        return uniqueName;
-//    }
+    @Scheduled(cron = "0 0 0 1 * *") // Chạy vào 00:00 ngày 1 mỗi tháng
+    public void autoCreateVoucherInAMonth() {
+        // Kiểm tra voucher tên MONTHVOUCHER đã tồn tại chưa
+        String voucherName = "MONTHVOUCHER";
+        VoucherRequest voucherRequest = new VoucherRequest();
+        voucherRequest.setUsageLimit(100);
+        voucherRequest.setMaxDiscount(BigDecimal.valueOf(50000));
+        voucherRequest.setType(DiscountType.PERCENTAGE);
+        voucherRequest.setMinOrderValue(BigDecimal.valueOf(200000));
+        voucherRequest.setDiscountValue(BigDecimal.valueOf(10));
+
+        LocalDate today = LocalDate.now();
+        voucherRequest.setStartDate(java.sql.Date.valueOf(today));
+        voucherRequest.setEndDate(java.sql.Date.valueOf(today.plusDays(7)));
+
+        if (isVoucherNameExist(voucherName.toUpperCase())) {
+            // Nếu voucher tồn tại, reset lại voucher với tên "MONTHVOUCHER"
+            VoucherEntity existingVoucher = voucherRepository.findByName(voucherName).orElse(null);
+            if (existingVoucher != null) {
+                existingVoucher.setUsageLimit(100);
+                existingVoucher.setMaxDiscount(BigDecimal.valueOf(50000));
+                existingVoucher.setDiscountValue(BigDecimal.valueOf(10));
+                existingVoucher.setStartDate(java.sql.Date.valueOf(today));
+                existingVoucher.setEndDate(java.sql.Date.valueOf(today.plusDays(7)));
+                voucherRepository.save(existingVoucher);
+                log.info("Voucher '{}' đã được reset lại thành công!", voucherName);
+            }
+        } else {
+            // Nếu voucher chưa tồn tại, tạo mới
+            voucherRequest.setName(voucherName.toUpperCase());
+            try {
+                createVoucher(voucherRequest);
+                log.info("Voucher '{}' tự động tạo thành công!", voucherRequest.getName());
+            } catch (AppException e) {
+                log.error("Lỗi khi tạo voucher: {}", e.getMessage());
+            } catch (Exception e) {
+                log.error("Lỗi không xác định: ", e);
+            }
+        }
+    }
 
 
     public VoucherResponse getVoucher(String id) {
