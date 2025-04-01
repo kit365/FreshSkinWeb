@@ -59,9 +59,9 @@ public class VoucherController {
     }
 
     @GetMapping("/get")
-    public ResponseAPI<List<VoucherResponse>> get4Voucher() {
+    public ResponseAPI<List<VoucherResponse>> getFourVoucher() {
         String message = "Xóa voucher thành công";
-        List<VoucherResponse> voucher = voucherService.get4Voucher();
+        List<VoucherResponse> voucher = voucherService.getFourVoucher();
         return ResponseAPI.<List<VoucherResponse>>builder().code(HttpStatus.OK.value()).message(message).data(voucher).build();
     }
 
