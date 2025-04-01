@@ -246,7 +246,7 @@ public class ProductAdminController {
         return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
-    @GetMapping("/skin-type")
+    @PostMapping("/skin-type")
     public ResponseAPI<Page<ProductRoutineDTO>> getProductsBySkinType(
             @RequestBody Map<String, Object> skinTypeRequestDTO,
             @RequestParam(defaultValue = "0") int page,
