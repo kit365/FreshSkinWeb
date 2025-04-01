@@ -83,7 +83,6 @@ public class EmailService {
             }
             context.setVariable("createdAtFormatted", formattedDate);
 
-            // Add image
             ClassPathResource imageResource = new ClassPathResource("static/images/img.png");
             helper.addInline("logo", imageResource);
 

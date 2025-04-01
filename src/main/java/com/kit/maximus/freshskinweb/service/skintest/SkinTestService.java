@@ -9,6 +9,7 @@ import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.SkinTestMapper;
 import com.kit.maximus.freshskinweb.repository.*;
 //import com.kit.maximus.freshskinweb.specification.SkinTestSpecification;
+import com.kit.maximus.freshskinweb.service.users.EmailService;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class SkinTestService {
     SkinTypeRepository skinTypeRepository;
     SkinQuestionsRepository skinQuestionsRepository;
     QuestionGroupRepository questionGroupRepository;
+    EmailService emailService;
 
     SkinTypeScoreRangeRepository skinTypeScoreRangeRepository;
 
@@ -102,7 +104,22 @@ public class SkinTestService {
         user.setSkinType(vnName);
         userRepository.save(user);
 
-        // Save test result
+
+        // Send email notification
+        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+            try {
+                emailService.sendSkinTypeResult(
+                        user.getEmail(),
+                        user.getFirstName() != null ? user.getFirstName() : user.getUsername(),
+                        skinTypeEntity.getType(),
+                        skinTypeEntity.getDescription(),
+                        List.of() // Empty recommendations list
+                );
+                log.info("Skin type result email sent to: {}", user.getEmail());
+            } catch (Exception e) {
+                log.error("Failed to send skin type result email: {}", e.getMessage());
+            }
+        }
         skinTestRepository.save(skinTest);
         return skinTest.getSkinType().getType();
     }

@@ -10,6 +10,7 @@ import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.service.product.ProductService;
+import feign.Body;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -245,14 +246,15 @@ public class ProductAdminController {
         return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
-    @GetMapping("/skin-type/{skinTypeId}")
+    @GetMapping("/skin-type")
     public ResponseAPI<Page<ProductRoutineDTO>> getProductsBySkinType(
-            @PathVariable Long skinTypeId,
+            @RequestBody Map<String, Object> skinTypeRequestDTO,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "7") int size) {
 
+        String skinType = skinTypeRequestDTO.get("skinType").toString();
         Page<ProductRoutineDTO> products = productService
-                .getProductsBySkinTypeAndCategories(skinTypeId, page, size);
+                .getProductsBySkinTypeAndCategories(skinType, page, size);
         return ResponseAPI.<Page<ProductRoutineDTO>>builder()
                 .code(HttpStatus.OK.value())
                 .data(products)

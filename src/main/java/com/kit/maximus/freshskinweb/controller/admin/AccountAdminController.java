@@ -1,8 +1,10 @@
 package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kit.maximus.freshskinweb.dto.request.blog.BlogUpdateRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.CreateUserRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
+import com.kit.maximus.freshskinweb.dto.response.BlogResponse;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -118,11 +120,40 @@ public class AccountAdminController {
         return ResponseAPI.<Boolean>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
-    @PatchMapping("edit/{id}")
-    public ResponseAPI<UserResponseDTO> updateAccount(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest userRequestDTO) {
-        String message = "Cập nhật account successfully";
-        var result = userService.updateAccount(id, userRequestDTO);
-        return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
+    @PatchMapping(value = "/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseAPI<UserResponseDTO> editAccount(
+            @PathVariable("id") Long id,
+            @RequestPart("request") String requestJson,
+            @RequestPart(value = "newImg", required = false) MultipartFile newImg) {
+
+        log.info("requestJson:{}", requestJson);
+        log.info("images:{}", newImg);
+        String message_succed = "Cập nhập tài khoản quản trị thành công";
+        String message_failed = "Cập nhập tài khoản quản trị thất bại";
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            UpdateUserRequest accountRequest = objectMapper.readValue(requestJson, UpdateUserRequest.class);
+            if (newImg != null) {
+                accountRequest.setNewImg(newImg);
+            }
+
+            UserResponseDTO result = userService.updateAccount(id, accountRequest);
+
+            log.info("UPDATE ACCOUNT REQUEST SUCCESS");
+            return ResponseAPI.<UserResponseDTO>builder()
+                    .code(HttpStatus.OK.value())
+                    .data(result)
+                    .message(message_succed)
+                    .build();
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            log.error("UPDATE ACCOUNT ERROR: " + e.getMessage());
+            return ResponseAPI.<UserResponseDTO>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message(message_failed)
+                    .build();
+        }
     }
 
     @PatchMapping("change-multi")
@@ -187,5 +218,17 @@ public class AccountAdminController {
         userService.restore(id);
         log.info(message);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
+    }
+
+    // CẬP NHẬT RIÊNG STATUS
+    @PatchMapping("update/{id}")
+    public ResponseAPI<String> updateAccountStatus(@PathVariable("id") int id,
+                                          @RequestBody Map<String, Object> request) {
+
+        String statusEdit = (String) request.get("statusEdit");
+        String status = (String) request.get("status");
+
+        String result = userService.update(id, status, statusEdit);
+        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 }

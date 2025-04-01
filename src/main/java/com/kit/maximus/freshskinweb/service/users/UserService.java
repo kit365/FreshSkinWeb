@@ -8,6 +8,7 @@ import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserPasswordRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.RoleResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
+import com.kit.maximus.freshskinweb.entity.BlogEntity;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.entity.RoleEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
@@ -375,7 +376,7 @@ public class UserService {
         return true;
     }
 
-    public UserResponseDTO update(Long id, UpdateUserRequest userRequestDTO) {
+    public UserResponseDTO updateUser(Long id, UpdateUserRequest userRequestDTO) {
         UserEntity userEntity = getUserEntityById(id);
 
         log.info("Tìm thấy user: {}", id);
@@ -404,6 +405,52 @@ public class UserService {
             userEntity.setRole(role);
         } else {
             userEntity.setRole(null);
+        }
+
+        if ((userRequestDTO.getNewImg() != null && !userRequestDTO.getNewImg().isEmpty()) ||
+                (userRequestDTO.getAvatar() != null && !userRequestDTO.getAvatar().isEmpty())) {
+
+            // Get old avatar URL
+            String oldAvatar = userEntity.getAvatar();
+
+            // Get new avatar URL from request
+            String newAvatar = userRequestDTO.getAvatar();
+
+            // Delete old avatar if it's different from new one
+            if (oldAvatar != null && !oldAvatar.equals(newAvatar)) {
+                try {
+                    deleteImageFromCloudinary(oldAvatar);
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to delete image: " + oldAvatar, e);
+                }
+            }
+
+            // Upload new image if provided
+            if (userRequestDTO.getNewImg() != null && !userRequestDTO.getNewImg().isEmpty()) {
+                try {
+                    String url = uploadImageFromFile(userRequestDTO.getNewImg(),
+                            userEntity.getUsername());  // Remove the third argument '0'
+                    userEntity.setAvatar(url);
+                } catch (IOException e) {
+                    log.error("Failed to upload image: {}", e.getMessage());
+                    throw new AppException(ErrorCode.IMAGE_UPLOAD_FAILED);
+                }
+            } else if (newAvatar != null && !newAvatar.isEmpty()) {
+                // Keep existing avatar URL
+                userEntity.setAvatar(newAvatar);
+            }
+
+
+        } else {
+            // If no image is provided, delete existing avatar
+            if (userEntity.getAvatar() != null) {
+                try {
+                    deleteImageFromCloudinary(userEntity.getAvatar());
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to delete image: " + userEntity.getAvatar(), e);
+                }
+                userEntity.setAvatar(null);
+            }
         }
 
         log.info("Cập nhật user id: {}", id);
@@ -569,7 +616,6 @@ public class UserService {
         }
     }
 
-
     public Map<String, Object> getAllAccount(String status, String keyword, Pageable pageable) {
         Specification<UserEntity> spec = AccountSpecification.hasRole();
 
@@ -657,15 +703,68 @@ public class UserService {
             userMapper.updateUser(userEntity, request);
 
             userEntity.setUsername(userEntity.getUsername());
-            if (userRepository.existsByEmail(request.getEmail())) {
-                log.info("Email exist");
+
+            if (request.getEmail() == null) {
+                userEntity.setEmail(request.getEmail());
+            } else if (userRepository.existsByEmail(request.getEmail())) {
                 throw new AppException(ErrorCode.EMAIL_EXISTED);
+            } else if (request.getEmail() != null && !userRepository.existsByEmail(request.getEmail())) {
+                userEntity.setEmail(request.getEmail());
             }
+
 
             if (userEntity.getRole() != null) {
                 RoleEntity role = roleRepository.findById(request.getRole())
                         .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+                userEntity.setRole(role);
             }
+
+            if ((request.getNewImg() != null && !request.getNewImg().isEmpty()) ||
+                    (request.getAvatar() != null && !request.getAvatar().isEmpty())) {
+
+                // Get old avatar URL
+                String oldAvatar = userEntity.getAvatar();
+
+                // Get new avatar URL from request
+                String newAvatar = request.getAvatar();
+
+                // Delete old avatar if it's different from new one
+                if (oldAvatar != null && !oldAvatar.equals(newAvatar)) {
+                    try {
+                        deleteImageFromCloudinary(oldAvatar);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + oldAvatar, e);
+                    }
+                }
+
+                // Upload new image if provided
+                if (request.getNewImg() != null && !request.getNewImg().isEmpty()) {
+                    try {
+                        String url = uploadImageFromFile(request.getNewImg(),
+                                userEntity.getUsername());  // Remove the third argument '0'
+                        userEntity.setAvatar(url);
+                    } catch (IOException e) {
+                        log.error("Failed to upload image: {}", e.getMessage());
+                        throw new AppException(ErrorCode.IMAGE_UPLOAD_FAILED);
+                    }
+                } else if (newAvatar != null && !newAvatar.isEmpty()) {
+                    // Keep existing avatar URL
+                    userEntity.setAvatar(newAvatar);
+                }
+
+
+            } else {
+                // If no image is provided, delete existing avatar
+                if (userEntity.getAvatar() != null) {
+                    try {
+                        deleteImageFromCloudinary(userEntity.getAvatar());
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + userEntity.getAvatar(), e);
+                    }
+                    userEntity.setAvatar(null);
+                }
+            }
+
 
             return userMapper.toUserResponseDTO(userRepository.save(userEntity));
 
@@ -745,5 +844,25 @@ public class UserService {
     //dashboard data
     public long countUser() {
         return userRepository.countByStatusAndDeleted(Status.ACTIVE, false);
+    }
+
+    // CẬP NHẬT STATUS RIÊNG
+
+    public String update(long id, String status, String statusEdit) {
+        UserEntity userEntity = userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        System.out.println("status: " + status +  ", statusEdit: " + statusEdit);
+
+        if ("editStatus".equalsIgnoreCase(statusEdit)) {
+            if (status != null) { // Kiểm tra nếu status không bị null
+                Status statusEnum = getStatus(status);
+                userEntity.setStatus(statusEnum);
+                userRepository.save(userEntity);
+                return "Cập nhật trạng thái thành công";
+            }
+            return "Trạng thái không được để trống!";
+        }
+        return "Cập nhật thất bại";
     }
 }

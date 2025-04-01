@@ -1603,7 +1603,14 @@ public List<ProductResponseDTO> mapProductIndexResponsesDTO(List<ProductEntity> 
     }
 
     //    Hỗ trợ cho lấy 7 loại danh mục sản phảm cô lộ trình da
-    public Page<ProductRoutineDTO> getProductsBySkinTypeAndCategories(Long skinTypeId, int page, int size) {
+    public Page<ProductRoutineDTO> getProductsBySkinTypeAndCategories(String skinType, int page, int size) {
+    SkinTypeEntity skinTypeEntity = skinTypeRepository.findByType(skinType);
+    Long skinTypeId = null;
+    if(skinType != null){
+        skinTypeId = skinTypeEntity.getId();
+    } else {
+        throw new IllegalArgumentException("Loại da không tồn tại");
+    }
         List<String> orderedCategories = List.of(
                 "Nước tẩy trang",
                 "Sữa rửa mặt",
