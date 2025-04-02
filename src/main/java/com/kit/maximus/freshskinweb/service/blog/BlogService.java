@@ -204,7 +204,6 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         }
 
 
-
         return blogResponse;
     }
 
@@ -221,7 +220,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         Status statusEnum = getStatus(status);
         List<BlogEntity> blogEntities = blogRepository.findAllById(id);
 
-        if(blogEntities.isEmpty()) {
+        if (blogEntities.isEmpty()) {
             throw new AppException(ErrorCode.BLOG_NOT_FOUND);
         }
 
@@ -368,12 +367,17 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     public BlogResponse showDetail(Long aLong) {
         BlogEntity blogEntity = getBlogEntityById(aLong);
         BlogResponse blogResponse = blogMapper.toBlogResponse(getBlogEntityById(aLong));
-        if (blogEntity.getBlogCategory() != null) {
-            BlogCategoryResponse blogCategoryResponse = new BlogCategoryResponse();
-            blogCategoryResponse.setTitle(blogEntity.getBlogCategory().getTitle());
-            blogCategoryResponse.setId(blogEntity.getBlogCategory().getId());
-            blogResponse.setBlogCategory(blogCategoryResponse);
+        if (blogEntity != null) {
+            blogResponse.setAuthor(mapAuthor(blogEntity.getUser()));
+
+            if (blogEntity.getBlogCategory() != null) {
+                BlogCategoryResponse blogCategoryResponse = new BlogCategoryResponse();
+                blogCategoryResponse.setTitle(blogEntity.getBlogCategory().getTitle());
+                blogCategoryResponse.setId(blogEntity.getBlogCategory().getId());
+                blogResponse.setBlogCategory(blogCategoryResponse);
+            }
         }
+
 
         return blogResponse;
     }
@@ -412,6 +416,11 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         }
 
         Page<BlogResponse> list = blogEntityPage.map(blogMapper::toBlogResponse);
+        blogEntityPage.forEach(blogEntity -> {
+            list.forEach(blogResponse -> {
+                blogResponse.setAuthor(mapAuthor(blogEntity.getUser()));
+            });
+        });
 
         map.put("blogs", list.getContent());
         map.put("currentPage", list.getNumber() + 1);
@@ -499,7 +508,6 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
     }
 
     private String getNameFile(String slug, int count) {
-        String fileName;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
         String timestamp = LocalDateTime.now().format(formatter);
         if (count <= 0) {
