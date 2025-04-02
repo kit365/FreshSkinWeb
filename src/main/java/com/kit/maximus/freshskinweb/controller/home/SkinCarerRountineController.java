@@ -19,7 +19,7 @@ public class SkinCarerRountineController {
 
     SkinCareRountineService skinCareRountineService;
 
-    @PostMapping("/skin-routine")
+    @PostMapping()
     public ResponseAPI<SkinCareRoutineResponseDTO> getRoutineAndProducts(
             @RequestBody Map<String, Object> skinTypeRequestDTO,
             @RequestParam(defaultValue = "0") Integer page,
