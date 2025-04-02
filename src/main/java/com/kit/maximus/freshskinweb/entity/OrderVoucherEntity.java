@@ -19,7 +19,7 @@ public class OrderVoucherEntity extends AbstractEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "OrderVoucherId")
-    private Long orderVoucherId;
+    Long orderVoucherId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -27,14 +27,14 @@ public class OrderVoucherEntity extends AbstractEntity {
 
     @ManyToOne
     @JoinColumn(name = "voucher_id", nullable = false)
-    private VoucherEntity voucher; // Voucher được sử dụng
+    VoucherEntity voucher; // Voucher được sử dụng
 
     @ManyToOne
     @JoinColumn(name = "order_id")
-    private OrderEntity order; // Đơn hàng áp dụng voucher (nullable nếu user chỉ lấy mà chưa dùng)
+    OrderEntity order; // Đơn hàng áp dụng voucher (nullable nếu user chỉ lấy mà chưa dùng)
 
     @Column(name = "used", nullable = false)
-    private Boolean used = false; // Đánh dấu voucher đã sử dụng hay chưa
+    Boolean used = false; // Đánh dấu voucher đã sử dụng hay chưa
 
     @Override
     public final boolean equals(Object o) {

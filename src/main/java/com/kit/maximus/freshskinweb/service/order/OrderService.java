@@ -53,6 +53,110 @@ public class OrderService {
     VoucherService voucherService;
     ApplicationEventPublisher eventPublisher;
 
+//    @Transactional
+//    public OrderIdResponse addOrder(OrderRequest orderRequest) {
+//        OrderEntity order = orderMapper.toOrderEntity(orderRequest);
+//
+//        UserEntity user = null;
+//        if (orderRequest.getUserId() != null) {
+//            user = userRepository.findById(orderRequest.getUserId()).orElse(null);
+//            order.setUser(user);
+//        } else {
+//            order.setUser(user);
+//        }
+//        // Tạo orderId duy nhất
+//        String orderId = generateOrderCode();
+//        order.setOrderId(orderId);
+//        order.setOrderStatus(OrderStatus.PENDING);
+//
+//        // Set payment method safely
+//        if (orderRequest.getPaymentMethod() != null) {
+//            System.out.println(orderRequest.getPaymentMethod());
+//            try {
+//                order.setPaymentMethod(PaymentMethod.valueOf(String.valueOf(orderRequest.getPaymentMethod())));
+//                System.out.println(order.getPaymentMethod());
+//
+//            } catch (IllegalArgumentException e) {
+//                log.error("Invalid payment method: {}", orderRequest.getPaymentMethod());
+//                throw new AppException(ErrorCode.INVALID_PAYMENT_METHOD);
+//            }
+//        }
+//
+//        Integer totalAmount = 0;
+//        BigDecimal totalPrice = BigDecimal.ZERO;
+//        List<OrderItemEntity> orderItems = new ArrayList<>();
+//
+//        for (OrderItemRequest itemRequest : orderRequest.getOrderItems()) {
+//            ProductVariantEntity variant = productVariantRepository.findById(itemRequest.getProductVariantId())
+//                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+//
+//
+//            OrderItemEntity orderItem = new OrderItemEntity();
+//            orderItem.setProductVariant(variant);
+//            orderItem.setQuantity(itemRequest.getQuantity());
+//            BigDecimal discountAmount = BigDecimal.ZERO;
+//
+////            if (variant.getProduct().getDiscountPercent() != null) {
+////                discountAmount = variant.getPrice()
+////                        .multiply(BigDecimal.valueOf(variant.getProduct().getDiscountPercent())
+////                                .divide(BigDecimal.valueOf(100)));
+////
+////            }
+//
+//// Tính giá sau giảm
+//            BigDecimal discountedPrice = variant.getPrice().subtract(discountAmount);
+//
+
+    /// / Tính tổng tiền cho số lượng sản phẩm
+//            BigDecimal subtotal = discountedPrice.multiply(BigDecimal.valueOf(orderItem.getQuantity()));
+//            orderItem.setSubtotal(subtotal);
+//
+//
+//            orderItem.setOrder(order);
+//            orderItems.add(orderItem);
+//
+//            totalAmount += itemRequest.getQuantity(); // Đảm bảo kiểu số nguyên
+//            totalPrice = totalPrice.add(orderItem.getSubtotal());
+//        }
+//
+//        order.setTotalAmount(totalAmount);
+//        order.setTotalPrice(totalPrice);
+//        order.setOrderItems(orderItems);
+//
+//        if (orderRequest.getVoucherName() != null) {
+//            VoucherEntity voucher = voucherRepository.findByName(orderRequest.getVoucherName())
+//                    .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
+//
+//            if (voucherService.validateVoucher(orderRequest.getVoucherName(), order.getTotalPrice()) == null) {
+//                throw new AppException(ErrorCode.VOUCHER_INVALID);
+//            }
+//
+//            // Áp dụng giảm giá
+//            BigDecimal finalPrice = voucherService.applyVoucherDiscount(voucher, order.getTotalPrice());
+//            order.setDiscountAmount(totalPrice.subtract(finalPrice));
+//            order.setTotalPrice(finalPrice);
+//
+//            // Giảm số lượt sử dụng voucher
+//            voucher.setUsed(voucher.getUsed() + 1);
+//            voucherRepository.save(voucher);
+//
+//            // Liên kết voucher với order
+//            order.setVoucher(voucher);
+//        }
+//
+//
+//        OrderEntity savedOrder = orderRepository.save(order);
+//
+//        if (user != null && order.getPaymentMethod() != null && order.getPaymentMethod().equals(PaymentMethod.CASH)) {
+//            NotificationEntity notification = new NotificationEntity();
+//            notification.setUser(user);
+//            notification.setOrder(order);
+//            notification.setMessage("Đơn hàng " + order.getOrderId() + " đặt hàng thành công");
+//            eventPublisher.publishEvent(new NotificationEvent(this, notification));
+//        }
+//
+//        return new OrderIdResponse(savedOrder.getOrderId());
+//    }
     @Transactional
     public OrderIdResponse addOrder(OrderRequest orderRequest) {
         OrderEntity order = orderMapper.toOrderEntity(orderRequest);
@@ -83,7 +187,7 @@ public class OrderService {
         }
 
         Integer totalAmount = 0;
-        BigDecimal totalPrice = BigDecimal.ZERO;
+        BigDecimal totalPrice = orderRequest.getTotalPrice();
         List<OrderItemEntity> orderItems = new ArrayList<>();
 
         for (OrderItemRequest itemRequest : orderRequest.getOrderItems()) {
@@ -96,12 +200,12 @@ public class OrderService {
             orderItem.setQuantity(itemRequest.getQuantity());
             BigDecimal discountAmount = BigDecimal.ZERO;
 
-            if (variant.getProduct().getDiscountPercent() != null) {
-                discountAmount = variant.getPrice()
-                        .multiply(BigDecimal.valueOf(variant.getProduct().getDiscountPercent())
-                                .divide(BigDecimal.valueOf(100)));
-
-            }
+//            if (variant.getProduct().getDiscountPercent() != null) {
+//                discountAmount = variant.getPrice()
+//                        .multiply(BigDecimal.valueOf(variant.getProduct().getDiscountPercent())
+//                                .divide(BigDecimal.valueOf(100)));
+//
+//            }
 
 // Tính giá sau giảm
             BigDecimal discountedPrice = variant.getPrice().subtract(discountAmount);
@@ -115,7 +219,7 @@ public class OrderService {
             orderItems.add(orderItem);
 
             totalAmount += itemRequest.getQuantity(); // Đảm bảo kiểu số nguyên
-            totalPrice = totalPrice.add(orderItem.getSubtotal());
+//            totalPrice = totalPrice.add(orderItem.getSubtotal());
         }
 
         order.setTotalAmount(totalAmount);

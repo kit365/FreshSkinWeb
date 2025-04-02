@@ -8,6 +8,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -57,4 +58,6 @@ public class OrderRequest extends AbstractEntity implements Serializable {
 
 
     String voucherName;
+
+    BigDecimal totalPrice;
 }
