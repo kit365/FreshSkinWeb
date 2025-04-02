@@ -99,7 +99,7 @@ public class OrderService {
             if (variant.getProduct().getDiscountPercent() != null) {
                 discountAmount = variant.getPrice()
                         .multiply(BigDecimal.valueOf(variant.getProduct().getDiscountPercent())
-                        .divide(BigDecimal.valueOf(100)));
+                                .divide(BigDecimal.valueOf(100)));
 
             }
 
@@ -121,27 +121,27 @@ public class OrderService {
         order.setTotalAmount(totalAmount);
         order.setTotalPrice(totalPrice);
         order.setOrderItems(orderItems);
-//
-//        if (orderRequest.getVoucherName() != null) {
-//            VoucherEntity voucher = voucherRepository.findByName(orderRequest.getVoucherName())
-//                    .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
-//
-//            if (voucherService.validateVoucher(orderRequest.getVoucherName(), order.getTotalPrice()) == null) {
-//                throw new AppException(ErrorCode.VOUCHER_INVALID);
-//            }
+
+        if (orderRequest.getVoucherName() != null) {
+            VoucherEntity voucher = voucherRepository.findByName(orderRequest.getVoucherName())
+                    .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
+
+            if (voucherService.validateVoucher(orderRequest.getVoucherName(), order.getTotalPrice()) == null) {
+                throw new AppException(ErrorCode.VOUCHER_INVALID);
+            }
 
             // Áp dụng giảm giá
-//            BigDecimal finalPrice = voucherService.applyVoucherDiscount(voucher, order.getTotalPrice());
-//            order.setDiscountAmount(totalPrice.subtract(finalPrice));
-            order.setTotalPrice(BigDecimal.valueOf(orderRequest.getTotalAmount()));
-//
-//            // Giảm số lượt sử dụng voucher
-//            voucher.setUsed(voucher.getUsed() + 1);
-//            voucherRepository.save(voucher);
+            BigDecimal finalPrice = voucherService.applyVoucherDiscount(voucher, order.getTotalPrice());
+            order.setDiscountAmount(totalPrice.subtract(finalPrice));
+            order.setTotalPrice(finalPrice);
+
+            // Giảm số lượt sử dụng voucher
+            voucher.setUsed(voucher.getUsed() + 1);
+            voucherRepository.save(voucher);
 
             // Liên kết voucher với order
-//            order.setVoucher(voucher);
-//        }
+            order.setVoucher(voucher);
+        }
 
 
         OrderEntity savedOrder = orderRepository.save(order);
