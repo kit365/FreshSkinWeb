@@ -40,6 +40,15 @@ public class VoucherService {
         if(voucher) {
             throw new AppException(ErrorCode.VOUCHER_IS_EXISTED);
         }
+        if (voucherRequest.getEndDate().before(voucherRequest.getStartDate())) {
+            throw new AppException(ErrorCode.ENDDATE_INVALID_MUST_AFTER_STARTDATE);
+        }
+        if (voucherRequest.getEndDate().before(new Date())) {
+            throw new AppException(ErrorCode.ENDDATE_INVALID);
+        }
+        if (voucherRequest.getStartDate().before(new Date())) {
+            throw new AppException(ErrorCode.STATUS_INVALID);
+        }
         var mapVoucher = voucherMapper.toVoucherEntity(voucherRequest);
         voucherRepository.save(mapVoucher);
         log.info("Voucher Request: {}", voucherRequest);
@@ -214,6 +223,12 @@ public class VoucherService {
     }
 
     public List<VoucherResponse> getFourVoucher(){
-        return voucherRepository.findTopFourPercentageVouchers().stream().map(voucherMapper::toVoucherResponse).collect(Collectors.toList());
+        Date currentDate = new Date();
+        return voucherRepository.findTopFourPercentageVouchers(currentDate).stream().map(voucherMapper::toVoucherResponse).collect(Collectors.toList());
     }
+    public List<VoucherResponse> getValidVouchers() {
+        Date currentDate = new Date();  // Lấy ngày hiện tại
+        return voucherRepository.findValidVouchers(currentDate).stream().map(voucherMapper::toVoucherResponse).collect(Collectors.toList());  // Tìm voucher còn hạn
+    }
+
 }

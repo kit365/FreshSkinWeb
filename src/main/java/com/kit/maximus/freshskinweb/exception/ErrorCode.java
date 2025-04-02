@@ -2,8 +2,6 @@ package com.kit.maximus.freshskinweb.exception;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.apache.http.HttpStatus;
-import org.opensearch.client.opensearch.nodes.Http;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Getter
@@ -210,6 +208,9 @@ public enum ErrorCode {
     VOUCHER_IS_USED_UP(400, "Voucher đã được sử dụng hết"),
     ORDER_NOT_ELIGIBLE(400, "Đơn hàng không đủ điều kiện để sử dụng voucher"),
     VOUCHER_INVALID(400, "Voucher không hợp lệ"),
+    ENDDATE_INVALID(400, "Ngày kết thúc phải ở tương lai"),
+    STARTDATE_INVALID(400, "Ngày bắt đầu phải từ hiện tại trở đi"),
+    ENDDATE_INVALID_MUST_AFTER_STARTDATE(400, "Ngày kết thúc phải sau ngày bắt đầu"),
 
 
     //system

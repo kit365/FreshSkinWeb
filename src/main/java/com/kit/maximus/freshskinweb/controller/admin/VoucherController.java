@@ -3,7 +3,6 @@ package com.kit.maximus.freshskinweb.controller.admin;
 import com.kit.maximus.freshskinweb.dto.request.voucher.VoucherRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.VoucherResponse;
-import com.kit.maximus.freshskinweb.entity.VoucherEntity;
 import com.kit.maximus.freshskinweb.service.product.VoucherService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +61,13 @@ public class VoucherController {
     public ResponseAPI<List<VoucherResponse>> getFourVoucher() {
         String message = "Xóa voucher thành công";
         List<VoucherResponse> voucher = voucherService.getFourVoucher();
+        return ResponseAPI.<List<VoucherResponse>>builder().code(HttpStatus.OK.value()).message(message).data(voucher).build();
+    }
+
+    @GetMapping("/valid")
+    public ResponseAPI<List<VoucherResponse>> getValidVouchers() {
+        String message = "Hiện voucher còn hạn sử dụng thành công";
+        List<VoucherResponse> voucher = voucherService.getValidVouchers();
         return ResponseAPI.<List<VoucherResponse>>builder().code(HttpStatus.OK.value()).message(message).data(voucher).build();
     }
 
