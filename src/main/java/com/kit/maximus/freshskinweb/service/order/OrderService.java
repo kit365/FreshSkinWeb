@@ -200,12 +200,12 @@ public class OrderService {
             orderItem.setQuantity(itemRequest.getQuantity());
             BigDecimal discountAmount = BigDecimal.ZERO;
 
-//            if (variant.getProduct().getDiscountPercent() != null) {
-//                discountAmount = variant.getPrice()
-//                        .multiply(BigDecimal.valueOf(variant.getProduct().getDiscountPercent())
-//                                .divide(BigDecimal.valueOf(100)));
-//
-//            }
+            if (variant.getProduct().getDiscountPercent() != null) {
+                discountAmount = variant.getPrice()
+                        .multiply(BigDecimal.valueOf(variant.getProduct().getDiscountPercent())
+                                .divide(BigDecimal.valueOf(100)));
+
+            }
 
 // Tính giá sau giảm
             BigDecimal discountedPrice = variant.getPrice().subtract(discountAmount);
