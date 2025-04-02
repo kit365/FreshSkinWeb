@@ -49,8 +49,8 @@ public class OrderSpecification {
             // Create CASE expression for status ordering
             Expression<Object> statusOrder = criteriaBuilder.selectCase()
                     .when(criteriaBuilder.equal(root.get("orderStatus"), OrderStatus.PENDING), 1)
-                    .when(criteriaBuilder.equal(root.get("orderStatus"), OrderStatus.CANCELED), 2)
-                    .when(criteriaBuilder.equal(root.get("orderStatus"), OrderStatus.COMPLETED), 3)
+                    .when(criteriaBuilder.equal(root.get("orderStatus"), OrderStatus.COMPLETED), 2)
+                    .when(criteriaBuilder.equal(root.get("orderStatus"), OrderStatus.CANCELED), 3)
                     .otherwise(4);
 
             // If priority status is specified, modify the order

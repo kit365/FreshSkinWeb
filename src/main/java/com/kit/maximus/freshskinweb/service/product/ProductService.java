@@ -3,10 +3,8 @@ package com.kit.maximus.freshskinweb.service.product;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.product.UpdateProductRequest;
-import com.kit.maximus.freshskinweb.dto.request.product_brand.UpdateProductBrandRequest;
 import com.kit.maximus.freshskinweb.dto.response.*;
 import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
@@ -27,13 +25,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -44,7 +37,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.kit.maximus.freshskinweb.specification.ProductSpecification.*;
 
@@ -426,7 +418,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         productResponseDTO.setCategory(getProductCategoryResponses(productEntity));
         productResponseDTO.setSkinTypes(getSkinTypeResponses(productEntity));
 
-        if (productResponseDTO.getVariants() != null) {
+        if (productEntity.getVariants() != null) {
             List<ProductVariantResponse> productVariantResponses = new ArrayList<>();
             productEntity.getVariants().forEach(productVariantEntity -> {
                 ProductVariantResponse newVariant = new ProductVariantResponse();
@@ -437,11 +429,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 productVariantResponses.add(newVariant);
             });
             productResponseDTO.setVariants(productVariantResponses);
-        }
-        if (productEntity.getReviews() != null) {
-            productEntity.getReviews().forEach(productReviewEntity -> {
-                System.out.println(productReviewEntity.getReviewId());
-            });
         }
         return productResponseDTO;
     }
