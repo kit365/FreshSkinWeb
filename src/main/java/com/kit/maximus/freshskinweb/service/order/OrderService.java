@@ -82,66 +82,66 @@ public class OrderService {
             }
         }
 
-        Integer totalAmount = 0;
-        BigDecimal totalPrice = BigDecimal.ZERO;
-        List<OrderItemEntity> orderItems = new ArrayList<>();
+//        Integer totalAmount = 0;
+//        BigDecimal totalPrice = BigDecimal.ZERO;
+//        List<OrderItemEntity> orderItems = new ArrayList<>();
+//
+//        for (OrderItemRequest itemRequest : orderRequest.getOrderItems()) {
+//            ProductVariantEntity variant = productVariantRepository.findById(itemRequest.getProductVariantId())
+//                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+//
+//
+//            OrderItemEntity orderItem = new OrderItemEntity();
+//            orderItem.setProductVariant(variant);
+//            orderItem.setQuantity(itemRequest.getQuantity());
+//            BigDecimal discountAmount = BigDecimal.ZERO;
+//
+//            if (variant.getProduct().getDiscountPercent() != null) {
+//                discountAmount = variant.getPrice()
+//                        .multiply(BigDecimal.valueOf(variant.getProduct().getDiscountPercent())
+//                        .divide(BigDecimal.valueOf(100)));
+//
+//            }
 
-        for (OrderItemRequest itemRequest : orderRequest.getOrderItems()) {
-            ProductVariantEntity variant = productVariantRepository.findById(itemRequest.getProductVariantId())
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+//// Tính giá sau giảm
+//            BigDecimal discountedPrice = variant.getPrice().subtract(discountAmount);
+//
+//// Tính tổng tiền cho số lượng sản phẩm
+//            BigDecimal subtotal = discountedPrice.multiply(BigDecimal.valueOf(orderItem.getQuantity()));
+//            orderItem.setSubtotal(subtotal);
+//
+//
+//            orderItem.setOrder(order);
+//            orderItems.add(orderItem);
+//
+//            totalAmount += itemRequest.getQuantity(); // Đảm bảo kiểu số nguyên
+//            totalPrice = totalPrice.add(orderItem.getSubtotal());
+//        }
 
+//        order.setTotalAmount(totalAmount);
+//        order.setTotalPrice(totalPrice);
+//        order.setOrderItems(orderItems);
 
-            OrderItemEntity orderItem = new OrderItemEntity();
-            orderItem.setProductVariant(variant);
-            orderItem.setQuantity(itemRequest.getQuantity());
-            BigDecimal discountAmount = BigDecimal.ZERO;
-
-            if (variant.getProduct().getDiscountPercent() != null) {
-                discountAmount = variant.getPrice()
-                        .multiply(BigDecimal.valueOf(variant.getProduct().getDiscountPercent())
-                        .divide(BigDecimal.valueOf(100)));
-
-            }
-
-// Tính giá sau giảm
-            BigDecimal discountedPrice = variant.getPrice().subtract(discountAmount);
-
-// Tính tổng tiền cho số lượng sản phẩm
-            BigDecimal subtotal = discountedPrice.multiply(BigDecimal.valueOf(orderItem.getQuantity()));
-            orderItem.setSubtotal(subtotal);
-
-
-            orderItem.setOrder(order);
-            orderItems.add(orderItem);
-
-            totalAmount += itemRequest.getQuantity(); // Đảm bảo kiểu số nguyên
-            totalPrice = totalPrice.add(orderItem.getSubtotal());
-        }
-
-        order.setTotalAmount(totalAmount);
-        order.setTotalPrice(totalPrice);
-        order.setOrderItems(orderItems);
-
-        if (orderRequest.getVoucherName() != null) {
-            VoucherEntity voucher = voucherRepository.findByName(orderRequest.getVoucherName())
-                    .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
-
-            if (voucherService.validateVoucher(orderRequest.getVoucherName(), order.getTotalPrice()) == null) {
-                throw new AppException(ErrorCode.VOUCHER_INVALID);
-            }
-
-            // Áp dụng giảm giá
-            BigDecimal finalPrice = voucherService.applyVoucherDiscount(voucher, order.getTotalPrice());
-            order.setDiscountAmount(totalPrice.subtract(finalPrice));
-            order.setTotalPrice(finalPrice);
-
-            // Giảm số lượt sử dụng voucher
-            voucher.setUsed(voucher.getUsed() + 1);
-            voucherRepository.save(voucher);
-
-            // Liên kết voucher với order
-            order.setVoucher(voucher);
-        }
+//        if (orderRequest.getVoucherName() != null) {
+//            VoucherEntity voucher = voucherRepository.findByName(orderRequest.getVoucherName())
+//                    .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
+//
+//            if (voucherService.validateVoucher(orderRequest.getVoucherName(), order.getTotalPrice()) == null) {
+//                throw new AppException(ErrorCode.VOUCHER_INVALID);
+//            }
+//
+//            // Áp dụng giảm giá
+//            BigDecimal finalPrice = voucherService.applyVoucherDiscount(voucher, order.getTotalPrice());
+//            order.setDiscountAmount(totalPrice.subtract(finalPrice));
+//            order.setTotalPrice(finalPrice);
+//
+//            // Giảm số lượt sử dụng voucher
+//            voucher.setUsed(voucher.getUsed() + 1);
+//            voucherRepository.save(voucher);
+//
+//            // Liên kết voucher với order
+//            order.setVoucher(voucher);
+//        }
 
 
         OrderEntity savedOrder = orderRepository.save(order);
