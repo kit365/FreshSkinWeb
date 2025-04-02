@@ -4,8 +4,7 @@ import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.SkinCareRount
 import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.UpdationSkinCareRountineRequest;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.SkinCareRountineResponse;
-import com.kit.maximus.freshskinweb.entity.SkinCareRoutineEntity;
-import com.kit.maximus.freshskinweb.service.product.ProductService;
+
 import com.kit.maximus.freshskinweb.service.skintest.SkinCareRountineService;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ public class SkinCareRountineController {
 
     SkinCareRountineService skinCareRountineService;
 
-    ProductService productService;
 
     @PostMapping("create")
     public ResponseAPI<Boolean> addSkinCareRoutine(@RequestBody SkinCareRountineRequest request) {
@@ -41,7 +39,7 @@ public class SkinCareRountineController {
 
     @PatchMapping("edit/{id}")
     public ResponseAPI<Boolean> updateSkinCareRoutine(@PathVariable Long id, @RequestBody UpdationSkinCareRountineRequest request) {
-        Boolean response = skinCareRountineService.update(id, request);
+        boolean response = skinCareRountineService.update(id, request);
         String message = "Cập nhật lộ trình da thành công";
         if(!response){
             message = "Cập nhật lộ trình da thất bại";

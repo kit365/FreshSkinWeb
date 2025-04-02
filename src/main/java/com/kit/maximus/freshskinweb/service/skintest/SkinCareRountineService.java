@@ -2,13 +2,17 @@ package com.kit.maximus.freshskinweb.service.skintest;
 
 import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.SkinCareRountineRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.UpdationSkinCareRountineRequest;
+import com.kit.maximus.freshskinweb.dto.response.ProductRoutineDTO;
 import com.kit.maximus.freshskinweb.dto.response.SkinCareRountineResponse;
+import com.kit.maximus.freshskinweb.dto.response.SkinCareRoutineResponseDTO;
+import com.kit.maximus.freshskinweb.dto.response.SkinTypeResponse;
 import com.kit.maximus.freshskinweb.entity.SkinCareRoutineEntity;
 import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
 import com.kit.maximus.freshskinweb.mapper.SkinCareRoutineMapper;
 import com.kit.maximus.freshskinweb.mapper.SkinTypeMapper;
 import com.kit.maximus.freshskinweb.repository.SkinCareRountineRepository;
 import com.kit.maximus.freshskinweb.repository.SkinTypeRepository;
+import com.kit.maximus.freshskinweb.service.product.ProductService;
 import com.kit.maximus.freshskinweb.specification.SkinCareRoutineSpecification;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.AccessLevel;
@@ -30,23 +34,20 @@ public class SkinCareRountineService {
     SkinCareRoutineMapper skinCareRoutineMapper;
     SkinTypeRepository skinTypeRepository;
     SkinTypeMapper skinTypeMapper;
+    ProductService productService;
 
     public boolean add(SkinCareRountineRequest request) {
 
         SkinCareRoutineEntity skinCareRountineEntity = skinCareRoutineMapper.toEntity(request);
         SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(request.getSkinTypeEntity()).orElse(null);
 
-        if(skinTypeEntity != null) {
-            skinCareRountineEntity.setSkinType(skinTypeEntity);
-        } else {
-            skinCareRountineEntity.setSkinType(null);
-        }
+        skinCareRountineEntity.setSkinType(skinTypeEntity);
 
         skinCareRountineRepository.save(skinCareRountineEntity);
         return true;
     }
 
-    public Boolean update(Long id, UpdationSkinCareRountineRequest request) {
+    public boolean update(Long id, UpdationSkinCareRountineRequest request) {
         SkinCareRoutineEntity skinCareRountineEntity = skinCareRountineRepository.findById(id).orElse(null);
 
         if(skinCareRountineEntity != null) {
@@ -114,6 +115,34 @@ public class SkinCareRountineService {
             }
             return toResponse(entity);
         });
+    }
+
+    public SkinCareRountineResponse getSkinCareRoutineByType(String skinType) {
+        SkinTypeEntity findBySkinType = skinTypeRepository.findByType(skinType);
+        SkinTypeResponse skinTypeResponse = skinTypeMapper.toSkinTypeResponse(findBySkinType);
+        SkinCareRountineResponse response = null;
+        if(findBySkinType != null) {
+            SkinCareRoutineEntity skinCareRoutine = skinCareRountineRepository.findBySkinType(findBySkinType);
+               response = skinCareRoutineMapper.toResponse(skinCareRoutine);
+               response.setSkinTypeEntity(skinTypeResponse);
+        }
+        return response;
+    }
+
+    //Show lộ trình cho loại da cụ thể và sản phẩm liên quan
+
+    public SkinCareRoutineResponseDTO getRoutineAndProducts(String skinType, Integer page, Integer size) {
+        // Lấy thông tin skin care routine
+        SkinCareRountineResponse routineInfo = getSkinCareRoutineByType(skinType);
+
+        // Lấy danh sách sản phẩm theo loại da
+        Page<ProductRoutineDTO> products = productService.getProductsBySkinTypeAndCategories(skinType, page, size);
+
+        // Kết hợp kết quả
+        return SkinCareRoutineResponseDTO.builder()
+                .skinCareRoutine(routineInfo)
+                .products(products)
+                .build();
     }
 }
 
