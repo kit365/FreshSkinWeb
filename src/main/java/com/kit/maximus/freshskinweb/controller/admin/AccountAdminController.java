@@ -39,7 +39,7 @@ public class AccountAdminController {
 
     public ResponseAPI<UserResponseDTO> addAccount(
             @RequestPart("request") String requestJson,  // Nhận JSON dưới dạng String
-            @RequestPart(value = "avatar", required = false) MultipartFile image) { // Nhận hình ảnh
+            @RequestPart(value = "avatar", required = false) List<MultipartFile> image) { // Nhận hình ảnh
         log.info("requestJson:{}", requestJson);
         log.info("images:{}", image);
         String message_succed = "Tạo user thành công";
@@ -124,7 +124,7 @@ public class AccountAdminController {
     public ResponseAPI<UserResponseDTO> editAccount(
             @PathVariable("id") Long id,
             @RequestPart("request") String requestJson,
-            @RequestPart(value = "newImg", required = false) MultipartFile newImg) {
+            @RequestPart(value = "newImg", required = false) List<MultipartFile> newImg) {
 
         log.info("requestJson:{}", requestJson);
         log.info("images:{}", newImg);
@@ -133,7 +133,13 @@ public class AccountAdminController {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             UpdateUserRequest accountRequest = objectMapper.readValue(requestJson, UpdateUserRequest.class);
-            if (newImg != null) {
+            if (newImg != null && !newImg.isEmpty()) {
+                // Xử lý và lưu ảnh
+                for (MultipartFile image : newImg) {
+                    // Lưu ảnh vào một vị trí hoặc xử lý theo yêu cầu
+                    // Ví dụ: saveImage(image);
+                    log.info("Processing image: {}", image.getOriginalFilename());
+                }
                 accountRequest.setNewImg(newImg);
             }
 
@@ -223,7 +229,7 @@ public class AccountAdminController {
     // CẬP NHẬT RIÊNG STATUS
     @PatchMapping("update/{id}")
     public ResponseAPI<String> updateAccountStatus(@PathVariable("id") int id,
-                                          @RequestBody Map<String, Object> request) {
+                                                   @RequestBody Map<String, Object> request) {
 
         String statusEdit = (String) request.get("statusEdit");
         String status = (String) request.get("status");

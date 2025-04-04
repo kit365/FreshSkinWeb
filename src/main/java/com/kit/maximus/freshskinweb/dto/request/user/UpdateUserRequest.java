@@ -1,7 +1,5 @@
 package com.kit.maximus.freshskinweb.dto.request.user;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -26,11 +24,10 @@ public class UpdateUserRequest implements Serializable {
     String lastName;
     String email;
     String phone;
-    String avatar;
-    MultipartFile newImg;
+    List<String> avatar;
+    List<MultipartFile> newImg;
     String token;
     String address;
     String status;   // ACTIVE / INACTIVE
     String typeUser; // NORMAL / VIP
 }
-

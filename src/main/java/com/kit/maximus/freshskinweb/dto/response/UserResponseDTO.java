@@ -42,7 +42,7 @@ public class UserResponseDTO implements Serializable {
     String email;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String phone;
-    String avatar;
+    List<String> avatar;
     String token;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String address;

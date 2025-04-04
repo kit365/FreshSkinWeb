@@ -8,7 +8,6 @@ import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserPasswordRequest;
 import com.kit.maximus.freshskinweb.dto.request.user.UpdateUserRequest;
 import com.kit.maximus.freshskinweb.dto.response.RoleResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.UserResponseDTO;
-import com.kit.maximus.freshskinweb.entity.BlogEntity;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.entity.RoleEntity;
 import com.kit.maximus.freshskinweb.entity.UserEntity;
@@ -101,16 +100,21 @@ public class UserService {
 
         encodePassword(userEntity);
 
-        if (request.getAvatar() != null) {
-            try {
-                MultipartFile file = request.getAvatar();
-                String slg = getSlug(request.getLastName() + " " + request.getFirstName());
+        if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
 
-                String img = uploadImageFromFile(file, slg);
-                userEntity.setAvatar(img);
-            } catch (IOException e) {
-                log.error("Upload avatar error", e);
+            int count = 0;
+            List<String> images = new ArrayList<>();
+
+            for (MultipartFile file : request.getAvatar()) {
+                try {
+                    String url = uploadImageFromFile(file, getSlug(request.getLastName(), count++));
+                    images.add(url);
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                    throw new RuntimeException(e);
+                }
             }
+            userEntity.setAvatar(images);
         }
 
         userRepository.save(userEntity);
@@ -125,12 +129,14 @@ public class UserService {
         }
 
         //Xóa ảnh từ cloud khi xóa user
-        if (userEntity.getAvatar() != null) {
-            try {
-                deleteImageFromCloudinary(userEntity.getAvatar());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        if (userEntity.getAvatar() != null && !userEntity.getAvatar().isEmpty()) {
+            userEntity.getAvatar().forEach(s -> {
+                try {
+                    deleteImageFromCloudinary(s);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
 
         log.info("Delete user id:{}", userId);
@@ -142,15 +148,18 @@ public class UserService {
         userRepository.deleteAllById(id);
         List<UserEntity> userEntities = userRepository.findAllById(id);
 
-        userEntities.forEach(UserEntity -> {
-            if (UserEntity.getAvatar() != null) {
-                try {
-                    deleteImageFromCloudinary(UserEntity.getAvatar());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+        for (UserEntity userEntity : userEntities) {
+            if (userEntity.getAvatar() != null && !userEntity.getAvatar().isEmpty()) {
+                for (String url : userEntity.getAvatar()) {
+                    try {
+                        deleteImageFromCloudinary(url);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
-        });
+        }
+        userRepository.deleteAll(userEntities);
         return true;
     }
 
@@ -410,47 +419,57 @@ public class UserService {
         if ((userRequestDTO.getNewImg() != null && !userRequestDTO.getNewImg().isEmpty()) ||
                 (userRequestDTO.getAvatar() != null && !userRequestDTO.getAvatar().isEmpty())) {
 
-            // Get old avatar URL
-            String oldAvatar = userEntity.getAvatar();
+            List<String> oldImages = userEntity.getAvatar() != null ?
+                    new ArrayList<>(userEntity.getAvatar()) : new ArrayList<>();
 
-            // Get new avatar URL from request
-            String newAvatar = userRequestDTO.getAvatar();
+            // Danh sách ảnh mới từ FE
+            List<String> newThumbnails = userRequestDTO.getAvatar() != null ?
+                    userRequestDTO.getAvatar() : new ArrayList<>();
 
-            // Delete old avatar if it's different from new one
-            if (oldAvatar != null && !oldAvatar.equals(newAvatar)) {
-                try {
-                    deleteImageFromCloudinary(oldAvatar);
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to delete image: " + oldAvatar, e);
+            // Xóa ảnh không còn trong danh sách mới
+            for (String oldUrl : oldImages) {
+                if (!newThumbnails.contains(oldUrl)) {
+                    try {
+                        deleteImageFromCloudinary(oldUrl); // Xóa khỏi Cloudinary
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                    }
                 }
             }
 
-            // Upload new image if provided
+            // Danh sách mới giữ lại các ảnh chưa bị xóa
+            List<String> updatedThumbnails = new ArrayList<>(newThumbnails);
+
+            // Thêm ảnh mới nếu có
             if (userRequestDTO.getNewImg() != null && !userRequestDTO.getNewImg().isEmpty()) {
-                try {
-                    String url = uploadImageFromFile(userRequestDTO.getNewImg(),
-                            userEntity.getUsername());  // Remove the third argument '0'
-                    userEntity.setAvatar(url);
-                } catch (IOException e) {
-                    log.error("Failed to upload image: {}", e.getMessage());
-                    throw new AppException(ErrorCode.IMAGE_UPLOAD_FAILED);
+                int count = 0;
+                for (MultipartFile file : userRequestDTO.getNewImg()) {
+                    if (file != null && !file.isEmpty()) {
+                        try {
+                            String url = uploadImageFromFile(file, getSlug(userRequestDTO.getFirstName(), count++));
+                            updatedThumbnails.add(url);
+                        } catch (IOException e) {
+                            log.error("Failed to upload image: {}", e.getMessage());
+                            throw new AppException(ErrorCode.IMAGE_UPLOAD_FAILED);
+                        }
+                    }
                 }
-            } else if (newAvatar != null && !newAvatar.isEmpty()) {
-                // Keep existing avatar URL
-                userEntity.setAvatar(newAvatar);
             }
 
+            userEntity.setAvatar(updatedThumbnails);
 
         } else {
-            // If no image is provided, delete existing avatar
-            if (userEntity.getAvatar() != null) {
-                try {
-                    deleteImageFromCloudinary(userEntity.getAvatar());
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to delete image: " + userEntity.getAvatar(), e);
+            // Nếu FE không gửi gì => Xóa hết ảnh
+            if (userEntity.getAvatar() != null && !userEntity.getAvatar().isEmpty()) {
+                for (String oldUrl : userEntity.getAvatar()) {
+                    try {
+                        deleteImageFromCloudinary(oldUrl); // Xóa toàn bộ hình ảnh
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                    }
                 }
-                userEntity.setAvatar(null);
             }
+            userEntity.setAvatar(null); // Xóa danh sách ảnh trong DB
         }
 
         log.info("Cập nhật user id: {}", id);
@@ -549,7 +568,7 @@ public class UserService {
         return false; // Không tìm thấy đơn hàng để xóa
     }
 
-    private String getSlug(String slug) {
+    private String getSlug(String slug, int i) {
         return Normalizer.normalize(slug, Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "")
                 .replaceAll("[^a-zA-Z0-9\\s]", "")
@@ -698,22 +717,14 @@ public class UserService {
         UserEntity userEntity = getUserEntityById(id);
 
         if (userEntity.getRole() != null) {
-
-            // Cập nhật thông tin từ request (trừ password)
+            // Update user information from request (excluding password)
             userMapper.updateUser(userEntity, request);
 
-            userEntity.setUsername(userEntity.getUsername());
-
-            if (request.getEmail() == null) {
-                userEntity.setEmail(request.getEmail());
-            } else if (userRepository.existsByEmail(request.getEmail())) {
-                throw new AppException(ErrorCode.EMAIL_EXISTED);
-            } else if (request.getEmail() != null && !userRepository.existsByEmail(request.getEmail())) {
+            if (request.getEmail() != null && !userRepository.existsByEmail(request.getEmail())) {
                 userEntity.setEmail(request.getEmail());
             }
 
-
-            if (userEntity.getRole() != null) {
+            if (request.getRole() != null) {
                 RoleEntity role = roleRepository.findById(request.getRole())
                         .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
                 userEntity.setRole(role);
@@ -722,49 +733,56 @@ public class UserService {
             if ((request.getNewImg() != null && !request.getNewImg().isEmpty()) ||
                     (request.getAvatar() != null && !request.getAvatar().isEmpty())) {
 
-                // Get old avatar URL
-                String oldAvatar = userEntity.getAvatar();
+                List<String> oldImages = userEntity.getAvatar() != null ?
+                        new ArrayList<>(userEntity.getAvatar()) : new ArrayList<>();
 
-                // Get new avatar URL from request
-                String newAvatar = request.getAvatar();
+                List<String> newThumbnails = request.getAvatar() != null ?
+                        request.getAvatar() : new ArrayList<>();
 
-                // Delete old avatar if it's different from new one
-                if (oldAvatar != null && !oldAvatar.equals(newAvatar)) {
-                    try {
-                        deleteImageFromCloudinary(oldAvatar);
-                    } catch (IOException e) {
-                        throw new RuntimeException("Failed to delete image: " + oldAvatar, e);
+                // Delete old images not in the new list
+                for (String oldUrl : oldImages) {
+                    if (!newThumbnails.contains(oldUrl)) {
+                        try {
+                            deleteImageFromCloudinary(oldUrl);
+                        } catch (IOException e) {
+                            throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                        }
                     }
                 }
 
-                // Upload new image if provided
+                List<String> updatedThumbnails = new ArrayList<>(newThumbnails);
+
+                // Add new images
                 if (request.getNewImg() != null && !request.getNewImg().isEmpty()) {
-                    try {
-                        String url = uploadImageFromFile(request.getNewImg(),
-                                userEntity.getUsername());  // Remove the third argument '0'
-                        userEntity.setAvatar(url);
-                    } catch (IOException e) {
-                        log.error("Failed to upload image: {}", e.getMessage());
-                        throw new AppException(ErrorCode.IMAGE_UPLOAD_FAILED);
+                    int count = 0;
+                    for (MultipartFile file : request.getNewImg()) {
+                        if (file != null && !file.isEmpty()) {
+                            try {
+                                String url = uploadImageFromFile(file, getSlug(request.getFirstName(), count++));
+                                updatedThumbnails.add(url);
+                            } catch (IOException e) {
+                                log.error("Failed to upload image: {}", e.getMessage());
+                                throw new AppException(ErrorCode.IMAGE_UPLOAD_FAILED);
+                            }
+                        }
                     }
-                } else if (newAvatar != null && !newAvatar.isEmpty()) {
-                    // Keep existing avatar URL
-                    userEntity.setAvatar(newAvatar);
                 }
 
+                userEntity.setAvatar(updatedThumbnails);
 
             } else {
-                // If no image is provided, delete existing avatar
-                if (userEntity.getAvatar() != null) {
-                    try {
-                        deleteImageFromCloudinary(userEntity.getAvatar());
-                    } catch (IOException e) {
-                        throw new RuntimeException("Failed to delete image: " + userEntity.getAvatar(), e);
+                // If no images are sent, delete all images
+                if (userEntity.getAvatar() != null && !userEntity.getAvatar().isEmpty()) {
+                    for (String oldUrl : userEntity.getAvatar()) {
+                        try {
+                            deleteImageFromCloudinary(oldUrl);
+                        } catch (IOException e) {
+                            throw new RuntimeException("Failed to delete image: " + oldUrl, e);
+                        }
                     }
-                    userEntity.setAvatar(null);
                 }
+                userEntity.setAvatar(null);
             }
-
 
             return userMapper.toUserResponseDTO(userRepository.save(userEntity));
 
@@ -825,19 +843,17 @@ public class UserService {
     public boolean deleteSelectedAccount(List<Long> id) {
         List<UserEntity> userEntities = userRepository.findAllById(id);
         for (UserEntity userEntity : userEntities) {
-            if (userEntity.getRole() != null) {
-                userRepository.delete(userEntity);
-                if (userEntity.getAvatar() != null) {
+            if (userEntity.getAvatar() != null && !userEntity.getAvatar().isEmpty()) {
+                for (String url : userEntity.getAvatar()) {
                     try {
-                        deleteImageFromCloudinary(userEntity.getAvatar());
+                        deleteImageFromCloudinary(url);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }
-            } else {
-                throw new AppException(ErrorCode.THIS_USER_NOT_ALLOWED_TO_DELETE);
             }
         }
+        userRepository.deleteAll(userEntities);
         return true;
     }
 

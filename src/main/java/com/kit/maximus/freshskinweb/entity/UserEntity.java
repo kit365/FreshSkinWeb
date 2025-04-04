@@ -51,8 +51,9 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @Column(name = "PhoneNumber")
     String phone;
 
-    @Column(name = "Avatar")
-    String avatar;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Column(name = "avatar")
+    List<String> avatar;
 
     @Column(name = "Token", nullable = false, unique = true)
     private String token = UUID.randomUUID().toString();
@@ -60,7 +61,7 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @Column(name = "Address")
     String address;
 
-//    2 field này được lưu khi user đăng nhập bằng google
+    //    2 field này được lưu khi user đăng nhập bằng google
     @Column(name = "provider")
     private String provider; // GOOGLE, LOCAL, etc.
 
@@ -101,8 +102,8 @@ public class UserEntity extends AbstractEntity implements UserDetails {
 
 
     public void createOrder(OrderEntity order) {
-            orders.add(order);
-            order.setUser(this);
+        orders.add(order);
+        order.setUser(this);
     }
 
     public void removeOrder(OrderEntity order) {

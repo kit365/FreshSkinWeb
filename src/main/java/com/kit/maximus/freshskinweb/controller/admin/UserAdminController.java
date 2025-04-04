@@ -39,7 +39,7 @@ public class UserAdminController {
     @PostMapping(value = "create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseAPI<UserResponseDTO> addUser(
             @RequestPart("request") String requestJson,  // Nhận JSON dưới dạng String
-            @RequestPart(value = "avatar", required = false) MultipartFile image) { // Nhận hình ảnh
+            @RequestPart(value = "avatar", required = false) List<MultipartFile> image) { // Nhận hình ảnh
         log.info("requestJson:{}", requestJson);
         log.info("images:{}", image);
         String message_succed = "Tạo user thành công";
@@ -149,7 +149,7 @@ public class UserAdminController {
     public ResponseAPI<UserResponseDTO> editUser(
             @PathVariable("id") Long id,
             @RequestPart("request") String requestJson,
-            @RequestPart(value = "newImg", required = false) MultipartFile newImg) {
+            @RequestPart(value = "newImg", required = false) List<MultipartFile> newImg) {
 
         log.info("requestJson:{}", requestJson);
         log.info("images:{}", newImg);
