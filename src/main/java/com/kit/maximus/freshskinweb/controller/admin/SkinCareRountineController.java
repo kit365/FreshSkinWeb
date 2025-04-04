@@ -2,26 +2,37 @@ package com.kit.maximus.freshskinweb.controller.admin;
 
 import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.SkinCareRountineRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.UpdationSkinCareRountineRequest;
+import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ResponseAPI;
 import com.kit.maximus.freshskinweb.dto.response.SkinCareRountineResponse;
 
+import com.kit.maximus.freshskinweb.exception.AppException;
+import com.kit.maximus.freshskinweb.exception.ErrorCode;
+import com.kit.maximus.freshskinweb.service.product.ProductService;
 import com.kit.maximus.freshskinweb.service.skintest.SkinCareRountineService;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/admin/skin-care-routines")
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = lombok.AccessLevel.PRIVATE)
+@Slf4j
 public class SkinCareRountineController {
 
     SkinCareRountineService skinCareRountineService;
+
+    ProductService productService;
 
 
     @PostMapping("create")
@@ -85,6 +96,23 @@ public class SkinCareRountineController {
                 .data(skinCareRountineService.getFilteredSkinCareRoutines(status, keyword, PageRequest.of(page, size)))
                 .build();
 
+    }
+
+    @GetMapping("/products/{id}")
+    public ResponseAPI<List<ProductResponseDTO>> getAllProducts(
+            @PathVariable("id") Long skinType,
+            @RequestParam(defaultValue = "10") int limit) {
+        log.info("Getting top {} products for skin type ID: {}", limit, skinType);
+
+        List<ProductResponseDTO> products = productService.getAllProductsBySkinType(skinType, limit);
+        if (products.isEmpty()) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+        return ResponseAPI.<List<ProductResponseDTO>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Lấy danh sách sản phẩm thành công")
+                .data(products)
+                .build();
     }
 
 }

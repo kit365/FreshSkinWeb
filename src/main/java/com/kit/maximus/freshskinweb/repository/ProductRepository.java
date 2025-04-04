@@ -3,9 +3,7 @@ package com.kit.maximus.freshskinweb.repository;
 
 import com.kit.maximus.freshskinweb.entity.ProductEntity;
 import com.kit.maximus.freshskinweb.utils.Status;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -30,6 +28,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
     @Query("SELECT p.id FROM ProductEntity p WHERE p.status = :status AND p.deleted = :deleted ORDER BY p.featured DESC")
     List<Long> findTop3ByStatusAndDeletedAndFeatured(@Param("status") Status status, @Param("deleted") boolean deleted, Pageable pageable);
 
+    List<ProductEntity> findAllByIdIn(List<Long> ids);
 
 //    List<ProductEntity> findTop3ByStatusAndDeletedAndFeatured(Status status, boolean b, boolean b1);
 
@@ -59,4 +58,14 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
 
     long countByStatusAndDeleted(Status status, boolean b);
 
+    @Query(value = """
+    SELECT DISTINCT p.* FROM product p
+    INNER JOIN product_skin_type pst ON p.product_id = pst.product_id
+    WHERE pst.skin_type_id = :skinTypeId
+    AND p.deleted = false
+    AND p.status = 'ACTIVE'
+    ORDER BY p.position DESC
+    LIMIT :limit
+    """, nativeQuery = true)
+    List<ProductEntity> findAllActiveBySkinType(@Param("skinTypeId") Long skinTypeId, @Param("limit") int limit);
 }

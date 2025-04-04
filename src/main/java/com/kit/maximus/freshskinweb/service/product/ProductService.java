@@ -616,6 +616,44 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return map;
     }
 
+//show các sản phẩm thông qua skin type
+public List<ProductResponseDTO> getAllProductsBySkinType(Long skinTypeId, int limit) {
+    List<ProductEntity> products = productRepository.findAllActiveBySkinType(skinTypeId, limit);
+
+    return products.stream()
+            .map(product -> {
+                ProductResponseDTO dto = productMapper.productToProductResponseDTO(product);
+
+                // Map variants
+                List<ProductVariantResponse> variantResponses = product.getVariants().stream()
+                        .map(variant -> {
+                            ProductVariantResponse variantResponse = new ProductVariantResponse();
+                            variantResponse.setId(variant.getId());
+                            variantResponse.setPrice(variant.getPrice());
+                            variantResponse.setVolume(variant.getVolume());
+                            variantResponse.setUnit(variant.getUnit());
+                            return variantResponse;
+                        })
+                        .collect(Collectors.toList());
+                dto.setVariants(variantResponses);
+
+                // Map skin types
+                List<SkinTypeResponse> skinTypeResponses = product.getSkinTypes().stream()
+                        .map(skinType -> {
+                            SkinTypeResponse skinTypeResponse = new SkinTypeResponse();
+                            skinTypeResponse.setId(skinType.getId());
+                            skinTypeResponse.setType(skinType.getType());
+                            skinTypeResponse.setDescription(skinType.getDescription());
+                            return skinTypeResponse;
+                        })
+                        .collect(Collectors.toList());
+                dto.setSkinTypes(skinTypeResponses);
+
+                clearUnnecessaryFields(dto);
+                return dto;
+            })
+            .collect(Collectors.toList());
+}
 
     //-------------------------------------------------------------------------------------------------------------
     //tra ve ProductEntity, Neu Id null -> nem loi
@@ -1750,6 +1788,7 @@ public List<ProductResponseDTO> mapProductIndexResponsesDTO(List<ProductEntity> 
 
         return Map.of("data", data);
     }
+
 
 //    //dashboard
 //    //5 danh mục có nhiều sản phẩm nhất

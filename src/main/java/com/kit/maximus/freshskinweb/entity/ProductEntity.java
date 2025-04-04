@@ -107,7 +107,12 @@ public class ProductEntity extends AbstractEntity {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "product")
     List<ReviewEntity> reviews = new ArrayList<>();
 
-
+    @ManyToMany (fetch = FetchType.LAZY)
+    @JoinTable(name = "ProductSkinCareRoutine",
+            joinColumns = @JoinColumn(name = "productID", nullable = true),
+            inverseJoinColumns = @JoinColumn(name = "RoutineID", nullable = true)
+    )
+    List<SkinCareRoutineEntity> skinCareRoutines = new ArrayList<>();
 
 //    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 //    @JoinColumn(name = "discountId")
