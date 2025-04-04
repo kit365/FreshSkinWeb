@@ -47,7 +47,7 @@ public class AuthenticationController {
     public ResponseAPI<AuthenticationResponseDTO> checkLoginAdmin(@RequestBody AuthenticationRequest request, HttpServletResponse response, HttpServletRequest httpRequest ) {
         log.info(httpRequest.getRequestURI());
         String message = "Đăng nhập thành công";
-        AuthenticationResponseDTO result = authenticationService.authenticate(request, response,httpRequest);
+        AuthenticationResponseDTO result = authenticationService.authenticateAdmin(request, response,httpRequest);
 
         return ResponseAPI.<AuthenticationResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
 
