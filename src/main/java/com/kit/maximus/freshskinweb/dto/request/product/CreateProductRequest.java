@@ -40,6 +40,7 @@ public class CreateProductRequest implements Serializable {
     String usageInstructions;
     String benefits;
     String skinIssues;
+    int stock;
 //    String thumbnailPayload;
     /// ////////////////////////////////////////////
     boolean featured;

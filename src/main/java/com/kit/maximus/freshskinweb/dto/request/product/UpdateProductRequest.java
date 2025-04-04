@@ -36,5 +36,6 @@ public class UpdateProductRequest implements Serializable {
     String benefits;
     String skinIssues;
     boolean featured;
+    int stock;
 
 }
