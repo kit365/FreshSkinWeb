@@ -145,6 +145,35 @@ public class AuthenticationService implements UserDetailsService {
                 .build();
     }
 
+    public AuthenticationResponseDTO authenticateAdmin(AuthenticationRequest authenticationRequest, HttpServletResponse response, HttpServletRequest request) {
+        UserEntity user = userRepository.findByUsername(authenticationRequest.getUsername())
+                .orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_FOUND));
+
+        if(user.getRole() == null) {
+            throw new AppException(ErrorCode.ROLE_ACCESS_DENIED);
+        }
+
+
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+
+        boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
+
+        if (!authenticated) {
+            throw new AppException(ErrorCode.PASSWORD_INCORRECT);
+        }
+        if (user.getStatus().equals(Status.INACTIVE)) {
+            throw new AppException(ErrorCode.ACCOUNT_LOCKED);
+        }
+
+        // Generate JWT Token
+        String token = generateToken(authenticationRequest.getUsername());
+
+        return AuthenticationResponseDTO.builder()
+                .token(token)
+                .authenticated(authenticated)
+                .build();
+    }
+
 
     public String generateToken(String username) {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
