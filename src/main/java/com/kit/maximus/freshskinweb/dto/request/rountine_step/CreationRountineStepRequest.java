@@ -12,6 +12,6 @@ import lombok.*;
 public class CreationRountineStepRequest {
     Integer position;
     String step;
-    String description;
+    String content;
     String productCategory;
 }

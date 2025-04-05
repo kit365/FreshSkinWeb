@@ -35,8 +35,8 @@ public class RountineStepEntity {
     @Column(name = "Step",columnDefinition = "MEDIUMTEXT")
     String step;
 
-    @Column(name = "Description",columnDefinition = "MEDIUMTEXT")
-    String description;
+    @Column(name = "Content",columnDefinition = "MEDIUMTEXT")
+    String content;
 
     @OneToMany(mappedBy = "rountineStep", fetch = FetchType.LAZY)
             @OnDelete(action = OnDeleteAction.SET_NULL)

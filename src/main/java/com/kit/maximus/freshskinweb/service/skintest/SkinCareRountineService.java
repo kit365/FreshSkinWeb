@@ -1,6 +1,5 @@
 package com.kit.maximus.freshskinweb.service.skintest;
 
-import com.kit.maximus.freshskinweb.dto.request.product.CreateProductRequest;
 import com.kit.maximus.freshskinweb.dto.request.rountine_step.CreationRountineStepRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.SkinCareRountineRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
@@ -84,7 +83,7 @@ public class SkinCareRountineService {
             // Set giá trị có trong rountine step vào biến Object tạm thời, để tí nữa set cho bảng rountine
             for (CreationRountineStepRequest stepRequest : request.getRountineStep()) {
                 RountineStepEntity routineStepEntity = new RountineStepEntity();
-                routineStepEntity.setDescription(stepRequest.getDescription());
+                routineStepEntity.setContent(stepRequest.getContent());
                 routineStepEntity.setStep(stepRequest.getStep());
                 routineStepEntity.setSkinCareRountine(skinCareRoutineEntity);
 

@@ -12,7 +12,7 @@ import java.util.List;
 public interface RountineStepMapper{
 
     @Mapping(target = "product",ignore = true)
-    @Mapping(target = "skinCareRoutine", ignore = true)
+    @Mapping(target = "skinCareRountine", ignore = true)
     RountineStepEntity toRountineStepEntity(CreationRountineStepRequest request);
 
     @Mapping(target = "product",ignore = true)
@@ -22,7 +22,7 @@ public interface RountineStepMapper{
     List<RountineStepResponse> toRountinesStepResponse(List<RountineStepEntity> entity);
 
     @Mapping(target = "product",ignore = true)
-    @Mapping(target = "skinCareRoutine", ignore = true)
+    @Mapping(target = "skinCareRountine", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateRountineStep(@MappingTarget RountineStepEntity entity, UpdationRountineStepRequest request);
 }

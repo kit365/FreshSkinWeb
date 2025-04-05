@@ -12,6 +12,6 @@ import lombok.*;
 public class UpdationRountineStepRequest {
     Integer position;
     String step;
-    String description;
+    String content;
     String productCategory;
 }
