@@ -8,6 +8,7 @@ import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.OrderItemMapper;
 import com.kit.maximus.freshskinweb.mapper.OrderMapper;
+import com.kit.maximus.freshskinweb.mapper.VoucherMapper;
 import com.kit.maximus.freshskinweb.repository.OrderRepository;
 import com.kit.maximus.freshskinweb.repository.ProductVariantRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
@@ -51,6 +52,7 @@ public class OrderService {
     OrderItemMapper orderItemMapper;
     VoucherRepository voucherRepository;
     VoucherService voucherService;
+    VoucherMapper voucherMapper;
     ApplicationEventPublisher eventPublisher;
 
 //    @Transactional
@@ -248,6 +250,8 @@ public class OrderService {
 
                 // Liên kết voucher với order
                 order.setVoucher(voucher);
+
+
             }
 
         }
@@ -313,11 +317,12 @@ public class OrderService {
 
 
     public OrderResponse getOrderById(String orderId) {
-        OrderEntity order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         OrderResponse orderResponse = orderMapper.toOrderResponse(order);
 
-        //Dựa vào ProductVariantID, show ra thêm các field phụ như ảnh, title, slug của Product (Mặc dù product và Order không đươc liên kết nhau )
+        // Map OrderItems và thêm thông tin product
         if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
             List<OrderItemResponse> orderItemResponses = new ArrayList<>();
 
@@ -326,8 +331,6 @@ public class OrderService {
                 orderItemResponse.setOrderItemId(orderItemEntity.getOrderItemId());
                 orderItemResponse.setQuantity(orderItemEntity.getQuantity());
                 orderItemResponse.setSubtotal(orderItemEntity.getSubtotal());
-//                orderItemResponse.setDiscountPrice(orderItemEntity.getDiscountPrice());
-
 
                 if (orderItemEntity.getProductVariant() != null) {
                     ProductVariantResponse productVariantResponse = new ProductVariantResponse();
@@ -355,8 +358,15 @@ public class OrderService {
             orderResponse.setOrderItems(orderItemResponses);
         }
 
+        // Map thông tin voucher đầy đủ nếu có
+        if (order.getVoucher() != null) {
+            VoucherResponse voucherResponse = voucherMapper.toVoucherResponse(order.getVoucher());
+            orderResponse.setVoucher(voucherResponse);
+        }
+
         return orderResponse;
     }
+
 
 
     //Tra cứu đơn hàng theo SĐT or Email or Both

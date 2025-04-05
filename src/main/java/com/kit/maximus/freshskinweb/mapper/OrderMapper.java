@@ -18,6 +18,7 @@ public interface OrderMapper {
 
     @Mapping(target = "orderItems", ignore = true)
     @Mapping(target = "orderId", source = "orderId")
+    @Mapping(source = "voucher", target = "voucher")
     OrderResponse toOrderResponse(OrderEntity order);
 
     @Named("toOrderResponseCreate")

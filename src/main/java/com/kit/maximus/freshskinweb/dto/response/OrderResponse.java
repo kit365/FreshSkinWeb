@@ -2,6 +2,7 @@ package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.kit.maximus.freshskinweb.entity.VoucherEntity;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
 import com.kit.maximus.freshskinweb.utils.Status;
@@ -57,7 +58,7 @@ public class OrderResponse implements Serializable {
 
     String paymentStatus;
 
-    String voucherName; // Mã giảm giá nếu có
+    VoucherResponse voucher; // Mã giảm giá nếu có
 
     BigDecimal discountAmount; // Số tiền giảm giá
 
