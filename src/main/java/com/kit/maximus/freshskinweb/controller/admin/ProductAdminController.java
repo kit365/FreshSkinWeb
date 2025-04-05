@@ -91,21 +91,6 @@ public class ProductAdminController {
         return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
-    @PatchMapping(value = "edit/{id}")
-    public ResponseAPI<ProductResponseDTO> updateProduct(@RequestBody UpdateProductRequest request, @PathVariable Long id) {
-
-        String message_succed = "Cập nhật sản phẩm thành công";
-        String message_failed = "Cập nhật sản phẩm thất bại";
-        try {
-            ProductResponseDTO result = productService.update(id, request);
-            log.info("Product updated successfully");
-            return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).message(message_succed).data(result).build();
-        } catch (Exception e) {
-            log.info("Product update failed");
-            log.error(e.getMessage());
-            return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
-        }
-    }
 
     @PatchMapping(value = "/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseAPI<ProductResponseDTO> editProduct(
