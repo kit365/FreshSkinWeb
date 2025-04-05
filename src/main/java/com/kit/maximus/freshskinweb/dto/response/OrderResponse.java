@@ -9,6 +9,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public class OrderResponse implements Serializable {
 
     Long totalAmount;
 
-    Double totalPrice;
+    BigDecimal totalPrice;
 
     PaymentMethod paymentMethod;
 
@@ -58,5 +59,7 @@ public class OrderResponse implements Serializable {
 
     String voucherName; // Mã giảm giá nếu có
 
-    Double discountAmount; // Số tiền giảm giá
+    BigDecimal discountAmount; // Số tiền giảm giá
+
+
 }

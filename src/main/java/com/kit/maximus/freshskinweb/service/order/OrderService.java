@@ -227,24 +227,29 @@ public class OrderService {
         order.setOrderItems(orderItems);
 
         if (orderRequest.getVoucherName() != null) {
-            VoucherEntity voucher = voucherRepository.findByName(orderRequest.getVoucherName())
-                    .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
+            if(orderRequest.getVoucherName().isBlank()) {
+                order.setVoucher(null);
+            } else{
+                VoucherEntity voucher = voucherRepository.findByName(orderRequest.getVoucherName())
+                        .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
 
-            if (voucherService.validateVoucher(orderRequest.getVoucherName(), order.getTotalPrice()) == null) {
-                throw new AppException(ErrorCode.VOUCHER_INVALID);
+                if (voucherService.validateVoucher(orderRequest.getVoucherName(), order.getTotalPrice()) == null) {
+                    throw new AppException(ErrorCode.VOUCHER_INVALID);
+                }
+
+                // Áp dụng giảm giá
+                BigDecimal finalPrice = voucherService.applyVoucherDiscount(voucher, order.getTotalPrice());
+                order.setDiscountAmount(totalPrice.subtract(finalPrice));
+                order.setTotalPrice(finalPrice);
+
+                // Giảm số lượt sử dụng voucher
+                voucher.setUsed(voucher.getUsed() + 1);
+                voucherRepository.save(voucher);
+
+                // Liên kết voucher với order
+                order.setVoucher(voucher);
             }
 
-            // Áp dụng giảm giá
-            BigDecimal finalPrice = voucherService.applyVoucherDiscount(voucher, order.getTotalPrice());
-            order.setDiscountAmount(totalPrice.subtract(finalPrice));
-            order.setTotalPrice(finalPrice);
-
-            // Giảm số lượt sử dụng voucher
-            voucher.setUsed(voucher.getUsed() + 1);
-            voucherRepository.save(voucher);
-
-            // Liên kết voucher với order
-            order.setVoucher(voucher);
         }
 
 
