@@ -246,18 +246,4 @@ public class ProductAdminController {
         return ResponseAPI.<ProductResponseDTO>builder().code(HttpStatus.OK.value()).data(result).build();
     }
 
-    @PostMapping("/skin-type")
-    public ResponseAPI<Page<ProductRoutineDTO>> getProductsBySkinType(
-            @RequestBody Map<String, Object> skinTypeRequestDTO,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "7") int size) {
-
-        String skinType = skinTypeRequestDTO.get("skinType").toString();
-        Page<ProductRoutineDTO> products = productService
-                .getProductsBySkinTypeAndCategories(skinType, page, size);
-        return ResponseAPI.<Page<ProductRoutineDTO>>builder()
-                .code(HttpStatus.OK.value())
-                .data(products)
-                .build();
-    }
 }

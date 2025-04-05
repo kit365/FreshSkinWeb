@@ -64,6 +64,27 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     ProductSearchRepository productSearchRepository;
 
+    // Biến lưu toàn bộ các danh mục sản phẩm cho các bước trong lộ trình chăm sóc da
+    private static final List<String> CATEGORY_KEYWORDS = Arrays.asList(
+            "Nước tẩy trang",
+            "Sữa rữa mặt",
+            "Toner",
+            "Serum / Tinh Chất",
+            "Dưỡng ẩm",
+            "Chống nắng da mặt"
+    );
+
+    // Biến lưu toàn bộ loại da cho các bước trong lộ trình chăm sóc da
+    private static final List<String> SKIN_TYPE_KEYWORDS = Arrays.asList(
+            "da dầu",
+            "da khô",
+            "da nhạy cảm",
+            "da hỗn hợp",
+            "da thường"
+    );
+
+
+
 
     // Là annotation của JPA để inject EntityManager instance
     // Quản lý lifecycle của EntityManager
@@ -616,44 +637,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return map;
     }
 
-//show các sản phẩm thông qua skin type
-public List<ProductResponseDTO> getAllProductsBySkinType(Long skinTypeId, int limit) {
-    List<ProductEntity> products = productRepository.findAllActiveBySkinType(skinTypeId, limit);
-
-    return products.stream()
-            .map(product -> {
-                ProductResponseDTO dto = productMapper.productToProductResponseDTO(product);
-
-                // Map variants
-                List<ProductVariantResponse> variantResponses = product.getVariants().stream()
-                        .map(variant -> {
-                            ProductVariantResponse variantResponse = new ProductVariantResponse();
-                            variantResponse.setId(variant.getId());
-                            variantResponse.setPrice(variant.getPrice());
-                            variantResponse.setVolume(variant.getVolume());
-                            variantResponse.setUnit(variant.getUnit());
-                            return variantResponse;
-                        })
-                        .collect(Collectors.toList());
-                dto.setVariants(variantResponses);
-
-                // Map skin types
-                List<SkinTypeResponse> skinTypeResponses = product.getSkinTypes().stream()
-                        .map(skinType -> {
-                            SkinTypeResponse skinTypeResponse = new SkinTypeResponse();
-                            skinTypeResponse.setId(skinType.getId());
-                            skinTypeResponse.setType(skinType.getType());
-                            skinTypeResponse.setDescription(skinType.getDescription());
-                            return skinTypeResponse;
-                        })
-                        .collect(Collectors.toList());
-                dto.setSkinTypes(skinTypeResponses);
-
-                clearUnnecessaryFields(dto);
-                return dto;
-            })
-            .collect(Collectors.toList());
-}
 
     //-------------------------------------------------------------------------------------------------------------
     //tra ve ProductEntity, Neu Id null -> nem loi
@@ -1627,111 +1610,65 @@ public List<ProductResponseDTO> mapProductIndexResponsesDTO(List<ProductEntity> 
         return false;
     }
 
-    //    Hỗ trợ cho lấy 7 loại danh mục sản phảm cô lộ trình da
-    public Page<ProductRoutineDTO> getProductsBySkinTypeAndCategories(String skinType, int page, int size) {
-    SkinTypeEntity skinTypeEntity = skinTypeRepository.findByType(skinType);
-    Long skinTypeId = null;
-    if(skinType != null){
-        skinTypeId = skinTypeEntity.getId();
-    } else {
-        throw new IllegalArgumentException("Loại da không tồn tại");
-    }
-        List<String> orderedCategories = List.of(
-                "Nước tẩy trang",
-                "Sữa rửa mặt",
-                "Tẩy tế bào chết",
-                "Toner / Nước cân bằng da",
-                "Hỗ trợ trị mụn",
-                "Serum / Tinh Chất",
-                "Dưỡng ẩm",
-                "Chống nắng da mặt"
-        );
 
-        String sql = """
-                    WITH RankedProducts AS (
-                        SELECT p.*,
-                               c.title as category_title,
-                               ROW_NUMBER() OVER (PARTITION BY c.title ORDER BY p.product_id) as rn
-                        FROM product p
-                        JOIN product_category pc ON p.product_id = pc.productid
-                        JOIN category c ON pc.categoryid = c.id
-                        JOIN product_skin_type pst ON p.product_id = pst.product_id
-                        WHERE pst.skin_type_id = :skinTypeId
-                        AND c.title IN :categories
-                        AND p.deleted = false
-                        AND p.status = 'ACTIVE'
-                    )
-                    SELECT * FROM RankedProducts
-                    WHERE rn = 1
-                    ORDER BY FIELD(category_title, :orderList)
-                """;
-
-        Query query = entityManager.createNativeQuery(sql, ProductEntity.class)
-                .setParameter("skinTypeId", skinTypeId)
-                .setParameter("categories", orderedCategories)
-                .setParameter("orderList", orderedCategories.stream()
-                        .collect(Collectors.joining("','", "'", "'"))); // Format: 'cat1','cat2',...
-
-        List<ProductEntity> products = query.getResultList();
-
-        // Apply pagination
-        Pageable pageable = PageRequest.of(page, size);
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), products.size());
-
-        List<ProductRoutineDTO> dtoList = products.subList(start, end)
-                .stream()
-                .map(this::mapToRoutineDTO)
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(dtoList, pageable, products.size());
+// Lấy top 5 sản phẩm bán chạy nhất theo loại da và thể loại
+public List<ProductEntity> getTop5BestSellerProductBySkinTypeAndProductCategory(Long skinTypeId, String step) {
+    String categoryKeyword = extractCategoryKeyword(step);
+    if (categoryKeyword == null) {
+        log.warn("No matching category found for step: {}", step);
+        throw new AppException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND);
     }
 
-    private ProductRoutineDTO mapToRoutineDTO(ProductEntity product) {
-        ProductRoutineDTO dto = new ProductRoutineDTO();
-        dto.setId(product.getId());
-        dto.setTitle(product.getTitle());
-        dto.setSlug(product.getSlug());
-        dto.setThumbnail(product.getThumbnail());
+    // Get current skin type
+    SkinTypeEntity currentSkinType = skinTypeRepository.findById(skinTypeId)
+            .orElseThrow(() -> new AppException(ErrorCode.SKIN_TYPE_NOT_FOUND));
+    String currentSkinTypeName = currentSkinType.getType();
 
-        if (product.getBrand() != null) {
-            ProductBrandResponse brandResponse = new ProductBrandResponse();
-            brandResponse.setId(product.getBrand().getId());
-            brandResponse.setTitle(product.getBrand().getTitle());
-            brandResponse.setSlug(product.getBrand().getSlug());
-            dto.setBrand(brandResponse);
-        }
+    log.info("Searching top 5 selling products for skinType: {} with category: {}", skinTypeId, categoryKeyword);
+    List<Long> productIds = productRepository.findTop5SellingProductsBySkinTypeAndCategory(
+            skinTypeId,
+            categoryKeyword
+    );
 
-        if (product.getCategory() != null) {
-            List<ProductCategoryResponse> categoryResponses = product.getCategory().stream()
-                    .map(category -> {
-                        ProductCategoryResponse response = new ProductCategoryResponse();
-                        response.setId(category.getId());
-                        response.setTitle(category.getTitle());
-                        response.setSlug(category.getSlug());
-                        return response;
-                    })
-                    .collect(Collectors.toList());
-            dto.setCategory(categoryResponses);
-        }
-
-        if (product.getVariants() != null) {
-            List<ProductVariantResponse> variantResponses = product.getVariants().stream()
-                    .map(variant -> {
-                        ProductVariantResponse response = new ProductVariantResponse();
-                        response.setId(variant.getId());
-                        response.setPrice(variant.getPrice());
-                        response.setVolume(variant.getVolume());
-                        response.setUnit(variant.getUnit());
-                        return response;
-                    })
-                    .collect(Collectors.toList());
-            dto.setVariants(variantResponses);
-        }
-
-        return dto;
+    if (productIds.isEmpty()) {
+        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
     }
 
+    List<ProductEntity> products = productRepository.findAllById(productIds);
+
+    // Filter products based on skin type in title
+    return products.stream()
+            .filter(product -> isMatchingSkinType(product.getTitle(), currentSkinTypeName))
+            .collect(Collectors.toList());
+}
+
+// Lọc nội dung của tên danh mục sản phẩm, sau đó lấy những danh mục tương ứng với biến được khai trước đó và so sánh
+private String extractCategoryKeyword(String step) {
+    String stepLower = step.toLowerCase().trim();
+    return CATEGORY_KEYWORDS.stream()
+            .filter(keyword -> keyword.toLowerCase().equals(stepLower))
+            .findFirst()
+            .orElseGet(() -> {
+                log.warn("Step '{}' did not match any category keywords", step);
+                return null;
+            });
+}
+
+// Lọc nội dung của bước làm da, sau đó lấy những keyword tương ứng với biến được khai trước đó và so sánh
+    // Tránh những sản phẩm có tên khác với loại da hiện tại
+private boolean isMatchingSkinType(String productTitle, String currentSkinType) {
+    String titleLower = productTitle.toLowerCase();
+
+    // If product title contains current skin type, return true
+    if (titleLower.contains(currentSkinType.toLowerCase())) {
+        return true;
+    }
+
+    // If product title contains any other skin type, return false
+    return SKIN_TYPE_KEYWORDS.stream()
+            .filter(skinType -> !skinType.equalsIgnoreCase(currentSkinType))
+            .noneMatch(titleLower::contains);
+    }
     //data dashboard
     public long countProduct() {
         return productRepository.countByStatusAndDeleted(Status.ACTIVE, false);

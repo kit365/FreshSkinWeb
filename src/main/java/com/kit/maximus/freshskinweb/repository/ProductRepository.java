@@ -58,14 +58,21 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
 
     long countByStatusAndDeleted(Status status, boolean b);
 
-    @Query(value = """
-    SELECT DISTINCT p.* FROM product p
-    INNER JOIN product_skin_type pst ON p.product_id = pst.product_id
-    WHERE pst.skin_type_id = :skinTypeId
-    AND p.deleted = false
-    AND p.status = 'ACTIVE'
-    ORDER BY p.position DESC
-    LIMIT :limit
-    """, nativeQuery = true)
-    List<ProductEntity> findAllActiveBySkinType(@Param("skinTypeId") Long skinTypeId, @Param("limit") int limit);
+    // Truy vấn lấy danh sách sản phẩm theo skinTypeId và categoryKeyword và chọn theo top 5 lượt mua nhiều nhất
+    @Query("SELECT DISTINCT p.id FROM ProductEntity p " +
+            "JOIN p.skinTypes st " +
+            "JOIN p.category c " +
+            "JOIN p.variants pv " +
+            "JOIN OrderItemEntity oi ON oi.productVariant.id = pv.id " +
+            "WHERE st.id = :skinTypeId " +
+            "AND LOWER(c.title) LIKE LOWER(CONCAT('%', :categoryKeyword, '%')) " +
+            "AND p.status = 'ACTIVE' " +
+            "AND p.deleted = false " +
+            "GROUP BY p.id " +
+            "ORDER BY COUNT(oi) DESC " +
+            "LIMIT 5")
+    List<Long> findTop5SellingProductsBySkinTypeAndCategory(
+            @Param("skinTypeId") Long skinTypeId,
+            @Param("categoryKeyword") String categoryKeyword
+    );
 }

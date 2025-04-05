@@ -106,6 +106,10 @@ public enum ErrorCode {
     //ORDER ITEMS
     ORDER_ITEM_NOT_FOUND(404, "Không tìm thấy đơn hàng"),
 
+    //SKIN CARE ROUNTINE
+    SKIN_CARE_ROUTINE_NOT_FOUND(404, "Không tìm thấy lộ trình chăm sóc da"),
+    SKIN_CARE_ROUTINE_ALREADY_EXISTS(400, "Lộ trình chăm sóc da đã tồn tại"),
+
     //SKIN TYPE
     SKIN_TYPE_NOT_FOUND(404, "Không tìm thấy loại da"),
     INVALID_SKIN_TYPE(404, "Loại da không hợp lệ"),
@@ -114,6 +118,9 @@ public enum ErrorCode {
     //SKIN TEST
     SKIN_TEST_NOT_FOUND(404, "Không tìm thấy bài đánh giá loại da nào"),
 
+    //ROUTINE STEP
+    ROUTINE_STEP_NOT_FOUND(404, "Không tìm thấy bước chăm sóc da nào"),
+    DUPLICATE_POSITION(404, "Duplicate position in routine steps"),
     //REVIEW
     RATING_INVALID(400, "Giá trị phải từ 1 đến 5"),
     REVIEW_NOT_FOUND(404, "Không tìm thấy đánh giá"),
