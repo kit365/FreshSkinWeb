@@ -106,7 +106,7 @@ public class ProductAdminController {
             ObjectMapper objectMapper = new ObjectMapper();
             UpdateProductRequest request = objectMapper.readValue(requestJson, UpdateProductRequest.class);
             if (newImg != null) {
-                request.setThumbnail(newImg);
+                request.setNewImg(newImg);
             }
 
             ProductResponseDTO result = productService.update(id, request);
