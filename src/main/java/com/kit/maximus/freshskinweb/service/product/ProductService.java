@@ -591,6 +591,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             specification = specification.and(sortByPosition(getSortDirection(sortDirection)));
         } else if (sortKey.equalsIgnoreCase("price")) {
             specification = specification.and(sortByPrice(getSortDirection(sortDirection)));
+        }else if (sortKey.equalsIgnoreCase("title")) {
+            specification = specification.and(sortByTitle(getSortDirection(sortDirection)));
         }
 
         // Tính toán số trang
