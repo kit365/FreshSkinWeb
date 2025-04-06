@@ -1,12 +1,8 @@
 package com.kit.maximus.freshskinweb.config;
 
-import com.kit.maximus.freshskinweb.service.notification.NotificationListener;
 import com.kit.maximus.freshskinweb.websocket.DashboardWebSocketHandler;
 import com.kit.maximus.freshskinweb.websocket.NotificationWebSocketHandler;
-import com.sun.nio.sctp.NotificationHandler;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
 
 @Configuration

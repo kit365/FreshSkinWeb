@@ -56,7 +56,7 @@ public class OrderService {
     VoucherService voucherService;
     VoucherMapper voucherMapper;
     ApplicationEventPublisher eventPublisher;
-   ProductService productService;
+    ProductService productService;
 
 //    @Transactional
 //    public OrderIdResponse addOrder(OrderRequest orderRequest) {
@@ -237,9 +237,9 @@ public class OrderService {
         order.setPriceShipping(orderRequest.getPriceShipping());
 
         if (orderRequest.getVoucherName() != null) {
-            if(orderRequest.getVoucherName().isBlank()) {
+            if (orderRequest.getVoucherName().isBlank()) {
                 order.setVoucher(null);
-            } else{
+            } else {
                 VoucherEntity voucher = voucherRepository.findByName(orderRequest.getVoucherName())
                         .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
 
@@ -250,11 +250,11 @@ public class OrderService {
                 // Áp dụng giảm giá
                 BigDecimal finalPrice = voucherService.applyVoucherDiscount(voucher, totalPrice);
                 order.setDiscountAmount(totalPrice.subtract(finalPrice));
-                System.out.println("finalPrice:"+finalPrice);
-                System.out.println("totalPrice:"+totalPrice);
-                System.out.println("totalPrice.subtract(finalPrice):"+totalPrice.subtract(finalPrice));
+                System.out.println("finalPrice:" + finalPrice);
+                System.out.println("totalPrice:" + totalPrice);
+                System.out.println("totalPrice.subtract(finalPrice):" + totalPrice.subtract(finalPrice));
                 order.setTotalPrice(finalPrice.add(orderRequest.getPriceShipping()));
-                System.out.println("finalPrice.add(orderRequest.getPriceShipping():"+finalPrice.add(orderRequest.getPriceShipping()));
+                System.out.println("finalPrice.add(orderRequest.getPriceShipping():" + finalPrice.add(orderRequest.getPriceShipping()));
 
                 // Giảm số lượt sử dụng voucher
                 voucher.setUsed(voucher.getUsed() + 1);
@@ -271,9 +271,9 @@ public class OrderService {
 
         OrderEntity savedOrder = orderRepository.save(order);
 
-        if(!savedOrder.getOrderItems().isEmpty()) {
+        if (!savedOrder.getOrderItems().isEmpty()) {
             savedOrder.getOrderItems().forEach(orderItem -> {
-                if(orderItem.getProductVariant() != null) {
+                if (orderItem.getProductVariant() != null) {
                     productService.updateStock(
                             orderItem.getProductVariant().getId(),
                             orderItem.getProductVariant().getProduct().getId(),
@@ -392,7 +392,6 @@ public class OrderService {
         // Map thông tin người dùng
         return orderResponse;
     }
-
 
 
     //Tra cứu đơn hàng theo SĐT or Email or Both
@@ -712,8 +711,19 @@ public class OrderService {
             List<OrderEntity> orderEntities = orderRepository.findAllById(id);
 
             if (!orderEntities.isEmpty()) {
-                orderEntities.forEach(orderEntity -> orderEntity.setOrderStatus(orderStatusEnum));
+                for (OrderEntity orderEntity : orderEntities) {
+                    orderEntity.setOrderStatus(orderStatusEnum);
+                    if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
+                        orderEntity.getOrderItems().forEach(orderItem -> productService.updateStockCancel(
+                                orderItem.getProductVariant().getId(),
+                                orderItem.getProductVariant().getProduct().getId(),
+                                -orderItem.getQuantity()
+                        ));
+                    }
+                }
                 orderRepository.saveAll(orderEntities);
+
+
                 return "Cập nhật trạng thái đơn hàng thành công";
             }
             return "Không tìm thấy đơn hàng nào để cập nhật";
@@ -732,6 +742,15 @@ public class OrderService {
         if (orderEntity != null) {
             orderEntity.setOrderStatus(orderStatusEnum);
             orderRepository.save(orderEntity);
+
+            if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
+                orderEntity.getOrderItems().forEach(orderItem -> productService.updateStockCancel(
+                        orderItem.getProductVariant().getId(),
+                        orderItem.getProductVariant().getProduct().getId(),
+                        -orderItem.getQuantity()
+                ));
+            }
+
             return "Cập nhật trạng thái đơn hàng thành công";
         }
         return "Không tìm thấy đơn hàng để cập nhật";

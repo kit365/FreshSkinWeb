@@ -1704,6 +1704,32 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         productSearchRepository.updateProduct(mapProductIndexResponsesDTO(productRepository.save(productEntity)));
     }
 
+    public void updateStockCancel(Long variantId,Long productId, int quantity) {
+        ProductEntity productEntity = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        for (ProductVariantEntity variant : productEntity.getVariants()) {
+            if (variant.getId().equals(variantId)) {
+                int currentStock = variant.getStock();
+                int newStock = currentStock + quantity;
+
+                if (newStock < 0) {
+                    throw new AppException(ErrorCode.STOCK_NOT_ENOUGH);
+                }
+                variant.setStock(newStock);
+                break;
+            }
+        }
+        int totalStock = productEntity.getVariants().stream()
+                .mapToInt(ProductVariantEntity::getStock)
+                .sum();
+
+        if (totalStock > 0) {
+            productEntity.setStatus(Status.ACTIVE);
+        }
+
+        productSearchRepository.updateProduct(mapProductIndexResponsesDTO(productRepository.save(productEntity)));
+    }
 
 }
 
