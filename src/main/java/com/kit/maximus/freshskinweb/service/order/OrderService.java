@@ -718,7 +718,7 @@ public class OrderService {
                         orderEntity.getOrderItems().forEach(orderItem -> productService.updateStockCancel(
                                 orderItem.getProductVariant().getId(),
                                 orderItem.getProductVariant().getProduct().getId(),
-                                -orderItem.getQuantity()
+                                orderItem.getQuantity()
                         ));
                     }
                 }
@@ -749,7 +749,7 @@ public class OrderService {
                 orderEntity.getOrderItems().forEach(orderItem -> productService.updateStockCancel(
                         orderItem.getProductVariant().getId(),
                         orderItem.getProductVariant().getProduct().getId(),
-                        -orderItem.getQuantity()
+                        orderItem.getQuantity()
                 ));
             }
 
