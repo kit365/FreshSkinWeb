@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 //@CrossOrigin(origins = "*")
 @Slf4j
@@ -46,11 +47,16 @@ public class ProductTrashController {
             throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
         }
 
+        List<Long> ids = ((List<?>) productRequestDTO.get("id"))
+                .stream()
+                .map(id -> ((Number) id).longValue())
+                .collect(Collectors.toList());
 
-        List<Long> ids = (List<Long>) productRequestDTO.get("id");
         String status = productRequestDTO.get("status").toString();
 
         var result = productService.update(ids, status);
+
+
         return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
     }
     @PatchMapping("edit/{id}")

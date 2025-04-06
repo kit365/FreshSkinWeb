@@ -50,7 +50,8 @@ public class OrderSpecification {
             Expression<Object> statusOrder = criteriaBuilder.selectCase()
                     .when(criteriaBuilder.equal(root.get("orderStatus"), OrderStatus.PENDING), 1)
                     .when(criteriaBuilder.equal(root.get("orderStatus"), OrderStatus.COMPLETED), 2)
-                    .when(criteriaBuilder.equal(root.get("orderStatus"), OrderStatus.CANCELED), 3)
+                    .when(criteriaBuilder.equal(root.get("orderStatus"), OrderStatus.DELIVERING), 3)
+                    .when(criteriaBuilder.equal(root.get("orderStatus"), OrderStatus.CANCELED), 4)
                     .otherwise(4);
 
             // If priority status is specified, modify the order

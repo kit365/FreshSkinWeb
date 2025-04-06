@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface SkinCareRountineRepository  extends JpaRepository<SkinCareRoutineEntity, Long>, JpaSpecificationExecutor<SkinCareRoutineEntity> {
 
     SkinCareRoutineEntity findBySkinType(SkinTypeEntity skinType);
+    boolean existsBySkinType(SkinTypeEntity skinType);
 }

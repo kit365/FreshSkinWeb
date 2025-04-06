@@ -3,7 +3,11 @@ package com.kit.maximus.freshskinweb.repository;
 import com.kit.maximus.freshskinweb.dto.response.OrderResponse;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -60,5 +64,12 @@ public interface OrderRepository extends JpaRepository<OrderEntity, String>, Jpa
     List<Object[]> getTotalPriceByDate(@Param("orderStatus") OrderStatus orderStatus);
 
 
-//    OrderResponse findById(String orderId);
+    @EntityGraph(attributePaths = {
+            "user",
+            "orderItems",
+            "orderItems.productVariant",
+            "orderItems.productVariant.product",
+            "voucher"
+    })
+    Page<OrderEntity> findAll(Specification<OrderEntity> spec, Pageable pageable);
 }

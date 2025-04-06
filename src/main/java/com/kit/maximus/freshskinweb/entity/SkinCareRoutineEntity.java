@@ -3,6 +3,11 @@ package com.kit.maximus.freshskinweb.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "SkinCareRoutine")
@@ -20,11 +25,17 @@ public class SkinCareRoutineEntity extends AbstractEntity {
     Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SkinTypeId", nullable = true)
-    @JsonBackReference
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @JoinColumn(name = "SkinTypeId")
     SkinTypeEntity skinType;
 
     @Column(name = "Rountine",columnDefinition = "MEDIUMTEXT")
-    String rountine;
+    String title;
+
+    @Column(name = "description",columnDefinition = "MEDIUMTEXT")
+    String description;
+
+    @OneToMany(mappedBy = "skinCareRountine", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    List<RountineStepEntity> rountineStep = new ArrayList<>();
 
 }

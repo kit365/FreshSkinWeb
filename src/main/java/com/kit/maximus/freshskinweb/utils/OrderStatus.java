@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 public enum OrderStatus {
     PENDING("Đơn hàng đang chờ xử lý"),
+    DELIVERING("Đơn hàng đang giao"),
     CANCELED("Đơn hàng đã bị hủy"),
     COMPLETED("Đơn hàng đã hoàn thành"),
     ;

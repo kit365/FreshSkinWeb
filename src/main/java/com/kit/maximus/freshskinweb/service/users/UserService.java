@@ -393,14 +393,17 @@ public class UserService {
         // Cập nhật thông tin từ request (trừ password)
         userMapper.updateUser(userEntity, userRequestDTO);
 
-        userEntity.setUsername(userEntity.getUsername());
-
+        //Cập nhật email + set thêm điều kiện cho input email
         if (userRequestDTO.getEmail() == null) {
+            throw new AppException(ErrorCode.EMAIL_NOT_BLANK);
+        } else if (userRequestDTO.getEmail().equals(userEntity.getEmail())) {
+            // Giữ nguyên email cũ
             userEntity.setEmail(userRequestDTO.getEmail());
-        } else if (userRepository.existsByEmail(userRequestDTO.getEmail())) {
+        } else if (!userRepository.existsByEmail(userRequestDTO.getEmail())) {
+            // Email mới chưa tồn tại trong hệ thống
+            userEntity.setEmail(userRequestDTO.getEmail());
+        } else {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
-        } else if (userRequestDTO.getEmail() != null && !userRepository.existsByEmail(userRequestDTO.getEmail())) {
-            userEntity.setEmail(userRequestDTO.getEmail());
         }
 
         // Cập nhật Role
@@ -416,6 +419,7 @@ public class UserService {
             userEntity.setRole(null);
         }
 
+        //Cập nhật ảnh
         if ((userRequestDTO.getNewImg() != null && !userRequestDTO.getNewImg().isEmpty()) ||
                 (userRequestDTO.getAvatar() != null && !userRequestDTO.getAvatar().isEmpty())) {
 
@@ -477,6 +481,7 @@ public class UserService {
         return userMapper.toUserResponseDTO(userRepository.save(userEntity));
     }
 
+    //Cập nhật trạng thái của user ( update by selected id )
     public String update(List<Long> id, String status) {
         Status statusEnum = getStatus(status);
 
@@ -720,16 +725,24 @@ public class UserService {
             // Update user information from request (excluding password)
             userMapper.updateUser(userEntity, request);
 
-            if (request.getEmail() != null && !userRepository.existsByEmail(request.getEmail())) {
+            if (request.getEmail() == null) {
+                throw new AppException(ErrorCode.EMAIL_NOT_BLANK);
+            } else if (request.getEmail().equals(userEntity.getEmail())) {
+                // Giữ nguyên email cũ
                 userEntity.setEmail(request.getEmail());
+            } else if (!userRepository.existsByEmail(request.getEmail())) {
+                // Email mới chưa tồn tại trong hệ thống
+                userEntity.setEmail(request.getEmail());
+            } else {
+                throw new AppException(ErrorCode.EMAIL_EXISTED);
             }
 
-            if (request.getRole() != null) {
-                RoleEntity role = roleRepository.findById(request.getRole())
-                        .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
-                userEntity.setRole(role);
-            }
+            //Cập nhật role cho tải khoản quản trị
+            RoleEntity role = roleRepository.findById(request.getRole())
+                    .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+            userEntity.setRole(role);
 
+            // Cập nhật ảnh
             if ((request.getNewImg() != null && !request.getNewImg().isEmpty()) ||
                     (request.getAvatar() != null && !request.getAvatar().isEmpty())) {
 
