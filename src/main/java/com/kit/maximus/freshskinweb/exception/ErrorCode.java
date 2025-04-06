@@ -65,6 +65,7 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND(404, "Không tìm thấy sản phẩm"),
     INVALID_REQUEST_PRODUCTID(400, "Yêu cầu không hợp lệ: Thiếu 'id' trong nội dung yêu cầu"),
     VOLUME_EXISTED(400, "Dung tích đã tồn tại"),
+    STOCK_NOT_ENOUGH(400, "Không đủ hàng trong kho"),
 
     //ProductCategory
     PRODUCT_CATEGORY_NOT_FOUND(404, "Không tìm thấy danh mục sản phẩm"),
@@ -121,6 +122,8 @@ public enum ErrorCode {
     //ROUTINE STEP
     ROUTINE_STEP_NOT_FOUND(404, "Không tìm thấy bước chăm sóc da nào"),
     DUPLICATE_POSITION(404, "Duplicate position in routine steps"),
+    PRODUCTS_NOT_FOUND_FOR_STEP(404, "Không tìm thấy sản phẩm nào cho bước chăm sóc da này"),
+
     //REVIEW
     RATING_INVALID(400, "Giá trị phải từ 1 đến 5"),
     REVIEW_NOT_FOUND(404, "Không tìm thấy đánh giá"),

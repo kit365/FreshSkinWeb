@@ -215,7 +215,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         }
 
 
-
         if ((request.getNewImg() != null && !request.getNewImg().isEmpty()) ||
                 (request.getImage() != null && !request.getImage().isEmpty())) {
 
@@ -1602,6 +1601,30 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         }
 
         return Map.of("data", data);
+    }
+
+    public void updateStock(Long id, int quantity) {
+        ProductEntity productEntity = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+
+        int currentStock = productEntity.getStock();
+        int newStock = currentStock - quantity;
+
+        if(newStock < 0) {
+            throw new AppException(ErrorCode.STOCK_NOT_ENOUGH);
+        }
+
+
+        productEntity.setStock(newStock);
+
+        if (productEntity.getStock() <= 0) {
+            productEntity.setStatus(Status.INACTIVE);
+        }
+
+        productSearchRepository.updateProduct(mapProductIndexResponsesDTO(productRepository.save(productEntity)));
+
+
     }
 
 
