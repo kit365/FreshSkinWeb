@@ -75,4 +75,18 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
             @Param("skinTypeId") Long skinTypeId,
             @Param("categoryKeyword") String categoryKeyword
     );
+
+    // Tìm sản phẩm có danh mục con được bán nhiều nhất
+    @Query("SELECT c.id " +
+            "FROM ProductCategoryEntity c " +
+            "JOIN c.products p " +
+            "JOIN p.variants pv " +
+            "JOIN OrderItemEntity oi ON oi.productVariant.id = pv.id " +
+            "WHERE c.parent.id = :parentCategoryId " +
+            "AND p.status = 'ACTIVE' " +
+            "AND p.deleted = FALSE " +
+            "GROUP BY c.id " +
+            "ORDER BY COUNT(oi) DESC")
+    List<Long> findTop5BestSellingChildCategoryIdByParent(@Param("parentCategoryId") Long parentCategoryId, Pageable pageable);
+
 }

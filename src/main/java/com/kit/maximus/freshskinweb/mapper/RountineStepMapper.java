@@ -13,16 +13,22 @@ public interface RountineStepMapper{
 
     @Mapping(target = "product",ignore = true)
     @Mapping(target = "skinCareRountine", ignore = true)
+    @Mapping(source = "content", target = "content")
+    @Mapping(source = "step", target = "step")
+    @Mapping(source = "position", target = "position")
     RountineStepEntity toRountineStepEntity(CreationRountineStepRequest request);
 
     @Mapping(target = "product",ignore = true)
+    @Mapping(source = "content", target = "content")
+    @Mapping(source = "step", target = "step")
+    @Mapping(source = "position", target = "position")
     RountineStepResponse toRountineStepResponse(RountineStepEntity entity);
 
     @Mapping(target = "product",ignore = true)
-    List<RountineStepResponse> toRountinesStepResponse(List<RountineStepEntity> entity);
-
-    @Mapping(target = "product",ignore = true)
     @Mapping(target = "skinCareRountine", ignore = true)
+    @Mapping(source = "content", target = "content")
+    @Mapping(source = "step", target = "step")
+    @Mapping(source = "position", target = "position")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateRountineStep(@MappingTarget RountineStepEntity entity, UpdationRountineStepRequest request);
 }

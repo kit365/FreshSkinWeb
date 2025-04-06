@@ -63,13 +63,14 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     ProductSearchRepository productSearchRepository;
 
     // Biến lưu toàn bộ các danh mục sản phẩm cho các bước trong lộ trình chăm sóc da
-    private static final List<String> CATEGORY_KEYWORDS = Arrays.asList(
-            "Nước tẩy trang",
-            "Sữa rữa mặt",
-            "Toner",
-            "Serum / Tinh Chất",
-            "Dưỡng ẩm",
-            "Chống nắng da mặt"
+    private static final Map<String, String> CATEGORY_KEYWORDS = Map.of(
+            "tẩy trang", "Nước tẩy trang",
+            "rửa mặt", "Sữa rữa mặt",
+            "toner", "Toner",
+            "serum", "Serum / Tinh Chất",
+            "tinh chất", "Serum / Tinh Chất",
+            "dưỡng ẩm", "Dưỡng ẩm",
+            "chống nắng", "Chống nắng da mặt"
     );
 
     // Biến lưu toàn bộ loại da cho các bước trong lộ trình chăm sóc da
@@ -1493,45 +1494,114 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     // Lấy top 5 sản phẩm bán chạy nhất theo loại da và thể loại
     public List<ProductEntity> getTop5BestSellerProductBySkinTypeAndProductCategory(Long skinTypeId, String step) {
+        // Bước 1: Trích xuất keyword từ bước chăm sóc
         String categoryKeyword = extractCategoryKeyword(step);
         if (categoryKeyword == null) {
-            log.warn("No matching category found for step: {}", step);
+            log.warn("Không tìm thấy danh mục ứng với step: {}", step);
             throw new AppException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND);
         }
 
-        // Get current skin type
+        // Bước 2: Lấy loại da hiện tại
         SkinTypeEntity currentSkinType = skinTypeRepository.findById(skinTypeId)
                 .orElseThrow(() -> new AppException(ErrorCode.SKIN_TYPE_NOT_FOUND));
         String currentSkinTypeName = currentSkinType.getType();
 
-        log.info("Searching top 5 selling products for skinType: {} with category: {}", skinTypeId, categoryKeyword);
+        log.info("-----------------------------------------------------------------");
+        log.info("\n");
+        log.info("Đang tìm top 5 sản phẩm cho loại da: {} với danh mục sản phẩm: {}",
+                currentSkinTypeName, categoryKeyword);
+
+        // Bước 3: Lấy danh mục cha từ keyword
+        ProductCategoryEntity parentCategory = productCategoryRepository.findByTitleContainingIgnoreCase(categoryKeyword)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND));
+        log.info("danh mục cha: {}", parentCategory.getTitle());
+
+        // Bước 4: Tìm sản phẩm bán chạy theo keyword (cha)
         List<Long> productIds = productRepository.findTop5SellingProductsBySkinTypeAndCategory(
-                skinTypeId,
-                categoryKeyword
+                skinTypeId, parentCategory.getTitle() // vẫn truyền keyword
         );
 
-        if (productIds.isEmpty()) {
-            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        // Bước 5: Nếu không tìm thấy, thử tìm danh mục con bán chạy nhất và dùng tên danh mục con đó làm keyword mới
+        if (productIds == null || productIds.isEmpty()) {
+            log.info("Danh mục '{}' cha không tìm thấy sản phẩm nào, Cố gắng tìm danh mục con...", parentCategory.getTitle());
+
+            // Lấy danh sách top 5 danh mục con bán chạy nhất
+            Pageable pageable = PageRequest.of(0, 5);  // Giới hạn 5 danh mục con
+            List<Long> childCategoryIds = productRepository.findTop5BestSellingChildCategoryIdByParent(
+                    parentCategory.getId(), pageable
+            );
+
+            if (childCategoryIds.isEmpty()) {
+                log.info("Không tìm thấy danh mục con");
+                return Collections.emptyList();
+            }
+
+            // Duyệt qua từng danh mục con và tìm sản phẩm tương ứng
+            List<ProductEntity> products = new ArrayList<>();
+            for (Long childCategoryId : childCategoryIds) {
+                Optional<ProductCategoryEntity> bestChildCategory = productCategoryRepository.findById(childCategoryId);
+                if (bestChildCategory.isPresent()) {
+                    String bestChildCategoryTitle = bestChildCategory.get().getTitle();
+
+                    List<Long> childProductIds = productRepository.findTop5SellingProductsBySkinTypeAndCategory(
+                            skinTypeId, bestChildCategoryTitle
+                    );
+
+                    if (childProductIds != null && !childProductIds.isEmpty()) {
+                        List<ProductEntity> childProducts = productRepository.findAllById(childProductIds);
+                        products.addAll(childProducts);
+                    }
+                }
+            }
+
+            if (products.isEmpty()) {
+                log.info("No products found after fallback to child categories.");
+                return Collections.emptyList();
+            }
+
+            return products.stream()
+                    .filter(p -> isMatchingSkinType(p.getTitle(), currentSkinTypeName))
+                    .collect(Collectors.toList());
         }
 
+        // Bước 6: Trả về danh sách sản phẩm
         List<ProductEntity> products = productRepository.findAllById(productIds);
+        if (products.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-        // Filter products based on skin type in title
         return products.stream()
-                .filter(product -> isMatchingSkinType(product.getTitle(), currentSkinTypeName))
+                .filter(p -> isMatchingSkinType(p.getTitle(), currentSkinTypeName))
                 .collect(Collectors.toList());
     }
 
+
+
+
     // Lọc nội dung của tên danh mục sản phẩm, sau đó lấy những danh mục tương ứng với biến được khai trước đó và so sánh
     private String extractCategoryKeyword(String step) {
+        if (step == null || step.trim().isEmpty()) {
+            log.warn("Step is null or empty");
+            return null;
+        }
+
         String stepLower = step.toLowerCase().trim();
-        return CATEGORY_KEYWORDS.stream()
-                .filter(keyword -> keyword.toLowerCase().equals(stepLower))
+        log.info("Processing step: {}", stepLower);
+        String result = CATEGORY_KEYWORDS.entrySet().stream()
+                .filter(entry -> {
+                    boolean match = stepLower.contains(entry.getKey());
+                    log.info("Checking keyword '{}' against '{}': {}",
+                            entry.getKey(), stepLower, match);
+                    return match;
+                })
+                .peek(entry -> log.info("Found match: {} -> {}",
+                        entry.getKey(), entry.getValue()))
+                .map(Map.Entry::getValue)
                 .findFirst()
-                .orElseGet(() -> {
-                    log.warn("Step '{}' did not match any category keywords", step);
-                    return null;
-                });
+                .orElse(null);
+
+        log.info("Final category result: {}", result);
+        return result;
     }
 
     // Lọc nội dung của bước làm da, sau đó lấy những keyword tương ứng với biến được khai trước đó và so sánh

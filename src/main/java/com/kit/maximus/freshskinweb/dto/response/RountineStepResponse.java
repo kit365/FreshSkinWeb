@@ -26,19 +26,9 @@ public class RountineStepResponse {
     String step;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    String description;
+    String content;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<ProductResponseDTO> product;
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    String status;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    Boolean deleted;
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    Date createdAt;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    Date updatedAt;
 }

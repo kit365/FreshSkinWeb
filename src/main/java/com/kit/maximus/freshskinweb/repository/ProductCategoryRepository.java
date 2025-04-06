@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductCategoryRepository extends JpaRepository<ProductCategoryEntity, Long>, JpaSpecificationExecutor<ProductCategoryEntity> {
@@ -26,6 +27,7 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
     @Query("SELECT c FROM ProductCategoryEntity c WHERE c.slug = :slug")
     ProductCategoryEntity findCategoryBySlug(@Param("slug") String slug);
 
+    Optional<ProductCategoryEntity> findByTitleContainingIgnoreCase(String title);
 
     List<ProductCategoryEntity> findAllByParentIsNull();
 
