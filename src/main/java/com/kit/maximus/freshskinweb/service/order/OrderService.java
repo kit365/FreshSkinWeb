@@ -190,6 +190,8 @@ public class OrderService {
 
         Integer totalAmount = 0;
         BigDecimal totalPrice = orderRequest.getTotalPrice().subtract(orderRequest.getPriceShipping());
+        System.out.println(orderRequest.getTotalPrice());
+        System.out.println(totalPrice);
         List<OrderItemEntity> orderItems = new ArrayList<>();
 
         for (OrderItemRequest itemRequest : orderRequest.getOrderItems()) {
@@ -225,7 +227,9 @@ public class OrderService {
         }
 
         order.setTotalAmount(totalAmount);
-        order.setTotalPrice(totalPrice);
+        order.setTotalPrice(totalPrice.add(orderRequest.getPriceShipping()));
+        System.out.println(totalPrice.add(orderRequest.getPriceShipping()));
+        System.out.println(totalPrice);
         order.setOrderItems(orderItems);
         order.setPriceShipping(orderRequest.getPriceShipping());
 
