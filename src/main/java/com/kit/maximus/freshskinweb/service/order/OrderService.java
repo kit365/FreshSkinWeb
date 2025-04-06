@@ -245,9 +245,13 @@ public class OrderService {
                 }
 
                 // Áp dụng giảm giá
-                BigDecimal finalPrice = voucherService.applyVoucherDiscount(voucher, order.getTotalPrice());
+                BigDecimal finalPrice = voucherService.applyVoucherDiscount(voucher, totalPrice);
                 order.setDiscountAmount(totalPrice.subtract(finalPrice));
+                System.out.println("finalPrice:"+finalPrice);
+                System.out.println("totalPrice:"+totalPrice);
+                System.out.println("totalPrice.subtract(finalPrice):"+totalPrice.subtract(finalPrice));
                 order.setTotalPrice(finalPrice.add(orderRequest.getPriceShipping()));
+                System.out.println("finalPrice.add(orderRequest.getPriceShipping():"+finalPrice.add(orderRequest.getPriceShipping()));
 
                 // Giảm số lượt sử dụng voucher
                 voucher.setUsed(voucher.getUsed() + 1);
