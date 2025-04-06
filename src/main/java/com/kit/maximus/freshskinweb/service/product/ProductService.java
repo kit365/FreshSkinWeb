@@ -426,6 +426,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 newVariant.setUnit(productVariantEntity.getUnit());
                 newVariant.setVolume(productVariantEntity.getVolume());
                 newVariant.setPrice(productVariantEntity.getPrice());
+                newVariant.setStock(productVariantEntity.getStock());
                 productVariantResponses.add(newVariant);
             });
             productResponseDTO.setVariants(productVariantResponses);
