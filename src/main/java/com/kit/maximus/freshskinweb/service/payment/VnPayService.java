@@ -11,9 +11,11 @@ import com.kit.maximus.freshskinweb.entity.NotificationEntity;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
+import com.kit.maximus.freshskinweb.repository.search.ProductSearchRepository;
 import com.kit.maximus.freshskinweb.service.notification.NotificationEvent;
 import com.kit.maximus.freshskinweb.service.notification.NotificationService;
 import com.kit.maximus.freshskinweb.service.order.OrderService;
+import com.kit.maximus.freshskinweb.service.product.ProductService;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
 import com.kit.maximus.freshskinweb.utils.PaymentStatus;
@@ -45,6 +47,8 @@ public class VnPayService implements PaymentService {
     OrderService orderService;
 
     ApplicationEventPublisher eventPublisher;
+
+    ProductService productService;
 
 
     private static String getRandomNumber(int len) {
@@ -159,11 +163,6 @@ public class VnPayService implements PaymentService {
         }
     }
 
-    public byte[] generatePaymentQRCode(String orderId, HttpServletRequest ipAddr) throws Exception {
-        String paymentUrl = createPayment(orderId, ipAddr);
-        return generateQRCodeImage(paymentUrl);
-    }
-
     private static String hmacSHA512(String key, String data) {
         try {
             SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
@@ -197,11 +196,21 @@ public class VnPayService implements PaymentService {
 
 /// Kiểm tra mã giao dịch hợp lệ
         if ("00".equals(transactionStatus)) {
-            //thanh toán thành công -> chuyên status
+            //thanh toán thành công -> chuyển status
             orderOpt.setPaymentStatus(PaymentStatus.PAID);
             orderOpt.setOrderStatus(OrderStatus.COMPLETED);
             orderService.saveOrder(orderOpt);
 
+            if(!orderOpt.getOrderItems().isEmpty()) {
+                orderOpt.getOrderItems().forEach(orderItem -> {
+                    if(orderItem.getProductVariant() != null) {
+                        productService.updateStock(
+                                orderItem.getProductVariant().getProduct().getId(),
+                                orderItem.getQuantity()
+                        );
+                    }
+                });
+            }
             if (orderOpt.getPaymentMethod() != null && orderOpt.getPaymentMethod().equals(PaymentMethod.QR)) {
                 NotificationEntity notification = new NotificationEntity();
                 notification.setUser(orderOpt.getUser());
@@ -221,100 +230,7 @@ public class VnPayService implements PaymentService {
     }
 
 
-//@Override
-//public String handleIPN(Map<String, String> params) {
-//    String orderId = params.get("vnp_TxnRef");
-//    String transactionStatus = params.get("vnp_TransactionStatus");
-//    String promotionCode = params.get("vnp_PromotionCode"); // Mã khuyến mãi từ VNPay
-//    String promotionAmount = params.get("vnp_PromotionAmount"); // Số tiền được giảm
-//
-//    OrderEntity orderOpt = orderService.getOrder(orderId);
-//    if (!orderOpt.getOrderId().equals(orderId)) {
-//        return "Order not found";
-//    }
-//
-//    if ("00".equals(transactionStatus)) {
-//        // Xử lý khuyến mãi từ VNPay nếu có
-//        if (promotionCode != null && promotionAmount != null) {
-//            BigDecimal discountAmount = new BigDecimal(promotionAmount);
-//            orderOpt.setDiscountAmount(discountAmount);
-//            orderOpt.setVnpayPromoCode(promotionCode);
-//            // Cập nhật lại tổng tiền sau khuyến mãi
-//            orderOpt.setTotalAmount(orderOpt.getTotalPrice().subtract(discountAmount));
-//        }
-//
-//        orderOpt.setPaymentStatus(PaymentStatus.PAID);
-//        orderOpt.setOrderStatus(OrderStatus.COMPLETED);
-//        orderService.saveOrder(orderOpt);
-//
-//        if(orderOpt.getPaymentMethod() != null && orderOpt.getPaymentMethod().equals(PaymentMethod.QR)) {
-//            NotificationEntity notification = new NotificationEntity();
-//            notification.setUser(orderOpt.getUser());
-//            notification.setOrder(orderOpt);
-//            notification.setMessage("Đặt hàng thành công" +
-//                    (promotionCode != null ? " với mã khuyến mãi " + promotionCode : ""));
-//            eventPublisher.publishEvent(new NotificationEvent(this, notification));
-//        }
-//
-//        return orderId;
-//    } else {
-//        orderOpt.setPaymentStatus(PaymentStatus.FAILED);
-//        orderOpt.setOrderStatus(OrderStatus.CANCELED);
-//        orderService.saveOrder(orderOpt);
-//        return null;
-//    }
-//}
 
-//    // Method tạo mã QR
-//    public static byte[] generateQRCodeImage(String text) throws Exception {
-//        int width = 300; // Chiều rộng của mã QR
-//        int height = 300; // Chiều cao của mã QR
-//        String imageFormat = "PNG"; // Định dạng ảnh (PNG, JPEG, etc.)
-//
-//        Map<EncodeHintType, Object> hints = new HashMap<>();
-//        hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L); // Mức độ sửa lỗi
-//        hints.put(EncodeHintType.MARGIN, 1); // Khoảng cách giữa mã QR và biên
-//
-//        // Tạo mã QR dưới dạng BitMatrix
-//        BitMatrix bitMatrix = new MultiFormatWriter().encode(text, BarcodeFormat.QR_CODE, width, height, hints);
-//
-//        // Chuyển BitMatrix thành byte[] (mảng byte của hình ảnh)
-//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//        MatrixToImageWriter.writeToStream(bitMatrix, imageFormat, baos);
-//        return baos.toByteArray();
-//    }
-
-    // Method tạo mã QR với thông tin thanh toán
-    public static byte[] generateQRCodeImage(String text) throws Exception {
-        int width = 300;
-        int height = 300;
-        String imageFormat = "PNG";
-
-        // Tạo mã QR với định dạng VNPay
-        Map<EncodeHintType, Object> hints = new HashMap<>();
-        hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H); // Tăng độ chính xác
-        hints.put(EncodeHintType.CHARACTER_SET, "UTF-8"); // Hỗ trợ tiếng Việt
-        hints.put(EncodeHintType.MARGIN, 2);
-//        hints.put(EncodeHintType.QR_VERSION, 15); // Version cao hơn để chứa nhiều thông tin
-
-        // Tạo VNPay Deep Link format
-        String vnpayDeeplink = text;
-        if (!text.startsWith("vnpay://")) {
-            vnpayDeeplink = "vnpay://?url=" + URLEncoder.encode(text, StandardCharsets.UTF_8);
-        }
-
-        BitMatrix bitMatrix = new MultiFormatWriter().encode(
-                vnpayDeeplink,
-                BarcodeFormat.QR_CODE,
-                width,
-                height,
-                hints
-        );
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        MatrixToImageWriter.writeToStream(bitMatrix, imageFormat, baos);
-        return baos.toByteArray();
-    }
 
 
 }

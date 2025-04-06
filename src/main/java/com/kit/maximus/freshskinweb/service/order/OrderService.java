@@ -13,6 +13,8 @@ import com.kit.maximus.freshskinweb.repository.OrderRepository;
 import com.kit.maximus.freshskinweb.repository.ProductVariantRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.repository.VoucherRepository;
+import com.kit.maximus.freshskinweb.repository.search.ProductSearchRepository;
+import com.kit.maximus.freshskinweb.service.product.ProductService;
 import com.kit.maximus.freshskinweb.service.product.VoucherService;
 import com.kit.maximus.freshskinweb.service.notification.NotificationEvent;
 import com.kit.maximus.freshskinweb.service.users.EmailService;
@@ -54,6 +56,7 @@ public class OrderService {
     VoucherService voucherService;
     VoucherMapper voucherMapper;
     ApplicationEventPublisher eventPublisher;
+   ProductService productService;
 
 //    @Transactional
 //    public OrderIdResponse addOrder(OrderRequest orderRequest) {
@@ -263,6 +266,18 @@ public class OrderService {
 
 
         OrderEntity savedOrder = orderRepository.save(order);
+
+        if(!savedOrder.getOrderItems().isEmpty()) {
+            savedOrder.getOrderItems().forEach(orderItem -> {
+                if(orderItem.getProductVariant() != null) {
+                    productService.updateStock(
+                            orderItem.getProductVariant().getProduct().getId(),
+                            orderItem.getQuantity()
+                    );
+                }
+            });
+        }
+
 
         if (user != null && order.getPaymentMethod() != null && order.getPaymentMethod().equals(PaymentMethod.CASH)) {
             NotificationEntity notification = new NotificationEntity();

@@ -65,6 +65,7 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND(404, "Không tìm thấy sản phẩm"),
     INVALID_REQUEST_PRODUCTID(400, "Yêu cầu không hợp lệ: Thiếu 'id' trong nội dung yêu cầu"),
     VOLUME_EXISTED(400, "Dung tích đã tồn tại"),
+    STOCK_NOT_ENOUGH(400, "Không đủ hàng trong kho"),
 
     //ProductCategory
     PRODUCT_CATEGORY_NOT_FOUND(404, "Không tìm thấy danh mục sản phẩm"),
