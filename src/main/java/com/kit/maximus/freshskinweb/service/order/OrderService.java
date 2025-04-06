@@ -227,6 +227,7 @@ public class OrderService {
         order.setTotalAmount(totalAmount);
         order.setTotalPrice(totalPrice);
         order.setOrderItems(orderItems);
+        order.setPriceShipping(orderRequest.getPriceShipping());
 
         if (orderRequest.getVoucherName() != null) {
             if(orderRequest.getVoucherName().isBlank()) {
@@ -355,6 +356,7 @@ public class OrderService {
                 orderItemResponses.add(orderItemResponse);
             }
 
+            orderResponse.setPriceShipping(order.getPriceShipping());
             orderResponse.setOrderItems(orderItemResponses);
         }
 

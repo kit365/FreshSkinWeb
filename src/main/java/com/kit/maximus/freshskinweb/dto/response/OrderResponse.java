@@ -62,5 +62,7 @@ public class OrderResponse implements Serializable {
 
     BigDecimal discountAmount; // Số tiền giảm giá
 
+    BigDecimal priceShipping;
+
 
 }

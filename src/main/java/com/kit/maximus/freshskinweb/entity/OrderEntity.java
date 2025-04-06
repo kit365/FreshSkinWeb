@@ -103,6 +103,9 @@ public class OrderEntity extends AbstractEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     List<OrderVoucherEntity> orderVouchers = new ArrayList<>();
 
+    @Column(name = "PriceShipping")
+    BigDecimal priceShipping;
+
 
     public void addOrderItem(OrderItemEntity orderItem) {
         orderItems.add(orderItem);
