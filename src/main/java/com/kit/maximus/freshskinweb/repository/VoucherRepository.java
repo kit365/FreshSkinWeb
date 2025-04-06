@@ -25,6 +25,7 @@ public interface VoucherRepository extends JpaRepository<VoucherEntity, String> 
     List<VoucherEntity> findTopFourPercentageVouchers(Date currentDate);
 
     // Hàm tìm voucher còn hạn sử dụng (sử dụng endDate)
-    @Query("SELECT v FROM VoucherEntity v WHERE v.endDate > :currentDate")
+    @Query("SELECT v FROM VoucherEntity v WHERE v.endDate > :currentDate AND v.usageLimit > v.used")
     List<VoucherEntity> findValidVouchers(Date currentDate);
+
 }
