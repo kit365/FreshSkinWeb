@@ -601,7 +601,6 @@ public class OrderService {
         Map<String, Object> map = new HashMap<>();
         int p = Math.max(page - 1, 0);
 
-        // Chỉ kiểm tra orderId khi nó không null
         if (orderId != null) {
             orderRepository.findById(orderId)
                     .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
@@ -613,59 +612,70 @@ public class OrderService {
                 .and(OrderSpecification.hasKeyword(keyword))
                 .and(orderId != null ? OrderSpecification.hasOrderId(orderId) : null);
 
-        Pageable pageable;
-        Page<OrderEntity> ordersPage;
+        Pageable pageable = sortBy != null && sortBy.equals("updatedAt")
+                ? PageRequest.of(p, size, Sort.by("updatedAt").descending())
+                : PageRequest.of(p, size);
 
-        if (sortBy != null && sortBy.equals("updatedAt")) {
-            pageable = PageRequest.of(p, size, Sort.by("updatedAt").descending());
-            ordersPage = orderRepository.findAll(spec, pageable);
-        } else {
-            pageable = PageRequest.of(p, size);
+        if (sortBy == null) {
             spec = spec.and(OrderSpecification.orderByStatusPriorityAndDate(priorityStatus));
-            ordersPage = orderRepository.findAll(spec, pageable);
         }
+
+        Page<OrderEntity> ordersPage = orderRepository.findAll(spec, pageable);
 
         List<OrderResponse> orderResponses = ordersPage.getContent().stream()
                 .map(orderEntity -> {
                     OrderResponse response = orderMapper.toOrderResponse(orderEntity);
 
-                    // Xử lý trường hợp user == null ( vì cho phép user k đăng nhập vẫn có thể Order )
                     if (orderEntity.getUser() != null) {
                         response.setUserId(orderEntity.getUser().getUserID());
                         response.setUsername(orderEntity.getUser().getUsername());
                         response.setTypeUser(orderEntity.getUser().getSkinType());
-                    } else {
-                        response.setUserId(null);
-                        response.setUsername(null);
-                        response.setTypeUser(null);
                     }
-                    // Ánh xạ orderItems vào response
-                    List<OrderItemResponse> orderItemResponses = orderEntity.getOrderItems().stream()
+
+                    response.setOrderItems(orderEntity.getOrderItems().stream()
                             .map(orderItem -> OrderItemResponse.builder()
                                     .orderItemId(orderItem.getOrderItemId())
                                     .quantity(orderItem.getQuantity())
                                     .subtotal(orderItem.getSubtotal())
-                                    .productVariant(ProductVariantResponse.builder()
-                                            .id(orderItem.getProductVariant().getId())
-                                            .price(orderItem.getProductVariant().getPrice())
-                                            .volume(orderItem.getProductVariant().getVolume())
-                                            .unit(orderItem.getProductVariant().getUnit())
-                                            .build())
+                                    .productVariant(mapProductVariant(orderItem.getProductVariant()))
                                     .build())
-                            .collect(Collectors.toList());
-
-                    response.setOrderItems(orderItemResponses);
+                            .collect(Collectors.toList()));
 
                     return response;
                 })
                 .collect(Collectors.toList());
 
-        map.put("orders", orderResponses);
-        map.put("currentPage", ordersPage.getNumber() + 1);
-        map.put("totalItems", ordersPage.getTotalElements());
-        map.put("totalPages", ordersPage.getTotalPages());
-        map.put("pageSize", ordersPage.getSize());
+        return buildPaginationResponse(map, ordersPage, orderResponses);
+    }
 
+    private ProductVariantResponse mapProductVariant(ProductVariantEntity variant) {
+        return ProductVariantResponse.builder()
+                .id(variant.getId())
+                .price(variant.getPrice())
+                .volume(variant.getVolume())
+                .unit(variant.getUnit())
+                .product(variant.getProduct() != null ? mapProduct(variant.getProduct()) : null)
+                .build();
+    }
+
+    private ProductResponseDTO mapProduct(ProductEntity product) {
+        return ProductResponseDTO.builder()
+                .id(product.getId())
+                .title(product.getTitle())
+                .thumbnail(product.getThumbnail())
+                .discountPercent(product.getDiscountPercent())
+                .slug(product.getSlug())
+                .build();
+    }
+
+    private Map<String, Object> buildPaginationResponse(Map<String, Object> map,
+                                                        Page<OrderEntity> page,
+                                                        List<OrderResponse> content) {
+        map.put("orders", content);
+        map.put("currentPage", page.getNumber() + 1);
+        map.put("totalItems", page.getTotalElements());
+        map.put("totalPages", page.getTotalPages());
+        map.put("pageSize", page.getSize());
         return map;
     }
 
