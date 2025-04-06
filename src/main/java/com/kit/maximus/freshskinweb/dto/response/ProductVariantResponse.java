@@ -33,4 +33,6 @@ public class ProductVariantResponse {
 
     ProductResponseDTO product;
 
+    int stock;
+
 }

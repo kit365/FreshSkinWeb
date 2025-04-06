@@ -33,6 +33,9 @@ public class ProductVariantEntity {
     @Column(name = "Volume")
     int volume;
 
+    @Column(name = "Stock")
+    int stock;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ProductID")

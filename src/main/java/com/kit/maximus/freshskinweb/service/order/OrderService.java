@@ -275,6 +275,7 @@ public class OrderService {
             savedOrder.getOrderItems().forEach(orderItem -> {
                 if(orderItem.getProductVariant() != null) {
                     productService.updateStock(
+                            orderItem.getProductVariant().getId(),
                             orderItem.getProductVariant().getProduct().getId(),
                             orderItem.getQuantity()
                     );

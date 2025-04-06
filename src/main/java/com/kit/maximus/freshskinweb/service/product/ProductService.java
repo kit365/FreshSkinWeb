@@ -14,6 +14,7 @@ import com.kit.maximus.freshskinweb.repository.*;
 import com.kit.maximus.freshskinweb.repository.search.ProductSearchRepository;
 import com.kit.maximus.freshskinweb.service.BaseService;
 import com.kit.maximus.freshskinweb.utils.Status;
+import com.kit.maximus.freshskinweb.utils.UnitType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -202,6 +203,9 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                     if (productVariantEntity.getPrice().compareTo(BigDecimal.ZERO) < 0)
                         productVariantEntity.setPrice(BigDecimal.ZERO);
                     productVariantEntity.setPrice(listUpdate.getPrice());
+                    productVariantEntity.setVolume(listUpdate.getVolume());
+                    productVariantEntity.setStock(listUpdate.getStock());
+                    productVariantEntity.setUnit(listUpdate.getUnit());
                 } else {
                     listProduct.createProductVariant(listUpdate);
                 }
@@ -1603,28 +1607,31 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return Map.of("data", data);
     }
 
-    public void updateStock(Long id, int quantity) {
-        ProductEntity productEntity = productRepository.findById(id)
+    public void updateStock(Long variantId,Long productId, int quantity) {
+        ProductEntity productEntity = productRepository.findById(productId)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
+        for (ProductVariantEntity variant : productEntity.getVariants()) {
+            if (variant.getId().equals(variantId)) {
+                int currentStock = variant.getStock();
+                int newStock = currentStock - quantity;
 
-        int currentStock = productEntity.getStock();
-        int newStock = currentStock - quantity;
-
-        if(newStock < 0) {
-            throw new AppException(ErrorCode.STOCK_NOT_ENOUGH);
+                if (newStock < 0) {
+                    throw new AppException(ErrorCode.STOCK_NOT_ENOUGH);
+                }
+                variant.setStock(newStock);
+                break;
+            }
         }
+        int totalStock = productEntity.getVariants().stream()
+                .mapToInt(ProductVariantEntity::getStock)
+                .sum();
 
-
-        productEntity.setStock(newStock);
-
-        if (productEntity.getStock() <= 0) {
+        if (totalStock <= 0) {
             productEntity.setStatus(Status.INACTIVE);
         }
 
         productSearchRepository.updateProduct(mapProductIndexResponsesDTO(productRepository.save(productEntity)));
-
-
     }
 
 
