@@ -1473,6 +1473,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                         variantResponse.setPrice(variant.getPrice());
                         variantResponse.setVolume(variant.getVolume());
                         variantResponse.setUnit(variant.getUnit());
+                        variantResponse.setStock(variant.getStock());
                         return variantResponse;
                     })
                     .collect(Collectors.toList()));
