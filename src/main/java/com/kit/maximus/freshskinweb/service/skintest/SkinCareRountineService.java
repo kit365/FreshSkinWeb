@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -95,12 +96,13 @@ public class SkinCareRountineService {
                         throw new AppException(ErrorCode.DUPLICATE_POSITION);
                     }
                     routineStepEntity.setPosition(position);
+                    usedPositions.add(position);
                 } else {
                     // Nếu không có position thì tự động tăng lên 1 theo số bước đã có trong lộ trình da
                     currentMaxPosition++;
                     routineStepEntity.setPosition(currentMaxPosition);
+                    usedPositions.add(currentMaxPosition);
                 }
-                usedPositions.add(routineStepEntity.getPosition());
 
                 // Lưu lại lộ trình da trước, sau khi có data thì cập nhật thêm vào bảng lộ trình, tránh gom quá nhiều field add cùng 1 lúc
                 RountineStepEntity savedRoutineStep = rountineStepRepository.save(routineStepEntity);
@@ -133,13 +135,54 @@ public class SkinCareRountineService {
         }
     }
 
+    @Transactional(readOnly = true)
     public SkinCareRountineResponse getById(Long id) {
-            SkinCareRoutineEntity routineEntity = skinCareRountineRepository.findById(id)
-                    .orElseThrow(() -> new AppException(ErrorCode.SKIN_CARE_ROUTINE_NOT_FOUND));
+        SkinCareRoutineEntity routineEntity = skinCareRountineRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.SKIN_CARE_ROUTINE_NOT_FOUND));
 
+        SkinCareRountineResponse response = skinCareRoutineMapper.toResponse(routineEntity);
+
+        List<RountineStepResponse> stepResponses = routineEntity.getRountineStep().stream()
+                .sorted(Comparator.comparing(RountineStepEntity::getPosition, Comparator.nullsLast(Comparator.naturalOrder())))
+                .map(step -> {
+                    RountineStepResponse stepResponse = rountineStepMapper.toRountineStepResponse(step);
+
+                    List<ProductResponseDTO> productResponses = step.getProduct().stream()
+                            .map(product -> {
+                                ProductResponseDTO productDTO = productMapper.productToProductResponseDTO(product);
+                                productDTO.setVariants(product.getVariants().stream()
+                                        .map(variant -> {
+                                            ProductVariantResponse variantResponse = new ProductVariantResponse();
+                                            variantResponse.setId(variant.getId());
+                                            variantResponse.setPrice(variant.getPrice());
+                                            variantResponse.setUnit(variant.getUnit());
+                                            variantResponse.setVolume(variant.getVolume());
+                                            return variantResponse;
+                                        })
+                                        .collect(Collectors.toList()));
+                                return productDTO;
+                            })
+                            .collect(Collectors.toList());
+
+                    stepResponse.setProduct(productResponses);
+                    return stepResponse;
+                })
+                .collect(Collectors.toList());
+
+        response.setRountineStep(stepResponses);
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<SkinCareRountineResponse> getAllSkinCareRoutines(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
+        Page<SkinCareRoutineEntity> routinePage = skinCareRountineRepository.findAll(pageable);
+
+        return routinePage.map(routineEntity -> {
             SkinCareRountineResponse response = skinCareRoutineMapper.toResponse(routineEntity);
 
             List<RountineStepResponse> stepResponses = routineEntity.getRountineStep().stream()
+                    .sorted(Comparator.comparing(RountineStepEntity::getPosition, Comparator.nullsLast(Comparator.naturalOrder())))
                     .map(step -> {
                         RountineStepResponse stepResponse = rountineStepMapper.toRountineStepResponse(step);
 
@@ -167,46 +210,7 @@ public class SkinCareRountineService {
 
             response.setRountineStep(stepResponses);
             return response;
-    }
-
-    public Page<SkinCareRountineResponse> getAllSkinCareRoutines(int page, int size) {
-            Pageable pageable = PageRequest.of(page, size);
-            Page<SkinCareRoutineEntity> routinePage = skinCareRountineRepository.findAll(pageable);
-
-            return routinePage.map(routineEntity -> {
-                SkinCareRountineResponse response = skinCareRoutineMapper.toResponse(routineEntity);
-
-                // Sắp xết các bước theo position
-                List<RountineStepResponse> stepResponses = routineEntity.getRountineStep().stream()
-                        .sorted(Comparator.comparing(RountineStepEntity::getPosition))
-                        .map(step -> {
-                            RountineStepResponse stepResponse = rountineStepMapper.toRountineStepResponse(step);
-
-                            List<ProductResponseDTO> productResponses = step.getProduct().stream()
-                                    .map(product -> {
-                                        ProductResponseDTO productDTO = productMapper.productToProductResponseDTO(product);
-                                        productDTO.setVariants(product.getVariants().stream()
-                                                .map(variant -> {
-                                                    ProductVariantResponse variantResponse = new ProductVariantResponse();
-                                                    variantResponse.setId(variant.getId());
-                                                    variantResponse.setPrice(variant.getPrice());
-                                                    variantResponse.setUnit(variant.getUnit());
-                                                    variantResponse.setVolume(variant.getVolume());
-                                                    return variantResponse;
-                                                })
-                                                .collect(Collectors.toList()));
-                                        return productDTO;
-                                    })
-                                    .collect(Collectors.toList());
-
-                            stepResponse.setProduct(productResponses);
-                            return stepResponse;
-                        })
-                        .collect(Collectors.toList());
-
-                response.setRountineStep(stepResponses);
-                return response;
-            });
+        });
     }
 
     @Transactional
@@ -284,10 +288,24 @@ public class SkinCareRountineService {
 
     @Transactional
     public boolean delete(Long id) {
-        SkinCareRoutineEntity skinCareRoutineEntity = skinCareRountineRepository.findById(id)
+        SkinCareRoutineEntity routine = skinCareRountineRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.SKIN_CARE_ROUTINE_NOT_FOUND));
-        skinCareRountineRepository.delete(skinCareRoutineEntity);
-            return true;
+
+        // Clear product references first
+        for (RountineStepEntity step : routine.getRountineStep()) {
+            // Remove routine_step_id from products
+            List<ProductEntity> products = step.getProduct();
+            if (products != null) {
+                products.forEach(product -> {
+                    product.setRountineStep(null);
+                    productRepository.save(product);
+                });
+            }
+        }
+
+        // Now safe to delete routine and its steps
+        skinCareRountineRepository.delete(routine);
+        return true;
     }
 
                 // Get top 5 products

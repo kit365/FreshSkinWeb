@@ -122,6 +122,8 @@ public enum ErrorCode {
     //ROUTINE STEP
     ROUTINE_STEP_NOT_FOUND(404, "Không tìm thấy bước chăm sóc da nào"),
     DUPLICATE_POSITION(404, "Duplicate position in routine steps"),
+    PRODUCTS_NOT_FOUND_FOR_STEP(404, "Không tìm thấy sản phẩm nào cho bước chăm sóc da này"),
+
     //REVIEW
     RATING_INVALID(400, "Giá trị phải từ 1 đến 5"),
     REVIEW_NOT_FOUND(404, "Không tìm thấy đánh giá"),
