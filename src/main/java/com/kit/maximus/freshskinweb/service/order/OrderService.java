@@ -189,7 +189,7 @@ public class OrderService {
         }
 
         Integer totalAmount = 0;
-        BigDecimal totalPrice = orderRequest.getTotalPrice();
+        BigDecimal totalPrice = orderRequest.getTotalPrice().subtract(orderRequest.getPriceShipping());
         List<OrderItemEntity> orderItems = new ArrayList<>();
 
         for (OrderItemRequest itemRequest : orderRequest.getOrderItems()) {
@@ -363,7 +363,7 @@ public class OrderService {
             VoucherResponse voucherResponse = voucherMapper.toVoucherResponse(order.getVoucher());
             orderResponse.setVoucher(voucherResponse);
         }
-
+        // Map thông tin người dùng
         return orderResponse;
     }
 
