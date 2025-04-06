@@ -73,7 +73,7 @@ public class SkinCareRountineController {
                 .build();
     }
     @PatchMapping("update/{id}")
-    public ResponseAPI<Boolean> updateSkinCareRoutine(@PathVariable Long id, @RequestBody SkinCareRountineRequest request) {
+    public ResponseAPI<Boolean> updateSkinCareRoutine(@PathVariable Long id, @RequestBody UpdationSkinCareRountineRequest request) {
 
             boolean result = skinCareRountineService.update(id, request);
 

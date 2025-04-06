@@ -2,6 +2,7 @@ package com.kit.maximus.freshskinweb.service.skintest;
 
 import com.kit.maximus.freshskinweb.dto.request.rountine_step.CreationRountineStepRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.SkinCareRountineRequest;
+import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.UpdationSkinCareRountineRequest;
 import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.ProductVariantResponse;
 import com.kit.maximus.freshskinweb.dto.response.RountineStepResponse;
@@ -142,6 +143,7 @@ public class SkinCareRountineService {
                 .orElseThrow(() -> new AppException(ErrorCode.SKIN_CARE_ROUTINE_NOT_FOUND));
 
         SkinCareRountineResponse response = skinCareRoutineMapper.toResponse(routineEntity);
+        response.setSkinType(skinTypeMapper.toSkinTypeResponse(routineEntity.getSkinType()));
 
         List<RountineStepResponse> stepResponses = routineEntity.getRountineStep().stream()
                 .sorted(Comparator.comparing(RountineStepEntity::getPosition, Comparator.nullsLast(Comparator.naturalOrder())))
@@ -181,6 +183,7 @@ public class SkinCareRountineService {
 
         return routinePage.map(routineEntity -> {
             SkinCareRountineResponse response = skinCareRoutineMapper.toResponse(routineEntity);
+            response.setSkinType(skinTypeMapper.toSkinTypeResponse(routineEntity.getSkinType()));
 
             List<RountineStepResponse> stepResponses = routineEntity.getRountineStep().stream()
                     .sorted(Comparator.comparing(RountineStepEntity::getPosition, Comparator.nullsLast(Comparator.naturalOrder())))
@@ -215,13 +218,16 @@ public class SkinCareRountineService {
     }
 
     @Transactional
-    public boolean update(Long id, SkinCareRountineRequest request) {
+    public boolean update(Long id, UpdationSkinCareRountineRequest request) {
         try {
             SkinCareRoutineEntity existingRoutine = skinCareRountineRepository.findById(id)
                     .orElseThrow(() -> new AppException(ErrorCode.SKIN_CARE_ROUTINE_NOT_FOUND));
 
-            SkinTypeEntity skinType = skinTypeRepository.findById(request.getSkinType())
+
+            SkinTypeEntity skinType = skinTypeRepository.findById(existingRoutine.getSkinType().getId())
                     .orElseThrow(() -> new AppException(ErrorCode.SKIN_TYPE_NOT_FOUND));
+
+            existingRoutine.setSkinType(skinType);
 
             // Gỡ bỏ liên kết sản phẩm từ các bước cũ
             for (RountineStepEntity oldStep : existingRoutine.getRountineStep()) {

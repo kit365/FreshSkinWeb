@@ -42,8 +42,8 @@ public class AccountAdminController {
             @RequestPart(value = "avatar", required = false) List<MultipartFile> image) { // Nhận hình ảnh
         log.info("requestJson:{}", requestJson);
         log.info("images:{}", image);
-        String message_succed = "Tạo user thành công";
-        String message_failed = "Tạo user thất bại";
+        String message_succed = "Tạo tài khoản quản trị thành công";
+        String message_failed = "Tạo tài khoản quản trị thất bại";
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -52,7 +52,7 @@ public class AccountAdminController {
 
             userService.add(createProductRequest);
 
-            log.info("CREATE USER REQUEST SUCCESS");
+            log.info("CREATE ACCOUNT REQUEST SUCCESS");
 
             return ResponseAPI.<UserResponseDTO>builder()
                     .code(HttpStatus.OK.value())
@@ -61,7 +61,7 @@ public class AccountAdminController {
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            log.error("CREATE USER ERROR: " + e.getMessage());
+            log.error("CREATE ACCOUNT ERROR: " + e.getMessage());
 
             return ResponseAPI.<UserResponseDTO>builder()
                     .code(HttpStatus.BAD_REQUEST.value())
@@ -101,14 +101,14 @@ public class AccountAdminController {
         if (result.get("users") instanceof List && ((List<?>) result.get("users")).isEmpty()) {
             return ResponseAPI.<Map<String, Object>>builder()
                     .code(HttpStatus.NOT_FOUND.value())
-                    .message("Không tìm thấy tài khoản phù hợp với từ khóa đã nhập.")
+                    .message("Không tìm thấy tài khoản quản trị phù hợp với từ khóa đã nhập.")
                     .data(result)
                     .build();
         }
 
         return ResponseAPI.<Map<String, Object>>builder()
                 .code(HttpStatus.OK.value())
-                .message("Tìm thấy danh sách tài khoản.")
+                .message("Tìm thấy danh sách tài khoản quản trị.")
                 .data(result)
                 .build();
     }
@@ -189,21 +189,21 @@ public class AccountAdminController {
 
         List<Long> ids = (List<Long>) request.get("id");
 
-        String message_succed = "Xóa vĩnh viễn tài khoản thành công";
-        String message_failed = "Xóa vĩnh viễn tài khoản thất bại";
+        String message_succed = "Xóa vĩnh viễn tài khoản quản trịthành công";
+        String message_failed = "Xóa vĩnh viễn tài khoản quản trị thất bại";
         var result = userService.deleteSelectedAccount(ids);
         if (result) {
             log.info("Account delete successfully");
             return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
         }
-        log.info("Xóa tài khoản không thành công");
+        log.info("Xóa tài khoản quản trị không thành công");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
 
     @DeleteMapping("delete/{id}")
     public ResponseAPI<UserResponseDTO> deleteUser(@PathVariable("id") Long id) {
         {
-            String message = "Xóa vĩnh viễn tài khoản thành công";
+            String message = "Xóa vĩnh viễn tài khoản quản trị thành công";
             userService.deleteAccount(id);
             log.info(message);
             return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
@@ -212,7 +212,7 @@ public class AccountAdminController {
 
     @PatchMapping("deleteT/{id}")
     public ResponseAPI<UserResponseDTO> deleteAccountT(@PathVariable("id") Long id) {
-        String message = "Xóa tài khoản thành công";
+        String message = "Xóa tài khoản quản trị thành công";
         userService.deleteTemporarily(id);
         log.info(message);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
@@ -220,7 +220,7 @@ public class AccountAdminController {
 
     @PatchMapping("restore/{id}")
     public ResponseAPI<UserResponseDTO> restoreAccount(@PathVariable("id") Long id) {
-        String message = "Phục hồi tài khoản thành công";
+        String message = "Phục hồi tài khoản quản trị thành công";
         userService.restore(id);
         log.info(message);
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();

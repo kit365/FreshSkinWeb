@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 //@CrossOrigin(origins = "*")
@@ -94,8 +95,7 @@ public class BlogCategoryTrashController {
         log.info(" BlogCategory Restored failed");
         return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
     }
-    /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// MY CODE HERE =>
+
     @PatchMapping("change-multi")
     public ResponseAPI<String> updataBlogCategory(@RequestBody Map<String,Object> requestBlogCategory) {
 
@@ -105,7 +105,16 @@ public class BlogCategoryTrashController {
             throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
         }
 
-        List<Long> ids =  (List<Long>) requestBlogCategory.get("id");
+        Object idObject = requestBlogCategory.get("id");
+        List<Long> ids;
+
+        if (idObject instanceof List<?>) {
+            ids = ((List<?>) idObject).stream()
+                    .map(item -> Long.valueOf(item.toString())) // Chuyển từng phần tử sang Long
+                    .collect(Collectors.toList());
+        } else {
+            throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
+        }
         String status  =  requestBlogCategory.get("status").toString();
 
         var result = blogCategoryService.update(ids, status);

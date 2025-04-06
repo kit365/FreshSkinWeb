@@ -305,6 +305,7 @@ public class OrderService {
     }
 
     public OrderStatus getOrderStatus(String orderStatus) {
+        log.info(orderStatus.toString());
         try {
             return OrderStatus.valueOf((orderStatus.toUpperCase()));
         } catch (IllegalArgumentException e) {
@@ -734,6 +735,7 @@ public class OrderService {
 
     //Cập nhật trạng thái cho 1 đơn hàng
     public String update(String id, OrderRequest request) {
+        log.info(request.getOrderStatus().toString());
         String orderStatus = request.getOrderStatus();
 
         OrderStatus orderStatusEnum = getOrderStatus(orderStatus);

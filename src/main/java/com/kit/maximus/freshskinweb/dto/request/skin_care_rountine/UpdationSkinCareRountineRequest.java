@@ -1,5 +1,7 @@
 package com.kit.maximus.freshskinweb.dto.request.skin_care_rountine;
 
+import com.kit.maximus.freshskinweb.dto.request.rountine_step.CreationRountineStepRequest;
+import com.kit.maximus.freshskinweb.dto.request.rountine_step.UpdationRountineStepRequest;
 import com.kit.maximus.freshskinweb.entity.RountineStepEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -14,8 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdationSkinCareRountineRequest {
-    Long skinType;
     String title;
     String description;
-    List<RountineStepEntity> rountineStep;
+    List<CreationRountineStepRequest> rountineStep;
 }

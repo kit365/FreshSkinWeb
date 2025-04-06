@@ -59,7 +59,7 @@ public class AccountTrashController {
 
             return ResponseAPI.<Map<String, Object>>builder()
                     .code(HttpStatus.OK.value())
-                    .message("Lấy danh sách người dùng đã xóa thành công.")
+                    .message("Lấy danh sách tài khoản quản trị đã xóa thành công.")
                     .data(result)
                     .build();
 
@@ -86,60 +86,4 @@ public class AccountTrashController {
         return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
 
-    @PatchMapping("change-multi")
-    public ResponseAPI<String> updataAccount(@RequestBody Map<String, Object> request) {
-
-        if (!request.containsKey("id")) {
-            log.warn("Request does not contain 'id' key");
-            //sua lai thong bao loi
-            throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
-        }
-
-        List<Long> ids = (List<Long>) request.get("id");
-        String status = request.get("status").toString();
-
-        var result = userService.updateMulti(ids, status);
-        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
-    }
-
-    @DeleteMapping("delete")
-    public ResponseAPI<String> deleteSelectedAccount(@RequestBody Map<String, Object> request) {
-
-        if (!request.containsKey("id")) {
-            log.warn("Request does not contain 'id' key");
-            throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
-        }
-
-        List<Long> ids = (List<Long>) request.get("id");
-
-        String message_succed = "Xóa mềm tài khoản quản trị thành công";
-        String message_failed = "Xóa mềm tài khoản quản trị thất bại";
-        var result = userService.delete(ids);
-        if (result) {
-            log.info("BlogCategory delete successfully");
-            return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).message(message_succed).build();
-        }
-        log.info("BlogCategory delete failed");
-        return ResponseAPI.<String>builder().code(HttpStatus.NOT_FOUND.value()).message(message_failed).build();
-    }
-
-    @DeleteMapping("delete/{id}")
-    public ResponseAPI<UserResponseDTO> deleteUser(@PathVariable("id") Long id) {
-        {
-            String message = "Delete user successfully";
-            userService.delete(id);
-            log.info(message);
-            return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
-        }
-    }
-
-    @DeleteMapping("deleteAll")
-    public ResponseAPI<UserResponseDTO> deleteUser() {
-        {
-            String message = "Delete all users successfully";
-            userService.deleteAllUsers();
-            log.info(message);
-            return ResponseAPI.<UserResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
-        }
-    }
 }
