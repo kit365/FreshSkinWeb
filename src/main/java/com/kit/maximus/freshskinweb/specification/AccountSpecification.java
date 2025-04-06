@@ -24,4 +24,10 @@ public class AccountSpecification {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.isNotNull(root.get("role"));
     }
+
+    public static Specification<UserEntity> isNotDeleted() {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("deleted"), false);
+    }
+
 }

@@ -641,8 +641,62 @@ public class UserService {
         }
     }
 
+    public Map<String, Object> getTrashAccount(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
+        // Tạo Pageable với sắp xếp
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.fromString(sortDirection.toLowerCase()), sortKey)
+        );
+
+        // Bắt đầu với specification để lấy user có deleted = true và role là null
+        Specification<UserEntity> spec = (root, query, builder) ->
+                builder.and(
+                        builder.isTrue(root.get("deleted")),
+                        builder.isNotNull(root.get("role"))
+                );
+
+        // Thêm các điều kiện tìm kiếm nếu có
+        if (StringUtils.hasText(status) || StringUtils.hasText(keyword)) {
+            try {
+                // Thêm điều kiện lọc theo status nếu có
+                if (StringUtils.hasText(status)) {
+                    try {
+                        Status statusEnum = Status.valueOf(status.toUpperCase());
+                        spec = spec.and(UserSpecification.filterByStatus(statusEnum));
+                    } catch (IllegalArgumentException e) {
+                        return createEmptyResponse(pageable);
+                    }
+                }
+
+                // Thêm điều kiện tìm kiếm nếu có keyword
+                if (StringUtils.hasText(keyword)) {
+                    spec = spec.and(UserSpecification.searchByKeyword(keyword));
+                }
+            } catch (Exception e) {
+                log.error("Error while filtering trash accounts", e);
+                return createEmptyResponse(pageable);
+            }
+        }
+
+        // Thực hiện truy vấn với specification
+        Page<UserEntity> userPage = userRepository.findAll(spec, pageable);
+        Page<UserResponseDTO> userDTOPage = userPage.map(userMapper::toUserResponseDTO);
+
+        // Tạo response
+        Map<String, Object> response = new HashMap<>();
+        response.put("accounts", userDTOPage.getContent());
+        response.put("currentPage", userDTOPage.getNumber() + 1);
+        response.put("totalItems", userDTOPage.getTotalElements());
+        response.put("totalPages", userDTOPage.getTotalPages());
+        response.put("pageSize", userDTOPage.getSize());
+
+        return response;
+    }
+
     public Map<String, Object> getAllAccount(String status, String keyword, Pageable pageable) {
-        Specification<UserEntity> spec = AccountSpecification.hasRole();
+        Specification<UserEntity> spec = AccountSpecification.hasRole()
+                .and(AccountSpecification.isNotDeleted()); // Thêm điều kiện deleted == false
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             Specification<UserEntity> keywordSpec = AccountSpecification.filterAccounts(keyword);
@@ -657,7 +711,6 @@ public class UserService {
                     criteriaBuilder.equal(root.get("status"), statusEnum)
             );
         }
-
 
         Page<UserEntity> userEntityPage = userRepository.findAll(spec, pageable);
 
@@ -708,6 +761,7 @@ public class UserService {
 
         return response;
     }
+
 
     public boolean deleteAccount(Long id) {
         UserEntity user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
