@@ -101,9 +101,6 @@ public class ProductEntity extends AbstractEntity {
     @Column(name = "SkinIssues", columnDefinition = "MEDIUMTEXT")
     String skinIssues;
 
-    @Column(name = "Stock")
-    int stock;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "product")
     List<ReviewEntity> reviews = new ArrayList<>();
 

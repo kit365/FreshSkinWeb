@@ -1,7 +1,5 @@
 package com.kit.maximus.freshskinweb.dto.request.product;
 
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-//import com.kit.maximus.freshskinweb.entity.DiscountEntity;
 import com.kit.maximus.freshskinweb.entity.ProductVariantEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -40,7 +38,6 @@ public class CreateProductRequest implements Serializable {
     String usageInstructions;
     String benefits;
     String skinIssues;
-    int stock;
 //    String thumbnailPayload;
     /// ////////////////////////////////////////////
     boolean featured;

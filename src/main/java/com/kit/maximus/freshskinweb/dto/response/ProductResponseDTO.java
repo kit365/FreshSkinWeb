@@ -62,7 +62,6 @@ public class ProductResponseDTO implements Serializable {
     Boolean featured;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     String status;
-    int stock;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonFormat(pattern = "yyyy-MM-dd")
     Date createdAt;

@@ -14,7 +14,6 @@ import com.kit.maximus.freshskinweb.repository.*;
 import com.kit.maximus.freshskinweb.repository.search.ProductSearchRepository;
 import com.kit.maximus.freshskinweb.service.BaseService;
 import com.kit.maximus.freshskinweb.utils.Status;
-import com.kit.maximus.freshskinweb.utils.UnitType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -794,9 +793,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         List<Long> list = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status.ACTIVE, false, PageRequest.of(0, 9, Sort.by(Sort.Direction.DESC, "position")));
 
         List<ProductResponseDTO> productResponseDTO = new ArrayList<>();
-        list.forEach(productEntity -> {
-            productResponseDTO.add(productSearchRepository.getProductById(productEntity));
-        });
+        list.forEach(productEntity -> productResponseDTO.add(productSearchRepository.getProductById(productEntity)));
 
         if (!productResponseDTO.isEmpty()) {
             productResponseDTO.forEach(productResponseDTO1 -> {
@@ -1399,6 +1396,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                                     variantResponse.setPrice(variant.getPrice());
                                     variantResponse.setVolume(variant.getVolume());
                                     variantResponse.setUnit(variant.getUnit());
+                                    variantResponse.setStock(variant.getStock());
                                     return variantResponse;
                                 }).collect(Collectors.toList());
 

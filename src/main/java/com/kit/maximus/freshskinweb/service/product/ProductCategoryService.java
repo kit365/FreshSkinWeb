@@ -781,6 +781,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                     productVariantResponse.setId(productVariantEntity.getId());
                     productVariantResponse.setVolume(productVariantEntity.getVolume());
                     productVariantResponse.setUnit(productVariantEntity.getUnit());
+                    productVariantResponse.setStock(productVariantEntity.getStock());
                     variantResponses.add(productVariantResponse);
                 });
 
