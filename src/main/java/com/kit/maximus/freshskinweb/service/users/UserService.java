@@ -75,6 +75,7 @@ public class UserService {
 
     public boolean add(CreateUserRequest request) {
         UserEntity userEntity = userMapper.toUserEntity(request);
+        userEntity.setAddress(request.getAddress());
 
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new AppException(ErrorCode.USER_EXISTED);

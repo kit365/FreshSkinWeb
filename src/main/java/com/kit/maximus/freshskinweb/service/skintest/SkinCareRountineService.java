@@ -54,7 +54,6 @@ public class SkinCareRountineService {
     @Transactional
     public boolean add(SkinCareRountineRequest request) {
         try {
-            // Map data từ request sang entity
             SkinCareRoutineEntity skinCareRoutineEntity = skinCareRoutineMapper.toEntity(request);
 
             // check loại da có tồn tại hay không
@@ -67,7 +66,7 @@ public class SkinCareRountineService {
                 throw new AppException(ErrorCode.SKIN_CARE_ROUTINE_ALREADY_EXISTS);
             }
 
-            // check user có nhập các bước trong lộ trình da hay không ( không được để 1 lộ trình mà null )
+            // check user có nhập các step cho lộ trình da hay không ( không được để 1 lộ trình == null )
             if (request.getRountineStep() == null || request.getRountineStep().isEmpty()) {
                 throw new AppException(ErrorCode.ROUTINE_STEP_NOT_FOUND);
             }
@@ -91,29 +90,31 @@ public class SkinCareRountineService {
                 // Xử lý position
                 Integer position = stepRequest.getPosition();
                 if (position != null) {
-                    // Nếu vị trí trùng với những vị trí đã có thì báo lỗi
+                    // check position trùng nhau
                     if (usedPositions.contains(position)) {
                         throw new AppException(ErrorCode.DUPLICATE_POSITION);
                     }
                     routineStepEntity.setPosition(position);
                     usedPositions.add(position);
                 } else {
-                    // Nếu không có position thì tự động tăng lên 1 theo số bước đã có trong lộ trình da
+                    // Không nhập position thì tự động tăng ++
                     currentMaxPosition++;
                     routineStepEntity.setPosition(currentMaxPosition);
                     usedPositions.add(currentMaxPosition);
                 }
 
-                // Lưu lại lộ trình da trước, sau khi có data thì cập nhật thêm vào bảng lộ trình, tránh gom quá nhiều field add cùng 1 lúc
+                // Lưu lại lộ trình da trước, sau khi có data product thì cập nhật thêm vào bảng lộ trình, tránh gom quá nhiều field add cùng 1 lúc
                 RountineStepEntity savedRoutineStep = rountineStepRepository.save(routineStepEntity);
 
+                //PHẦN HAY: TỰ ĐỘNG LẤY PRODUCT THEO DANH MỤC SẢN PHẨM VÀ LOẠI DA
+                // Danh mục sản phẩm sẽ dựa vào tên bước chăm sóc da mà user nhập vào ( chỉ cần trong step có chứa keyword: "toner", "serum", "tẩy trang",... là được )
                 // Lấy theo top 5 sản phẩm theo loại da và danh mục sản phẩm, ở hàm này còn có thêm rằng buộc không lấy những sản phẩm có tên != loại da đang xét
                 List<ProductEntity> products = productService.getTop5BestSellerProductBySkinTypeAndProductCategory(
                         skinType.getId(),
                         stepRequest.getStep()
                 );
 
-                // Lưu cột khóa ngoại rountine step cho sản phẩm đó
+                // Lưu giá trị FK routine step vào bảng product
                 products.forEach(product -> {
                     product.setRountineStep(savedRoutineStep);
                     productRepository.save(product);

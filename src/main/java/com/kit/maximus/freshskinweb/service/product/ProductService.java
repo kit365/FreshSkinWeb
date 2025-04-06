@@ -1489,10 +1489,11 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return false;
     }
 
-
-    // Lấy top 5 sản phẩm bán chạy nhất theo loại da và thể loại
+    //PHẦN HAY: Lấy top 5 sản phẩm bán chạy nhất theo loại da và thể loại
+    //Sẽ lấy những sản phẩm được bán nhiều nhất cho mỗi bước chăm sóc da ( lấy 5 sản phẩm tối đa )
     public List<ProductEntity> getTop5BestSellerProductBySkinTypeAndProductCategory(Long skinTypeId, String step) {
-        // Bước 1: Trích xuất keyword từ bước chăm sóc
+
+        // Xét chuỗi step, chỉ cần chứa keyword "tẩy trang, chống nắng"
         String categoryKeyword = extractCategoryKeyword(step);
         if (categoryKeyword == null) {
             log.warn("Không tìm thấy danh mục ứng với step: {}", step);
@@ -1576,19 +1577,19 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
 
 
-    // Lọc nội dung của tên danh mục sản phẩm, sau đó lấy những danh mục tương ứng với biến được khai trước đó và so sánh
+    // Hàm hỗ trợ lấy keyword và so sánh với giá trị được set trong biến hằng số CATEGORY_KEYWORDS. Match với nhau thì trả kết quả
     private String extractCategoryKeyword(String step) {
         if (step == null || step.trim().isEmpty()) {
-            log.warn("Step is null or empty");
+            log.warn("Không tìm thấy step nào để xử lý");
             return null;
         }
 
         String stepLower = step.toLowerCase().trim();
-        log.info("Processing step: {}", stepLower);
+        log.info("Step đang xét: {}", stepLower);
         String result = CATEGORY_KEYWORDS.entrySet().stream()
                 .filter(entry -> {
                     boolean match = stepLower.contains(entry.getKey());
-                    log.info("Checking keyword '{}' against '{}': {}",
+                    log.info("Kiểm tra keyword '{}' against '{}': {}",
                             entry.getKey(), stepLower, match);
                     return match;
                 })
@@ -1602,8 +1603,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return result;
     }
 
-    // Lọc nội dung của bước làm da, sau đó lấy những keyword tương ứng với biến được khai trước đó và so sánh
-    // Tránh những sản phẩm có tên khác với loại da hiện tại
+    // Hàm hỗ trợ lấy keyword và so sánh với giá trị được set trong biến hằng số SKIN_TYPE_KEYWORDS. Match với nhau thì trả kết quả
+    // Lọc để lấy ra các sản phẩm có loại da tương ứng với loại da hiện tại
     private boolean isMatchingSkinType(String productTitle, String currentSkinType) {
         String titleLower = productTitle.toLowerCase();
 
