@@ -243,7 +243,7 @@ public class OrderService {
                 // Áp dụng giảm giá
                 BigDecimal finalPrice = voucherService.applyVoucherDiscount(voucher, order.getTotalPrice());
                 order.setDiscountAmount(totalPrice.subtract(finalPrice));
-                order.setTotalPrice(finalPrice);
+                order.setTotalPrice(finalPrice.add(orderRequest.getPriceShipping()));
 
                 // Giảm số lượt sử dụng voucher
                 voucher.setUsed(voucher.getUsed() + 1);
