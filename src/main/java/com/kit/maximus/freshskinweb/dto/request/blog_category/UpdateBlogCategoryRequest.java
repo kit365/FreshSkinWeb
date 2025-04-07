@@ -21,4 +21,5 @@ public class UpdateBlogCategoryRequest implements Serializable {
     List<MultipartFile> newImg;
     List<String> thumbnail;
     boolean featured;
+    String status;
 }

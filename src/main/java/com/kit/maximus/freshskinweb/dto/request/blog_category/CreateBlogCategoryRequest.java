@@ -22,5 +22,4 @@ public class CreateBlogCategoryRequest implements Serializable {
     Integer position;
     boolean featured;
     List<MultipartFile> image;
-    String status;
 }
