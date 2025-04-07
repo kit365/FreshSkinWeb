@@ -74,18 +74,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             "chống nắng", "Chống nắng da mặt"
     );
 
-    // chưa chắc đã hoạt động đâu
-    public String checkKeywordInProductCategory(String keyword) {
-        List<ProductCategoryEntity> getCategories = productCategoryRepository.findAll();
-        if(!getCategories.isEmpty()){
-            for (ProductCategoryEntity category : getCategories) {
-                if (category.getTitle().toLowerCase().contains(keyword.toLowerCase())) {
-                    return category.getTitle();
-                }
-            }
-        }
-        return null;
-    }
 
     // Biến lưu toàn bộ loại da cho các bước trong lộ trình chăm sóc da
     private static final List<String> SKIN_TYPE_KEYWORDS = Arrays.asList(
@@ -130,9 +118,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             productEntity.setBrand(productBrandEntity);
         }
 
-//        if(discountEntity != null){
-//            productEntity.setDiscountEntity(discountEntity);
-//        }
 
         if (request.getPosition() == null || request.getPosition() <= 0) {
             Integer size = productRepository.findAll().size();
@@ -1508,11 +1493,10 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return false;
     }
 
-    //PHẦN HAY: Lấy top 5 sản phẩm bán chạy nhất theo loại da và thể loại
+    //PHẦN HAY: Lấy top 5 sản phẩm bán chạy nhất theo loại da và thể loại, trường hợp sản phẩm đó chưa được order, có thể xét theo position của sản phẩm đó
     //Sẽ lấy những sản phẩm được bán nhiều nhất cho mỗi bước chăm sóc da ( lấy 5 sản phẩm tối đa )
     public List<ProductEntity> getTop5BestSellerProductBySkinTypeAndProductCategory(Long skinTypeId, String step) {
-
-        // Xét chuỗi step, chỉ cần chứa keyword "tẩy trang, chống nắng"
+        // Bước 1: Trích xuất keyword từ step
         String categoryKeyword = extractCategoryKeyword(step);
         log.info("keyword truyền vào: {}", step);
         log.info("Lấy danh mục theo keyword: {}", categoryKeyword);
@@ -1528,8 +1512,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         log.info("-----------------------------------------------------------------");
         log.info("\n");
-        log.info("Đang tìm top 5 sản phẩm cho loại da: {} với danh mục sản phẩm: {}",
-                currentSkinTypeName, categoryKeyword);
+        log.info("Đang tìm top 5 sản phẩm cho loại da: {} với danh mục sản phẩm: {}", currentSkinTypeName, categoryKeyword);
 
         // Bước 3: Lấy danh mục cha từ keyword
         ProductCategoryEntity parentCategory = productCategoryRepository.findByTitleContainingIgnoreCase(categoryKeyword)
@@ -1538,25 +1521,18 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         // Bước 4: Tìm sản phẩm bán chạy theo keyword (cha)
         List<Long> productIds = productRepository.findTop5SellingProductsBySkinTypeAndCategory(
-                skinTypeId, parentCategory.getTitle() // vẫn truyền keyword
+                skinTypeId, parentCategory.getTitle()
         );
 
-        // Bước 5: Nếu không tìm thấy, thử tìm danh mục con bán chạy nhất và dùng tên danh mục con đó làm keyword mới
+        // Bước 5: Nếu không tìm thấy, thử tìm danh mục con
         if (productIds == null || productIds.isEmpty()) {
-            log.info("Danh mục '{}' cha không tìm thấy sản phẩm nào, Cố gắng tìm danh mục con...", parentCategory.getTitle());
+            log.info("Không tìm thấy sản phẩm từ danh mục cha, thử tìm danh mục con...");
 
-            // Lấy danh sách top 5 danh mục con bán chạy nhất
             Pageable pageable = PageRequest.of(0, 5);  // Giới hạn 5 danh mục con
             List<Long> childCategoryIds = productRepository.findTop5BestSellingChildCategoryIdByParent(
                     parentCategory.getId(), pageable
             );
 
-            if (childCategoryIds.isEmpty()) {
-                log.info("Không tìm thấy danh mục con");
-                return Collections.emptyList();
-            }
-
-            // Duyệt qua từng danh mục con và tìm sản phẩm tương ứng
             List<ProductEntity> products = new ArrayList<>();
             for (Long childCategoryId : childCategoryIds) {
                 Optional<ProductCategoryEntity> bestChildCategory = productCategoryRepository.findById(childCategoryId);
@@ -1574,17 +1550,31 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 }
             }
 
-            if (products.isEmpty()) {
-                log.info("No products found after fallback to child categories.");
-                return Collections.emptyList();
+            if (!products.isEmpty()) {
+                return products.stream()
+                        .filter(p -> isMatchingSkinType(p.getTitle(), currentSkinTypeName))
+                        .collect(Collectors.toList());
             }
 
-            return products.stream()
-                    .filter(p -> isMatchingSkinType(p.getTitle(), currentSkinTypeName))
-                    .collect(Collectors.toList());
+            // Bước 6: Nếu vẫn không có sản phẩm từ cha/con -> tìm theo position
+            log.info("Không có sản phẩm bán chạy, fallback sang tìm theo position...");
+            List<Long> positionBasedProductIds = productRepository.findTop5ProductsByCategoryOrderedByPosition(
+                    parentCategory.getTitle(), pageable
+            );
+
+            if (positionBasedProductIds != null && !positionBasedProductIds.isEmpty()) {
+                List<ProductEntity> fallbackProducts = productRepository.findAllById(positionBasedProductIds);
+                return fallbackProducts.stream()
+                        .filter(p -> isMatchingSkinType(p.getTitle(), currentSkinTypeName))
+                        .collect(Collectors.toList());
+            }
+
+            // Không tìm được gì luôn
+            log.info("Không tìm thấy sản phẩm nào theo position.");
+            return Collections.emptyList();
         }
 
-        // Bước 6: Trả về danh sách sản phẩm
+        // Bước 7: Trả về danh sách sản phẩm tìm được từ danh mục cha
         List<ProductEntity> products = productRepository.findAllById(productIds);
         if (products.isEmpty()) {
             return Collections.emptyList();
@@ -1594,9 +1584,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
                 .filter(p -> isMatchingSkinType(p.getTitle(), currentSkinTypeName))
                 .collect(Collectors.toList());
     }
-
-
-
 
     // Hàm hỗ trợ lấy keyword và so sánh với giá trị được set trong biến hằng số CATEGORY_KEYWORDS. Match với nhau thì trả kết quả
     private String extractCategoryKeyword(String step) {
