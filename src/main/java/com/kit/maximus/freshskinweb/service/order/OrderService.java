@@ -22,6 +22,7 @@ import com.kit.maximus.freshskinweb.specification.OrderSpecification;
 import com.kit.maximus.freshskinweb.utils.DiscountType;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
+import com.kit.maximus.freshskinweb.utils.PaymentStatus;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -80,6 +81,11 @@ public class OrderService {
             try {
                 order.setPaymentMethod(PaymentMethod.valueOf(String.valueOf(orderRequest.getPaymentMethod())));
                 System.out.println(order.getPaymentMethod());
+
+                //Phương thức mà là CASH => TRẠNG THÁI LÀ ĐANG CHỜ THANH TOÁN
+                if(orderRequest.getPaymentMethod().equals(PaymentMethod.CASH)){
+                    order.setPaymentStatus(PaymentStatus.PENDING);
+                }
 
             } catch (IllegalArgumentException e) {
                 log.error("Invalid payment method: {}", orderRequest.getPaymentMethod());
@@ -494,7 +500,22 @@ public class OrderService {
 
             if (!orderEntities.isEmpty()) {
                 for (OrderEntity orderEntity : orderEntities) {
-                    orderEntity.setOrderStatus(orderStatusEnum);
+                    // Nếu thanh toán bằng tiền mặt
+                    if(orderEntity.getPaymentMethod().equals(PaymentMethod.CASH)) {
+                        orderEntity.setOrderStatus(orderStatusEnum);
+
+                        // Nếu đơn hàng được giao => thanh toán thành công
+                        if(orderStatusEnum.equals(OrderStatus.COMPLETED)) {
+                            orderEntity.setPaymentStatus(PaymentStatus.PAID);
+                            // Chưa được giao => thanh toán thất bại
+                        } else if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
+                            orderEntity.setPaymentStatus(PaymentStatus.FAILED);
+                        }
+                    }else {
+                        // Nếu thanh toán bằng QR => bên QR sẽ cập nhật trạng thái thanh toán
+                        orderEntity.setOrderStatus(orderStatusEnum);
+                    }
+
                     if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
                         orderEntity.getOrderItems().forEach(orderItem -> productService.updateStockCancel(
                                 orderItem.getProductVariant().getId(),
@@ -523,7 +544,22 @@ public class OrderService {
         OrderEntity orderEntity = orderRepository.findById(id).orElse(null);
 
         if (orderEntity != null) {
-            orderEntity.setOrderStatus(orderStatusEnum);
+            // Nếu thanh toán bằng tiền mặt
+            if(orderEntity.getPaymentMethod().equals(PaymentMethod.CASH)) {
+                orderEntity.setOrderStatus(orderStatusEnum);
+
+                // Nếu đơn hàng được giao => thanh toán thành công
+                if(orderStatusEnum.equals(OrderStatus.COMPLETED)) {
+                    orderEntity.setPaymentStatus(PaymentStatus.PAID);
+                    // Chưa được giao => thanh toán thất bại
+                } else if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
+                    orderEntity.setPaymentStatus(PaymentStatus.FAILED);
+                }
+                // Nếu thanh toán bằng QR => bên QR sẽ cập nhật trạng thái thanh toán
+            } else {
+                log.info("thanh toán bằng QR ");
+                orderEntity.setOrderStatus(orderStatusEnum);
+            }
             orderRepository.save(orderEntity);
 
             if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
