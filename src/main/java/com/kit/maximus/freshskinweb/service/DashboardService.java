@@ -59,6 +59,11 @@ public class DashboardService {
     }
 
     @Async
+    public CompletableFuture<Long> getCountDriving() {
+        return CompletableFuture.completedFuture(orderService.countShipping());
+    }
+
+    @Async
     public CompletableFuture<Long> getOrderPending() {
         return CompletableFuture.completedFuture(orderService.countPending());
     }

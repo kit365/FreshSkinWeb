@@ -290,6 +290,7 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
                 dashboardService.getOrderCompleted(),
                 dashboardService.getOrderPending(),
                 dashboardService.getOrderCanceled(),
+                dashboardService.getCountDriving(),
                 dashboardService.getTotalRevenue(),
                 dashboardService.getTotalBlogs(),
                 dashboardService.getTotalReviews(),
@@ -309,6 +310,7 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
                 data.put("totalOrderCompleted", dashboardService.getOrderCompleted().join());
                 data.put("totalOrderPending", dashboardService.getOrderPending().join());
                 data.put("totalOrderCanceled", dashboardService.getOrderCanceled().join());
+                data.put("totalOrderShipping", dashboardService.getCountDriving().join());
                 data.put("totalRevenue", dashboardService.getTotalRevenue().join());
                 data.put("totalBlogs", dashboardService.getTotalBlogs().join());
                 data.put("totalFeedbacks", dashboardService.getTotalReviews().join());

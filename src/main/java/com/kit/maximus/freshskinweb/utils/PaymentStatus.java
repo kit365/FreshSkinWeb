@@ -4,7 +4,8 @@ public enum PaymentStatus {
     PENDING("Chờ thanh toán"),
     PAID("Đã thanh toán thành công"),
     FAILED("Thanh toán thất bại"),
-    CANCELED("Thanh toán bị hủy");
+    CANCELED("Thanh toán bị hủy"),
+    REFUNDED("Hoàn tiền");
 
     private final String message;
 

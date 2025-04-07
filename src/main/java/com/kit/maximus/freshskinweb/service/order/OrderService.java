@@ -83,7 +83,7 @@ public class OrderService {
                 System.out.println(order.getPaymentMethod());
 
                 //Phương thức mà là CASH => TRẠNG THÁI LÀ ĐANG CHỜ THANH TOÁN
-                if(orderRequest.getPaymentMethod().equals(PaymentMethod.CASH)){
+                if (orderRequest.getPaymentMethod().equals(PaymentMethod.CASH)) {
                     order.setPaymentStatus(PaymentStatus.PENDING);
                 }
 
@@ -359,7 +359,6 @@ public class OrderService {
     }
 
 
-
     /*PHÂN TRANG ORDER CHO USER */
     public List<OrderResponse> getUserOrders(Long userId) {
         // Kiểm tra user tồn tại
@@ -403,7 +402,6 @@ public class OrderService {
                 })
                 .collect(Collectors.toList());
     }
-
 
 
     /*PHÂN TRANG ORDER CHO ADMIN */
@@ -501,11 +499,12 @@ public class OrderService {
             if (!orderEntities.isEmpty()) {
                 for (OrderEntity orderEntity : orderEntities) {
                     // Nếu thanh toán bằng tiền mặt
-                    if(orderEntity.getPaymentMethod().equals(PaymentMethod.CASH)) {
+
+                    if (orderEntity.getPaymentMethod().equals(PaymentMethod.CASH)) {
                         orderEntity.setOrderStatus(orderStatusEnum);
 
                         // Nếu đơn hàng được giao => thanh toán thành công
-                        if(orderStatusEnum.equals(OrderStatus.COMPLETED)) {
+                        if (orderStatusEnum.equals(OrderStatus.COMPLETED)) {
                             orderEntity.setPaymentStatus(PaymentStatus.PAID);
                             // Chưa được giao => thanh toán thất bại
                         } else if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
@@ -514,6 +513,10 @@ public class OrderService {
                     }
 
                     if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
+                        if (orderEntity.getPaymentMethod().equals(PaymentMethod.QR)) {
+                            orderEntity.setPaymentStatus(PaymentStatus.REFUNDED);
+                        }
+
                         orderEntity.getOrderItems().forEach(orderItem -> productService.updateStockCancel(
                                 orderItem.getProductVariant().getId(),
                                 orderItem.getProductVariant().getProduct().getId(),
@@ -541,12 +544,19 @@ public class OrderService {
         OrderEntity orderEntity = orderRepository.findById(id).orElse(null);
 
         if (orderEntity != null) {
+
+            if (orderEntity.getPaymentMethod().equals(PaymentMethod.QR)) {
+                if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
+                    orderEntity.setPaymentStatus(PaymentStatus.REFUNDED);
+                }
+            }
+
             // Nếu thanh toán bằng tiền mặt
-            if(orderEntity.getPaymentMethod().equals(PaymentMethod.CASH)) {
+            if (orderEntity.getPaymentMethod().equals(PaymentMethod.CASH)) {
                 orderEntity.setOrderStatus(orderStatusEnum);
 
                 // Nếu đơn hàng được giao => thanh toán thành công
-                if(orderStatusEnum.equals(OrderStatus.COMPLETED)) {
+                if (orderStatusEnum.equals(OrderStatus.COMPLETED)) {
                     orderEntity.setPaymentStatus(PaymentStatus.PAID);
                     // Chưa được giao => thanh toán thất bại
                 } else if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
@@ -554,9 +564,13 @@ public class OrderService {
                 }
                 // Nếu thanh toán bằng QR => bên QR sẽ cập nhật trạng thái thanh toán
             }
+
+
             orderRepository.save(orderEntity);
 
             if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
+
+
                 orderEntity.getOrderItems().forEach(orderItem -> productService.updateStockCancel(
                         orderItem.getProductVariant().getId(),
                         orderItem.getProductVariant().getProduct().getId(),
@@ -606,6 +620,10 @@ public class OrderService {
 
     public long countCanceled() {
         return orderRepository.countByOrderStatus(OrderStatus.CANCELED);
+    }
+
+    public long countShipping() {
+        return orderRepository.countByOrderStatus(OrderStatus.DELIVERING);
     }
 
     public String countRevenue() {

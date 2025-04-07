@@ -198,7 +198,7 @@ public class VnPayService implements PaymentService {
         if ("00".equals(transactionStatus)) {
             //thanh toán thành công -> chuyển status
             orderOpt.setPaymentStatus(PaymentStatus.PAID);
-            orderOpt.setOrderStatus(OrderStatus.COMPLETED);
+            orderOpt.setOrderStatus(OrderStatus.PENDING);
             orderService.saveOrder(orderOpt);
 
 //            if(!orderOpt.getOrderItems().isEmpty()) {
