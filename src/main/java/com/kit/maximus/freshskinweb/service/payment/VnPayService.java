@@ -201,17 +201,17 @@ public class VnPayService implements PaymentService {
             orderOpt.setOrderStatus(OrderStatus.COMPLETED);
             orderService.saveOrder(orderOpt);
 
-            if(!orderOpt.getOrderItems().isEmpty()) {
-                orderOpt.getOrderItems().forEach(orderItem -> {
-                    if(orderItem.getProductVariant() != null) {
-                        productService.updateStock(
-                                orderItem.getProductVariant().getId(),
-                                orderItem.getProductVariant().getProduct().getId(),
-                                orderItem.getQuantity()
-                        );
-                    }
-                });
-            }
+//            if(!orderOpt.getOrderItems().isEmpty()) {
+//                orderOpt.getOrderItems().forEach(orderItem -> {
+//                    if(orderItem.getProductVariant() != null) {
+//                        productService.updateStock(
+//                                orderItem.getProductVariant().getId(),
+//                                orderItem.getProductVariant().getProduct().getId(),
+//                                orderItem.getQuantity()
+//                        );
+//                    }
+//                });
+//            }
             if (orderOpt.getPaymentMethod() != null && orderOpt.getPaymentMethod().equals(PaymentMethod.QR)) {
                 NotificationEntity notification = new NotificationEntity();
                 notification.setUser(orderOpt.getUser());
