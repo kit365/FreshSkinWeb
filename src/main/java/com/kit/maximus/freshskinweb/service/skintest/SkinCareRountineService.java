@@ -177,6 +177,48 @@ public class SkinCareRountineService {
     }
 
     @Transactional(readOnly = true)
+    public SkinCareRountineResponse getBySkinType(String skinType) {
+        SkinTypeEntity skinTypeEntity = skinTypeRepository.findByType(skinType);
+        if(skinTypeEntity == null){
+            throw new AppException(ErrorCode.SKIN_TYPE_NOT_FOUND);
+        }
+
+        SkinCareRoutineEntity routineEntity = skinCareRountineRepository.findBySkinType(skinTypeEntity);
+        SkinCareRountineResponse response = skinCareRoutineMapper.toResponse(routineEntity);
+        response.setSkinType(skinTypeMapper.toSkinTypeResponse(routineEntity.getSkinType()));
+
+        List<RountineStepResponse> stepResponses = routineEntity.getRountineStep().stream()
+                .sorted(Comparator.comparing(RountineStepEntity::getPosition, Comparator.nullsLast(Comparator.naturalOrder())))
+                .map(step -> {
+                    RountineStepResponse stepResponse = rountineStepMapper.toRountineStepResponse(step);
+
+                    List<ProductResponseDTO> productResponses = step.getProduct().stream()
+                            .map(product -> {
+                                ProductResponseDTO productDTO = productMapper.productToProductResponseDTO(product);
+                                productDTO.setVariants(product.getVariants().stream()
+                                        .map(variant -> {
+                                            ProductVariantResponse variantResponse = new ProductVariantResponse();
+                                            variantResponse.setId(variant.getId());
+                                            variantResponse.setPrice(variant.getPrice());
+                                            variantResponse.setUnit(variant.getUnit());
+                                            variantResponse.setVolume(variant.getVolume());
+                                            return variantResponse;
+                                        })
+                                        .collect(Collectors.toList()));
+                                return productDTO;
+                            })
+                            .collect(Collectors.toList());
+
+                    stepResponse.setProduct(productResponses);
+                    return stepResponse;
+                })
+                .collect(Collectors.toList());
+
+        response.setRountineStep(stepResponses);
+        return response;
+    }
+
+    @Transactional(readOnly = true)
     public Page<SkinCareRountineResponse> getAllSkinCareRoutines(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
         Page<SkinCareRoutineEntity> routinePage = skinCareRountineRepository.findAll(pageable);

@@ -14,6 +14,7 @@ public interface SkinTypeRepository extends JpaRepository<SkinTypeEntity, Long> 
     @NotNull
     Optional<SkinTypeEntity> findById(Long aLong);
 
+
     SkinTypeEntity findByType(String type);
 
     boolean existsByTypeContainingIgnoreCase(String type);
