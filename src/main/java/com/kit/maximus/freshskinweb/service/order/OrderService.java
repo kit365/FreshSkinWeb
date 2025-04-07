@@ -58,110 +58,6 @@ public class OrderService {
     ApplicationEventPublisher eventPublisher;
     ProductService productService;
 
-//    @Transactional
-//    public OrderIdResponse addOrder(OrderRequest orderRequest) {
-//        OrderEntity order = orderMapper.toOrderEntity(orderRequest);
-//
-//        UserEntity user = null;
-//        if (orderRequest.getUserId() != null) {
-//            user = userRepository.findById(orderRequest.getUserId()).orElse(null);
-//            order.setUser(user);
-//        } else {
-//            order.setUser(user);
-//        }
-//        // Tạo orderId duy nhất
-//        String orderId = generateOrderCode();
-//        order.setOrderId(orderId);
-//        order.setOrderStatus(OrderStatus.PENDING);
-//
-//        // Set payment method safely
-//        if (orderRequest.getPaymentMethod() != null) {
-//            System.out.println(orderRequest.getPaymentMethod());
-//            try {
-//                order.setPaymentMethod(PaymentMethod.valueOf(String.valueOf(orderRequest.getPaymentMethod())));
-//                System.out.println(order.getPaymentMethod());
-//
-//            } catch (IllegalArgumentException e) {
-//                log.error("Invalid payment method: {}", orderRequest.getPaymentMethod());
-//                throw new AppException(ErrorCode.INVALID_PAYMENT_METHOD);
-//            }
-//        }
-//
-//        Integer totalAmount = 0;
-//        BigDecimal totalPrice = BigDecimal.ZERO;
-//        List<OrderItemEntity> orderItems = new ArrayList<>();
-//
-//        for (OrderItemRequest itemRequest : orderRequest.getOrderItems()) {
-//            ProductVariantEntity variant = productVariantRepository.findById(itemRequest.getProductVariantId())
-//                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
-//
-//
-//            OrderItemEntity orderItem = new OrderItemEntity();
-//            orderItem.setProductVariant(variant);
-//            orderItem.setQuantity(itemRequest.getQuantity());
-//            BigDecimal discountAmount = BigDecimal.ZERO;
-//
-////            if (variant.getProduct().getDiscountPercent() != null) {
-////                discountAmount = variant.getPrice()
-////                        .multiply(BigDecimal.valueOf(variant.getProduct().getDiscountPercent())
-////                                .divide(BigDecimal.valueOf(100)));
-////
-////            }
-//
-//// Tính giá sau giảm
-//            BigDecimal discountedPrice = variant.getPrice().subtract(discountAmount);
-//
-
-    /// / Tính tổng tiền cho số lượng sản phẩm
-//            BigDecimal subtotal = discountedPrice.multiply(BigDecimal.valueOf(orderItem.getQuantity()));
-//            orderItem.setSubtotal(subtotal);
-//
-//
-//            orderItem.setOrder(order);
-//            orderItems.add(orderItem);
-//
-//            totalAmount += itemRequest.getQuantity(); // Đảm bảo kiểu số nguyên
-//            totalPrice = totalPrice.add(orderItem.getSubtotal());
-//        }
-//
-//        order.setTotalAmount(totalAmount);
-//        order.setTotalPrice(totalPrice);
-//        order.setOrderItems(orderItems);
-//
-//        if (orderRequest.getVoucherName() != null) {
-//            VoucherEntity voucher = voucherRepository.findByName(orderRequest.getVoucherName())
-//                    .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
-//
-//            if (voucherService.validateVoucher(orderRequest.getVoucherName(), order.getTotalPrice()) == null) {
-//                throw new AppException(ErrorCode.VOUCHER_INVALID);
-//            }
-//
-//            // Áp dụng giảm giá
-//            BigDecimal finalPrice = voucherService.applyVoucherDiscount(voucher, order.getTotalPrice());
-//            order.setDiscountAmount(totalPrice.subtract(finalPrice));
-//            order.setTotalPrice(finalPrice);
-//
-//            // Giảm số lượt sử dụng voucher
-//            voucher.setUsed(voucher.getUsed() + 1);
-//            voucherRepository.save(voucher);
-//
-//            // Liên kết voucher với order
-//            order.setVoucher(voucher);
-//        }
-//
-//
-//        OrderEntity savedOrder = orderRepository.save(order);
-//
-//        if (user != null && order.getPaymentMethod() != null && order.getPaymentMethod().equals(PaymentMethod.CASH)) {
-//            NotificationEntity notification = new NotificationEntity();
-//            notification.setUser(user);
-//            notification.setOrder(order);
-//            notification.setMessage("Đơn hàng " + order.getOrderId() + " đặt hàng thành công");
-//            eventPublisher.publishEvent(new NotificationEvent(this, notification));
-//        }
-//
-//        return new OrderIdResponse(savedOrder.getOrderId());
-//    }
     @Transactional
     public OrderIdResponse addOrder(OrderRequest orderRequest) {
         OrderEntity order = orderMapper.toOrderEntity(orderRequest);
@@ -457,133 +353,24 @@ public class OrderService {
     }
 
 
-//    public ProductResponseDTO getProductByVariant(Long id) {
-//        ProductVariantEntity varirant = productVariantRepository.findById(id).orElse(null);
-//        ProductEntity product = varirant.getProduct();
-//        return productMapper.productToProductResponseDTO(product);
-//    }
-
-//    public List<OrderResponse> getAllOrder() {
-//        List<OrderEntity> orders = orderRepository.findAll();
-//
-//        List<OrderResponse> orderResponses = orderMapper.toOrderResponseList(orders);
-//
-//
-//
-//        for (OrderResponse orderResponse : orderResponses) {
-//
-//            orders.forEach(orderEntity -> {
-//                if(orderEntity.getOrderItems() != null) {
-//                    List<OrderItemResponse>  orderItemResponses = new ArrayList<>();
-//                    orderEntity.getOrderItems().forEach(orderItemEntity -> {
-//                        OrderItemResponse orderItemResponse = new OrderItemResponse();
-//                        orderItemResponse.setOrderItemId(orderItemEntity.getOrderItemId());
-//                        orderItemResponse.setQuantity(orderItemEntity.getQuantity());
-//                        orderItemResponse.setSubtotal(orderItemEntity.getSubtotal());
-//
-//                        if(orderItemEntity.getProductVariant() != null) {
-//                            ProductVariantResponse productVariantResponse = new ProductVariantResponse();
-//                            productVariantResponse.setId(orderItemEntity.getProductVariant().getId());
-//                            productVariantResponse.setPrice(orderItemEntity.getProductVariant().getPrice());
-//                            productVariantResponse.setUnit(orderItemEntity.getProductVariant().getUnit());
-//                            productVariantResponse.setVolume(orderItemEntity.getProductVariant().getVolume());
-//
-//                            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-//                            productResponseDTO.setTitle(orderItemEntity.getProductVariant().getProduct().getTitle());
-//                            productResponseDTO.setThumbnail(orderItemEntity.getProductVariant().getProduct().getThumbnail());
-//                            productResponseDTO.setDiscountPercent(orderItemEntity.getProductVariant().getProduct().getDiscountPercent());
-//                            productResponseDTO.setSlug(orderItemEntity.getProductVariant().getProduct().getSlug());
-//                            productResponseDTO.setId(orderItemEntity.getProductVariant().getProduct().getId());
-//                            productVariantResponse.setProduct(productResponseDTO);
-//                            orderItemResponse.setProductVariant(productVariantResponse);
-//                            orderItemResponses.add(orderItemResponse);
-//                        }
-//                        orderResponse.setOrderItems(orderItemResponses);
-//                    });
-//                }
-//            });
-//
-//
-//        }
-//        return orderResponses;
-
-
-    //Truy xuat Product thông qua ProductVariantID
-
-
-//        if (orders != null && !orders.isEmpty()) {
-//            for (OrderEntity orderEntity : orders) {
-//                OrderResponse orderResponse = orderMapper.toOrderResponse(orderEntity);
-//
-//                List<OrderItemResponse> orderItemsResponse = new ArrayList<>();
-//
-//                if (orderResponse.getOrderItems() != null) {
-//                    for (OrderItemResponse orderItemResponse : orderResponse.getOrderItems()) {
-//                        ProductVariantResponse productVariantResponse = orderItemResponse.getProductVariant();
-//
-//                        if (productVariantResponse != null) {
-//                            ProductResponseDTO productResponse = getProductByVariant(productVariantResponse.getId());
-//                            productVariantResponse.setProduct(productResponse);
-//                        }
-//
-//                        OrderItemResponse updatedOrderItemResponse = OrderItemResponse.builder()
-//                                .orderItemId(orderItemResponse.getOrderItemId())
-//                                .order(orderItemResponse.getOrder())
-//                                .productVariant(productVariantResponse)
-//                                .quantity(orderItemResponse.getQuantity())
-//                                .subtotal(orderItemResponse.getSubtotal())
-//                                .status(orderItemResponse.getStatus())
-//                                .build();
-//
-//                        orderItemsResponse.add(updatedOrderItemResponse);
-//                    }
-//                }
-
-//                orderResponse.setOrderItems(orderItemsResponse);
-//                orderResponses.add(orderResponse);
-//            }
-//        }
-
-
-//    }
 
     /*PHÂN TRANG ORDER CHO USER */
-    public Map<String, Object> getUserOrders(Long userId, OrderStatus status, String keyword,
-                                             String orderId, int page, int size,
-                                             String sortBy, OrderStatus priorityStatus) {
+    public List<OrderResponse> getUserOrders(Long userId) {
         // Kiểm tra user tồn tại
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        Map<String, Object> map = new HashMap<>();
-        int p = Math.max(page - 1, 0);
-
-        // Chỉ kiểm tra orderId khi nó không null
-        if (orderId != null) {
-            orderRepository.findById(orderId)
-                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-        }
-
+        // Tạo Specification đơn giản chỉ lọc theo userId và không bị xóa
         Specification<OrderEntity> spec = Specification
                 .where(OrderSpecification.isNotDeleted())
-                .and(OrderSpecification.hasUserId(userId))
-                .and(OrderSpecification.hasStatus(status))
-                .and(OrderSpecification.hasKeyword(keyword))
-                .and(orderId != null ? OrderSpecification.hasOrderId(orderId) : null);
+                .and(OrderSpecification.hasUserId(userId));
 
-        Pageable pageable;
-        Page<OrderEntity> ordersPage;
+        // Sắp xếp theo updatedAt giảm dần
+        Sort sort = Sort.by(Sort.Direction.DESC, "updatedAt");
 
-        if (sortBy != null && sortBy.equals("updatedAt")) {
-            pageable = PageRequest.of(p, size, Sort.by("updatedAt").descending());
-            ordersPage = orderRepository.findAll(spec, pageable);
-        } else {
-            pageable = PageRequest.of(p, size);
-            spec = spec.and(OrderSpecification.orderByStatusPriorityAndDate(priorityStatus));
-            ordersPage = orderRepository.findAll(spec, pageable);
-        }
+        List<OrderEntity> orders = orderRepository.findAll(spec, sort);
 
-        List<OrderResponse> orderResponses = ordersPage.getContent().stream()
+        return orders.stream()
                 .map(orderEntity -> {
                     OrderResponse response = orderMapper.toOrderResponse(orderEntity);
 
@@ -609,15 +396,9 @@ public class OrderService {
                     return response;
                 })
                 .collect(Collectors.toList());
-
-        map.put("orders", orderResponses);
-        map.put("currentPage", ordersPage.getNumber() + 1);
-        map.put("totalItems", ordersPage.getTotalElements());
-        map.put("totalPages", ordersPage.getTotalPages());
-        map.put("pageSize", ordersPage.getSize());
-
-        return map;
     }
+
+
 
     /*PHÂN TRANG ORDER CHO ADMIN */
     /* PHẦN NÀY TÍCH HƠP THÊM BỘ LỌC THÔNG TIN THÔNG QUA Status và user */

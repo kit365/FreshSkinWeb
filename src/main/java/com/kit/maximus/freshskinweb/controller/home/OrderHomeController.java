@@ -57,18 +57,10 @@ public class OrderHomeController {
 
     //SHOW LIST ORDER THEO USER
     @GetMapping("/user/{userId}")
-    public ResponseAPI<Map<String, Object>> getUserOrders(
-            @PathVariable Long userId,
-            @RequestParam(required = false) OrderStatus status,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String orderId,
-            @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) OrderStatus priorityStatus,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        var result = orderService.getUserOrders(userId, status, keyword, orderId, page, size, sortBy, priorityStatus);
-        return ResponseAPI.<Map<String, Object>>builder()
+    public ResponseAPI<List<OrderResponse>> getUserOrders(
+            @PathVariable Long userId) {
+        List<OrderResponse> result = orderService.getUserOrders(userId);
+        return ResponseAPI.<List<OrderResponse>>builder()
                 .code(HttpStatus.OK.value())
                 .data(result)
                 .build();
