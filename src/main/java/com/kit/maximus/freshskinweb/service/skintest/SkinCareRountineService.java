@@ -76,7 +76,7 @@ public class SkinCareRountineService {
             List<Integer> usedPositions = new ArrayList<>();
 
             // Lấy max position hiện tại trong bảng rountine step, dùng cho việc tự động tăng position khi user không nhập
-            Integer currentMaxPosition = rountineStepRepository.findMaxPosition().orElse(0);
+            Integer currentMaxPosition = 0;
 
             // Set giá trị có trong rountine step vào biến Object tạm thời, để tí nữa set cho bảng rountine
             for (CreationRountineStepRequest stepRequest : request.getRountineStep()) {
@@ -310,11 +310,31 @@ public class SkinCareRountineService {
             // Lưu routine để có ID
             existingRoutine = skinCareRountineRepository.save(existingRoutine);
 
+            //Cập nhật lại position
+            List<Integer> usedPositions = new ArrayList<>();
+
+            Integer currentMaxPosition = 0;
+
             // Tạo và lưu các bước mới
             if (request.getRountineStep() != null) {
                 for (CreationRountineStepRequest stepRequest : request.getRountineStep()) {
                     // Tạo bước mới
                     RountineStepEntity newStep = rountineStepMapper.toRountineStepEntity(stepRequest);
+
+                    if(stepRequest.getPosition() != null) {
+                        // check position trùng nhau
+                        if (usedPositions.contains(stepRequest.getPosition())) {
+                            throw new AppException(ErrorCode.DUPLICATE_POSITION);
+                        }
+                        newStep.setPosition(stepRequest.getPosition());
+                        usedPositions.add(stepRequest.getPosition());
+                    } else {
+                        // Không nhập position thì tự động tăng ++
+                        currentMaxPosition++;
+                        newStep.setPosition(currentMaxPosition);
+                        usedPositions.add(currentMaxPosition);
+                    }
+
                     newStep.setSkinCareRountine(existingRoutine);
 
                     // Lưu bước mới để có ID
