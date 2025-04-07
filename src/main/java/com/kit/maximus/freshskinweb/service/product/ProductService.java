@@ -830,7 +830,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         Map<String, Object> map = new HashMap<>();
 
         // Lấy sản phẩm theo slug
-        ProductResponseDTO productCategoryResponses = productSearchRepository.findBySlug(slug, "ACTIVE", false);
+        ProductResponseDTO productCategoryResponses = productSearchRepository.findBySlug(slug, false);
 
         if (productCategoryResponses == null) {
             throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);

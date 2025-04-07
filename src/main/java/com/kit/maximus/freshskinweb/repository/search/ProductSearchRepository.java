@@ -517,6 +517,54 @@ public class ProductSearchRepository {
         }
     }
 
+    public ProductResponseDTO findBySlug(String slug, boolean deleted) {
+        try {
+            // Điều kiện tìm theo slug (exact match)
+            TermQuery termQuerySlug = new TermQuery.Builder()
+                    .field("slug.keyword")
+                    .value(FieldValue.of(slug))
+                    .build();
+
+            // Điều kiện tìm theo deleted (true/false)
+            TermQuery termQueryDeleted = new TermQuery.Builder()
+                    .field("deleted")
+                    .value(FieldValue.of(deleted))
+                    .build();
+
+            // Tạo danh sách query
+            List<Query> queries = new ArrayList<>();
+            queries.add(new Query.Builder().term(termQuerySlug).build());
+            queries.add(new Query.Builder().term(termQueryDeleted).build());
+
+            // Kết hợp tất cả các điều kiện bằng BoolQuery (AND)
+            BoolQuery boolQuery = new BoolQuery.Builder()
+                    .must(queries)
+                    .build();
+
+            Query searchQuery = new Query.Builder()
+                    .bool(boolQuery)
+                    .build();
+
+            SearchRequest searchRequest = new SearchRequest.Builder()
+                    .index("products")
+                    .query(searchQuery)
+                    .size(1)
+                    .build();
+
+            SearchResponse<ProductResponseDTO> response = openSearchClient.search(searchRequest, ProductResponseDTO.class);
+
+            // Kiểm tra kết quả
+            if (!response.hits().hits().isEmpty()) {
+                return response.hits().hits().getFirst().source();
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            log.error("Error while fetching product by slug", e);
+            return null;
+        }
+    }
+
 
     public List<ProductResponseDTO> getProductByCategoryIDs(List<Long> categoryIds, String status, boolean deleted, int size) {
         try {
