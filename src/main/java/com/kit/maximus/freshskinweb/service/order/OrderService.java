@@ -511,9 +511,6 @@ public class OrderService {
                         } else if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
                             orderEntity.setPaymentStatus(PaymentStatus.FAILED);
                         }
-                    }else {
-                        // Nếu thanh toán bằng QR => bên QR sẽ cập nhật trạng thái thanh toán
-                        orderEntity.setOrderStatus(orderStatusEnum);
                     }
 
                     if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
@@ -556,9 +553,6 @@ public class OrderService {
                     orderEntity.setPaymentStatus(PaymentStatus.FAILED);
                 }
                 // Nếu thanh toán bằng QR => bên QR sẽ cập nhật trạng thái thanh toán
-            } else {
-                log.info("thanh toán bằng QR ");
-                orderEntity.setOrderStatus(orderStatusEnum);
             }
             orderRepository.save(orderEntity);
 
