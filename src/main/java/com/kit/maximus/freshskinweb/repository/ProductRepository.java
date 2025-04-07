@@ -44,6 +44,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
     @Query("SELECT p.id FROM ProductEntity p " +
             "JOIN p.variants pv " +
             "JOIN OrderItemEntity oi ON oi.productVariant.id = pv.id " +
+            "WHERE p.status = 'ACTIVE' AND p.deleted = false " +
             "GROUP BY p.id " +
             "ORDER BY COUNT(oi) DESC")
     List<Long> findTop10SellingProducts(Pageable pageable);
