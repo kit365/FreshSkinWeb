@@ -501,7 +501,7 @@ public class OrderService {
                     // Nếu thanh toán bằng tiền mặt
 
                     if (orderEntity.getPaymentMethod().equals(PaymentMethod.CASH)) {
-                        orderEntity.setOrderStatus(orderStatusEnum);
+
 
                         // Nếu đơn hàng được giao => thanh toán thành công
                         if (orderStatusEnum.equals(OrderStatus.COMPLETED)) {
@@ -523,6 +523,7 @@ public class OrderService {
                                 orderItem.getQuantity()
                         ));
                     }
+                    orderEntity.setOrderStatus(orderStatusEnum);
                 }
                 orderRepository.saveAll(orderEntities);
 
@@ -537,14 +538,13 @@ public class OrderService {
 
     //Cập nhật trạng thái cho 1 đơn hàng
     public String update(String id, OrderRequest request) {
-        log.info(request.getOrderStatus().toString());
         String orderStatus = request.getOrderStatus();
 
         OrderStatus orderStatusEnum = getOrderStatus(orderStatus);
         OrderEntity orderEntity = orderRepository.findById(id).orElse(null);
 
         if (orderEntity != null) {
-
+            // Nếu thanh toán bằng QR => Khi đơn hang bị hủy => bên QR sẽ cập nhật trạng thái thanh toán(Refunded)
             if (orderEntity.getPaymentMethod().equals(PaymentMethod.QR)) {
                 if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
                     orderEntity.setPaymentStatus(PaymentStatus.REFUNDED);
@@ -553,7 +553,7 @@ public class OrderService {
 
             // Nếu thanh toán bằng tiền mặt
             if (orderEntity.getPaymentMethod().equals(PaymentMethod.CASH)) {
-                orderEntity.setOrderStatus(orderStatusEnum);
+
 
                 // Nếu đơn hàng được giao => thanh toán thành công
                 if (orderStatusEnum.equals(OrderStatus.COMPLETED)) {
@@ -562,15 +562,12 @@ public class OrderService {
                 } else if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
                     orderEntity.setPaymentStatus(PaymentStatus.FAILED);
                 }
-                // Nếu thanh toán bằng QR => bên QR sẽ cập nhật trạng thái thanh toán
             }
 
-
+            orderEntity.setOrderStatus(orderStatusEnum);
             orderRepository.save(orderEntity);
 
             if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
-
-
                 orderEntity.getOrderItems().forEach(orderItem -> productService.updateStockCancel(
                         orderItem.getProductVariant().getId(),
                         orderItem.getProductVariant().getProduct().getId(),
