@@ -1154,6 +1154,7 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         // Nếu không tìm thấy sản phẩm, trả về thông báo
         if (filteredProducts.isEmpty()) {
+            map.put("title", keyword);
             map.put("messageNotFound", "Rất tiếc, không tìm thấy sản phẩm từ " + keyword);
             return map;
         }
