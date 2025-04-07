@@ -93,7 +93,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
     // Nếu danh mục cha - con không có trong sản phẩm được order nhiều nhất, thì dựa theo top 5 position của sp đó
     @Query("SELECT p.id " +
             "FROM ProductEntity p " +
-            "JOIN p.categories c " +
+            "JOIN p.category c " +
             "WHERE LOWER(c.title) LIKE LOWER(CONCAT('%', :categoryTitle, '%')) " +
             "AND p.status = 'ACTIVE' " +
             "AND p.deleted = FALSE " +
