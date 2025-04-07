@@ -63,14 +63,29 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
     // Biến lưu toàn bộ các danh mục sản phẩm cho các bước trong lộ trình chăm sóc da
     private static final Map<String, String> CATEGORY_KEYWORDS = Map.of(
+            "tế bào chết", "Tẩy tế bào chết",
             "tẩy trang", "Nước tẩy trang",
             "rửa mặt", "Sữa rữa mặt",
             "toner", "Toner",
+            "đặc trị", "Đặc Trị",
             "serum", "Serum / Tinh Chất",
             "tinh chất", "Serum / Tinh Chất",
             "dưỡng ẩm", "Dưỡng ẩm",
             "chống nắng", "Chống nắng da mặt"
     );
+
+    // chưa chắc đã hoạt động đâu
+    public String checkKeywordInProductCategory(String keyword) {
+        List<ProductCategoryEntity> getCategories = productCategoryRepository.findAll();
+        if(!getCategories.isEmpty()){
+            for (ProductCategoryEntity category : getCategories) {
+                if (category.getTitle().toLowerCase().contains(keyword.toLowerCase())) {
+                    return category.getTitle();
+                }
+            }
+        }
+        return null;
+    }
 
     // Biến lưu toàn bộ loại da cho các bước trong lộ trình chăm sóc da
     private static final List<String> SKIN_TYPE_KEYWORDS = Arrays.asList(
@@ -1499,6 +1514,8 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
 
         // Xét chuỗi step, chỉ cần chứa keyword "tẩy trang, chống nắng"
         String categoryKeyword = extractCategoryKeyword(step);
+        log.info("keyword truyền vào: {}", step);
+        log.info("Lấy danh mục theo keyword: {}", categoryKeyword);
         if (categoryKeyword == null) {
             log.warn("Không tìm thấy danh mục ứng với step: {}", step);
             throw new AppException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND);
