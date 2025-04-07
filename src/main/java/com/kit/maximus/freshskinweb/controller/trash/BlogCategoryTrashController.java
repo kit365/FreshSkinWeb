@@ -30,7 +30,7 @@ public class BlogCategoryTrashController {
 
     @PostMapping("/create")
     public ResponseAPI<BlogCategoryResponse> createBlogCategory(@RequestBody CreateBlogCategoryRequest request){
-        String message = "Create blog category successfully";
+        String message = "Tạo danh mục bài viết thành công";
         var result = blogCategoryService.add(request);
         log.info("CREATE BLOG CATEGORY REQUEST");
         return ResponseAPI.<BlogCategoryResponse>builder().code(HttpStatus.OK.value()).message(message).build();
@@ -38,7 +38,7 @@ public class BlogCategoryTrashController {
 
     @PatchMapping("/edit/{id}")
     public ResponseAPI<BlogCategoryResponse> updateBlogCategory(@PathVariable Long id ,@RequestBody UpdateBlogCategoryRequest request){
-        String message = "Update blog category successfully";
+        String message = "Cập nhật danh mục bài viết thành công";
         BlogCategoryResponse result = blogCategoryService.update(id, request);
         log.info("UPDATE BLOG CATEGORY REQUEST");
         return ResponseAPI.<BlogCategoryResponse>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
@@ -59,8 +59,8 @@ public class BlogCategoryTrashController {
 
     @DeleteMapping("delete/{id}")
     public ResponseAPI<String> deleteBlogCategory(@PathVariable Long id) {
-        String message_succed = "Delete Blog Category successfull";
-        String message_failed = "Delete Blog Category failed";
+        String message_succed = "Xóa danh mục bài viết thành công";
+        String message_failed = "Xóa danh mục bài viết thất bại";
         boolean result = blogCategoryService.delete(id);
         if (result) {
             log.info(" Blog Category deleted successfully!");
@@ -72,8 +72,8 @@ public class BlogCategoryTrashController {
 
     @PatchMapping("deleteT/{id}")
     public ResponseAPI<String> deleteTBlogCategory(@PathVariable Long id) {
-        String message_succed = "Delete Blog Category successfull";
-        String message_failed = "Delete Blog Category failed";
+        String message_succed = "Xóa danh mục bài viết thành công";
+        String message_failed = "Xóa danh mục bài viết thất bại";
         boolean result = blogCategoryService.deleteTemporarily(id);
         if (result) {
             log.info(" Blog Category deleted successfully!");
@@ -85,8 +85,8 @@ public class BlogCategoryTrashController {
 
     @PatchMapping("restore/{id}")
     public ResponseAPI<String> restoreBlogCategory(@PathVariable Long id) {
-        String message_succed = "Restore BlogCategory successfull";
-        String message_failed = "Restore BlogCategory failed";
+        String message_succed = "Khôi phục danh mục bài viết thành công";
+        String message_failed = "Khôi phục danh mục bài viết thất bại";
         var result = blogCategoryService.restore(id);
         if (result) {
             log.info(" BlogCategory Restored successfully!");
@@ -131,8 +131,8 @@ public class BlogCategoryTrashController {
 
         List<Long> ids = (List<Long>) request.get("id");
 
-        String message_succed = "delete BlogCategory successfull";
-        String message_failed = "delete BlogCategory failed";
+        String message_succed = "Xóa danh mục bài viết thành công";
+        String message_failed = "Xóa danh mục bài viết thất bại";
         var result = blogCategoryService.delete(ids);
         if (result) {
             log.info("BlogCategory delete successfully");

@@ -24,9 +24,7 @@ public class BlogUpdateRequest implements Serializable {
     Long user;
     List<MultipartFile> newImg;
     List<String> thumbnail;
-//    Integer position;
     boolean featured;
-//    String status;
-    //    BlogCategoryResponse blogCategory;
     Long categoryID;
+    String status;
 }

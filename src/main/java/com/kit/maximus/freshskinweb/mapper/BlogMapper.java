@@ -27,6 +27,7 @@ public interface BlogMapper {
     @Mapping(target = "blogCategory", ignore = true)
     @Mapping(target = "thumbnail", ignore = true)
     @Mapping(target = "user", ignore = true)
+    @Mapping(target = "status", source = "status")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateBlogEntity(@MappingTarget BlogEntity entity, BlogUpdateRequest request);
 }
