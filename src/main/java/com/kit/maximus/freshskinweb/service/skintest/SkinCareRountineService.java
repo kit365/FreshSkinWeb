@@ -3,10 +3,7 @@ package com.kit.maximus.freshskinweb.service.skintest;
 import com.kit.maximus.freshskinweb.dto.request.rountine_step.CreationRountineStepRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.SkinCareRountineRequest;
 import com.kit.maximus.freshskinweb.dto.request.skin_care_rountine.UpdationSkinCareRountineRequest;
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
-import com.kit.maximus.freshskinweb.dto.response.ProductVariantResponse;
-import com.kit.maximus.freshskinweb.dto.response.RountineStepResponse;
-import com.kit.maximus.freshskinweb.dto.response.SkinCareRountineResponse;
+import com.kit.maximus.freshskinweb.dto.response.*;
 import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
@@ -163,6 +160,12 @@ public class SkinCareRountineService {
                                             return variantResponse;
                                         })
                                         .collect(Collectors.toList()));
+
+                                ProductBrandResponse brandResponse = new ProductBrandResponse();
+                                brandResponse.setId(product.getBrand().getId());
+                                brandResponse.setTitle(product.getBrand().getTitle());
+                                productDTO.setBrand(brandResponse);
+
                                 return productDTO;
                             })
                             .collect(Collectors.toList());
@@ -205,6 +208,12 @@ public class SkinCareRountineService {
                                             return variantResponse;
                                         })
                                         .collect(Collectors.toList()));
+
+                                ProductBrandResponse brandResponse = new ProductBrandResponse();
+                                brandResponse.setId(product.getBrand().getId());
+                                brandResponse.setTitle(product.getBrand().getTitle());
+                                productDTO.setBrand(brandResponse);
+
                                 return productDTO;
                             })
                             .collect(Collectors.toList());
@@ -235,6 +244,8 @@ public class SkinCareRountineService {
                         List<ProductResponseDTO> productResponses = step.getProduct().stream()
                                 .map(product -> {
                                     ProductResponseDTO productDTO = productMapper.productToProductResponseDTO(product);
+
+                                    // map data từ variant qua product bằng stream
                                     productDTO.setVariants(product.getVariants().stream()
                                             .map(variant -> {
                                                 ProductVariantResponse variantResponse = new ProductVariantResponse();
@@ -245,6 +256,12 @@ public class SkinCareRountineService {
                                                 return variantResponse;
                                             })
                                             .collect(Collectors.toList()));
+
+                                    // map data từ brand qua product
+                                    ProductBrandResponse brandResponse = new ProductBrandResponse();
+                                    brandResponse.setId(product.getBrand().getId());
+                                    brandResponse.setTitle(product.getBrand().getTitle());
+                                    productDTO.setBrand(brandResponse);
                                     return productDTO;
                                 })
                                 .collect(Collectors.toList());
