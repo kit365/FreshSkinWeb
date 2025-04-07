@@ -226,6 +226,16 @@ public class VnPayService implements PaymentService {
             orderOpt.setPaymentStatus(PaymentStatus.FAILED);
             orderOpt.setOrderStatus(OrderStatus.CANCELED);
             orderService.saveOrder(orderOpt);
+
+            orderOpt.getOrderItems().forEach(orderItem -> {
+                if(orderItem.getProductVariant() != null) {
+                    productService.updateStockCancel(
+                            orderItem.getProductVariant().getId(),
+                            orderItem.getProductVariant().getProduct().getId(),
+                            orderItem.getQuantity()
+                    );
+                }
+            });
             return null;
         }
     }
