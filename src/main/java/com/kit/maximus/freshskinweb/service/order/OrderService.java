@@ -28,6 +28,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -59,6 +60,7 @@ public class OrderService {
     ApplicationEventPublisher eventPublisher;
     ProductService productService;
 
+    @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     @Transactional
     public OrderIdResponse addOrder(OrderRequest orderRequest) {
         OrderEntity order = orderMapper.toOrderEntity(orderRequest);
@@ -492,6 +494,7 @@ public class OrderService {
         return map;
     }
 
+    @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     //    Cập nhật trạng thái cho đơn hàng được chọn
     public String update(List<String> id, String orderStatus) {
         try {
@@ -538,6 +541,7 @@ public class OrderService {
         }
     }
 
+    @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     //Cập nhật trạng thái cho 1 đơn hàng
     public String update(String id, OrderRequest request) {
         String orderStatus = request.getOrderStatus();
