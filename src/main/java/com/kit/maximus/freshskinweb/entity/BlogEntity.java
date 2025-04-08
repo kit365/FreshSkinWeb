@@ -36,7 +36,7 @@ public class BlogEntity extends AbstractEntity {
     @JsonIgnore
     UserEntity user;
 
-    @Column(name = "content",columnDefinition = "MEDIUMTEXT")
+    @Column(name = "content", columnDefinition = "MEDIUMTEXT")
     String content;
 
     @ElementCollection(fetch = FetchType.EAGER)
