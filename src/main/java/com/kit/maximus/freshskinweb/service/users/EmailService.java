@@ -1,9 +1,7 @@
 package com.kit.maximus.freshskinweb.service.users;
 
 import com.kit.maximus.freshskinweb.config.MailConfig;
-import com.kit.maximus.freshskinweb.entity.OrderEntity;
-import com.kit.maximus.freshskinweb.entity.SettingEntity;
-import com.kit.maximus.freshskinweb.entity.UserEntity;
+import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.repository.OrderRepository;
@@ -21,6 +19,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -49,12 +48,23 @@ public class EmailService {
         return statusMap;
     }
 
+    @Transactional
     @Async
     public void sendOrderConfirmationEmail(String orderId) {
         try {
             OrderEntity order = orderRepository.findByOrderIdWithDetails(orderId)
                     .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
+            // Có công dụng đánh thức thumbnail
+            //VD:
+            //List<Image> thumbnails = product.getThumbnail(); // KHÔNG load đâu nha
+            //int count = thumbnails.size();                  // Hibernate: "à, được rồi, tao đi fetch cho mày"
+            for (OrderItemEntity item : order.getOrderItems()) {
+                ProductVariantEntity productVariants = item.getProductVariant();
+                if (productVariants != null) {
+                    productVariants.getProduct().getThumbnail().size();// lazy load
+                }
+            }
             SettingEntity setting = settingRepository.findById(1L)
                     .orElseThrow(() -> new AppException(ErrorCode.SETTING_NOT_FOUND));
 

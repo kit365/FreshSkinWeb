@@ -55,7 +55,6 @@ public class OrderService {
     VoucherMapper voucherMapper;
     ApplicationEventPublisher eventPublisher;
     ProductService productService;
-    SkinCareRountineService rountineService;
 
     @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     @Transactional
@@ -68,10 +67,9 @@ public class OrderService {
 
         if (orderRequest.getUserId() != null) {
             user = userRepository.findById(orderRequest.getUserId()).orElse(null);
-            order.setUser(user);
-        } else {
-            order.setUser(user);
         }
+        order.setUser(user);
+
         // Tạo orderId duy nhất
         String orderId = generateOrderCode();
         order.setOrderId(orderId);
@@ -173,6 +171,11 @@ public class OrderService {
 
         OrderEntity savedOrder = orderRepository.save(order);
 
+//        //Gửi mail bị lỗi do thumbnail tại product đang ở lazy, chưa được gọi nên không lấy được ảnh => gây lỗi NullPointerException
+//        // Vì vậy cần phải ép gọi thumbnail trước khi gửi mail
+//        productService.initializeProductThumbnail(order);
+
+
         if (!savedOrder.getOrderItems().isEmpty()) {
             savedOrder.getOrderItems().forEach(orderItem -> {
                 if (orderItem.getProductVariant() != null) {
@@ -195,6 +198,8 @@ public class OrderService {
         }
 
         System.out.println(order.getOrderId());
+
+
         emailService.sendOrderConfirmationEmail(order.getOrderId());
 
         return new OrderIdResponse(savedOrder.getOrderId());
