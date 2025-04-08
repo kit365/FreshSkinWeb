@@ -9,14 +9,12 @@ import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.OrderItemMapper;
 import com.kit.maximus.freshskinweb.mapper.OrderMapper;
 import com.kit.maximus.freshskinweb.mapper.VoucherMapper;
-import com.kit.maximus.freshskinweb.repository.OrderRepository;
-import com.kit.maximus.freshskinweb.repository.ProductVariantRepository;
-import com.kit.maximus.freshskinweb.repository.UserRepository;
-import com.kit.maximus.freshskinweb.repository.VoucherRepository;
+import com.kit.maximus.freshskinweb.repository.*;
 import com.kit.maximus.freshskinweb.repository.search.ProductSearchRepository;
 import com.kit.maximus.freshskinweb.service.product.ProductService;
 import com.kit.maximus.freshskinweb.service.product.VoucherService;
 import com.kit.maximus.freshskinweb.service.notification.NotificationEvent;
+import com.kit.maximus.freshskinweb.service.skintest.SkinCareRountineService;
 import com.kit.maximus.freshskinweb.service.users.EmailService;
 import com.kit.maximus.freshskinweb.specification.OrderSpecification;
 import com.kit.maximus.freshskinweb.utils.DiscountType;
@@ -52,12 +50,12 @@ public class OrderService {
     OrderMapper orderMapper;
     ProductVariantRepository productVariantRepository;
     EmailService emailService;
-    OrderItemMapper orderItemMapper;
     VoucherRepository voucherRepository;
     VoucherService voucherService;
     VoucherMapper voucherMapper;
     ApplicationEventPublisher eventPublisher;
     ProductService productService;
+    SkinCareRountineService rountineService;
 
     @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     @Transactional
@@ -173,6 +171,8 @@ public class OrderService {
 
         }
 
+        // Cập nhật lại sản phẩm gợi ý trong routine
+        rountineService.refreshBestSellerProductsForAllRoutineSteps();
 
         OrderEntity savedOrder = orderRepository.save(order);
 
@@ -196,10 +196,15 @@ public class OrderService {
             notification.setMessage("Đơn hàng " + order.getOrderId() + " đặt hàng thành công");
             eventPublisher.publishEvent(new NotificationEvent(this, notification));
         }
+
+        System.out.println(order.getOrderId());
         emailService.sendOrderConfirmationEmail(order.getOrderId());
 
         return new OrderIdResponse(savedOrder.getOrderId());
     }
+
+
+
 
     public void processOrder(String orderId) {
         emailService.sendOrderConfirmationEmail(orderId); // Gọi từ bên ngoài
