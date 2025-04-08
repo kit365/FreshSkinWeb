@@ -197,6 +197,8 @@ public class OrderService {
             notification.setMessage("Đơn hàng " + order.getOrderId() + " đặt hàng thành công");
             eventPublisher.publishEvent(new NotificationEvent(this, notification));
         }
+
+        System.out.println(order.getOrderId());
         emailService.sendOrderConfirmationEmail(order.getOrderId());
 
         return new OrderIdResponse(savedOrder.getOrderId());

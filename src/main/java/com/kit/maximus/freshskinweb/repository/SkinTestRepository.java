@@ -13,8 +13,16 @@ import java.util.List;
 public interface SkinTestRepository extends JpaRepository<SkinTestEntity, Long>, JpaSpecificationExecutor<SkinTestEntity> {
     SkinTestEntity findByUser(UserEntity user);
 
-    @Query("SELECT st.skinType.type as skinType, COUNT(st) as count " +
-            "FROM SkinTestEntity st " +
-            "GROUP BY st.skinType.type")
-    List<Object[]> countBySkinTypes();
+//    @Query("SELECT st.skinType.type as skinType, COUNT(st) as count " +
+//            "FROM SkinTestEntity st " +
+//            "GROUP BY st.skinType.type")
+//    List<Object[]> countBySkinTypes();
+
+ @Query(value = "SELECT skin_type as skinType, COUNT(skin_type) as count " +
+         "FROM `user` " +
+         "WHERE role_id is null AND skin_type is not null " +
+         "GROUP BY skin_type", nativeQuery = true)
+ List<Object[]> countBySkinTypes();
+
+
 }
