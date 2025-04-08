@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -52,17 +54,16 @@ public class EmailService {
     @Async
     public void sendOrderConfirmationEmail(String orderId) {
         try {
+            log.info("Sending order confirmation email for order ID: {}", orderId);
             OrderEntity order = orderRepository.findByOrderIdWithDetails(orderId)
                     .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+            log.info("Order status found: {}", order.getOrderStatus().toString());
 
-            // Có công dụng đánh thức thumbnail
-            //VD:
-            //List<Image> thumbnails = product.getThumbnail(); // KHÔNG load đâu nha
-            //int count = thumbnails.size();                  // Hibernate: "à, được rồi, tao đi fetch cho mày"
+            // Cơ chế này giúp đánh thức thumnail đang trong trạng thái lazy load dậy để hoạt động
             for (OrderItemEntity item : order.getOrderItems()) {
                 ProductVariantEntity productVariants = item.getProductVariant();
                 if (productVariants != null) {
-                    productVariants.getProduct().getThumbnail().size();// lazy load
+                    productVariants.getProduct().getThumbnail().size();// đánh thức thumbnail để bắt đầu trạng thái làm việc
                 }
             }
             SettingEntity setting = settingRepository.findById(1L)
@@ -92,12 +93,12 @@ public class EmailService {
             }
             context.setVariable("createdAtFormatted", formattedDate);
 
+            String content = templateEngine.process("order-confirmation", context);
+            helper.setText(content, true);
+
             ClassPathResource imageResource = new ClassPathResource("static/images/img.png");
             helper.addInline("logo", imageResource);
 
-
-            String content = templateEngine.process("order-confirmation", context);
-            helper.setText(content, true);
             mailSender.send(message);
         } catch (MessagingException e) {
             throw new AppException(ErrorCode.EMAIL_SEND_ERROR);
