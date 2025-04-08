@@ -64,6 +64,9 @@ public class OrderService {
         OrderEntity order = orderMapper.toOrderEntity(orderRequest);
 
         UserEntity user = null;
+
+        // Kiểm tra xem người dùng có tồn tại không
+
         if (orderRequest.getUserId() != null) {
             user = userRepository.findById(orderRequest.getUserId()).orElse(null);
             order.setUser(user);
@@ -128,7 +131,6 @@ public class OrderService {
             orderItems.add(orderItem);
 
             totalAmount += itemRequest.getQuantity(); // Đảm bảo kiểu số nguyên
-//            totalPrice = totalPrice.add(orderItem.getSubtotal());
         }
 
         order.setTotalAmount(totalAmount);

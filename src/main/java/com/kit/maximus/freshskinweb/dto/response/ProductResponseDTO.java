@@ -29,7 +29,6 @@ public class ProductResponseDTO implements Serializable {
     List<ProductCategoryResponse> category;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     ProductBrandResponse brand;
-    //    String DiscountID;
     String title;
     String slug;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)

@@ -61,25 +61,4 @@ public class ProductCategoryEntity extends AbstractEntity {
             mappedBy = "parent")
     List<ProductCategoryEntity> child = new ArrayList<>();
 
-
-//    public void createProduct(ProductEntity product) {
-//        products.add(product);
-//        product.setCategory(this);
-//    }
-//
-//    public void removeProduct(ProductEntity product) {
-//        products.remove(product);
-//        product.setCategory(null);
-//    }
-//
-//    public void createCategory(ProductCategoryEntity productCategory) {
-//        productCategory.setParent(this);
-//        child.add(productCategory);
-//    }
-//
-//    public void removeCategory(ProductCategoryEntity productCategory) {
-//        child.remove(productCategory);
-//        productCategory.setParent(null);
-//    }
-
 }
