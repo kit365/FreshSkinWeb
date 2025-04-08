@@ -629,6 +629,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         return productCategoryFeature;
     }
 
+    // Hàm này để ép Hibernate load dữ liệu ngay lập tức, thay vì chờ truy cập mới load.
     private void initializeLazyCollections(ProductCategoryEntity category) {
         if (category.getChild() != null) {
             Hibernate.initialize(category.getChild());
@@ -663,7 +664,7 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
     @Transactional(readOnly = true)
     @Cacheable("filteredCategories")
-    //Hàm này dùng để lấy ra n danh mục tùy chọn, số lượng n sản phẩm
+// Hàm này dùng để lấy ra n danh mục tùy chọn, mỗi danh mục giới hạn n sản phẩm
     public List<ProductCategoryResponse> getFilteredCategories(List<String> titles, int limit) {
         List<ProductCategoryResponse> result = new ArrayList<>();
 
@@ -671,31 +672,29 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                 .and(filterByStatus(Status.ACTIVE))
                 .and(isNotDeleted());
 
+        List<ProductCategoryEntity> categories = productCategoryRepository.findAll(
+                specification,
+                Sort.by(Sort.Direction.DESC, "position")
+        );
 
-        List<ProductCategoryEntity> categories = productCategoryRepository.findAll(specification, Sort.by(Sort.Direction.DESC, "position"));
-
+        //khởi tạo các quan hệ LAZY trong entity ProductCategoryEntity
         categories.forEach(this::initializeLazyCollections);
 
-
         result = mapToCategoryResponse(categories);
-
-        result.removeIf(category ->
-                category.getProducts().stream()
-                        .anyMatch(product -> product.getStatus().equalsIgnoreCase("INACTIVE") || product.isDeleted())
-        );
 
         result.forEach(category -> {
             category.setDescription(null);
 
-            List<ProductResponseDTO> limitedProducts = category.getProducts()
-                    .stream()
+            // Lọc bỏ sản phẩm không hợp lệ
+            List<ProductResponseDTO> validProducts = category.getProducts().stream()
+                    .filter(product -> product.getStatus().equalsIgnoreCase("ACTIVE") && !product.isDeleted())
                     .sorted(Comparator.comparing(ProductResponseDTO::getPosition,
-                            Comparator.nullsLast(Comparator.reverseOrder()))) //nhung thang null se nam o cuoi
+                            Comparator.nullsLast(Comparator.reverseOrder())))
                     .limit(limit)
                     .collect(Collectors.toList());
 
-            category.setProducts(limitedProducts);
-            limitedProducts.forEach(product -> {
+            // Xóa thông tin chi tiết sản phẩm không cần thiết
+            validProducts.forEach(product -> {
                 product.setDescription(null);
                 product.setSkinTypes(null);
                 product.setIngredients(null);
@@ -703,7 +702,12 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
                 product.setSkinIssues(null);
                 product.setUsageInstructions(null);
             });
+
+            category.setProducts(validProducts);
         });
+
+        // Xóa danh mục nếu không còn sản phẩm hợp lệ
+        result.removeIf(category -> category.getProducts().isEmpty());
 
         return result;
     }
