@@ -197,6 +197,7 @@ public class OrderService {
             notification.setMessage("Đơn hàng " + order.getOrderId() + " đặt hàng thành công");
             eventPublisher.publishEvent(new NotificationEvent(this, notification));
         }
+        emailService.sendOrderConfirmationEmail(order.getOrderId());
 
         return new OrderIdResponse(savedOrder.getOrderId());
     }
@@ -559,8 +560,6 @@ public class OrderService {
 
             // Nếu thanh toán bằng tiền mặt
             if (orderEntity.getPaymentMethod().equals(PaymentMethod.CASH)) {
-
-
                 // Nếu đơn hàng được giao => thanh toán thành công
                 if (orderStatusEnum.equals(OrderStatus.COMPLETED)) {
                     orderEntity.setPaymentStatus(PaymentStatus.PAID);
@@ -581,6 +580,7 @@ public class OrderService {
                 ));
             }
 
+            emailService.sendOrderConfirmationEmail(id);
             return "Cập nhật trạng thái đơn hàng thành công";
         }
         return "Không tìm thấy đơn hàng để cập nhật";

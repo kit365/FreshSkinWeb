@@ -16,6 +16,7 @@ import com.kit.maximus.freshskinweb.service.notification.NotificationEvent;
 import com.kit.maximus.freshskinweb.service.notification.NotificationService;
 import com.kit.maximus.freshskinweb.service.order.OrderService;
 import com.kit.maximus.freshskinweb.service.product.ProductService;
+import com.kit.maximus.freshskinweb.service.users.EmailService;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
 import com.kit.maximus.freshskinweb.utils.PaymentStatus;
@@ -50,6 +51,7 @@ public class VnPayService implements PaymentService {
 
     ProductService productService;
 
+    EmailService emailService;
 
     private static String getRandomNumber(int len) {
         Random rnd = new Random();
@@ -201,23 +203,14 @@ public class VnPayService implements PaymentService {
             orderOpt.setOrderStatus(OrderStatus.PENDING);
             orderService.saveOrder(orderOpt);
 
-//            if(!orderOpt.getOrderItems().isEmpty()) {
-//                orderOpt.getOrderItems().forEach(orderItem -> {
-//                    if(orderItem.getProductVariant() != null) {
-//                        productService.updateStock(
-//                                orderItem.getProductVariant().getId(),
-//                                orderItem.getProductVariant().getProduct().getId(),
-//                                orderItem.getQuantity()
-//                        );
-//                    }
-//                });
-//            }
+
             if (orderOpt.getPaymentMethod() != null && orderOpt.getPaymentMethod().equals(PaymentMethod.QR)) {
                 NotificationEntity notification = new NotificationEntity();
                 notification.setUser(orderOpt.getUser());
                 notification.setOrder(orderOpt);
                 notification.setMessage("Đặt hàng thành công");
                 eventPublisher.publishEvent(new NotificationEvent(this, notification));
+                emailService.sendOrderConfirmationEmail(orderOpt.getOrderId());
             }
 
 
