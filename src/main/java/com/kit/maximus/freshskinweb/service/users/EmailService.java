@@ -157,7 +157,7 @@ public class EmailService {
             helper.setText(htmlContent, true);
 
             // Add logo
-            ClassPathResource imageResource = new ClassPathResource("static/images/logo.png");
+            ClassPathResource imageResource = new ClassPathResource("static/images/img.png");
             helper.addInline("logo", imageResource);
 
             mailSender.send(message);
