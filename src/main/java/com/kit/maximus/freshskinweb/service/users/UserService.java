@@ -543,17 +543,6 @@ public class UserService {
         }
     }
 
-    //    public boolean deleteProductVariants(Long id, ProductVariantEntity productVariantEntities) {
-//        ProductEntity productEntity = getProductEntityById(id);
-//
-//        for (ProductVariantEntity request : productEntity.getVariants()) {
-//            if (request.getId().equals(productVariantEntities.getId())) {
-//                productEntity.removeProductVariant(productVariantEntities);
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 
     @Transactional
     public Boolean deleteOrder(Long userId, Long orderId) {

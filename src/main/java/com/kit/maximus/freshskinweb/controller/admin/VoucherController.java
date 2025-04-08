@@ -70,5 +70,4 @@ public class VoucherController {
         List<VoucherResponse> voucher = voucherService.getValidVouchers();
         return ResponseAPI.<List<VoucherResponse>>builder().code(HttpStatus.OK.value()).message(message).data(voucher).build();
     }
-
 }

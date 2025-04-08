@@ -42,6 +42,4 @@ public class RoleEntity extends AbstractEntity {
     @JsonManagedReference
     List<UserEntity> user = new ArrayList<>();
 
-
-
 }

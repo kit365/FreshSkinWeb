@@ -370,11 +370,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
 
         productCategoryResponse.setChild(null);
-//        if(productCategoryEntity.getParent() != null) {
-//            String parentTitle = productCategoryEntity.getParent().getTitle();
-//            productCategoryResponse.getParent().setTitle(parentTitle);
-//        }
-
         return productCategoryResponse;
     }
 
@@ -398,23 +393,11 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         Map<String, Object> map = new HashMap<>();
         ProductCategoryEntity productCategoryEntity = getCategoryById(id);
 
-//        ProductCategoryResponse productCategoryResponse = new ProductCategoryResponse();
-
-
         ProductCategoryResponse productCategoryResponse = productCategoryMapper.productCategoryToProductCategoryResponseDTO(productCategoryEntity);
         productCategoryResponse.setChild(null);
         String title = productCategoryEntity.getParent().getTitle();
         map.put("productCategoryResponse", productCategoryResponse);
         map.put("titleParent", title);
-
-
-//        response.setProductIDs(getProductIDs(productCategoryEntity));
-//
-//        productCategoryEntity.getChild().forEach(childCategoryEntity -> {
-//            ProductCategoryResponse parentCategoryResponse = new ProductCategoryResponse();
-//            parentCategoryResponse.setTitle(childCategoryEntity.getTitle());
-
-//        });
 
         return map;
     }
@@ -452,9 +435,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
 
         Page<ProductCategoryResponse> list = productCategoryEntities.map(productCategoryMapper::productCategoryToProductCategoryResponseDTO);
 
-//        if (!list.hasContent()) {
-//            return null;
-//        }
 
         map.put("product_category", list.getContent());
         map.put("currentPage", list.getNumber() + 1);
@@ -496,10 +476,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
         }
 
         Page<ProductCategoryResponse> list = productCategoryEntities.map(productCategoryMapper::productCategoryToProductCategoryResponseDTO);
-
-//        if (!list.hasContent()) {
-//            return null;
-//        }
 
         map.put("product_category", list.getContent());
         map.put("currentPage", list.getNumber() + 1);
@@ -727,13 +703,6 @@ public class ProductCategoryService implements BaseService<ProductCategoryRespon
             response.setImage(productCategoryEntity.getImage());
             if (productCategoryEntity.getChild() != null) {
                 productCategoryEntity.getChild().forEach(child -> {
-//                    if(child.getProducts() != null) {
-//                        child.getProducts().forEach(product -> {
-//                            ProductCategoryResponse childResponse = new ProductCategoryResponse();
-//                            childResponse.setId(product.getId());
-//                            childResponse.setTitle(product.getTitle());
-//                        });
-//                    }
                     ProductCategoryResponse responseChild = new ProductCategoryResponse();
                     responseChild.setId(child.getId());
                     responseChild.setTitle(child.getTitle());

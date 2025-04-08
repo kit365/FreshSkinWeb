@@ -12,13 +12,11 @@ import java.util.Map;
  * @param <ID> Kiểu dữ liệu của ID (Long, String, UUID,...)
  */
 public interface BaseService<T, R, U, ID> {
-
     /** CRUD operations with request objects **/
     boolean add(R request);
     T update(ID id, U request);
     String update(List<ID> id , String status);
 
-//    UserResponseDTO addOrder(Long id, CreateUserRequest request);
 
     /** Operations that require only ID **/
     boolean delete(ID id);
@@ -33,5 +31,4 @@ public interface BaseService<T, R, U, ID> {
 
     Map<String, Object> getTrash(int page, int size, String sortKey, String sortDirection,String status, String keyword);
 
-//    UserResponseDTO addOrder(Long id, OrderRequest request);
 }

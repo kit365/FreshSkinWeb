@@ -10,7 +10,6 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdationNotificationRequest {
-
     Long id;
     Long userId;
     String orderId;

@@ -14,7 +14,6 @@ import java.util.List;
 @ToString
 @Builder
 public class CreationQuestionGroupRequest {
-
     String title;
 
     String description;

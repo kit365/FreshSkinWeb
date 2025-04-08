@@ -25,7 +25,6 @@ public class RoleResponseDTO {
     List<String> permission;
 
     boolean deleted;
-
     String status;
 
     @JsonFormat(pattern = "yyyy-MM-dd")

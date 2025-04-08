@@ -20,7 +20,6 @@ import java.util.Date;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class VoucherRequest {
-
     @NotBlank(message = "Mã voucher không được để trống")
     String name;
 

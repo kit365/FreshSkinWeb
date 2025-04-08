@@ -15,9 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 public class DiscountRequest implements Serializable {
 
-//    @NotBlank(message = "DISCOUNT_NOT_NULL")
-//    String discountId;
-
     @Size(max = 255, message = "NAME_INVALID")
     String name;
 

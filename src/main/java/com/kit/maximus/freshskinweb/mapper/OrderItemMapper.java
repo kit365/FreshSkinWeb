@@ -7,12 +7,10 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface OrderItemMapper {
-
     @Mapping(target = "order", ignore = true)
     @Mapping(target = "productVariant", ignore = true)
     OrderItemEntity toOrderItemEntity(OrderItemRequest request);
 
-//    @Mapping(target = "discountPrice", source = "discountPrice")
     OrderItemResponse toOrderItemResponse(OrderItemEntity orderItemEntity);
 
     @Mapping(target = "order", ignore = true)

@@ -13,7 +13,6 @@ import java.util.List;
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AddPermissionRequest implements Serializable {
-
     Long roleId;
     List<String> permission;
 }

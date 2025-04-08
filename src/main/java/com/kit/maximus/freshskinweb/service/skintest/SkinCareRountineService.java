@@ -395,7 +395,6 @@ public class SkinCareRountineService {
                 });
             }
         }
-
         // Now safe to delete routine and its steps
         skinCareRountineRepository.delete(routine);
         return true;

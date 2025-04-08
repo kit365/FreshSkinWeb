@@ -222,7 +222,6 @@ public enum ErrorCode {
     STARTDATE_INVALID(400, "Ngày bắt đầu phải từ hiện tại trở đi"),
     ENDDATE_INVALID_MUST_AFTER_STARTDATE(400, "Ngày kết thúc phải sau ngày bắt đầu"),
 
-
     //system
         INVALID_INPUT(400,"Tham số truyền vào không đúng");
 

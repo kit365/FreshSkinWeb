@@ -39,18 +39,6 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
         return true;
     }
 
-    //    public boolean addPermission(Long id, CreateRoleRequest request) {
-//        var role = roleRepository.findById(id)
-//                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
-//        List<String> currentPermissions = role.getPermission();
-//        currentPermissions.addAll(request.getPermission());
-//        role.setPermission(currentPermissions);
-//
-//        roleRepository.save(role);
-//        System.out.println("Request permissions: " + request.getPermission());
-//        System.out.println("currentPermissions: " + currentPermissions);
-//        return true;
-//    }
     public boolean addPermission(List<AddPermissionRequest> request) {
         List<Long> id = request.stream()
                 .map(AddPermissionRequest::getRoleId)
@@ -78,7 +66,6 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
     public RoleResponseDTO getPermissionById(Long id) {
         RoleEntity roleEntity = roleRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
         RoleResponseDTO response = roleMapper.toRoleResponseDTO(roleEntity);
-//        response.setPermission(roleEntity.getPermission());
         return response;
     }
 
@@ -164,62 +151,6 @@ public class RoleService implements BaseService<RoleResponseDTO, CreateRoleReque
     }
 
 
-//
-//    //Method: Xóa tạm thời nhiều role => Status thành false, deleted thành true
-//    @Override
-//    public boolean deleteTemporarily(List<Long> request) {
-//        List<RoleEntity> roles = new ArrayList<>();
-//        for(RoleEntity list : roles ){
-//            list.setDeleted(true);
-//            list.setStatus(Status.INACTIVE);
-//        }
-//        roleRepository.saveAll(roles);
-//
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean restore(Long id) {
-//        return false;
-//    }
-//
-//    @Override
-//    public boolean restore(List<Long> id) {
-//        return false;
-//    }
-//
-//    @Override
-//    public Map<String, Object> getAll(int page, int size, String sortKey, String sortDirection, String status, String keyword) {
-//        return Map.of();
-//    }
-//
-//    public RoleResponseDTO update(Long id, UpdateRoleRequest request) {
-//        RoleEntity roleEntity = getRoleEntityById(id);
-//
-//        log.info("Tìm thấy user: {}", id);
-//
-//        // Cập nhật thông tin từ request (trừ password)
-//        roleMapper.updateRole(roleEntity, request);
-//
-//        // Chỉ mã hóa mật khẩu nếu có thay đổi
-//
-//        log.info("Cập nhật role id: {}", id);
-//        return roleMapper.toRoleResponseDTO(roleRepository.save(roleEntity));
-//    }
-//
-//    @Override
-//    public boolean update(List<Long> id, String status) {
-//        return false;
-//    }
-//
-//    public List<RoleResponseDTO> getAllRoles() {
-//        return roleRepository.findAll().stream().map(roleMapper::toRoleResponseDTO)
-//                .collect(Collectors.toList());
-//    }
-//
-//    public List<RoleResponseDTO> getRoleByRolename(String rolename) {
-//        return roleMapper.toRoleResponseDTO(roleRepository.searchByKeyword(rolename));
-//    }
 
 
 }

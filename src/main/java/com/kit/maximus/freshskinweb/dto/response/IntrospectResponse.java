@@ -1,7 +1,6 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.kit.maximus.freshskinweb.entity.UserEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

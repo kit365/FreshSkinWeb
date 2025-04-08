@@ -16,7 +16,6 @@ import java.util.List;
 
 @Component
 public class SkinCareRoutineSpecification {
-
     public static Specification<SkinCareRoutineEntity> filterByStatus(Status status) {
         return (root, query, criteriaBuilder) -> {
             if (status == null) return null;

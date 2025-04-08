@@ -48,7 +48,6 @@ public class SkinCareRountineController {
                 .build();
     }
 
-
     @GetMapping("/{id}")
     public ResponseAPI<SkinCareRountineResponse> getSkinCareRountine(@PathVariable("id") Long skinTypeId) {
         SkinCareRountineResponse skinCareRoutine = skinCareRountineService.getById(skinTypeId);

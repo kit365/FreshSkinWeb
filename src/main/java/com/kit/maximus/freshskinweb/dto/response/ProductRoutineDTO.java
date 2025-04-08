@@ -17,5 +17,4 @@ public class ProductRoutineDTO {
     private List<ProductVariantResponse> variants;
     private ProductBrandResponse brand;
     private List<ProductCategoryResponse> category;
-
 }

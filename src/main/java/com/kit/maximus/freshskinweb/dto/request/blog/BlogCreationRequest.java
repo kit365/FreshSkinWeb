@@ -1,6 +1,5 @@
 package com.kit.maximus.freshskinweb.dto.request.blog;
 
-import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,4 +23,5 @@ public class BlogCreationRequest implements Serializable {
     boolean featured;
     String status;
     Long categoryID;
+
 }

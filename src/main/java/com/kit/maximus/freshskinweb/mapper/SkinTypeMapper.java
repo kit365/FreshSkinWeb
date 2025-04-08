@@ -13,7 +13,6 @@ public interface SkinTypeMapper {
 
     @Mapping(target = "productID", ignore = true)
     SkinTypeResponse toSkinTypeResponse(SkinTypeEntity request);
-
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateSkinType(@MappingTarget SkinTypeEntity skinTypeEntity, UpdateSkinTypeRequest request);
 }

@@ -42,7 +42,6 @@ import java.util.*;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class VnPayService implements PaymentService {
-
     VnPayConfig vnPayConfig;
 
     OrderService orderService;
@@ -114,7 +113,6 @@ public class VnPayService implements PaymentService {
             params.put("vnp_TmnCode", teminal);
             params.put("vnp_Amount", String.valueOf(amount));
             params.put("vnp_CurrCode", "VND");
-//            params.put("vnp_TxnRef", transactionReference);
             params.put("vnp_TxnRef", order.getOrderId());
             params.put("vnp_OrderInfo", orderInfo);
             params.put("vnp_OrderType", otherType);

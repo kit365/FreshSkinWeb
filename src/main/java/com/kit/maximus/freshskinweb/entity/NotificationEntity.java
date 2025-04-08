@@ -60,7 +60,6 @@ public class NotificationEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "Status")
     Status status = Status.ACTIVE;
-
     @Column(name = "Deleted")
     boolean deleted;
 }

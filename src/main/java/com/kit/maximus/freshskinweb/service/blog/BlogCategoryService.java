@@ -61,9 +61,7 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
     @Override
     public boolean add(CreateBlogCategoryRequest request) {
         log.info("Request JSON: {}", request);
-//        if(!blogCategoryRepository.existsByblogCategoryName(request.getBlogCategoryName())){
-//            throw new AppException(ErrorCode.BLOG_CATEGORY_NAME_EXISTED);
-//        }
+
         BlogCategoryEntity blogCategoryEntity = blogCategoryMapper.toBlogCategory(request);
         if (request.getPosition() == null || request.getPosition() <= 0) {
             Integer size = blogCategoryRepository.findAll().size();
@@ -228,11 +226,6 @@ public class BlogCategoryService implements BaseService<BlogCategoryResponse, Cr
 
         return "Cập nhật danh mục blog thất bại";
     }
-
-//    @Override
-//    public UserResponseDTO addOrder(Long id, CreateUserRequest request) {
-//        return null;
-//    }
 
     @CacheEvict(value = {"featuredBlogCategories"}, allEntries = true)
     @Override

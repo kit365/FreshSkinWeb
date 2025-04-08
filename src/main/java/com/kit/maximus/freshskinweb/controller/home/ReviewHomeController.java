@@ -55,7 +55,6 @@ public class ReviewHomeController {
                 .message(message)
                 .build();
     }
-
     @GetMapping("/{id}")
     public ResponseAPI<?> showAllReview(@RequestParam(value = "page", defaultValue = "1") int page,
                                         @RequestParam(value = "size", defaultValue = "6") int size,

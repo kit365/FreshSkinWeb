@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-//@CrossOrigin(origins = "*")
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
@@ -125,14 +124,7 @@ public class BlogCategoryAdminController {
     }
 
 
-//
-//    @PatchMapping("/edit/{id}")
-//    public ResponseAPI<BlogCategoryResponse> updateBlogCategory(@PathVariable Long id ,@RequestBody UpdateBlogCategoryRequest request){
-//        String message = "Update blog category successfully";
-//        BlogCategoryResponse result = blogCategoryService.update(id, request);
-//        log.info("UPDATE BLOG CATEGORY REQUEST");
-//        return ResponseAPI.<BlogCategoryResponse>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
-//    }
+
 
     @GetMapping()
     public ResponseAPI<Map<String, Object>> getAllBlogCategory(@RequestParam(defaultValue = "1") int page,

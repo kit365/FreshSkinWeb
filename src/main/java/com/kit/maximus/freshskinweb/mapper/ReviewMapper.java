@@ -21,7 +21,6 @@ public interface ReviewMapper {
         //tự set product vào entity, chỉ trả cho FE Id
     ReviewResponse toReviewResponse(ReviewEntity reviewEntity);
 
-
     //khi người dùng cập nhập bình luận -> thường user chỉ cần cập nhập lại comment, lượt sao, lượt like/dislike
     @Mapping(target = "replies", ignore = true)
     @Mapping(target = "parent", ignore = true)

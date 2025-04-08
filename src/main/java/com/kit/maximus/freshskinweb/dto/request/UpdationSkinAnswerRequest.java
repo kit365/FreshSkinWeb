@@ -1,7 +1,6 @@
 package com.kit.maximus.freshskinweb.dto.request;
 
 import lombok.*;
-
 @Setter
 @Getter
 @NoArgsConstructor

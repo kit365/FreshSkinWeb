@@ -16,7 +16,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class HomeSkinCareRountineController {
-
     SkinCareRountineService skinCareRountineService;
 
     @PostMapping()

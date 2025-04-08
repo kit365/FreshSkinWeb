@@ -2,7 +2,6 @@ package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.kit.maximus.freshskinweb.entity.AbstractEntity;
 import lombok.*;
 
 import java.io.Serializable;
@@ -16,7 +15,6 @@ import java.util.List;
 @Builder
 public class SkinQuestionsResponse implements Serializable {
     Long id;
-
     String questionText;
 
     boolean deleted;

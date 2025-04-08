@@ -8,7 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class CreationSkinAnswerRequest {
-
     Long id;
     String option;
     Long score;

@@ -27,24 +27,6 @@ public class OrderItemService {
     OrderRepository orderRepository;
     ProductVariantRepository productVariantRepository;
 
-//    public boolean add(OrderItemRequest request) {
-//        OrderItemEntity orderItemEntity = orderItemMapper.toOrderItemEntity(request);
-//        OrderEntity orderEntity = null;
-//        if(request.getOrderId() != null) {
-//            orderEntity = orderRepository.findById(request.getOrderId()).orElseThrow(()-> new AppException(ErrorCode.ORDER_NOT_FOUND));
-//            orderItemEntity.setOrder(orderEntity);
-//        } else {
-//            orderItemEntity.setOrder(null);
-//        }
-//        ProductVariantEntity productVariant = productVariantRepository.findById(request.getProductVariantId()).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
-//        if(productVariant == null) {
-//            orderItemEntity.setProductVariant(null);
-//        } else {
-//            orderItemEntity.setProductVariant(productVariant);
-//        }
-//        orderItemRepository.save(orderItemEntity);
-//        return true;
-//    }
 
     public boolean add(OrderItemRequest request) {
         OrderItemEntity orderItemEntity = orderItemMapper.toOrderItemEntity(request);

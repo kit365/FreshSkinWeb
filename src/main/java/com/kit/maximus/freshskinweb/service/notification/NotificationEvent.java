@@ -4,7 +4,6 @@ package com.kit.maximus.freshskinweb.service.notification;
 import com.kit.maximus.freshskinweb.entity.NotificationEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.context.ApplicationEvent;
 

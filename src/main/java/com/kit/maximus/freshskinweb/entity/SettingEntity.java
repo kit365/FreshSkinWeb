@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @Table(name = "Setting")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SettingEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "SettingID")

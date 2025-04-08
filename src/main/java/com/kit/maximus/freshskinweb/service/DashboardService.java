@@ -6,7 +6,6 @@ import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.dto.response.VoucherResponse;
 import com.kit.maximus.freshskinweb.service.blog.BlogService;
 import com.kit.maximus.freshskinweb.service.order.OrderService;
-//import com.kit.maximus.freshskinweb.service.product.DiscountService;
 import com.kit.maximus.freshskinweb.service.product.ProductCategoryService;
 import com.kit.maximus.freshskinweb.service.product.ProductService;
 import com.kit.maximus.freshskinweb.service.product.VoucherService;

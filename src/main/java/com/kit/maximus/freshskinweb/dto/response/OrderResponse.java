@@ -2,8 +2,6 @@ package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.kit.maximus.freshskinweb.entity.VoucherEntity;
-import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
 import com.kit.maximus.freshskinweb.utils.Status;
 import lombok.*;

@@ -1,6 +1,5 @@
 package com.kit.maximus.freshskinweb.dto.request.blog_category;
 
-import com.kit.maximus.freshskinweb.entity.BlogEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,4 +21,5 @@ public class UpdateBlogCategoryRequest implements Serializable {
     List<String> thumbnail;
     boolean featured;
     String status;
+
 }

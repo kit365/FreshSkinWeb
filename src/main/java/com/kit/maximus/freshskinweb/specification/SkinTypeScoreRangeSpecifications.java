@@ -2,7 +2,6 @@ package com.kit.maximus.freshskinweb.specification;
 
 import com.kit.maximus.freshskinweb.entity.SkinTypeScoreRangeEntity;
 import org.springframework.data.jpa.domain.Specification;
-
 public class SkinTypeScoreRangeSpecifications {
     public static Specification<SkinTypeScoreRangeEntity> hasStatus(String status) {
         return (root, query, criteriaBuilder) ->

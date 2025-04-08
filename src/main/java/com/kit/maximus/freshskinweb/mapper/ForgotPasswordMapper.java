@@ -5,7 +5,6 @@ import com.kit.maximus.freshskinweb.dto.response.ForgotPasswordResponse;
 import com.kit.maximus.freshskinweb.entity.ForgotPasswordEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
-
 @Mapper(componentModel = "spring")
 public interface ForgotPasswordMapper {
     ForgotPasswordEntity toForgotPasswordEntity(ForgotPasswordRequest request);

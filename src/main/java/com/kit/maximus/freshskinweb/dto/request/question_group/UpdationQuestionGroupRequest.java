@@ -11,7 +11,6 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @Builder
 public class UpdationQuestionGroupRequest {
-
     String title;
 
     String description;

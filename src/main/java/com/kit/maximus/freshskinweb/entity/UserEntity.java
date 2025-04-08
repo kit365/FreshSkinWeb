@@ -85,14 +85,6 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     @JoinColumn(name = "roleId", nullable = true)
     RoleEntity role;
 
-
-
-//    @JsonBackReference
-//    @ManyToMany
-//    Set<RoleEntity> roles;
-
-//    RoleEnum roleEnum;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "user")
     List<ReviewEntity> reviews = new ArrayList<>();
 
@@ -112,14 +104,6 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     }
 
 
-    /* PHẦN NÀY TAO CHỈNH LẠI ĐỂ IN USER KHÔNG BỊ BÁO LỖI: KO THỂ TOSTRING ROLE DO ROLE == NULL */
-//    @Override
-//    public List<GrantedAuthority> getAuthorities() {
-//        List<GrantedAuthority> authorities = new ArrayList<>();
-//        authorities.add(new SimpleGrantedAuthority(this.role.toString()));
-//        return authorities;
-//    }
-
     @Override
     public List<GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
@@ -131,15 +115,6 @@ public class UserEntity extends AbstractEntity implements UserDetails {
         return authorities;
     }
 
-
-//    @Override
-//    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@class")
-//    @JsonSubTypes({@Type(value = SimpleGrantedAuthority.class, name = "SimpleGrantedAuthority")})
-//    public Collection<? extends GrantedAuthority> getAuthorities() {
-//        Collection<GrantedAuthority> authorities = new ArrayList<>();
-//        authorities.add(new SimpleGrantedAuthority(this.role.toString()));
-//        return authorities;
-//    }
 
     @Override
     public boolean isAccountNonExpired() {
@@ -160,10 +135,6 @@ public class UserEntity extends AbstractEntity implements UserDetails {
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
     }
-
-
-//    String roleId;
-//    FOREIGN KEY (RoleID) REFERENCES Role(RoleID) ON DELETE CASCADE ON UPDATE CASCADE
 
 
 }

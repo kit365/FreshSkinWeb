@@ -6,8 +6,6 @@ import com.kit.maximus.freshskinweb.dto.response.SkinTypeScoreRangeResponse;
 import com.kit.maximus.freshskinweb.entity.SkinTypeScoreRangeEntity;
 import org.mapstruct.*;
 
-import java.util.List;
-
 @Mapper(componentModel = "spring")
 public interface SkinTypeScoreRangeMapper {
 

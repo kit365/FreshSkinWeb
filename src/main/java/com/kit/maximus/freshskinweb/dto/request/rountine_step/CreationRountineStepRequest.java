@@ -2,7 +2,6 @@ package com.kit.maximus.freshskinweb.dto.request.rountine_step;
 
 import lombok.*;
 
-
 @Setter
 @Getter
 @NoArgsConstructor

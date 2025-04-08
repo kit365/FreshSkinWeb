@@ -23,8 +23,6 @@ public class ResponseAPI <T>{
         this.message = message;
     }
 
-
-
     public ResponseAPI(long code, String message) {
         this.code = code;
         this.message = message;

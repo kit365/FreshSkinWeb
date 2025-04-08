@@ -43,7 +43,6 @@ public class ProductCategoryEntity extends AbstractEntity {
     @ElementCollection(fetch = FetchType.LAZY)
     List<String> image;
 
-
     @ManyToMany(mappedBy = "category", fetch = FetchType.LAZY)
     List<ProductEntity> products = new ArrayList<>();
 

@@ -10,7 +10,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
-
 @Getter
 @Setter
 @MappedSuperclass
@@ -34,12 +33,5 @@ public abstract class AbstractEntity {
 
     @Column(name = "Deleted")
     boolean deleted;
-
-
-    //    DeletedAt DATETIME,
-//    @Column(name = "delete_at")
-//    @Temporal(TemporalType.TIMESTAMP)
-//    private Date deleteAt;
-
 
 }

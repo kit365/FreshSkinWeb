@@ -40,12 +40,6 @@ public class OpenSearchConfig {
         BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
 
-        // Tạo RestClient với Basic Auth
-//        RestClient restClient = RestClient.builder(httpHost)
-//                .setHttpClientConfigCallback(httpClientBuilder ->
-//                        httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider))
-//                .build();
-
         RestClient restClient = RestClient.builder(httpHost)
                 .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
                         .setDefaultCredentialsProvider(credentialsProvider)

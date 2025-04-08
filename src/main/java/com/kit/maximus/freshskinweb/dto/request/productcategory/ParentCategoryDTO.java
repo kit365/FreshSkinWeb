@@ -8,7 +8,6 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.util.List;
-
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @ToString

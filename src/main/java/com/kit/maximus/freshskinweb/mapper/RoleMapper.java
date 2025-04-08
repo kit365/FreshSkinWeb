@@ -14,7 +14,6 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 
 public interface RoleMapper {
-
     @Mapping(target = "permission", ignore = true)
     RoleEntity toRoleEntity(CreateRoleRequest role);
 

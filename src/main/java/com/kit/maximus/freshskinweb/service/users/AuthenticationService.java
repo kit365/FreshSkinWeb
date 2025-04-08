@@ -56,18 +56,6 @@ public class AuthenticationService implements UserDetailsService {
     @Value("${jwt.signerKey}")
     String SIGNER_KEY;
 
-//    public UserResponseDTO getUserByToken(String token) throws ParseException, JOSEException {
-//        JWSVerifier jwsVerifier = new MACVerifier(SIGNER_KEY.getBytes());
-//        SignedJWT signedJWT = SignedJWT.parse(token);
-//        Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
-//        var verify = signedJWT.verify(jwsVerifier);
-//        if(verify && expirationDate.after(new Date())) {
-//            String username = signedJWT.getJWTClaimsSet().getSubject();
-//            UserEntity user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-//            return userMapper.toUserResponseDTO(user);
-//        }
-//        return null;
-//    }
 
     public UserResponseDTO getUserByToken(String token) throws ParseException, JOSEException {
         JWSVerifier jwsVerifier = new MACVerifier(SIGNER_KEY.getBytes());
@@ -111,15 +99,6 @@ public class AuthenticationService implements UserDetailsService {
 
 
         return userResponseDTO;
-    }
-
-    public IntrospectResponse introspect(IntrospectRequest introspectRequest) throws JOSEException, ParseException {
-        var token = introspectRequest.getToken();
-        JWSVerifier jwsVerifier = new MACVerifier(SIGNER_KEY.getBytes());
-        SignedJWT signedJWT = SignedJWT.parse(token);
-        Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
-        var verify = signedJWT.verify(jwsVerifier);
-        return IntrospectResponse.builder().valid(verify && expirationDate.after(new Date())).build();
     }
 
     public AuthenticationResponseDTO authenticate(AuthenticationRequest authenticationRequest, HttpServletResponse response, HttpServletRequest request) {

@@ -3,16 +3,13 @@ package com.kit.maximus.freshskinweb.mapper;
 import com.kit.maximus.freshskinweb.dto.request.blog_category.CreateBlogCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.request.blog_category.UpdateBlogCategoryRequest;
 import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
-import com.kit.maximus.freshskinweb.dto.response.ProductCategoryResponse;
 import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
-import com.kit.maximus.freshskinweb.entity.ProductCategoryEntity;
 import org.mapstruct.*;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface BlogCategoryMapper {
-
 
     @Mapping(target = "image", ignore = true)
     BlogCategoryEntity toBlogCategory(CreateBlogCategoryRequest request);

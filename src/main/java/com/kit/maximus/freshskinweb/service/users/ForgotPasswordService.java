@@ -140,7 +140,6 @@ public class ForgotPasswordService {
         }
 
     }
-
     // Tạo mã OTP tự động
     public static String generateOtp() {
         SecureRandom random = new SecureRandom();

@@ -25,7 +25,6 @@ public interface ProductCategoryMapper {
     @Mapping(target = "child", ignore = true)
     @Mapping(target = "image", ignore = true)
     List<ProductCategoryEntity> childCategoriesToEntity(List<ChildCategoryDTO> request);
-//    ProductCategoryEntity parentCategoriesToEntity(ParentCategoryDTO request);
 
     @Mapping(target = "productIDs", ignore = true)
     @Mapping(target = "products", ignore = true)

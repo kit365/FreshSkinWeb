@@ -1,15 +1,10 @@
 package com.kit.maximus.freshskinweb.dto.request.productcategory;
 
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
-import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
@@ -26,5 +21,4 @@ public class ChildCategoryDTO implements Serializable {
     boolean featured;
     String image;
     String status;
-
 }

@@ -16,7 +16,6 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SkinTypeResponse implements Serializable {
-
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Long id;
 

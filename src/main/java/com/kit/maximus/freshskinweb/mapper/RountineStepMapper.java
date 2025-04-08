@@ -6,7 +6,6 @@ import com.kit.maximus.freshskinweb.dto.response.RountineStepResponse;
 import com.kit.maximus.freshskinweb.entity.RountineStepEntity;
 import org.mapstruct.*;
 
-import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface RountineStepMapper{

@@ -11,7 +11,6 @@ import com.kit.maximus.freshskinweb.repository.SettingRepository;
 import com.kit.maximus.freshskinweb.repository.UserRepository;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

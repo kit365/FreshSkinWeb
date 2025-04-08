@@ -12,7 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 public class UpdateSkinQuestionsRequest implements Serializable {
-
     String questionText;
     String questionGroup;
     List<SkinAnswerEntity> skinAnswers;

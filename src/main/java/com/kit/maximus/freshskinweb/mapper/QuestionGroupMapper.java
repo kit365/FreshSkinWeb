@@ -13,7 +13,6 @@ public interface QuestionGroupMapper {
 
     @Mapping(target = "questions", ignore = true)
     QuestionGroupEntity toEntity(CreationQuestionGroupRequest request);
-
     QuestionGroupResponse toResponse(QuestionGroupEntity questionGroupEntity);
 
     List<QuestionGroupResponse> toResponse(List<QuestionGroupEntity> questionGroupEntity);

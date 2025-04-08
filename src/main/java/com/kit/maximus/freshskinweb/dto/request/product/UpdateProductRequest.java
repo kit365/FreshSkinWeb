@@ -17,14 +17,12 @@ import java.util.List;
 public class UpdateProductRequest implements Serializable {
     List<Long> categoryId;
     long brandId;
-//    String DiscountID;
     String title;
     String description;
     List<MultipartFile> newImg;
     List<String> image;
     List<ProductVariantEntity> variants;
     List<Long> skinTypeId;
-//    DiscountEntity discountEntity;
     int discountPercent;
     String origin;
     String ingredients;

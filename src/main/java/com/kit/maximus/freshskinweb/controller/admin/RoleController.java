@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//@CrossOrigin(origins = "*")
 @Slf4j
 @RequestMapping("admin/roles")
 @RestController
@@ -43,13 +42,6 @@ public class RoleController {
         var res = roleService.addPermission(request);
         return ResponseAPI.<RoleResponseDTO>builder().code(HttpStatus.OK.value()).message(message).build();
     }
-
-//    @GetMapping("permission/{id}")
-//    public ResponseAPI<RoleResponseDTO> getPermission(@PathVariable Long id) {
-//        String message = "Hiển thị quyền thành công";
-//        var res = roleService.getPermissionById(id);
-//        return ResponseAPI.<RoleResponseDTO>builder().code(HttpStatus.OK.value()).message(message).data(res).build();
-//    }
 
 
     @PatchMapping("edit/{id}")

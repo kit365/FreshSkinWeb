@@ -52,6 +52,4 @@ public class ProductVariantEntity {
     List<OrderItemEntity> orderItems;
 
 
-
-
 }

@@ -101,45 +101,6 @@ public class VoucherService {
     }
 
 //    @Scheduled(cron = "0 */3 * * * *")
-//    public void autoCreateVoucher() {
-//        // Kiểm tra voucher tên TUESDAYVOUCHER đã tồn tại chưa
-//        String voucherName = "TUESDAYFRESH";
-//        VoucherRequest voucherRequest = new VoucherRequest();
-//        voucherRequest.setUsageLimit(100);
-//        voucherRequest.setMaxDiscount(BigDecimal.valueOf(50000));
-//        voucherRequest.setType(DiscountType.PERCENTAGE);
-//        voucherRequest.setMinOrderValue(BigDecimal.valueOf(200000));
-//        voucherRequest.setDiscountValue(BigDecimal.valueOf(10));
-//
-//        LocalDate today = LocalDate.now();
-//        voucherRequest.setStartDate(java.sql.Date.valueOf(today));
-//        voucherRequest.setEndDate(java.sql.Date.valueOf(today.plusDays(7)));
-//
-//        if (isVoucherNameExist(voucherName.toUpperCase())) {
-//            // Nếu voucher tồn tại, reset lại voucher với tên "TUESDAYVOUCHER"
-//            VoucherEntity existingVoucher = voucherRepository.findByName(voucherName).orElse(null);
-//            if (existingVoucher != null) {
-//                existingVoucher.setUsageLimit(100);
-//                existingVoucher.setMaxDiscount(BigDecimal.valueOf(50000));
-//                existingVoucher.setDiscountValue(BigDecimal.valueOf(10));
-//                existingVoucher.setStartDate(java.sql.Date.valueOf(today));
-//                existingVoucher.setEndDate(java.sql.Date.valueOf(today.plusDays(7)));
-//                voucherRepository.save(existingVoucher);
-//                log.info("Voucher '{}' đã được reset lại thành công!", voucherName);
-//            }
-//        } else {
-//            // Nếu voucher chưa tồn tại, tạo mới
-//            voucherRequest.setName(voucherName.toUpperCase());
-//            try {
-//                createVoucher(voucherRequest);
-//                log.info("Voucher '{}' tự động tạo thành công!", voucherRequest.getName());
-//            } catch (AppException e) {
-//                log.error("Lỗi khi tạo voucher: {}", e.getMessage());
-//            } catch (Exception e) {
-//                log.error("Lỗi không xác định: ", e);
-//            }
-//        }
-//    }
 
 
     // Kiểm tra voucher có tên trùng không

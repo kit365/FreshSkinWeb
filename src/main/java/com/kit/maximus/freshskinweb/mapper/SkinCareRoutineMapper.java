@@ -10,7 +10,6 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface SkinCareRoutineMapper {
-
     @Mapping(target = "rountineStep", ignore = true)
     @Mapping(target = "skinType", ignore = true)
     SkinCareRoutineEntity toEntity(SkinCareRountineRequest request);

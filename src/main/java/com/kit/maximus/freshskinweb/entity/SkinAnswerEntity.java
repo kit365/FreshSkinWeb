@@ -14,7 +14,6 @@ import org.hibernate.annotations.OnDeleteAction;
 @AllArgsConstructor
 @ToString
 public class SkinAnswerEntity extends AbstractEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "SkinQuestionID")

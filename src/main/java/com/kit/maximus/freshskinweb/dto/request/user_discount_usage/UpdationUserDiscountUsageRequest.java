@@ -13,7 +13,6 @@ import java.util.Date;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdationUserDiscountUsageRequest {
-
     Long userID;
     String promoCodeID;
     Boolean discountStatus;

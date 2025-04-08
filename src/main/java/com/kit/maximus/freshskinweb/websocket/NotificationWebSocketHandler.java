@@ -17,7 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Component
 public class NotificationWebSocketHandler extends TextWebSocketHandler {
-
     @Autowired
     private NotificationService notificationService;
 

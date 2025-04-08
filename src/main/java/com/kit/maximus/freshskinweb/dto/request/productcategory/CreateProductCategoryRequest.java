@@ -15,7 +15,6 @@ import java.util.List;
 @ToString
 @Builder
 public class CreateProductCategoryRequest implements Serializable {
-
     String title;
 
     String description;

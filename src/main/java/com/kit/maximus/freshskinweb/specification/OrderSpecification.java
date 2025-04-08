@@ -3,7 +3,6 @@ package com.kit.maximus.freshskinweb.specification;
 import com.kit.maximus.freshskinweb.entity.OrderEntity;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 
 public class OrderSpecification {

@@ -15,7 +15,6 @@ import java.util.List;
 @ToString
 @Builder
 public class UpdateProductBrandRequest implements Serializable {
-
     String title;
 
     List<MultipartFile> newImg;

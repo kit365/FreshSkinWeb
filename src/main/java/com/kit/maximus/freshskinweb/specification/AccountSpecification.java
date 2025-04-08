@@ -19,7 +19,6 @@ public class AccountSpecification {
             return criteriaBuilder.conjunction();
         };
     }
-
     public static Specification<UserEntity> hasRole() {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.isNotNull(root.get("role"));

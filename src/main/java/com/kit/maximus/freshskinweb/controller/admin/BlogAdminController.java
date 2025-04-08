@@ -95,7 +95,6 @@ public class BlogAdminController {
             throw new AppException(ErrorCode.INVALID_REQUEST_BLOGID);
         }
 
-        // Lấy danh sách ID dưới dạng List<Integer>
         List<Integer> intIds = (List<Integer>) blogRequest.get("id");
 
         // Chuyển đổi sang List<Long>

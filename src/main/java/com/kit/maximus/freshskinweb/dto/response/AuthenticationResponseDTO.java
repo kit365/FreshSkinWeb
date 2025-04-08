@@ -1,7 +1,6 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.servlet.http.Cookie;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -16,5 +15,4 @@ import java.io.Serializable;
 public class AuthenticationResponseDTO implements Serializable {
     String token;
     boolean authenticated;
-
 }

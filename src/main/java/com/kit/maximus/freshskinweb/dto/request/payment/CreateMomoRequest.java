@@ -22,4 +22,5 @@ public class CreateMomoRequest implements java.io.Serializable {
     private String lang;
     private String extraData;
     private String signature;
+
 }

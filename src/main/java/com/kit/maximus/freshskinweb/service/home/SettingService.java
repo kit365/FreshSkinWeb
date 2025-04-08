@@ -61,7 +61,6 @@ public class SettingService {
     public List<SettingResponse> getAll() {
         List<SettingEntity> setting = settingRepository.findAll();
 
-
         return settingMapper.toListSetting(setting);
     }
 

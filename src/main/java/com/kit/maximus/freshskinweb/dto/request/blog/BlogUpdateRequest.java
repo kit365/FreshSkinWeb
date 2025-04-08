@@ -1,14 +1,11 @@
 package com.kit.maximus.freshskinweb.dto.request.blog;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.kit.maximus.freshskinweb.dto.response.BlogCategoryResponse;
-import com.kit.maximus.freshskinweb.entity.BlogCategoryEntity;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -27,4 +24,5 @@ public class BlogUpdateRequest implements Serializable {
     boolean featured;
     Long categoryID;
     String status;
+
 }

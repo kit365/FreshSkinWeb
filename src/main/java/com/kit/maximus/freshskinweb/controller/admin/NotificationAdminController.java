@@ -28,7 +28,6 @@ public class NotificationAdminController {
         notificationService.updateStatus(id);
     }
 
-    //show danh sách thông báo review
     @GetMapping("/{id}")
     public List<NotificationResponse> showReviewNotification(@PathVariable("id") Long roleID) {
         return notificationService.showNotification(roleID);

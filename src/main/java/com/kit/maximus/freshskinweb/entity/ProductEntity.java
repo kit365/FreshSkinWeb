@@ -1,7 +1,6 @@
 package com.kit.maximus.freshskinweb.entity;
 
 
-import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
@@ -21,7 +20,6 @@ import java.util.List;
         @Index(name = "idx_slug", columnList = "Slug"),
         @Index(name = "idx_brand", columnList = "brandID"),
 })
-//@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "category", "variants", "skinTypes", "reviews"})
 public class ProductEntity extends AbstractEntity {
 
     @Id
@@ -29,9 +27,7 @@ public class ProductEntity extends AbstractEntity {
     @Column(name = "ProductId")
     Long id;
 
-    //quan he
-//    @Column(name = "DiscountID")
-//    DiscoundEntity discount;
+
 
 
     @ManyToMany(fetch = FetchType.LAZY,
@@ -69,8 +65,6 @@ public class ProductEntity extends AbstractEntity {
     @Column(columnDefinition = "MEDIUMTEXT", name = "Description")
     String description;
 
-//    @ElementCollection // Lưu danh sách ảnh trong một bảng riêng
-//     List<String> thumbnail;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @Column(name = "Thumbnail")
@@ -107,10 +101,6 @@ public class ProductEntity extends AbstractEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RountineStepId")
     RountineStepEntity rountineStep;
-
-//    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    @JoinColumn(name = "discountId")
-//    DiscountEntity discount;
 
     public void createProductVariant(ProductVariantEntity productVariantEntity) {
         variants.add(productVariantEntity);

@@ -45,7 +45,6 @@ public class ReviewEntity extends AbstractEntity {
     @Column(name = "Comment", columnDefinition = "TEXT")
     private String comment;
 
-    // Quản lý trả lời review
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<ReviewEntity> replies = new ArrayList<>();

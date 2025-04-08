@@ -7,12 +7,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.kit.maximus.freshskinweb.utils.OrderStatus;
 import com.kit.maximus.freshskinweb.utils.PaymentMethod;
 import com.kit.maximus.freshskinweb.utils.PaymentStatus;
-import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

@@ -19,7 +19,6 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class OrderRequest extends AbstractEntity implements Serializable {
-
     Long userId;
 
     @NotBlank(message = "FIRSTNAME_NOT_BLANK")

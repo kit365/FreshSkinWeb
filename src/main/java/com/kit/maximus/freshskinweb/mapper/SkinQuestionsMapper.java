@@ -10,7 +10,6 @@ import java.lang.annotation.Target;
 
 @Mapper(componentModel = "spring")
 public interface SkinQuestionsMapper {
-
     @Mapping( target=  "answers", ignore = true)
     @Mapping( target=  "questionGroup", ignore = true)
     SkinQuestionsEntity toSkinQuestionsEntity (CreateSkinQuestionsRequest request);

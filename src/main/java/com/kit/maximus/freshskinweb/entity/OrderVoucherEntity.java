@@ -6,7 +6,6 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Objects;
-
 @Entity
 @Getter
 @Setter

@@ -700,52 +700,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         return uploadResult.get("secure_url").toString();
     }
 
-/*
-    Trang home
-     */
-
-
-//    //## 7 sản phẩm có lượt mua cao nhất
-//    public List<ProductResponseDTO> findTop7FlashSale() {
-//        List<ProductEntity> list = productRepository.findTop7ByStatusAndDeleted(Status.ACTIVE, false, Sort.by(Sort.Direction.DESC, "discountPercent"));
-//
-//        List<ProductResponseDTO> top7BestSellers = new ArrayList<>();
-//
-//        if (list != null && !list.isEmpty()) {
-//            list.forEach(productEntity -> {
-//                ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-//                productResponseDTO.setId(productEntity.getId());
-//                productResponseDTO.setSlug(productEntity.getSlug());
-//                productResponseDTO.setTitle(productEntity.getTitle());
-//                productResponseDTO.setThumbnail(productEntity.getThumbnail());
-//                productResponseDTO.setDiscountPercent(productEntity.getDiscountPercent());
-//
-//                //Map với thương hiệu
-//                if (productEntity.getBrand() != null) {
-//                    ProductBrandResponse productBrandResponse = new ProductBrandResponse();
-//                    productBrandResponse.setTitle(productEntity.getBrand().getTitle());
-//                    productResponseDTO.setBrand(productBrandResponse);
-//                }
-//
-//                //Lấy giá của product
-//                if (productEntity.getVariants() != null) {
-//                    List<ProductVariantResponse> productVariantResponses = new ArrayList<>();
-//                    productEntity.getVariants().forEach(variantResponse -> {
-//                        ProductVariantResponse productVariantResponse = new ProductVariantResponse();
-//                        productVariantResponse.setId(variantResponse.getId());
-//                        productVariantResponse.setPrice(variantResponse.getPrice());
-//                        productVariantResponse.setVolume(variantResponse.getVolume());
-//                        productVariantResponse.setUnit(variantResponse.getUnit());
-//                        productVariantResponses.add(productVariantResponse);
-//                    });
-//                    productResponseDTO.setVariants(productVariantResponses);
-//                }
-//                top7BestSellers.add(productResponseDTO);
-//            });
-//        }
-//        top7BestSellers.forEach(productResponseDTO -> productResponseDTO.setDescription(null));
-//        return top7BestSellers;
-//    }
 
     //## 7 sản phẩm có lượt mua cao nhất
     public List<ProductResponseDTO> findTop7FlashSale() {
@@ -768,22 +722,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
     }
 
 
-//    //## FRESH SKIN
-//    // Show 3 san pham noi bat
-//    public List<ProductResponseDTO> getProductsFeature() {
-//        List<ProductEntity> productEntities = productRepository.findTop3ByStatusAndDeletedAndFeatured(Status.ACTIVE, false, true);
-//        List<ProductResponseDTO> productResponseDTO = mapProductResponsesDTO(productEntities);
-//        productResponseDTO.forEach(productResponseDTO1 -> {
-//            productResponseDTO1.setCategory(null);
-//            productResponseDTO1.setDescription(null);
-//            productResponseDTO1.setSkinTypes(null);
-//            productResponseDTO1.setIngredients(null);
-//            productResponseDTO1.setOrigin(null);
-//            productResponseDTO1.setSkinIssues(null);
-//            productResponseDTO1.setUsageInstructions(null);
-//        });
-//        return productResponseDTO;
-//    }
 
     //## FRESH SKIN
     // Show 3 san pham noi bat
@@ -1135,8 +1073,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
         // Xử lý page
         int p = (page > 0) ? page - 1 : 0;
 
-        //Tìm kiếm danh sách sản phẩm
-//        CompletableFuture<List<ProductResponseDTO>> productsFuture = CompletableFuture.supplyAsync(() -> productSearchRepository.searchByTitle(keyword, p, size));
         CompletableFuture<List<ProductResponseDTO>> productsFuture = CompletableFuture.supplyAsync(() ->
                 productSearchRepository.searchByTitle(keyword, p, size)
                         .stream()
@@ -1425,12 +1361,6 @@ public class ProductService implements BaseService<ProductResponseDTO, CreatePro
             dto.setBrand(brandResponse);
         }
 
-//        // Map danh sách review
-//        if (product.getReviews() != null) {
-//            dto.setReviews(product.getReviews().stream()
-//                    .map(reviewService::convertToReviewResponse)
-//                    .collect(Collectors.toList()));
-//        }
 
         // Map danh mục của Product
         if (product.getCategory() != null) {

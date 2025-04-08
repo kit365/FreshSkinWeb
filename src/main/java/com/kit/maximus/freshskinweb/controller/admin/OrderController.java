@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-//@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -83,14 +82,6 @@ public class OrderController {
         return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(create).build();
     }
 
-
-    //    @PatchMapping("/update/{orderId}")
-//    public ResponseAPI<OrderResponse> updateOrder(@Valid @PathVariable Long orderId, @RequestBody UpdateOrderRequest updateOrderRequest) {
-//        String message = "Update Order Success";
-//        var create = orderService.updateOrder(orderId, updateOrderRequest);
-//
-//        return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).data(create).build();
-//    }
 
     @DeleteMapping("/delete/{orderId}")
     public ResponseAPI<OrderResponse> deleteOrderByOrderId(@PathVariable String orderId) {

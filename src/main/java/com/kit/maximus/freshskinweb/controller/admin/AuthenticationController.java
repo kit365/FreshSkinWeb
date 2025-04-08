@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 
-//@CrossOrigin(origins = "*")
 @Slf4j
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -62,14 +61,6 @@ public class AuthenticationController {
 
     }
 
-    @PostMapping("/introspect")
-    public ResponseAPI<IntrospectResponse> checkToken(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
-        String message = "Kiểm tra token thành công";
-        IntrospectResponse result = authenticationService.introspect(request);
-
-        return ResponseAPI.<IntrospectResponse>builder().code(HttpStatus.OK.value()).message(message).data(result).build();
-
-    }
 
     @PostMapping("/getUser")
     public ResponseAPI<UserResponseDTO> getUser(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {

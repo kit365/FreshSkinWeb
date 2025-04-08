@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 
-//@CrossOrigin(origins = "*")
 @Slf4j
 @RequestMapping("admin/skin/result")
 @RestController

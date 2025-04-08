@@ -2,11 +2,7 @@ package com.kit.maximus.freshskinweb.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.kit.maximus.freshskinweb.dto.response.review.ReviewResponse;
-//import com.kit.maximus.freshskinweb.entity.DiscountEntity;
-import com.kit.maximus.freshskinweb.entity.SkinTypeEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

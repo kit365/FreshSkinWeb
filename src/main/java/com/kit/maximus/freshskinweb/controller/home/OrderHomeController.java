@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-//@CrossOrigin(origins = "*")
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
@@ -35,24 +34,6 @@ public class OrderHomeController {
 
         return ResponseAPI.<OrderIdResponse>builder().code(HttpStatus.OK.value()).message(message).data(create).build();
     }
-
-//    @GetMapping()
-//    public ResponseAPI<List<OrderResponse>> getAllOrder() {
-//        String message = "Hiện tất cả các đơn hàng thành công";
-//        List<OrderResponse> order = orderService.getAllOrder();
-//        return ResponseAPI.<List<OrderResponse>>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
-//    }
-
-//    @GetMapping
-//    public ResponseAPI<List<OrderResponse>> getAllOrder(
-//            @RequestParam(required = false) OrderStatus status,
-//            @RequestParam(required = false) String keyword,
-//            @RequestParam(required = false) String orderId
-//
-//    ) {
-//        var result = orderService.getAllOrder(status, keyword, orderId);
-//        return ResponseAPI.<List<OrderResponse>>builder().code(HttpStatus.OK.value()).data(result).build();
-//    }
 
 
     //SHOW LIST ORDER THEO USER

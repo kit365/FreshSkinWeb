@@ -1,17 +1,12 @@
 package com.kit.maximus.freshskinweb.specification;
 
-import com.kit.maximus.freshskinweb.dto.response.ProductResponseDTO;
 import com.kit.maximus.freshskinweb.entity.*;
-import com.kit.maximus.freshskinweb.utils.SkinType;
 import com.kit.maximus.freshskinweb.utils.Status;
 import jakarta.persistence.criteria.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -47,15 +42,6 @@ public class ProductSpecification {
             return query.getRestriction();
         };
 
-        //sql : SELECT pe1.product_id, pe1.benefits, pe1.brandid, pe1.created_at, pe1.deleted, pe1.description,
-        //       pe1.discount_percentage, pe1.featured, pe1.ingredients, pe1.origin, pe1.position,
-        //       pe1.skin_issues, pe1.slug, pe1.status, pe1.title, pe1.update_at, pe1.usage_instructions
-        //FROM product pe1
-        //LEFT JOIN product_variant v1 ON pe1.product_id = v1.productid
-        //WHERE pe1.deleted = ?
-        //GROUP BY pe1.product_id
-        //ORDER BY MIN(v1.price) DESC
-        //LIMIT ?, ?;
     }
 
 
@@ -162,10 +148,6 @@ public class ProductSpecification {
             return product_category.get("title").in(categoryNames);
         };
 
-        //SELECT * FROM Product p
-        //JOIN Product_Category pc ON p.ProductId = pc.productID
-        //JOIN ProductCategory c ON pc.categoryID = c.categoryID
-        //WHERE c.title IN ('Category1', 'Category2', 'Category3');
     }
 
     public static Specification<ProductEntity> filterByBrand(List<String> brandNames) {
@@ -175,10 +157,6 @@ public class ProductSpecification {
 
         return ((root, query, criteriaBuilder) -> root.get("brand").get("title").in(brandNames));
 
-        //SELECT * FROM Product p
-        //WHERE p.brandID IN (
-        //    SELECT brandID FROM ProductBrand pb WHERE pb.title IN ('Brand1', 'Brand2', 'Brand3')
-        //);
     }
 
     public static Specification<ProductEntity> filterBySkinType(List<String> skinTypeNames) {

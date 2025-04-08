@@ -68,13 +68,7 @@ OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
                         .requestMatchers("/**").permitAll()
                         .anyRequest().authenticated()
                 )
-//                .oauth2Login(oauth2 -> oauth2
-//                        .loginPage("/login")
-//                                .defaultSuccessUrl("https://project-swp391-n9j6.onrender.com", true)
-////                        .authorizationEndpoint(auth -> auth.baseUri("/oauth2/authorization"))
-////                        .redirectionEndpoint(redir -> redir.baseUri("/oauth2/callback/*"))
-//                        .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService()))
-//                )
+
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
                         .successHandler(oauth2AuthenticationSuccessHandler) // Thêm handler

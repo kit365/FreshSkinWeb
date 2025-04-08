@@ -1,6 +1,5 @@
 package com.kit.maximus.freshskinweb.dto.request.blog_category;
 
-import com.kit.maximus.freshskinweb.entity.BlogEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,7 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateBlogCategoryRequest implements Serializable {
-
     String title;
     String description;
     Integer position;

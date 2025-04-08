@@ -1,14 +1,12 @@
 package com.kit.maximus.freshskinweb.service.skintest;
 
 import com.kit.maximus.freshskinweb.dto.request.skin_test.SkinTestRequest;
-//import com.kit.maximus.freshskinweb.dto.request.skin_test.SkinResultSearchRequest;
 import com.kit.maximus.freshskinweb.dto.response.SkinTestResponse;
 import com.kit.maximus.freshskinweb.entity.*;
 import com.kit.maximus.freshskinweb.exception.AppException;
 import com.kit.maximus.freshskinweb.exception.ErrorCode;
 import com.kit.maximus.freshskinweb.mapper.SkinTestMapper;
 import com.kit.maximus.freshskinweb.repository.*;
-//import com.kit.maximus.freshskinweb.specification.SkinTestSpecification;
 import com.kit.maximus.freshskinweb.service.users.EmailService;
 import com.kit.maximus.freshskinweb.utils.SkinType;
 import lombok.AccessLevel;
@@ -136,24 +134,6 @@ public class SkinTestService {
         return skinTestResponse;
     }
 
-//    public Page<SkinTestResponse> getAll(SkinResultSearchRequest request) {
-//        int page = request.getPage() != null ? request.getPage() : 0;
-//        int size = request.getSize() != null ? request.getSize() : 10;
-//        String sortDir = request.getSortDirection() != null ? request.getSortDirection() : "desc";
-//
-//        // Tạo Pageable với sắp xếp theo updatedAt
-//        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), "updatedAt");
-//        PageRequest pageRequest = PageRequest.of(page, size, sort);
-//
-//        // Thực hiện truy vấn với Specification
-//        Page<SkinTestEntity> skinTests = skinTestRepository.findAll(
-//                SkinTestSpecification.withFilters(request),
-//                pageRequest
-//        );
-//
-//        // Chuyển đổi kết quả sang DTO
-//        return skinTests.map(skinTestMapper::toSkinTestResponse);
-//    }
 
     public Map<String, Object> getSkinTypeStatistics() {
         List<Object[]> statistics = skinTestRepository.countBySkinTypes();

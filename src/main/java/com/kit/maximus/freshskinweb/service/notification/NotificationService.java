@@ -86,7 +86,6 @@ public class NotificationService {
             entity.setMessage(request.getMessage());
         }
 
-//        notificationRepository.save(entity); //nếu bị deplay th bỏ ở bên kia mà lưu ở đay
 
         //Phát event khi lưu
         eventPublisher.publishEvent(new NotificationEvent(this, entity));
@@ -94,35 +93,6 @@ public class NotificationService {
         return true;
     }
 
-
-//    public NotificationResponse update(Long id, UpdationNotificationRequest request) {
-//        NotificationEntity entity = notificationRepository.findById(id)
-//                .orElseThrow(() -> new AppException(ErrorCode.NOTIFICATION_NOT_FOUND));
-//
-//        entity.setIsRead(true);
-//        NotificationEntity savedEntity = notificationRepository.save(entity);
-//
-//        NotificationResponse response = new NotificationResponse();
-//        response.setId(savedEntity.getId());
-//        response.setMessage(savedEntity.getMessage());
-//        response.setIsRead(savedEntity.getIsRead());
-//        response.setTime(savedEntity.getTime());
-////        response.setDeleted(savedEntity.isDeleted());
-//        response.setStatus(savedEntity.getStatus().name());
-//
-
-    /// /        if (savedEntity.getUser() != null) {
-    /// /            response.setUsername(savedEntity.getUser().getUsername());
-    /// /        }
-    /// /        if (savedEntity.getOrder() != null) {
-    /// /            response.setOrder(String.valueOf(savedEntity.getOrder().getOrderId()));
-    /// /        }
-    /// /        if (savedEntity.getReview() != null) {
-    /// /            response.setReview(savedEntity.getReview().getReviewId());
-    /// /        }
-//
-//        return response;
-//    }
     public Map<String, Object> getAllByUser(Long userId, int page, int size) {
         Sort sort = Sort.by(
                 Sort.Order.asc("isRead"),
@@ -142,18 +112,7 @@ public class NotificationService {
                     response.setMessage(entity.getMessage());
                     response.setIsRead(entity.getIsRead());
                     response.setTime(entity.getTime());
-//                    response.setDeleted(entity.isDeleted());
                     response.setStatus(entity.getStatus().name());
-
-//                    if (entity.getUser() != null) {
-//                        response.setUsername(entity.getUser().getUsername());
-//                    }
-//                    if (entity.getOrder() != null) {
-//                        response.setOrder(String.valueOf(entity.getOrder().getOrderId()));
-//                    }
-//                    if (entity.getReview() != null) {
-//                        response.setReview(entity.getReview().getReviewId());
-//                    }
 
                     return response;
                 })
@@ -195,19 +154,7 @@ public class NotificationService {
                     response.setMessage(entity.getMessage());
                     response.setIsRead(entity.getIsRead());
                     response.setTime(entity.getTime());
-//                    response.setDeleted(entity.isDeleted());
                     response.setStatus(entity.getStatus().name());
-
-//                    if (entity.getUser() != null) {
-//                        response.setUsername(entity.getUser().getUsername());
-//                    }
-//                    if (entity.getOrder() != null) {
-//                        response.setOrder(String.valueOf(entity.getOrder().getOrderId()));
-//                    }
-//                    if (entity.getReview() != null) {
-//                        response.setReview(entity.getReview().getReviewId());
-//                    }
-
                     return response;
                 })
                 .collect(Collectors.toList());

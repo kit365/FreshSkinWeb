@@ -13,7 +13,6 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface SettingMapper {
     SettingResponse toSetting(SettingEntity request);
-
     SettingEntity updateSetting(@MappingTarget SettingEntity settingEntity, SettingRequestDTO settingRequestDTO);
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void update(@MappingTarget SettingEntity settingEntity, SettingRequestDTO settingRequestDTO);

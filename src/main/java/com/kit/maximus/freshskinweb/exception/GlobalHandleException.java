@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class GlobalHandleException{
-
      @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ResponseAPI> handlingMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
          String enumKey = ex.getFieldError().getDefaultMessage();

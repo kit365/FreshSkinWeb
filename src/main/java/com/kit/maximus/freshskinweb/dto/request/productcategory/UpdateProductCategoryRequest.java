@@ -26,7 +26,6 @@ public class UpdateProductCategoryRequest implements Serializable {
 
     Long parentID;
 
-//    List<ChildCategoryDTO> child;
 
     Boolean featured;
 

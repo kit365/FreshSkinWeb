@@ -22,7 +22,6 @@ import java.util.List;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductVariantResponse {
-
     Long id;
     BigDecimal price;
     int volume;

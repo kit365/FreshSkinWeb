@@ -14,7 +14,6 @@ import java.io.Serializable;
 @ToString
 @Builder
 public class SettingRequestDTO implements Serializable {
-
     String websiteName;
     String logo;
     String phone;

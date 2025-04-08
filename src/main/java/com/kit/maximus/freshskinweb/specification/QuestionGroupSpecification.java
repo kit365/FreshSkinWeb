@@ -17,7 +17,6 @@ public class QuestionGroupSpecification {
             );
         };
     }
-
     public static Specification<QuestionGroupEntity> hasStatus(Status status) {
         return (root, query, cb) -> {
             if (status == null) {

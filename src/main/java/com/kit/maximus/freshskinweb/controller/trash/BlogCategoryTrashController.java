@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-//@CrossOrigin(origins = "*")
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor

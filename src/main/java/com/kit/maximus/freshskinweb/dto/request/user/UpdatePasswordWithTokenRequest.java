@@ -14,7 +14,6 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @Builder
 public class UpdatePasswordWithTokenRequest {
-
     @NotBlank(message = "TOKEN_REQUIRED")
     String token;
 

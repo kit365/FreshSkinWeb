@@ -67,5 +67,4 @@ public class SkinTypeService {
         SkinTypeEntity skinTypeEntity = skinTypeRepository.findById(id).orElseThrow(()-> new AppException(ErrorCode.SKIN_TYPE_NOT_FOUND));
         return skinTypeMapper.toSkinTypeResponse(skinTypeEntity);
     }
-
 }

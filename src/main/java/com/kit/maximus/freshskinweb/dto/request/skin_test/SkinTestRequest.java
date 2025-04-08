@@ -9,7 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class SkinTestRequest {
-
     Long user;
 
     Long questionGroup;

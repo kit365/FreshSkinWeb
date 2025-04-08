@@ -16,7 +16,6 @@ import java.io.Serializable;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class ReviewCreateRequest implements Serializable {
-
     @NotNull(message = "User ID is required")
     Long userId;
 

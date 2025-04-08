@@ -1,6 +1,5 @@
 package com.kit.maximus.freshskinweb.dto.request.forgot_password;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -18,6 +17,5 @@ public class ForgotPasswordRequest {
     @NotBlank(message = "EMAIL_NOT_BLANK")
     @Email(message = "EMAIL_INVALID")
     String Email;
-
     String OTP;
 }

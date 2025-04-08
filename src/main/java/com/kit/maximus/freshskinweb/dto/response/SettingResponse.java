@@ -1,6 +1,5 @@
 package com.kit.maximus.freshskinweb.dto.response;
 
-import jakarta.persistence.Column;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

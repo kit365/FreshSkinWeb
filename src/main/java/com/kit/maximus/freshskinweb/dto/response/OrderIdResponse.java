@@ -5,7 +5,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
-
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @Setter

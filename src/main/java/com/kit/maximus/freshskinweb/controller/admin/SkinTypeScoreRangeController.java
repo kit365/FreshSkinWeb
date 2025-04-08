@@ -144,7 +144,6 @@ public class SkinTypeScoreRangeController {
                 .data(result)
                 .build();
     }
-
     @PatchMapping("restore/{id}")
     public ResponseAPI<Boolean> restore(@PathVariable Long id) {
         var result = service.restore(id);

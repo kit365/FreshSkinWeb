@@ -34,6 +34,5 @@ public class QuestionGroupResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date updatedAt;
-
     boolean deleted;
 }

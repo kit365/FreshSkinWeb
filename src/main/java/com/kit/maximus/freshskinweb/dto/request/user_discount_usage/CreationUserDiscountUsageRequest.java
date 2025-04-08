@@ -11,7 +11,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CreationUserDiscountUsageRequest {
-
     Long userID;
     String promoCodeID;
     Boolean discountStatus;

@@ -21,7 +21,6 @@ import java.util.Date;
 public class ForgotPasswordResponse {
 
     String Email;
-
     String OTP;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

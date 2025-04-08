@@ -15,7 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateProductBrandRequest implements Serializable {
-
     String title;
 
     List<MultipartFile> image;

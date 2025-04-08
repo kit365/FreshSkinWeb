@@ -21,7 +21,6 @@ import java.util.List;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductBrandResponse implements Serializable {
-
     Long id;
 
     String title;

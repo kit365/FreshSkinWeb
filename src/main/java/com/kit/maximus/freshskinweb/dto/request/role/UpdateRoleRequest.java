@@ -1,11 +1,9 @@
 package com.kit.maximus.freshskinweb.dto.request.role;
 
-import com.kit.maximus.freshskinweb.entity.AbstractEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
-
 @Setter
 @Getter
 @NoArgsConstructor

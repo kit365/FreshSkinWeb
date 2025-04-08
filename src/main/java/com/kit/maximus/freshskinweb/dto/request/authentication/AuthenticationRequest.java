@@ -20,4 +20,5 @@ public class AuthenticationRequest implements Serializable {
     @NotNull(message = "PASSWORD_NOT_NULL")
     @NotBlank(message = "PASSWORD_NOT_BLANK")
     String password;
+
 }

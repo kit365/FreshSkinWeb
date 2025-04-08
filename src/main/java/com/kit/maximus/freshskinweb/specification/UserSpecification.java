@@ -4,8 +4,6 @@ import com.kit.maximus.freshskinweb.entity.UserEntity;
 import com.kit.maximus.freshskinweb.utils.Status;
 import com.kit.maximus.freshskinweb.utils.TypeUser;
 import org.springframework.data.jpa.domain.Specification;
-import jakarta.persistence.criteria.Predicate;
-
 
 public class UserSpecification {
     public static Specification<UserEntity> hasRoleZero() {

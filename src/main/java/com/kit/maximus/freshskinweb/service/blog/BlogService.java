@@ -620,11 +620,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
             // Xóa các trường không cần thiết
             blogResponse.setBlogCategory(null);
 
-//            // Thêm ngày tạo và ngày cập nhật
-//            BlogEntity blogEntity = blogRepository.searchBySlug(blogResponse.getSlug()); // Lấy thông tin blog từ DB
-//            if (blogEntity != null) {
-//                blogResponse.setCreatedAt(blogEntity.getCreatedAt());
-//            }
+
         });
 
         List<BlogResponse> blogResponseList = getBlogsByCategorySlug(slug, "ACTIVE", false);

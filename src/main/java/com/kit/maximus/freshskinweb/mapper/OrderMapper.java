@@ -29,14 +29,6 @@ public interface OrderMapper {
     @Mapping(target = "orderId", source = "orderId")
     List<OrderResponse> toOrderResponseList(List<OrderEntity> orderEntities);
 
-
-//    Optional<OrderResponse> toOrderEntityOptional(OrderResponse order);
-
-//    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-//    void updateOrder(@MappingTarget OrderEntity order, UpdateOrderRequest update);
-
-//    OrderEntity toOrderEntity(UserEntity user);
-
     @Mapping(target = "orderId", ignore = true) // Bỏ qua ID vì nó tự tăng
     @Mapping(target = "user", source = "user", ignore = false) // Map UserEntity vào OrderEntity
     @Mapping(target = "firstName", source = "user.firstName")

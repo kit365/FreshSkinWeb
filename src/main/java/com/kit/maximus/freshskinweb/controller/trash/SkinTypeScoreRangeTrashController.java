@@ -22,7 +22,6 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class SkinTypeScoreRangeTrashController {
-
     SkinTypeScoreRangeService service;
     @GetMapping
     public ResponseAPI<Map<String, Object>> search(

@@ -40,7 +40,6 @@ import java.util.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
 public class ProductBrandService implements BaseService<ProductBrandResponse, CreateProductBrandRequest, UpdateProductBrandRequest, Long> {
-
     ProductBrandRepository productBrandRepository;
 
     ProductBrandMapper productBrandMapper;

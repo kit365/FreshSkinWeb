@@ -34,5 +34,4 @@ public class OrderItemResponse implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Status status;
 
-//    BigDecimal discountPrice;
 }

@@ -16,6 +16,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 public class SkinTypeScoreRangeService {
 
     SkinTypeScoreRangeRepository repository;
+    @Qualifier("skinTypeScoreRangeMapper")
     SkinTypeScoreRangeMapper mapper;
 
     SkinTypeRepository skinTypeRepository;
