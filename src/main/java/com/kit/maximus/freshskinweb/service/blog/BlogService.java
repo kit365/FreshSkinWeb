@@ -92,7 +92,7 @@ public class BlogService implements BaseService<BlogResponse, BlogCreationReques
         blogEntity.setSlug(getSlug(request.getTitle()));
 
         BlogResponse blogResponse = blogMapper.toBlogResponse(blogRepository.save(blogEntity));
-        UserEntity user = blogEntity.getUser();
+        UserEntity user = userRepository.findById(request.getUser()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         blogResponse.setAuthor(mapAuthor(user));
         blogSearchRepository.indexBlog(blogResponse);
         return true;
