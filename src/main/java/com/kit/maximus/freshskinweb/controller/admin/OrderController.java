@@ -39,13 +39,12 @@ public class OrderController {
     public ResponseAPI<Map<String, Object>> getAllOrder(
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String orderId,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) OrderStatus priorityStatus,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        var result = orderService.getAllOrders(status, keyword, orderId, page, size, sortBy, priorityStatus);
+        var result = orderService.getAllOrders(status, keyword, page, size, sortBy, priorityStatus);
         return ResponseAPI.<Map<String, Object>>builder()
                 .code(HttpStatus.OK.value())
                 .data(result)

@@ -254,7 +254,7 @@ public class OrderService {
         return year + monthDay + randomDigits;
     }
 
-
+    // Lấy chi tiết 1 theo order ID
     public OrderResponse getOrderById(String orderId) {
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
@@ -418,21 +418,15 @@ public class OrderService {
     /*PHÂN TRANG ORDER CHO ADMIN */
     /* PHẦN NÀY TÍCH HƠP THÊM BỘ LỌC THÔNG TIN THÔNG QUA Status và user */
     /* TÍCH HỢP THÊM TÌM KIẾM INDEX CỦA DATABASE, GIÚP TÌM NHANH HƠN TRÁNH PHẢI CHẠY NHIỀU VÒNG FOR */
-    public Map<String, Object> getAllOrders(OrderStatus status, String keyword, String orderId,
+    public Map<String, Object> getAllOrders(OrderStatus status, String keyword,
                                             int page, int size, String sortBy, OrderStatus priorityStatus) {
         Map<String, Object> map = new HashMap<>();
         int p = Math.max(page - 1, 0);
 
-        if (orderId != null) {
-            orderRepository.findById(orderId)
-                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-        }
-
         Specification<OrderEntity> spec = Specification
                 .where(OrderSpecification.isNotDeleted())
                 .and(OrderSpecification.hasStatus(status))
-                .and(OrderSpecification.hasKeyword(keyword))
-                .and(orderId != null ? OrderSpecification.hasOrderId(orderId) : null);
+                .and(OrderSpecification.hasKeyword(keyword));
 
         Pageable pageable = sortBy != null && sortBy.equals("updatedAt")
                 ? PageRequest.of(p, size, Sort.by("updatedAt").descending())
@@ -469,6 +463,7 @@ public class OrderService {
 
         return buildPaginationResponse(map, ordersPage, orderResponses);
     }
+
 
     private ProductVariantResponse mapProductVariant(ProductVariantEntity variant) {
         return ProductVariantResponse.builder()
