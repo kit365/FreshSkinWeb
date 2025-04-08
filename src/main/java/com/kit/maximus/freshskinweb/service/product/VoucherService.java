@@ -47,7 +47,7 @@ public class VoucherService {
             throw new AppException(ErrorCode.ENDDATE_INVALID);
         }
         if (voucherRequest.getStartDate().before(new Date())) {
-            throw new AppException(ErrorCode.STATUS_INVALID);
+            throw new AppException(ErrorCode.STARTDATE_INVALID);
         }
         var mapVoucher = voucherMapper.toVoucherEntity(voucherRequest);
         voucherRepository.save(mapVoucher);
