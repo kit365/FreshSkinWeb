@@ -171,9 +171,6 @@ public class OrderService {
 
         }
 
-        // Cập nhật lại sản phẩm gợi ý trong routine
-        rountineService.refreshBestSellerProductsForAllRoutineSteps();
-
         OrderEntity savedOrder = orderRepository.save(order);
 
         if (!savedOrder.getOrderItems().isEmpty()) {
@@ -500,53 +497,6 @@ public class OrderService {
     }
 
     @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
-    //    Cập nhật trạng thái cho đơn hàng được chọn
-    public String update(List<String> id, String orderStatus) {
-        try {
-            OrderStatus orderStatusEnum = OrderStatus.valueOf(orderStatus);
-            List<OrderEntity> orderEntities = orderRepository.findAllById(id);
-
-            if (!orderEntities.isEmpty()) {
-                for (OrderEntity orderEntity : orderEntities) {
-                    // Nếu thanh toán bằng tiền mặt
-
-                    if (orderEntity.getPaymentMethod().equals(PaymentMethod.CASH)) {
-
-
-                        // Nếu đơn hàng được giao => thanh toán thành công
-                        if (orderStatusEnum.equals(OrderStatus.COMPLETED)) {
-                            orderEntity.setPaymentStatus(PaymentStatus.PAID);
-                            // Chưa được giao => thanh toán thất bại
-                        } else if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
-                            orderEntity.setPaymentStatus(PaymentStatus.FAILED);
-                        }
-                    }
-
-                    if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
-                        if (orderEntity.getPaymentMethod().equals(PaymentMethod.QR)) {
-                            orderEntity.setPaymentStatus(PaymentStatus.REFUNDED);
-                        }
-
-                        orderEntity.getOrderItems().forEach(orderItem -> productService.updateStockCancel(
-                                orderItem.getProductVariant().getId(),
-                                orderItem.getProductVariant().getProduct().getId(),
-                                orderItem.getQuantity()
-                        ));
-                    }
-                    orderEntity.setOrderStatus(orderStatusEnum);
-                }
-                orderRepository.saveAll(orderEntities);
-
-
-                return "Cập nhật trạng thái đơn hàng thành công";
-            }
-            return "Không tìm thấy đơn hàng nào để cập nhật";
-        } catch (IllegalArgumentException e) {
-            return e.getMessage(); // Hiển thị lỗi rõ ràng hơn
-        }
-    }
-
-    @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     //Cập nhật trạng thái cho 1 đơn hàng
     public String update(String id, OrderRequest request) {
         String orderStatus = request.getOrderStatus();
@@ -566,6 +516,7 @@ public class OrderService {
             if (orderEntity.getPaymentMethod().equals(PaymentMethod.CASH)) {
                 // Nếu đơn hàng được giao => thanh toán thành công
                 if (orderStatusEnum.equals(OrderStatus.COMPLETED)) {
+
                     orderEntity.setPaymentStatus(PaymentStatus.PAID);
                     // Chưa được giao => thanh toán thất bại
                 } else if (orderStatusEnum.equals(OrderStatus.CANCELED)) {

@@ -279,44 +279,6 @@ public class SkinCareRountineService {
         });
     }
 
-    @jakarta.transaction.Transactional
-    public void refreshBestSellerProductsForAllRoutineSteps() {
-        List<SkinCareRoutineEntity> allRoutines = skinCareRountineRepository.findAll();
-
-        for (SkinCareRoutineEntity routine : allRoutines) {
-            SkinTypeEntity skinType = routine.getSkinType();
-
-            for (RountineStepEntity step : routine.getRountineStep()) {
-                // Xóa liên kết sản phẩm cũ
-                if (step.getProduct() != null) {
-                    for (ProductEntity product : step.getProduct()) {
-                        product.setRountineStep(null);
-                        productRepository.save(product);
-                    }
-                    step.getProduct().clear();
-                }
-
-                // Lấy top 5 sản phẩm mới bán chạy
-                List<ProductEntity> topProducts = productService.getTop5BestSellerProductBySkinTypeAndProductCategory(
-                        skinType.getId(),
-                        step.getStep()
-                );
-
-                // Gán lại
-                if (topProducts != null) {
-                    for (ProductEntity product : topProducts) {
-                        product.setRountineStep(step);
-                        productRepository.save(product);
-                    }
-                    step.setProduct(topProducts);
-                    rountineStepRepository.save(step);
-                }
-            }
-
-            skinCareRountineRepository.save(routine);
-        }
-    }
-
     @Transactional
     public boolean update(Long id, UpdationSkinCareRountineRequest request) {
         try {

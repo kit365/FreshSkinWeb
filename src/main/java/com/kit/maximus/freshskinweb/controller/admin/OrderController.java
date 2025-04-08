@@ -61,19 +61,6 @@ public class OrderController {
         return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
     }
 
-    @PatchMapping("change-multi")
-    public ResponseAPI<String> updateOrder(@RequestBody Map<String, Object> request) {
-        if (!request.containsKey("id")) {
-            log.warn("Request does not contain 'id' key");
-            throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
-        }
-
-        List<String> ids = (List<String>) request.get("id");
-        String status = request.get("orderStatus").toString(); // Đổi từ 'status' thành 'orderStatus'
-
-        var result = orderService.update(ids, status);
-        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
-    }
 
     @PatchMapping("edit/{orderId}")
     public ResponseAPI<OrderResponse> updateOrder( @PathVariable String orderId, @RequestBody OrderRequest orderStatus) {
