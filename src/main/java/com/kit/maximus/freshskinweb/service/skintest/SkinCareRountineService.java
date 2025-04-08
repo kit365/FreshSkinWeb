@@ -157,6 +157,7 @@ public class SkinCareRountineService {
                                             variantResponse.setPrice(variant.getPrice());
                                             variantResponse.setUnit(variant.getUnit());
                                             variantResponse.setVolume(variant.getVolume());
+                                            variantResponse.setStock(variant.getStock());
                                             return variantResponse;
                                         })
                                         .collect(Collectors.toList()));
@@ -205,6 +206,7 @@ public class SkinCareRountineService {
                                             variantResponse.setPrice(variant.getPrice());
                                             variantResponse.setUnit(variant.getUnit());
                                             variantResponse.setVolume(variant.getVolume());
+                                            variantResponse.setStock(variant.getStock());
                                             return variantResponse;
                                         })
                                         .collect(Collectors.toList()));
@@ -253,6 +255,7 @@ public class SkinCareRountineService {
                                                 variantResponse.setPrice(variant.getPrice());
                                                 variantResponse.setUnit(variant.getUnit());
                                                 variantResponse.setVolume(variant.getVolume());
+                                                variantResponse.setStock(variant.getVolume());
                                                 return variantResponse;
                                             })
                                             .collect(Collectors.toList()));
@@ -312,35 +315,38 @@ public class SkinCareRountineService {
 
             //Cập nhật lại position
             List<Integer> usedPositions = new ArrayList<>();
-
-            Integer currentMaxPosition = 0;
+            int autoPosition = 1;
 
             // Tạo và lưu các bước mới
             if (request.getRountineStep() != null) {
-                for (CreationRountineStepRequest stepRequest : request.getRountineStep()) {
-                    // Tạo bước mới
+                // Sắp xếp danh sách bước theo thứ tự gốc từ client gửi lên
+                List<CreationRountineStepRequest> steps = request.getRountineStep();
+
+                for (CreationRountineStepRequest stepRequest : steps) {
                     RountineStepEntity newStep = rountineStepMapper.toRountineStepEntity(stepRequest);
 
-                    if(stepRequest.getPosition() != null) {
-                        // check position trùng nhau
-                        if (usedPositions.contains(stepRequest.getPosition())) {
+                    Integer position = stepRequest.getPosition();
+
+                    // Nếu client truyền vào position
+                    if (position != null) {
+                        if (usedPositions.contains(position)) {
                             throw new AppException(ErrorCode.DUPLICATE_POSITION);
                         }
-                        newStep.setPosition(stepRequest.getPosition());
-                        usedPositions.add(stepRequest.getPosition());
+                        newStep.setPosition(position);
+                        usedPositions.add(position);
                     } else {
-                        // Không nhập position thì tự động tăng ++
-                        currentMaxPosition++;
-                        newStep.setPosition(currentMaxPosition);
-                        usedPositions.add(currentMaxPosition);
+                        // Tự động đánh position liên tục từ 1
+                        while (usedPositions.contains(autoPosition)) {
+                            autoPosition++;
+                        }
+                        newStep.setPosition(autoPosition);
+                        usedPositions.add(autoPosition);
                     }
 
                     newStep.setSkinCareRountine(existingRoutine);
 
-                    // Lưu bước mới để có ID
                     RountineStepEntity savedStep = rountineStepRepository.save(newStep);
 
-                    // Lấy và liên kết sản phẩm
                     List<ProductEntity> products = productService.getTop5BestSellerProductBySkinTypeAndProductCategory(
                             skinType.getId(),
                             stepRequest.getStep()
@@ -358,6 +364,7 @@ public class SkinCareRountineService {
                     existingRoutine.getRountineStep().add(savedStep);
                 }
             }
+
 
             // Lưu lại toàn bộ thay đổi
             skinCareRountineRepository.save(existingRoutine);
