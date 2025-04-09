@@ -72,6 +72,9 @@ public enum ErrorCode {
 
     //ProductVariant
     PRODUCT_VARIANT_NOT_FOUND(404, "Không tìm thấy biến thể sản phẩm"),
+    OUT_OF_STOCK(400, "Sản phẩm đã hết hàng"),
+    INSUFFICIENT_STOCK(400, "Số lượng sản phẩm không đủ trong kho"),
+
 
     //ProductBrand
     PRODUCT_BRAND_NOT_FOUND(404, "Không tìm thấy thương hiệu sản phẩm"),

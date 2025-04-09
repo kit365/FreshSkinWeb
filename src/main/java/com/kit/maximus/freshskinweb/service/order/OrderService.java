@@ -58,7 +58,7 @@ public class OrderService {
 
     @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     @Transactional
-    public OrderIdResponse addOrder(OrderRequest orderRequest) {
+    public OrderIdResponse addOrder(OrderRequest orderRequest) throws Exception {
         OrderEntity order = orderMapper.toOrderEntity(orderRequest);
 
         UserEntity user = null;
@@ -103,6 +103,15 @@ public class OrderService {
             ProductVariantEntity variant = productVariantRepository.findById(itemRequest.getProductVariantId())
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
 
+            int requestedQuantity = itemRequest.getQuantity();
+            int availableStock = variant.getStock();
+
+            // Kiểm tra hết hàng hoặc không đủ hàng
+            if (availableStock <= 0) {
+                throw new AppException(ErrorCode.OUT_OF_STOCK, "Sản phẩm " + variant.getProduct().getTitle() + " đã hết hàng");
+            } else if (requestedQuantity > availableStock) {
+                throw new AppException(ErrorCode.INSUFFICIENT_STOCK, "Sản phẩm " + variant.getProduct().getTitle() + " chỉ còn " + availableStock + " sản phẩm");
+            }
 
             OrderItemEntity orderItem = new OrderItemEntity();
             orderItem.setProductVariant(variant);

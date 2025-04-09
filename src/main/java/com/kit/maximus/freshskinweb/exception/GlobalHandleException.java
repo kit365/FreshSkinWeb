@@ -27,13 +27,19 @@ public class GlobalHandleException{
 
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ResponseAPI> handlingAppException(AppException ex) {
-         ResponseAPI responseAPI = new ResponseAPI();
-         ErrorCode errorCode = ex.getErrorCode();
+        ResponseAPI responseAPI = new ResponseAPI();
+        ErrorCode errorCode = ex.getErrorCode();
 
-         responseAPI.setCode(errorCode.getCode());
-         responseAPI.setMessage(errorCode.getMessage());
+        // Ưu tiên customMessage nếu có, nếu không thì lấy message mặc định từ ErrorCode
+        String message = ex.getCustomMessage() != null ? ex.getCustomMessage() : errorCode.getMessage();
+
+        responseAPI.setCode(errorCode.getCode());
+        responseAPI.setMessage(message);
+
         return ResponseEntity.badRequest().body(responseAPI);
     }
+
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ResponseAPI> handlingRuntimeException(RuntimeException ex) {
         ResponseAPI responseAPI = new ResponseAPI();
@@ -43,5 +49,7 @@ public class GlobalHandleException{
         responseAPI.setMessage(errorCode.getMessage());
         return ResponseEntity.badRequest().body(responseAPI);
     }
+
+
 
 }

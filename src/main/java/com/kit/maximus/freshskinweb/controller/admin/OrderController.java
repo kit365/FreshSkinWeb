@@ -28,7 +28,7 @@ public class OrderController {
     OrderService orderService;
 
     @PostMapping("/create")
-    public ResponseAPI<OrderIdResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest) {
+    public ResponseAPI<OrderIdResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest) throws Exception {
         String message = "Tạo đơn hàng thành công";
         var create = orderService.addOrder(orderRequest);
 
