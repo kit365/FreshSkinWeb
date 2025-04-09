@@ -43,11 +43,11 @@ public class VoucherService {
         if (voucherRequest.getEndDate().before(voucherRequest.getStartDate())) {
             throw new AppException(ErrorCode.ENDDATE_INVALID_MUST_AFTER_STARTDATE);
         }
-        if (voucherRequest.getEndDate().before(new Date())) {
-            throw new AppException(ErrorCode.ENDDATE_INVALID);
-        }
         if (voucherRequest.getStartDate().before(new Date())) {
             throw new AppException(ErrorCode.STARTDATE_INVALID);
+        }
+        if (voucherRequest.getEndDate().before(new Date())) {
+            throw new AppException(ErrorCode.ENDDATE_INVALID);
         }
         var mapVoucher = voucherMapper.toVoucherEntity(voucherRequest);
         voucherRepository.save(mapVoucher);

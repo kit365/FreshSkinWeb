@@ -1,7 +1,10 @@
 package com.kit.maximus.freshskinweb.dto.request.voucher;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.kit.maximus.freshskinweb.entity.AbstractEntity;
 import com.kit.maximus.freshskinweb.utils.DiscountType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -9,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -19,7 +23,7 @@ import java.util.Date;
 @ToString
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class VoucherRequest {
+public class VoucherRequest implements Serializable {
     @NotBlank(message = "Mã voucher không được để trống")
     String name;
 
@@ -42,6 +46,10 @@ public class VoucherRequest {
     Date startDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
     Date endDate;
+
+    String status;
+
+    Boolean deleted;
 
 
 }
