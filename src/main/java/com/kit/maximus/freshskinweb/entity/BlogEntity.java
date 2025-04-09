@@ -33,10 +33,10 @@ public class BlogEntity extends AbstractEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "UserID", nullable = true)
-    @JsonIgnore
+//    @JsonIgnore
     UserEntity user;
 
-    @Column(name = "content",columnDefinition = "MEDIUMTEXT")
+    @Column(name = "content", columnDefinition = "MEDIUMTEXT")
     String content;
 
     @ElementCollection(fetch = FetchType.EAGER)

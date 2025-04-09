@@ -18,6 +18,13 @@ public class OrderSpecification {
         return (root, query, criteriaBuilder) -> {
             if (keyword == null || keyword.trim().isEmpty()) return null;
             String searchTerm = "%" + keyword.toLowerCase() + "%";
+
+            // Nếu keyword chỉ toàn là số, giả định là tìm theo orderId
+            if (keyword.matches("\\d+")) {
+                return criteriaBuilder.like(criteriaBuilder.lower(root.get("orderId")), searchTerm);
+            }
+
+            // Ngược lại, tìm theo tên
             return criteriaBuilder.or(
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), searchTerm),
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), searchTerm)
@@ -25,12 +32,6 @@ public class OrderSpecification {
         };
     }
 
-    public static Specification<OrderEntity> hasOrderId(String orderId) {
-        return (root, query, criteriaBuilder) -> {
-            if (orderId == null || orderId.trim().isEmpty()) return null;
-            return criteriaBuilder.equal(root.get("orderId"), orderId);
-        };
-    }
 
     public static Specification<OrderEntity> hasUserId(Long userId) {
         return (root, query, criteriaBuilder) -> {

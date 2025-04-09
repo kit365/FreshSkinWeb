@@ -55,11 +55,10 @@ public class OrderService {
     VoucherMapper voucherMapper;
     ApplicationEventPublisher eventPublisher;
     ProductService productService;
-    SkinCareRountineService rountineService;
 
     @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     @Transactional
-    public OrderIdResponse addOrder(OrderRequest orderRequest) {
+    public OrderIdResponse addOrder(OrderRequest orderRequest) throws Exception {
         OrderEntity order = orderMapper.toOrderEntity(orderRequest);
 
         UserEntity user = null;
@@ -68,10 +67,9 @@ public class OrderService {
 
         if (orderRequest.getUserId() != null) {
             user = userRepository.findById(orderRequest.getUserId()).orElse(null);
-            order.setUser(user);
-        } else {
-            order.setUser(user);
         }
+        order.setUser(user);
+
         // Tạo orderId duy nhất
         String orderId = generateOrderCode();
         order.setOrderId(orderId);
@@ -105,6 +103,15 @@ public class OrderService {
             ProductVariantEntity variant = productVariantRepository.findById(itemRequest.getProductVariantId())
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
 
+            int requestedQuantity = itemRequest.getQuantity();
+            int availableStock = variant.getStock();
+
+            // Kiểm tra hết hàng hoặc không đủ hàng
+            if (availableStock <= 0) {
+                throw new AppException(ErrorCode.OUT_OF_STOCK, "Sản phẩm " + variant.getProduct().getTitle() + " đã hết hàng");
+            } else if (requestedQuantity > availableStock) {
+                throw new AppException(ErrorCode.INSUFFICIENT_STOCK, "Sản phẩm " + variant.getProduct().getTitle() + " chỉ còn " + availableStock + " sản phẩm");
+            }
 
             OrderItemEntity orderItem = new OrderItemEntity();
             orderItem.setProductVariant(variant);
@@ -171,10 +178,12 @@ public class OrderService {
 
         }
 
-        // Cập nhật lại sản phẩm gợi ý trong routine
-        rountineService.refreshBestSellerProductsForAllRoutineSteps();
-
         OrderEntity savedOrder = orderRepository.save(order);
+
+//        //Gửi mail bị lỗi do thumbnail tại product đang ở lazy, chưa được gọi nên không lấy được ảnh => gây lỗi NullPointerException
+//        // Vì vậy cần phải ép gọi thumbnail trước khi gửi mail
+//        productService.initializeProductThumbnail(order);
+
 
         if (!savedOrder.getOrderItems().isEmpty()) {
             savedOrder.getOrderItems().forEach(orderItem -> {
@@ -198,6 +207,8 @@ public class OrderService {
         }
 
         System.out.println(order.getOrderId());
+
+
         emailService.sendOrderConfirmationEmail(order.getOrderId());
 
         return new OrderIdResponse(savedOrder.getOrderId());
@@ -252,7 +263,7 @@ public class OrderService {
         return year + monthDay + randomDigits;
     }
 
-
+    // Lấy chi tiết 1 theo order ID
     public OrderResponse getOrderById(String orderId) {
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
@@ -416,21 +427,15 @@ public class OrderService {
     /*PHÂN TRANG ORDER CHO ADMIN */
     /* PHẦN NÀY TÍCH HƠP THÊM BỘ LỌC THÔNG TIN THÔNG QUA Status và user */
     /* TÍCH HỢP THÊM TÌM KIẾM INDEX CỦA DATABASE, GIÚP TÌM NHANH HƠN TRÁNH PHẢI CHẠY NHIỀU VÒNG FOR */
-    public Map<String, Object> getAllOrders(OrderStatus status, String keyword, String orderId,
+    public Map<String, Object> getAllOrders(OrderStatus status, String keyword,
                                             int page, int size, String sortBy, OrderStatus priorityStatus) {
         Map<String, Object> map = new HashMap<>();
         int p = Math.max(page - 1, 0);
 
-        if (orderId != null) {
-            orderRepository.findById(orderId)
-                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-        }
-
         Specification<OrderEntity> spec = Specification
                 .where(OrderSpecification.isNotDeleted())
                 .and(OrderSpecification.hasStatus(status))
-                .and(OrderSpecification.hasKeyword(keyword))
-                .and(orderId != null ? OrderSpecification.hasOrderId(orderId) : null);
+                .and(OrderSpecification.hasKeyword(keyword));
 
         Pageable pageable = sortBy != null && sortBy.equals("updatedAt")
                 ? PageRequest.of(p, size, Sort.by("updatedAt").descending())
@@ -468,6 +473,7 @@ public class OrderService {
         return buildPaginationResponse(map, ordersPage, orderResponses);
     }
 
+
     private ProductVariantResponse mapProductVariant(ProductVariantEntity variant) {
         return ProductVariantResponse.builder()
                 .id(variant.getId())
@@ -500,53 +506,6 @@ public class OrderService {
     }
 
     @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
-    //    Cập nhật trạng thái cho đơn hàng được chọn
-    public String update(List<String> id, String orderStatus) {
-        try {
-            OrderStatus orderStatusEnum = OrderStatus.valueOf(orderStatus);
-            List<OrderEntity> orderEntities = orderRepository.findAllById(id);
-
-            if (!orderEntities.isEmpty()) {
-                for (OrderEntity orderEntity : orderEntities) {
-                    // Nếu thanh toán bằng tiền mặt
-
-                    if (orderEntity.getPaymentMethod().equals(PaymentMethod.CASH)) {
-
-
-                        // Nếu đơn hàng được giao => thanh toán thành công
-                        if (orderStatusEnum.equals(OrderStatus.COMPLETED)) {
-                            orderEntity.setPaymentStatus(PaymentStatus.PAID);
-                            // Chưa được giao => thanh toán thất bại
-                        } else if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
-                            orderEntity.setPaymentStatus(PaymentStatus.FAILED);
-                        }
-                    }
-
-                    if (orderStatusEnum.equals(OrderStatus.CANCELED)) {
-                        if (orderEntity.getPaymentMethod().equals(PaymentMethod.QR)) {
-                            orderEntity.setPaymentStatus(PaymentStatus.REFUNDED);
-                        }
-
-                        orderEntity.getOrderItems().forEach(orderItem -> productService.updateStockCancel(
-                                orderItem.getProductVariant().getId(),
-                                orderItem.getProductVariant().getProduct().getId(),
-                                orderItem.getQuantity()
-                        ));
-                    }
-                    orderEntity.setOrderStatus(orderStatusEnum);
-                }
-                orderRepository.saveAll(orderEntities);
-
-
-                return "Cập nhật trạng thái đơn hàng thành công";
-            }
-            return "Không tìm thấy đơn hàng nào để cập nhật";
-        } catch (IllegalArgumentException e) {
-            return e.getMessage(); // Hiển thị lỗi rõ ràng hơn
-        }
-    }
-
-    @CacheEvict(value = {"productsFeature", "filteredCategories", "getProductByCategoryOrBrandSlug", "productGetTrash", "productGetAll"}, allEntries = true)
     //Cập nhật trạng thái cho 1 đơn hàng
     public String update(String id, OrderRequest request) {
         String orderStatus = request.getOrderStatus();
@@ -566,6 +525,7 @@ public class OrderService {
             if (orderEntity.getPaymentMethod().equals(PaymentMethod.CASH)) {
                 // Nếu đơn hàng được giao => thanh toán thành công
                 if (orderStatusEnum.equals(OrderStatus.COMPLETED)) {
+
                     orderEntity.setPaymentStatus(PaymentStatus.PAID);
                     // Chưa được giao => thanh toán thất bại
                 } else if (orderStatusEnum.equals(OrderStatus.CANCELED)) {

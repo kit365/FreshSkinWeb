@@ -28,7 +28,7 @@ public class OrderController {
     OrderService orderService;
 
     @PostMapping("/create")
-    public ResponseAPI<OrderIdResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest) {
+    public ResponseAPI<OrderIdResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest) throws Exception {
         String message = "Tạo đơn hàng thành công";
         var create = orderService.addOrder(orderRequest);
 
@@ -39,13 +39,12 @@ public class OrderController {
     public ResponseAPI<Map<String, Object>> getAllOrder(
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String orderId,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) OrderStatus priorityStatus,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        var result = orderService.getAllOrders(status, keyword, orderId, page, size, sortBy, priorityStatus);
+        var result = orderService.getAllOrders(status, keyword, page, size, sortBy, priorityStatus);
         return ResponseAPI.<Map<String, Object>>builder()
                 .code(HttpStatus.OK.value())
                 .data(result)
@@ -61,19 +60,6 @@ public class OrderController {
         return ResponseAPI.<OrderResponse>builder().code(HttpStatus.OK.value()).message(message).data(order).build();
     }
 
-    @PatchMapping("change-multi")
-    public ResponseAPI<String> updateOrder(@RequestBody Map<String, Object> request) {
-        if (!request.containsKey("id")) {
-            log.warn("Request does not contain 'id' key");
-            throw new AppException(ErrorCode.INVALID_REQUEST_PRODUCTID);
-        }
-
-        List<String> ids = (List<String>) request.get("id");
-        String status = request.get("orderStatus").toString(); // Đổi từ 'status' thành 'orderStatus'
-
-        var result = orderService.update(ids, status);
-        return ResponseAPI.<String>builder().code(HttpStatus.OK.value()).data(result).build();
-    }
 
     @PatchMapping("edit/{orderId}")
     public ResponseAPI<OrderResponse> updateOrder( @PathVariable String orderId, @RequestBody OrderRequest orderStatus) {

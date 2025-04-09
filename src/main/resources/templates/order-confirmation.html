@@ -237,7 +237,16 @@
   </div>
 
   <div class="order-info">
-    <h3>Cảm ơn bạn đã đặt hàng!</h3>
+
+    <h3 th:text="${order.orderStatus.name() == 'COMPLETED' ? 'Đơn hàng của bạn đã được xử lý thành công!'
+              : (order.orderStatus.name()  == 'CANCELED' ? 'Đơn hàng của bạn đã bị hủy.'
+              : (order.orderStatus.name()  == 'PENDING' ? 'Đơn hàng của bạn đang chờ xử lý.'
+                : (order.orderStatus.name()  == 'DELIVERING' ? 'Đơn hàng của bạn đang được giao.'
+              : 'Cảm ơn bạn đã đặt hàng!')))}">
+
+    </h3>
+
+
     <div class="order-id">Mã đơn hàng: <strong th:text="${order.getOrderId()}"></strong></div>
   </div>
 
@@ -327,7 +336,17 @@
   </div>
 
   <div class="footer">
-    <div class="thank-you">Cảm ơn quý khách đã tin tưởng <span th:text="${setting.getWebsiteName()}">!</span> ❤️</div>
+
+    <div class="thank-you"
+         th:utext="${order.orderStatus.name()  == 'COMPLETED' ?
+               'Cảm ơn quý khách đã tin tưởng ' + setting.getWebsiteName() + ' ❤️' :
+               (order.orderStatus.name()  == 'CANCELED' ?
+               'Chúng tôi xin lỗi vì đơn hàng của bạn đã bị hủy <br> Vui lòng liên hệ qua số ' + setting.getPhone() + ' để được hỗ trợ.' :
+               (order.orderStatus.name()  == 'PENDING' ? 'Đơn hàng của bạn đang chờ xử lý. <br> Chúng tôi sẽ thông báo cho bạn khi đơn hàng được xác nhận.' :
+               (order.orderStatus.name()  == 'DELIVERING' ? 'Đơn hàng của bạn đang được giao. Hãy để ý liên lạc nhé !' :
+               'Cảm ơn quý khách đã tin tưởng ' + setting.getWebsiteName() + ' ❤️')))}">
+    </div>
+
 
     <div class="contact-info">
       <div class="contact-item" th:if="${setting.getEmail() != null and !setting.getEmail.isEmpty()}">
