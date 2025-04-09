@@ -20,12 +20,12 @@ public interface VoucherRepository extends JpaRepository<VoucherEntity, String> 
     boolean existsByNameAndVoucherIdNot(String name, String voucherId);
 
     // Truy vấn native: Lọc các voucher loại PERCENTAGE còn hạn sử dụng, sắp xếp theo usage_limit giảm dần, lấy 4 cái đầu
-    @Query(value = "SELECT * FROM vouchers WHERE type = 'PERCENTAGE' AND end_date > :currentDate ORDER BY usage_limit DESC LIMIT 4",
-            nativeQuery = true)
+    @Query(value = "SELECT * FROM vouchers WHERE type = 'PERCENTAGE' AND end_date > :currentDate AND deleted = false ORDER BY usage_limit DESC LIMIT 4", nativeQuery = true)
     List<VoucherEntity> findTopFourPercentageVouchers(Date currentDate);
 
-    // Hàm tìm voucher còn hạn sử dụng (sử dụng endDate)
-    @Query("SELECT v FROM VoucherEntity v WHERE v.endDate > :currentDate AND v.usageLimit > v.used")
+
+    @Query("SELECT v FROM VoucherEntity v WHERE v.endDate > :currentDate AND v.usageLimit > v.used AND v.deleted = false")
     List<VoucherEntity> findValidVouchers(Date currentDate);
+
 
 }

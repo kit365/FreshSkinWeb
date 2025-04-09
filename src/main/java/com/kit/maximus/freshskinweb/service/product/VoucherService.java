@@ -179,8 +179,13 @@ public class VoucherService {
     }
 
     public boolean deleteVoucher(String id) {
-        VoucherEntity voucher = voucherRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
-        voucherRepository.delete(voucher);
+        VoucherEntity voucher = voucherRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
+
+        // Xóa mềm
+        voucher.setDeleted(true);
+        voucherRepository.save(voucher);
+
         return true;
     }
 

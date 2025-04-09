@@ -48,9 +48,6 @@ public class OrderEntity extends AbstractEntity {
     @JsonManagedReference
     List<NotificationEntity> notifications = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "voucherId")
-    VoucherEntity voucher;
 
     @Column(name = "FirstName")
     @JsonIgnore
@@ -103,6 +100,10 @@ public class OrderEntity extends AbstractEntity {
 
     @Column(name = "PriceShipping")
     BigDecimal priceShipping;
+
+    @ManyToOne
+    @JoinColumn(name = "VoucherId", referencedColumnName = "VoucherId")
+    VoucherEntity voucher;
 
 
     public void addOrderItem(OrderItemEntity orderItem) {

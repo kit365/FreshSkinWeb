@@ -18,7 +18,7 @@ import java.util.List;
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "Vouchers")
-public class VoucherEntity {
+public class VoucherEntity extends AbstractEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "VoucherId")
