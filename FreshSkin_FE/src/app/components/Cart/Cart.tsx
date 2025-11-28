@@ -25,7 +25,6 @@ export default function Cart() {
     const [alertMessage, setAlertMessage] = useState<string>("");
     const [alertSeverity, setAlertSeverity] = useState<"success" | "error" | "info" | "warning">("info");
     const products = useSelector((state: any) => state.cartReducer.products);
-    console.log(products);
     const totalPriceInit = useSelector((state: any) => state.cartReducer.totalPriceInit);
     const totalQuantityInit = useSelector((state: any) => state.cartReducer.totalQuantityInit);
     const dispatchCart = useDispatch();
@@ -39,8 +38,6 @@ export default function Cart() {
 
     const handleMouseEnter = () => setIsHover(true);
     const handleMouseLeave = () => setIsHover(false);
-
-    console.log(products);
 
     const handleChange = (event: any, index: number): void => {
         const newQuantity = Number(event.target.value);

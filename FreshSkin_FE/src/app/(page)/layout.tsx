@@ -4,11 +4,12 @@ import { Inter } from "next/font/google";
 import "../globals.css";
 import { Provider } from "react-redux";
 import { usePathname } from "next/navigation";
+import { useMemo } from "react";
 import Header from "../components/header/Header";
 import Footer from "../components/footer/Footer";
 import { store } from "../store";
 import { createContext, useEffect, useState } from "react";
-import Cookies from "js-cookie";
+import { useAuth } from "../hooks/useAuth";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -69,6 +70,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { isAuthenticated, user, fetchProfile } = useAuth();
 
   const [setting, setSetting] = useState({
     websiteName: '',
@@ -94,23 +96,7 @@ export default function RootLayout({
     support5: ''
   });
 
-  const [profile, setProfile] = useState({
-    userID: 0,
-    address: "",
-    avatar: "",
-    createdAt: "",
-    email: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
-    username: "",
-    orders: [],
-    skinType: "",
-    productComparisonId: {
-      id: 0,
-      products: []
-    }
-  });
+
 
   const pathname = usePathname();
 
@@ -123,61 +109,59 @@ export default function RootLayout({
     };
 
     fetchSettings();
-
-    if (!pathname.startsWith("/user/login") && !pathname.startsWith("/user/register") && !pathname.startsWith("/user/otp")) {
-      const fetchProfile = async () => {
-        const tokenUser = Cookies.get("tokenUser");
-
-        if (tokenUser) {
-          const response = await fetch(
-            "https://freshskinweb.onrender.com/auth/getUser",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                token: tokenUser
-              }),
-            }
-          );
-
-          const data = await response.json();
-          setProfile(data.data);
-        }
-      };
-
-      fetchProfile();
-    }
   }, []);
 
+  useEffect(() => {
+    if (!pathname.startsWith("/user/login") && !pathname.startsWith("/user/register") && !pathname.startsWith("/user/otp")) {
+      if (isAuthenticated && !user) {
+        fetchProfile();
+      }
+    }
+  }, [isAuthenticated, user]);
+
+  const contextValue = useMemo(() => ({
+    setting,
+    profile: user ? {
+      userID: user.userID,
+      address: user.address || "",
+      avatar: user.avatar?.[0] || "",
+      createdAt: user.createdAt || "",
+      email: user.email || "",
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      phone: user.phone || "",
+      username: user.username || "",
+      orders: [], // Map from user.orders if needed
+      skinType: user.skinType || "",
+      productComparisonId: {
+        id: user.productComparisonId?.id || 0,
+        products: user.productComparisonId?.products || []
+      }
+    } : {
+      userID: 0,
+      address: '',
+      avatar: '',
+      createdAt: '',
+      email: '',
+      firstName: '',
+      lastName: '',
+      phone: '',
+      username: '',
+      orders: [],
+      skinType: '',
+      productComparisonId: {
+        id: 0,
+        products: []
+      }
+    }
+  }), [setting, user]);
 
   return (
     <html lang="en">
       <body
         className={`${inter.className} antialiased`}
       >
-        <SettingProfileContext.Provider
-          value={{
-            setting,
-            profile: profile || {
-              userID: 0,
-              address: '',
-              avatar: '',
-              createdAt: '',
-              email: '',
-              firstName: '',
-              lastName: '',
-              phone: '',
-              username: '',
-              orders: [],
-              skinType: "",
-              productComparisonId: {
-                id: 0,
-                products: []
-              }
-            }
-          }}
+        <SettingProfileContext.Provider value={contextValue}
         >
           <Provider store={store}>
             {!pathname.startsWith("/order") && pathname != "/quiz/result" && <Header />}
