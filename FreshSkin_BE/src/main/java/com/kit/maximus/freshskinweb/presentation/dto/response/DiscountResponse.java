@@ -1,0 +1,28 @@
+package com.kit.maximus.freshskinweb.presentation.dto.response;
+
+import com.kit.maximus.freshskinweb.common.enums.DiscountType;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.math.BigDecimal;
+import java.util.Date;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class DiscountResponse {
+    String discountId;
+    String name;
+    BigDecimal discountPercentage;
+    BigDecimal discountAmount;
+    BigDecimal maxDiscount;
+    Date startDate;
+    Date endDate;
+    Integer usageLimit;
+    Integer used;
+    Boolean isGlobal;
+    DiscountType discountType;
+}

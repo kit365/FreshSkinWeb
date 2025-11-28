@@ -1,0 +1,35 @@
+package com.kit.maximus.freshskinweb.presentation.dto.response;
+
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.kit.maximus.freshskinweb.common.enums.UnitType;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@ToString
+@With
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ProductVariantResponse {
+    Long id;
+    BigDecimal price;
+    int volume;
+    UnitType unit;
+
+    @JsonProperty("product_ids")
+    List<Long> productID;
+
+    ProductResponseDTO product;
+
+    int stock;
+
+}

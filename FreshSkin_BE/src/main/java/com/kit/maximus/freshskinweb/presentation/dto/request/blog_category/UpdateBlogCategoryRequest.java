@@ -1,0 +1,25 @@
+package com.kit.maximus.freshskinweb.presentation.dto.request.blog_category;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.Serializable;
+import java.util.List;
+
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Getter
+@Setter
+@ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UpdateBlogCategoryRequest implements Serializable {
+    String title;
+    String description;
+    List<MultipartFile> newImg;
+    List<String> thumbnail;
+    boolean featured;
+    String status;
+
+}

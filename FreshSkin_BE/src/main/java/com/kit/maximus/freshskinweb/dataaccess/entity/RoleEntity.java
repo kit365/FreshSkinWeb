@@ -1,0 +1,41 @@
+package com.kit.maximus.freshskinweb.dataaccess.entity;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@ToString
+@Table(name = "Role")
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class RoleEntity extends AbstractEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "RoleId")
+    Long roleId;
+
+    @Column(name = "Title")
+    String title;
+
+    @Column(name = "Description", columnDefinition = "MEDIUMTEXT")
+    String description;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "role_permission", joinColumns = @JoinColumn(name = "RoleId"))
+    @Column(name = "Permission")
+    List<String> permission = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role", fetch = FetchType.EAGER, orphanRemoval = true)
+    @JsonManagedReference
+    List<UserEntity> user = new ArrayList<>();
+
+}

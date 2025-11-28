@@ -1,0 +1,88 @@
+services:
+  freshskin-be:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: freshskin-be-container
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-freshskin}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-root}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-root}
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD:-admin123}@mongodb:27017/${MONGO_DATABASE:-freshskin_mongo}?authSource=admin
+      SPRING_DATA_REDIS_HOST: ${REDIS_HOST:-redis}
+      SPRING_DATA_REDIS_PORT: ${REDIS_PORT:-6379}
+    networks:
+      - freshskin-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.0
+    container_name: freshskin-mysql
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-freshskin}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-root}
+    ports:
+      - "3306:3306"
+    networks:
+      - freshskin-network
+    volumes:
+      - freshskin-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7.0
+    container_name: freshskin-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-admin123}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-freshskin_mongo}
+    ports:
+      - "27017:27017"
+    networks:
+      - freshskin-network
+    volumes:
+      - freshskin-mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: freshskin-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - freshskin-redis-data:/data
+    networks:
+      - freshskin-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    command: redis-server --appendonly yes
+
+networks:
+  freshskin-network:
+    driver: bridge
+
+volumes:
+  freshskin-mysql-data: {}
+  freshskin-mongodb-data: {}
+  freshskin-redis-data: {}
+

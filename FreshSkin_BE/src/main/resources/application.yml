@@ -1,0 +1,61 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: FreshSkinWeb
+  profiles:
+    active: dev
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
+    default-encoding: UTF-8
+    properties:
+      mail:
+        debug: ${SPRING_MAIL_DEBUG:false}
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 20MB
+  task:
+    execution:
+      pool:
+        max-size: 20
+        queue-capacity: 500
+        keep-alive: 60s
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+  cache:
+    type: simple
+
+# Custom Properties
+jwt:
+  key-secret: ${SPRING_JWT_SECRET_KEY:4sx7mLjZ1rEAucgISyV55IxhcfK9sRwCSMsierUiTWa1oPXZ4vb7dlkCwbWDe2lg}
+  key-expiration-ms: ${SPRING_JWT_EXPIRATION_MS:3600000}
+  refresh-expiration-ms: ${SPRING_JWT_REFRESH_EXPIRATION_MS:604800000}
+
+payment:
+  vnpay:
+    tmn-code: ${VNPAY_TMN_CODE}
+    hash-secret: ${VNPAY_HASH_SECRET}
+    url: ${VNPAY_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
+    return-url: "${SPRING_BACKEND_URL}/api/v1/payment/vnpay-return"
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method

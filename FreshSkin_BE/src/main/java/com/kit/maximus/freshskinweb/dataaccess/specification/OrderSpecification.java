@@ -1,0 +1,72 @@
+package com.kit.maximus.freshskinweb.dataaccess.specification;
+
+import com.kit.maximus.freshskinweb.dataaccess.entity.order.OrderEntity;
+import com.kit.maximus.freshskinweb.common.enums.OrderStatus;
+import jakarta.persistence.criteria.Expression;
+import org.springframework.data.jpa.domain.Specification;
+
+public class OrderSpecification {
+
+    public static Specification<OrderEntity> hasStatus(OrderStatus status) {
+        return (root, query, criteriaBuilder) -> {
+            if (status == null) return null;
+            return criteriaBuilder.equal(root.get("orderStatus"), status);
+        };
+    }
+
+    public static Specification<OrderEntity> hasKeyword(String keyword) {
+        return (root, query, criteriaBuilder) -> {
+            if (keyword == null || keyword.trim().isEmpty()) return null;
+            String searchTerm = "%" + keyword.toLowerCase() + "%";
+
+            // Nếu keyword chỉ toàn là số, giả định là tìm theo orderId
+            if (keyword.matches("\\d+")) {
+                return criteriaBuilder.like(criteriaBuilder.lower(root.get("orderId")), searchTerm);
+            }
+
+            // Ngược lại, tìm theo tên
+            return criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), searchTerm),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), searchTerm)
+            );
+        };
+    }
+
+
+    public static Specification<OrderEntity> hasUserId(Long userId) {
+        return (root, query, criteriaBuilder) -> {
+            if (userId == null) return null;
+            return criteriaBuilder.equal(root.get("user").get("userID"), userId);
+        };
+    }
+
+    public static Specification<OrderEntity> isNotDeleted() {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("deleted"), false);
+    }
+
+    public static Specification<OrderEntity> orderByStatusPriorityAndDate(OrderStatus priorityStatus) {
+        return (root, query, criteriaBuilder) -> {
+            // Create CASE expression for status ordering
+            Expression<Object> statusOrder = criteriaBuilder.selectCase()
+                    .when(criteriaBuilder.equal(root.get("orderStatus"), OrderStatus.PENDING), 1)
+                    .when(criteriaBuilder.equal(root.get("orderStatus"), OrderStatus.COMPLETED), 2)
+                    .when(criteriaBuilder.equal(root.get("orderStatus"), OrderStatus.DELIVERING), 3)
+                    .when(criteriaBuilder.equal(root.get("orderStatus"), OrderStatus.CANCELED), 4)
+                    .otherwise(4);
+
+            // If priority status is specified, modify the order
+            if (priorityStatus != null) {
+                statusOrder = criteriaBuilder.selectCase()
+                        .when(criteriaBuilder.equal(root.get("orderStatus"), priorityStatus), 0)
+                        .otherwise(statusOrder);
+            }
+
+            query.orderBy(
+                    criteriaBuilder.asc(statusOrder),
+                    criteriaBuilder.desc(root.get("updatedAt"))
+            );
+
+            return null;
+        };
+    }
+}

@@ -1,0 +1,16 @@
+package com.kit.maximus.freshskinweb.presentation.dto.request.skin_type;
+
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class CreateSkinTypeRequest {
+    String type;
+    String description;
+}
